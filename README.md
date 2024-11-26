@@ -1,2 +1,2 @@
 # Transcendence
-C'est le 
+C'est le speedrun de transcendence ! 
