@@ -33,4 +33,4 @@
 
 .vscode
 .idea
-.github
+.DS_Store
