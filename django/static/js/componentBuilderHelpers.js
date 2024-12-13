@@ -1,3 +1,6 @@
+import { dragoverHandler, dragleaveHandler, dropHandler } from "./dragDrop.js"
+
+
 const root = document.getElementById("componentBuilderRoot")
 const lastElement = root.lastElementChild
 const add  = document.createElement("div")
@@ -10,32 +13,48 @@ const childAnchor = document.getElementById("elementChilds")
 const classAdd = document.getElementById("classAdd")
 const childAdd = document.getElementById("childAdd")
 
-// const classAnchor = document.getElementById("elementClasses")
+
+const saveBtn = document.getElementById("saveBtn")
+const componentName = document.getElementById("componentName")
 
 
-let currentClickedElement
+const componentLib = document.getElementById("componentLib")
+
+
+const saveComponent = async (e)=>{
+    try {
+        const response = await fetch("/save-component", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+
+            body: JSON.stringify({html: root.innerHTML, name: componentName.value}),
+        });
+        const result = await response.json();
+        console.log('Success:', result);
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}
+
+
+
+saveBtn.addEventListener("click", async (e)=> {await saveComponent(e)})
+
 
 
 const evaluateEmpty = ()=>{
     const childElements = root.querySelectorAll("*");
 
-
     for (let i = 0; i < childElements.length; i++){
-
-        // emptyChildren.forEach((el)=>{
-        //     console.log(el instanceof HTMLElement);
-            if (!["img"].includes(childElements[i].tagName.toLowerCase())){
-                if (childElements[i].innerHTML.length == 0)
-                    childElements[i].classList.add("empty");
-                else
-                    childElements[i].classList.remove("empty");
-            }
-        // })
+        if (!["img"].includes(childElements[i].tagName.toLowerCase())){
+            if (childElements[i].innerHTML.length == 0)
+                childElements[i].classList.add("empty");
+            else
+                childElements[i].classList.remove("empty");
+        }
     }
-    // const emptyChildren = Array.from(childElements).filter(child => {
-    //     return !child.innerHTML.trim(); 
-    // });
-
 }
 
 const addChild = () => {
@@ -49,11 +68,10 @@ const addChild = () => {
 
 const rmChild = (e) => {
 
-    // console.log("/////" + e.target.getAttribute("data-id"), root.querySelectorAll(e.target.getAttribute("data-id"))[0])
+
 
     let toDelete = root.querySelectorAll(`[data-id="${e.target.getAttribute("data-id")}"]`)[0]
 
-    // div.classList.add("empty");
     currentClickedElement.removeChild(toDelete)
 
     updateRight(currentClickedElement);
@@ -73,24 +91,88 @@ const displayChildren = () =>{
 
     const children = currentClickedElement.children;
 
-    for (let i = 0 ; i < children.length; i++){
-        const li       = document.createElement("li")
-        const span       = document.createElement("p")
 
+    for (let i = 0 ; i < children.length; i++){
+        const li            = document.createElement("li")
+        const btnContain    = document.createElement("div")
+
+        const upBtn         = document.createElement("div")
+        const downBtn       = document.createElement("div")
+
+        upBtn.innerHTML   = "&uarr;"
+        downBtn.innerHTML = "&darr;"
 
         const deleteBtn  = document.createElement("div")
         deleteBtn.classList.add("minus")
 
+        li.classList.add("d-flex")
+        li.classList.add("align-items-center")
+        li.classList.add("justify-content-center")
+
+        btnContain.classList.add("m-2")
+        upBtn.classList.add("p-2")
+        upBtn.classList.add("updwn")
+        
+        downBtn.classList.add("p-2")
+        downBtn.classList.add("updwn")
+
         deleteBtn.addEventListener("click", (e)=>{rmChild(e)})
-        children[i].setAttribute("data-id", i)
+
+        li.setAttribute("data-id", i)
         deleteBtn.setAttribute("data-id", i)
-        span.classList.add("text-truncate")
-        // console.log(children[i])
-        li.innerText   = children[i].tagName + " | ";
-        span.innerText = `${children[i].innerText}`
+        children[i].setAttribute("data-id", i)
+       
+        li.addEventListener("mouseenter", (e)=>{
+            console.log(currentClickedElement)
+
+            let toHover = currentClickedElement.querySelectorAll(`[data-id="${e.target.getAttribute("data-id")}"]`)[0]
+            console.log(toHover)
+            toHover.classList.add("hoveredChild")
+        })
+
+
+               
+        li.addEventListener("mouseleave", (e)=>{
+            console.log(currentClickedElement)
+
+            let toHover = currentClickedElement.querySelectorAll(`[data-id="${e.target.getAttribute("data-id")}"]`)[0]
+            console.log(toHover)
+            toHover.classList.remove("hoveredChild")
+        })
+
+
+        upBtn.addEventListener("click", (e)=>{
+            let closestLi = e.target.closest("li")
+            let beforeId =  closestLi.getAttribute("data-id") - 1
+            let moveBefore = currentClickedElement.querySelectorAll(`[data-id="${beforeId}"]`)[0]
+            let toMove = currentClickedElement.querySelectorAll(`[data-id="${closestLi.getAttribute("data-id")}"]`)[0]
+            currentClickedElement.insertBefore(toMove ,moveBefore)
+            toMove.classList.remove("hoveredChild")
+
+            updateRight(currentClickedElement)
+        })
+
+        downBtn.addEventListener("click", (e)=>{
+            let closestLi = e.target.closest("li")
+            let beforeId =  (parseInt(closestLi.getAttribute("data-id")) + 2).toString()
+
+
+            let moveBefore = currentClickedElement.querySelectorAll(`[data-id="${beforeId}"]`)[0]
+            let toMove = currentClickedElement.querySelectorAll(`[data-id="${closestLi.getAttribute("data-id")}"]`)[0]
+            currentClickedElement.insertBefore(toMove ,moveBefore)
+            toMove.classList.remove("hoveredChild")
+
+            updateRight(currentClickedElement)
+        })
+
+
+        li.innerText   = children[i].tagName;
 
         li.appendChild(deleteBtn)
-        li.appendChild(span)
+        btnContain.appendChild(upBtn)
+        btnContain.appendChild(downBtn)
+
+        li.appendChild(btnContain)
 
         console.log(li)
         childAnchor.appendChild(li)
@@ -143,42 +225,48 @@ let updateAttributes = () =>{
     });
 }
 
-let updateRight = (target)=>{
+export let updateRight = (target)=>{
     elemTag.innerHTML = '';
     elemAttributes.innerHTML = '';
     classAnchor.innerHTML = '';
     childAnchor.innerHTML = '';
-    elemTag.innerText = target.tagName
 
-    target.classList.forEach((className) => {
-        if(!(className == "editable" || className == "focused" || className == "empty")){
-            const classDropContainer = document.createElement("div")
+    if (target != undefined){
+        elemTag.innerText = target.tagName
 
-            classDropContainer.classList.add("container", "d-flex", "justify-content-start", "align-items-center")
+        target.classList.forEach((className) => {
+            if(!(className == "editable" || className == "focused" || className == "empty")){
+                const classDropContainer = document.createElement("div")
+    
+                classDropContainer.classList.add("container", "d-flex", "justify-content-start", "align-items-center")
+    
+                const drop  = buildClassesDropDown(className)
+                const sub   = document.createElement("div")
+    
+                sub.addEventListener("click", (e)=>{ deleteClass(e)})
+                sub.classList.add("minus")
+                drop.appendChild(sub)
+                classDropContainer.appendChild(drop)
+    
+    
+                classAnchor.appendChild(classDropContainer)
+            }
+        });
 
-            const drop  = buildClassesDropDown(className)
-            const sub   = document.createElement("div")
-
-            sub.addEventListener("click", (e)=>{ deleteClass(e)})
-            sub.classList.add("minus")
-            console.log(drop)
-
-            // const btn = drop.querySelector("#dropdownMenuButton2")
-            // btn.textContent = className
-            drop.appendChild(sub)
-            classDropContainer.appendChild(drop)
-
-
-            classAnchor.appendChild(classDropContainer)
-        }
-    });
+        addAttributeToTxtDescendants("componentBuilderRoot","contenteditable", "true")
+        displayChildren();
+    
+        updateAttributes()
+        evaluateEmpty();
+    
+        addEventToAllDescendants(root, 'dragover', dragoverHandler)
+        addEventToAllDescendants(root, 'dragleave', dragoverHandler)
+        addEventToAllDescendants(root, 'drop', dragoverHandler)
+    }
 
 
-    addAttributeToTxtDescendants("componentBuilderRoot","contenteditable", "true")
-    displayChildren();
-    updateUrl(currentClickedElement.tagName)
-    updateAttributes()
-    evaluateEmpty();
+
+
 }
 
 function isLastDimension(obj) {
@@ -271,23 +359,57 @@ let changeClass = (e)=>{
 }
 
 let deleteClass = (e)=>{
-    // if (e.target.classList.value.includes("lastDimention")){
+
         let originParent = e.target.closest('.container');
         let classToDelete = originParent.querySelector('button')
 
-        // console.log(classToDelete.innerText)
-        // updateRight(currentClickedElement);
+
         currentClickedElement.classList.remove(classToDelete.innerText.trim())
         updateRight(currentClickedElement);
 
-    // }
 }
 
+const openPopup = (popup, untouchable)=>{
+    popup.classList.add("displayed")
+    untouchable.classList.add("untouchable")
+}
+
+const selectImg = () =>{
+
+
+    const imgPop = document.getElementById("imgSelectPopup")
+    const toolsContainer = document.getElementById("toolsContainer")
+
+    openPopup(imgPop, toolsContainer)
+
+    let test = imgPop.querySelectorAll('.imgDisplay')
+
+    for (let i = 0; i < test.length ; i++){
+        test[i].addEventListener("click", (e)=>{
+            let img = e.target.querySelector("img")
+            console.log(img.getAttribute("src"))
+            currentClickedElement.setAttribute("src", img.getAttribute("src"))
+
+            imgPop.classList.remove("displayed")
+            toolsContainer.classList.remove("untouchable")
+        })
+    }
+
+    
+
+    console.log(imgPop)
+}
 
 let enableDebug = (event) => {
 
     currentClickedElement = event.target; 
+    if (currentClickedElement.tagName == "IMG"){
+        selectImg()
+    }
+
     updateRight(currentClickedElement);
+
+    
 
 
 
@@ -381,10 +503,27 @@ classAdd.addEventListener("click", ()=>{
 childAdd.addEventListener('click', (e)=>{addChild()})
 
 
+
+for (let i = 0; i < componentLib.children.length; i++){
+    componentLib.children[i].addEventListener('dragstart', (e)=>{
+        console.log(e.target)
+        currentDrag = e.target
+    })
+
+
+
+    componentLib.children[i].addEventListener('dragend', (e)=>{
+        console.log("stoped")
+    })
+}
+
+
+
 addEventToAllDescendants(root, 'click', enableFocus)
-
-
 addClassToAllDescendants("componentBuilderRoot", "editable")
 
+root.addEventListener('dragover', dragoverHandler)
+root.addEventListener('dragleave', dragleaveHandler)
+root.addEventListener('drop', dropHandler);
 
 
