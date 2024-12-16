@@ -9,10 +9,25 @@
 <body>
     <ul>
         {% for user in users %}
-            <li>{{ user }}</li>    
+            <li>{{ user }}</li>
         {% endfor %}
     </ul>
     <h1>Test</h1>
     <img src="{% static 'img/img.png' %}" alt="">
+
+    <!-- Boutons ajoutés -->
+    <div>
+        <!-- Bouton pour aller à la page de connexion -->
+        <button onclick="window.location.href='{% url 'login' %}'">Login</button>
+
+        <!-- Bouton pour aller à la page d'inscription -->
+        <button onclick="window.location.href='{% url 'register' %}'">Register</button>
+
+        <!-- Bouton pour se déconnecter -->
+        <form id="logout-form" style="display:inline;">
+            <button>Logout</button>
+        </form>
+    </div>
 </body>
+<script src="{% static 'js/auth/logout.js' %}"></script>
 </html>
