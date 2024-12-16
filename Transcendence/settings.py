@@ -55,7 +55,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'index.apps.IndexConfig',
-    'authentification.apps.AuthentificationConfig',
+    'auth.apps.AuthConfig',
     'account.apps.AccountConfig',
     'shared.apps.SharedConfig'
 ]

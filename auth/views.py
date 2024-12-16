@@ -1,8 +1,8 @@
 from django.views.decorators.csrf import csrf_exempt
 
-from authentification.view.login import login_view
-from authentification.view.logout import logout_view
-from authentification.view.register import register_view
+from auth.view.login import login_view
+from auth.view.logout import logout_view
+from auth.view.register import register_view
 
 
 @csrf_exempt

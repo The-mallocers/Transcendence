@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('authentification', '0003_alter_user_is_admin'),
+        ('auth', '0003_alter_user_is_admin'),
     ]
 
     operations = [
