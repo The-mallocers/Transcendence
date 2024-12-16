@@ -1,36 +1,93 @@
-# Prerequisites
-*.d
+# Created by https://www.gitignore.io
 
-# Compiled Object files
-*.slo
-*.lo
-*.o
-*.obj
+### OSX ###
+.DS_Store
+.AppleDouble
+.LSOverride
 
-# Precompiled Headers
-*.gch
-*.pch
+# Icon must end with two \r
+Icon
 
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
+# Thumbnails
+._*
 
-# Fortran module files
-*.mod
-*.smod
+# Files that might appear on external disk
+.Spotlight-V100
+.Trashes
 
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
+# Directories potentially created on remote AFP share
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
 
-# Executables
-*.exe
-*.out
-*.app
-
+### Editor ###
 .vscode
 .idea
-.DS_Store
+
+
+### Python ###
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# PyInstaller
+#  Usually these files are written by a python script from a template
+#  before PyInstaller builds the exe, so as to inject date/other infos into it.
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.coverage
+.cache
+nosetests.xml
+coverage.xml
+
+# Translations
+*.mo
+*.pot
+
+# Sphinx documentation
+docs/_build/
+
+# PyBuilder
+target/
+
+
+### Django ###
+*.log
+*.pot
+*.pyc
+__pycache__/
+local_settings.py
+
+.env
+db.sqlite3
+db_test.sqlite3

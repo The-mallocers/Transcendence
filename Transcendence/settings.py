@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 import os
+import sys
 
 from pathlib import Path
 
@@ -54,7 +55,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'index.apps.IndexConfig',
-    'authentification.apps.AuthentificationConfig',
+    'auth.apps.AuthConfig',
     'account.apps.AccountConfig',
     'shared.apps.SharedConfig'
 ]
@@ -96,9 +97,14 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
+        'TEST': {
+            'NAME': BASE_DIR / 'test_db.sqlite3',
+        },
     }
 }
 
+if 'test' in sys.argv:
+    DATABASES['default']['NAME'] = BASE_DIR / 'test_db.sqlite3'
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
