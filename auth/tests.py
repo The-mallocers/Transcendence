@@ -15,4 +15,4 @@ class AuthTest(TestCase):
         response = self.client.get('/auth/login')
         self.assertEqual(response.status_code, 200)
         response = self.client.post(url, data)
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 400)
