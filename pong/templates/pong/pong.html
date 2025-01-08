@@ -1,45 +1,33 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Canvas Rectangle</title>
-    <style>
-        canvas {
-            border: 1px solid #000;
-        }
-    </style>
+    <title>PONG</title>
+    <link rel="stylesheet" href="{% static 'css/pong/pong.css' %}">
 </head>
 <body>
-    <canvas id="myCanvas" width="600" height="300"></canvas>
-    <script>
-        const canvas = document.getElementById('myCanvas');
-        const ctx = canvas.getContext('2d');
-        let rectX = 150;
-        const rectY = 75;
-        const rectWidth = 300;
-        const rectHeight = 150;
-        const speed = 10;
+    <div class="container">
+        <h1>PONG</h1>
+        <div class="canvas-wrapper">
+            <canvas id="myCanvas" width="1000" height="500"></canvas>
+        </div>
+    </div>
 
-        function drawRect() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = '#3498db';
-            ctx.fillRect(rectX, rectY, rectWidth, rectHeight);
-        }
+    <!-- Instructions for Paddle Control -->
+    <div class="instructions top-left">
+        Top Paddle: <strong>A</strong> (left) / <strong>D</strong> (right)
+    </div>
 
-        window.addEventListener('keydown', (e) => {
-            if (e.key === 'a' || e.key === 'A') {
-                rectX -= speed;
-            } else if (e.key === 'd' || e.key === 'D') {
-                rectX += speed;
-            }
-            drawRect();
-        });
+    <div class="instructions top-right">
+        Bottom Paddle: <strong>J</strong> (left) / <strong>L</strong> (right)
+    </div>
 
-        drawRect();
-    </script>
+    <script src="{% static 'js/pong/pong.js' %}"></script>
 </body>
 </html>
+
 
 
         
