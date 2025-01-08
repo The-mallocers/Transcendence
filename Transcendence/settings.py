@@ -46,12 +46,14 @@ EXPIRATION_REFRESH_TOKEN = os.getenv('EXPIRATION_REFRESH_TOKEN', 30) #30 days
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    'localhost'
+    'localhost',
+    '127.0.0.1'
 ]
 
 # Application definition
 
 INSTALLED_APPS = [
+    'pong.apps.PongConfig',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',

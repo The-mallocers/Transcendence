@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canvas Rectangle</title>
+    <style>
+        canvas {
+            border: 1px solid #000;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="myCanvas" width="600" height="300"></canvas>
+    <script>
+        const canvas = document.getElementById('myCanvas');
+        const ctx = canvas.getContext('2d');
+        let rectX = 150;
+        const rectY = 75;
+        const rectWidth = 300;
+        const rectHeight = 150;
+        const speed = 10;
+
+        function drawRect() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#3498db';
+            ctx.fillRect(rectX, rectY, rectWidth, rectHeight);
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'q' || e.key === 'Q') {
+                rectX -= speed;
+            } else if (e.key === 'd' || e.key === 'D') {
+                rectX += speed;
+            }
+            drawRect();
+        });
+
+        drawRect();
+    </script>
+</body>
+</html>
+
+
+        
