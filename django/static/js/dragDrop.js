@@ -1,5 +1,5 @@
 
-import { updateRight } from "./componentBuilderHelpers.js"
+import { updateRight } from "./render.js"
 
 let oldDropAreaBg
 let oldBgIsSet = false
@@ -40,10 +40,7 @@ export const dragleaveHandler = (e)=>{
 
 export const dropHandler = async (e)=>{
     e.preventDefault();
-
-
     const result = await getComponentById(e);
-
     e.target.style.background = oldDropAreaBg;
     oldBgIsSet = false
     e.target.innerHTML = e.target.innerHTML + result.component.html
@@ -51,5 +48,25 @@ export const dropHandler = async (e)=>{
 
     updateRight(currentClickedElement)
 }
+
+export const addDragEvents = (root)=>{
+    for (let i = 0; i < componentLib.children.length; i++){
+        componentLib.children[i].addEventListener('dragstart', (e)=>{
+            console.log(e.target)
+            currentDrag = e.target
+        })
+    
+        componentLib.children[i].addEventListener('dragend', (e)=>{
+            console.log("stoped")
+        })
+    }
+
+
+    root.addEventListener('dragover', dragoverHandler)
+    root.addEventListener('dragleave', dragleaveHandler)
+    root.addEventListener('drop', dropHandler);
+}
+
+
 
 // export  { dragoverHandler, dragleaveHandler, dropHandler };
