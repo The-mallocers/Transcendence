@@ -7,6 +7,8 @@ name = "pypi"
 django = "*"
 bcrypt = "*"
 pyjwt = "*"
+django-environ = "*"
+python-dotenv = "*"
 
 [dev-packages]
 django-extensions = "*"
