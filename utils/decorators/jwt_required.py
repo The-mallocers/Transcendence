@@ -21,6 +21,8 @@ def jwt_required(view_func):
             session_version =  access_decoded.get("session_version")
             user = User.get_user(request)
 
+            if user is None:
+                return HttpResponseRedirect('/auth/login')
             if str(user.session_user) != session_version:
                 return HttpResponse("Token revoque", status=401)
         except jwt.ExpiredSignatureError:
