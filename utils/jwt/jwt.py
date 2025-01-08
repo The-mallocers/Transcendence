@@ -16,6 +16,7 @@ def generate_access_token(user):
         "iat": now,
         "session_version": str(user.session_user)
     }
+
     access_token = jwt.encode(access_payload, settings.SECRET_KEY, algorithm='HS256')
     refresh_token = jwt.encode(refresh_payload, settings.SECRET_KEY, algorithm='HS256')
     return access_token, refresh_token
