@@ -7,9 +7,10 @@ name = "pypi"
 django = "*"
 bcrypt = "*"
 pyjwt = "*"
-django-configurations = "*"
 
 [dev-packages]
+django-extensions = "*"
+werkzeug = "*"
 
 [requires]
 python_version = "3.13"

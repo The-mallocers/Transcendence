@@ -22,7 +22,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', "ICsi_sZOYCznPK_KkkciC76i3HRD5nG9tEcK_00XSoUG53exW70G-i2L-exBthfh-vc")
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
 EXPIRATION_ACCESS_TOKEN = os.getenv('DJANGO_EXPIRATION_ACCESS_TOKEN', 30) #30 minutes
 EXPIRATION_REFRESH_TOKEN = os.getenv('EXPIRATION_REFRESH_TOKEN', 30) #30 days
 
@@ -45,7 +45,9 @@ EXPIRATION_REFRESH_TOKEN = os.getenv('EXPIRATION_REFRESH_TOKEN', 30) #30 days
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'localhost'
+]
 
 # Application definition
 
@@ -54,10 +56,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_extensions',
     'index.apps.IndexConfig',
     'auth.apps.AuthConfig',
     'account.apps.AccountConfig',
-    'shared.apps.SharedConfig'
+    'shared.apps.SharedConfig',
+    'error.apps.ErrorConfig',
+    'admin.apps.AdminConfig'
 ]
 
 MIDDLEWARE = [
