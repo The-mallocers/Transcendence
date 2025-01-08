@@ -62,7 +62,6 @@ INSTALLED_APPS = [
     'account.apps.AccountConfig',
     'shared.apps.SharedConfig',
     'error.apps.ErrorConfig',
-    'admin.apps.AdminConfig'
 ]
 
 MIDDLEWARE = [
