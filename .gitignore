@@ -90,5 +90,5 @@ local_settings.py
 
 .env
 my_fixture.json
-db.sqlite3
+transcendence.sqlite3
 test_db.sqlite3
