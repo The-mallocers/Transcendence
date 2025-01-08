@@ -1,0 +1,71 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update User Information</title>
+    <link rel="stylesheet" href="{% static 'css/account/account.css' %}">
+</head>
+<body>
+<div class="account-container" id="account-container">
+    <h1 class="account-header">Update User Information</h1>
+    <div class="account-avatar">
+        <img src="{% static user.avatar %}" alt="User Avatar" id="user-avatar">
+    </div>
+    <form id="first-name-form">
+        <div class="form-group">
+            <label for="first_name">First Name</label>
+            <input type="text" id="first_name" name="first-name"
+                   value="{{ user.first_name }}" required>
+        </div>
+        <button type="submit">Update First Name</button>
+    </form>
+    <form id="last-name-form">
+        <div class="form-group">
+            <label for="last_name">Last Name</label>
+            <input type="text" id="last_name" name="last-name"
+                   value="{{ user.last_name }}" required>
+        </div>
+        <button type="submit">Update Last Name</button>
+    </form>
+    <form id="nickname-form">
+        <div class="form-group">
+            <label for="nickname">Username</label>
+            <input type="text" id="nickname" name="username"
+                   value="{{ user.nickname }}" required>
+        </div>
+        <button type="submit">Update Username</button>
+    </form>
+    <form id="email-form">
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email"
+                   value="{{ user.email }}" required>
+        </div>
+        <button type="submit">Update Email</button>
+    </form>
+    <form id="password-form">
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password"
+                   placeholder="Change your password" required>
+        </div>
+        <button type="submit">Update Password</button>
+    </form>
+    <form id="avatar-form">
+        <div class="form-group">
+            <label for="avatar">Avatar</label>
+            <input type="file" id="avatar" name="avatar" accept="image/*"
+                   onchange="previewAvatar(event)">
+        </div>
+        <button type="submit">Update Avatar</button>
+    </form>
+    <!-- Bouton pour aller à la page d'inscription -->
+    <button onclick="window.location.href='{% url 'index' %}'">Home</button>
+</div>
+
+</body>
+<script src="{% static 'js/account/account.js' %}"></script>
+</html>
