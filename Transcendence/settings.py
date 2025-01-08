@@ -31,7 +31,7 @@ print(os.path.join(BASE_DIR, '.env'))
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = ENV('DJANGO_SECRET_KEY')
+SECRET_KEY = ENV('DJANGO_SECRET_KEY', default='1234')
 EXPIRATION_ACCESS_TOKEN = ENV('DJANGO_EXPIRATION_ACCESS_TOKEN', default=30) #30 minutes
 EXPIRATION_REFRESH_TOKEN = ENV('DJANGO_EXPIRATION_REFRESH_TOKEN', default=30) #30 days
 
