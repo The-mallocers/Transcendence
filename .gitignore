@@ -37,6 +37,7 @@ __pycache__/
 
 # Distribution / packaging
 .Python
+Pipfile.lock
 env/
 build/
 develop-eggs/
@@ -89,5 +90,6 @@ __pycache__/
 local_settings.py
 
 .env
+my_fixture.json
 db.sqlite3
 test_db.sqlite3

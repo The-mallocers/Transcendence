@@ -33,11 +33,7 @@ print(os.path.join(BASE_DIR, '.env'))
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = ENV('DJANGO_SECRET_KEY')
 EXPIRATION_ACCESS_TOKEN = ENV('DJANGO_EXPIRATION_ACCESS_TOKEN', default=30) #30 minutes
-EXPIRATION_REFRESH_TOKEN = ENV('EXPIRATION_REFRESH_TOKEN', default=30) #30 days
-
-print("SECRET_KEY:", SECRET_KEY)
-print("EXPIRATION_ACCESS_TOKEN:", EXPIRATION_ACCESS_TOKEN)
-print("EXPIRATION_REFRESH_TOKEN:", EXPIRATION_REFRESH_TOKEN)
+EXPIRATION_REFRESH_TOKEN = ENV('DJANGO_EXPIRATION_REFRESH_TOKEN', default=30) #30 days
 
 # COOKIES SECURITY
 # SESSION_COOKIE_SECURE = True
@@ -56,7 +52,7 @@ print("EXPIRATION_REFRESH_TOKEN:", EXPIRATION_REFRESH_TOKEN)
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = ENV('DJANGO_DEBUG', default=False)
 
 ALLOWED_HOSTS = [
     'localhost',
@@ -115,7 +111,7 @@ WSGI_APPLICATION = 'Transcendence.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'NAME': BASE_DIR / 'transcendence.sqlite3',
         'TEST': {
             'NAME': BASE_DIR / 'test_db.sqlite3',
         },
