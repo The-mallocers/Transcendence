@@ -5,5 +5,5 @@ from error.views import error_404
 from . import views
 
 urlpatterns = [
-    path('', views.pong, name='pong'),
+    path('', views.pong, name='pong')
 ]
