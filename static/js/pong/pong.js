@@ -1,5 +1,8 @@
+const BALL_SPEED = 2;
+const RECTANGLE_SPEED = 15;
+
 class Rectangle {
-    constructor(x, y, width, height, color = '#3498db', speed = 10) {
+    constructor(x, y, width, height, color = '#3498db', speed = RECTANGLE_SPEED)  {
         this.x = x;
         this.y = y;
         this.width = width;
@@ -16,11 +19,15 @@ class Rectangle {
 
     move() {
         this.x += this.moveDirection * this.speed;
+        if (this.x < 0)
+            this.x = 0;
+        if (this.x + this.width > canvas.width)
+            this.x = canvas.width - this.width;
     }
 }
 
 class Ball {
-    constructor(x, y, width, height, color = '#3498db', speed = 1) {
+    constructor(x, y, width, height, color = '#3498db', speed = BALL_SPEED) {
         this.x = x;
         this.y = y;
         this.width = width;
@@ -28,6 +35,7 @@ class Ball {
         this.color = color;
         this.speed = speed;
         this.dy = speed; // Ball's vertical speed
+        this.dx = 0;
     }
 
     draw(ctx) {
@@ -37,10 +45,14 @@ class Ball {
 
     move() {
         this.y += this.dy;
+        this.x += this.dx;
 
         // Reverse direction when hitting top or bottom of the canvas
         if (this.y <= 0 || this.y + this.height >= canvas.height) {
             this.dy = -this.dy; // Reverse vertical direction
+        }
+        if (this.x <= 0 || this.x + this.width >= canvas.width) {
+            this.dx = -this.dx; // Reverse horizontal direction
         }
     }
 
@@ -51,6 +63,9 @@ class Ball {
             this.y + this.height > rectangle.y) 
         {
             this.dy = -this.dy; // Reverse direction on collision
+            const paddleCenter = rectangle.x + rectangle.width / 2;
+            const ballCenter = this.x + this.width / 2;
+            this.dx = (ballCenter - paddleCenter) / 20; // Scale for better control
         }
     }
 }
