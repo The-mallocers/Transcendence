@@ -9,22 +9,31 @@ https://docs.djangoproject.com/en/5.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
+
+
 import os
+import environ
+
 import sys
 
 from pathlib import Path
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Build paths inside the project like this: BASE_DIR / 'subdir'.
+
+ENV = environ.Env(DEBUG_MODE=True)
+ENV.read_env(env_file=os.path.join(BASE_DIR, '.env'))
+
+print(os.path.join(BASE_DIR, '.env'))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
-EXPIRATION_ACCESS_TOKEN = os.getenv('DJANGO_EXPIRATION_ACCESS_TOKEN', 30) #30 minutes
-EXPIRATION_REFRESH_TOKEN = os.getenv('EXPIRATION_REFRESH_TOKEN', 30) #30 days
+SECRET_KEY = ENV('DJANGO_SECRET_KEY', default='1234')
+EXPIRATION_ACCESS_TOKEN = ENV('DJANGO_EXPIRATION_ACCESS_TOKEN', default=30) #30 minutes
+EXPIRATION_REFRESH_TOKEN = ENV('DJANGO_EXPIRATION_REFRESH_TOKEN', default=30) #30 days
 
 # COOKIES SECURITY
 # SESSION_COOKIE_SECURE = True
@@ -43,7 +52,7 @@ EXPIRATION_REFRESH_TOKEN = os.getenv('EXPIRATION_REFRESH_TOKEN', 30) #30 days
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = ENV('DJANGO_DEBUG', default=False)
 
 ALLOWED_HOSTS = [
     'localhost',
@@ -61,6 +70,7 @@ INSTALLED_APPS = [
     'django_extensions',
     'index.apps.IndexConfig',
     'auth.apps.AuthConfig',
+    'componentBuilder.apps.ComponentbuilderConfig',
     'account.apps.AccountConfig',
     'shared.apps.SharedConfig',
     'error.apps.ErrorConfig',
@@ -102,7 +112,7 @@ WSGI_APPLICATION = 'Transcendence.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'NAME': BASE_DIR / 'transcendence.sqlite3',
         'TEST': {
             'NAME': BASE_DIR / 'test_db.sqlite3',
         },
