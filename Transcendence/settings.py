@@ -62,6 +62,7 @@ ALLOWED_HOSTS = [
 # Application definition
 
 INSTALLED_APPS = [
+    'channels',
     'pong.apps.PongConfig',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -104,8 +105,14 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'Transcendence.wsgi.application'
+ASGI_APPLICATION = 'Transcendence.asgi.application'
 
-
+#Optionnal stuff "usefule for learning channels", to delete if i end up not using it
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer",
+    },
+}
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 

@@ -1,6 +1,14 @@
 const BALL_SPEED = 2;
 const RECTANGLE_SPEED = 15;
 
+
+
+const socket = new WebSocket('ws://localhost:8000/ws/pong/');
+
+socket.onopen = function () {
+    console.log("WebSocket connected");
+};
+
 class Rectangle {
     constructor(x, y, width, height, color = '#3498db', speed = RECTANGLE_SPEED)  {
         this.x = x;

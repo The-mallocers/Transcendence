@@ -9,6 +9,9 @@ bcrypt = "*"
 pyjwt = "*"
 django-environ = "*"
 python-dotenv = "*"
+//channels is for websockets in django, daphne is like a ASGI server to be able to use async connection.
+channels = "*" 
+daphne = "*"
 
 [dev-packages]
 django-extensions = "*"
