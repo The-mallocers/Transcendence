@@ -1,5 +1,8 @@
 
-import {enebaleEditMode} from "./componentBuilderHelpers.js"
+import {enebaleEditMode, changeClass} from "./componentBuilderHelpers.js"
+import {addChild} from "./render.js"
+import { updateRight } from "./render.js"
+
 
 function addEventListenerOnce(element, event, handler) {
     const eventKey = `${event}-listener`;

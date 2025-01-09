@@ -27,7 +27,7 @@ saveBtn.addEventListener("click", async (e)=> {await saveComponent(e)})
 
 
 
-const evaluateEmpty = ()=>{
+export const evaluateEmpty = ()=>{
     const childElements = root.querySelectorAll("*");
 
     for (let i = 0; i < childElements.length; i++){
@@ -96,21 +96,21 @@ export const buildClassesDropDown = (className) => {
 }
 
 
-// let changeTag = (e)=>{
-//     console.log(e)
+window.changeTag = (e)=>{
+    console.log(e)
 
-//     console.log(currentClickedElement)
+    console.log(currentClickedElement)
 
-//     const newElement = document.createElement(e.innerText);
-//     newElement.innerHTML = currentClickedElement.innerHTML; 
+    const newElement = document.createElement(e.innerText);
+    newElement.innerHTML = currentClickedElement.innerHTML; 
 
-//     currentClickedElement.parentNode.replaceChild(newElement, currentClickedElement);
+    currentClickedElement.parentNode.replaceChild(newElement, currentClickedElement);
 
-//     currentClickedElement = newElement
+    currentClickedElement = newElement
 
-//     updateRight(currentClickedElement);
+    updateRight(currentClickedElement);
 
-// }
+}
 
 
 export let changeClass = (e)=>{
