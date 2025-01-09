@@ -6,7 +6,7 @@ urlpatterns = [
     path('auth/', include("auth.urls")),
     path('account/', include("account.urls")),
     path('', include("index.urls")),
-    path('pong/', include('pong.urls'))
+    path('pong/', include('pong.urls')),
     path('edit/', include("componentBuilder.urls"))
 ]
 
