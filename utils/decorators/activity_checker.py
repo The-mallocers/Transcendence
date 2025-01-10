@@ -2,7 +2,7 @@ import jwt
 from django.conf import settings
 from django.http import HttpResponse
 
-from shared.models import User
+from shared.models import Client
 from utils.jwt.jwt import generate_access_token
 
 

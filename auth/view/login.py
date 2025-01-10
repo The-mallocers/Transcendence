@@ -4,7 +4,7 @@ import bcrypt
 from django.http import JsonResponse
 from django.shortcuts import render
 
-from shared.models import User
+from shared.models import Client
 from utils.jwt.jwt import generate_access_token
 
 def login_view(req):
@@ -23,7 +23,7 @@ def post(req):
         data = json.loads(req.body)
         email = data.get("email")
         password = data.get("password")
-        user = User.objects.filter(email=email).first()
+        client = Client.objects.filter(email=email).first()
 
         if (email or password) is None:
             return JsonResponse({
@@ -31,16 +31,16 @@ def post(req):
                 "message": "Invalid post request"
             }, status=400)
 
-        if user is None:
+        if client is None:
             return JsonResponse({
                 "success": False,
                 "message": "Wrong credentials"
             }, status=401)
 
-        user_password = user.password.encode('utf-8')
+        user_password = client.password.encode('utf-8')
 
         if bcrypt.checkpw(password.encode('utf-8'), user_password):
-            access_token, refresh_token = generate_access_token(user)
+            access_token, refresh_token = generate_access_token(client)
             response = JsonResponse({
                 "success": True,
                 "message": "Login successful",
@@ -48,7 +48,7 @@ def post(req):
             }, status=200)
             response.set_cookie('access_token', access_token, httponly=True, secure=True, samesite='Lax')
             response.set_cookie('refresh_token', refresh_token, httponly=True, secure=True, samesite='Lax')
-            req.session['user_id'] = str(user.id)
+            req.session['user_id'] = str(client.id)
             return response
         else:
             return JsonResponse({
@@ -62,7 +62,8 @@ def post(req):
         }, status=400)
 
 def get(req):
-    users = User.objects.all()
+    users = Client.objects.all()
+
     context = {"users": users}
 
     return render(req, "auth/login.html", context)

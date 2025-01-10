@@ -2,7 +2,7 @@ import uuid
 
 from django.http import HttpResponseRedirect, JsonResponse
 
-from shared.models import User
+from shared.models import Client
 
 
 def logout_view(req):
