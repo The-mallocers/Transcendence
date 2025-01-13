@@ -9,6 +9,9 @@ bcrypt = "*"
 pyjwt = "*"
 django-environ = "*"
 python-dotenv = "*"
+pyotp = "*"
+qrcode = "*"
+pillow = "*"
 
 [dev-packages]
 django-extensions = "*"

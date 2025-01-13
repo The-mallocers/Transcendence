@@ -1,0 +1,34 @@
+async function validateCode() {
+	const code = document.getElementById('authCode').value;
+	if(code.length === 6 && /^\d+$/.test(code)) {
+		// Here you would typically send the code to your server for validation
+		try{
+			console.log(code);
+			const response = await fetch("/auth/2fa", { // Remplace "/login" par l'URL de ton endpoint
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					code : code
+				}),
+			});
+			
+			if(response.status === 200)
+			{
+				console.log(response);
+			}
+			alert('Code submitted: ' + code);
+		}catch(err)
+		{
+			console.log(err);
+		}
+	} else {
+		alert('Please enter a valid 6-digit code');
+	}
+}
+
+// Add input validation to only allow numbers
+document.getElementById('authCode').addEventListener('input', function(e) {
+	this.value = this.value.replace(/[^0-9]/g, '');
+});

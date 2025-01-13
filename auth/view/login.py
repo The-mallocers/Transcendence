@@ -6,6 +6,8 @@ from django.shortcuts import render
 
 from shared.models import User
 from utils.jwt.jwt import generate_access_token
+import pyotp
+import qrcode
 
 def login_view(req):
     if req.method == 'GET':
@@ -40,6 +42,7 @@ def post(req):
         user_password = user.password.encode('utf-8')
 
         if bcrypt.checkpw(password.encode('utf-8'), user_password):
+            return two_fa(req, user)
             access_token, refresh_token = generate_access_token(user)
             response = JsonResponse({
                 "success": True,
@@ -66,3 +69,17 @@ def get(req):
     context = {"users": users}
 
     return render(req, "auth/login.html", context)
+
+def two_fa(req, user):
+    secret_fa_key = "myrandomkey"
+    if(user.mfa_enable):
+        uri = pyotp.totp.TOTP(secret_fa_key).provisioning_uri(name=user.first_name, issuer_name="Transcendance")
+        print(uri)
+        qrcode.make(uri).save("./static/img/qrcode.png")
+        # return render(req, "auth/2fa.html", context)
+        response = JsonResponse({
+                "success": True,
+                "message": "Login successful",
+                "redirect_url": "/auth/2fa"
+            }, status=200)
+        return response

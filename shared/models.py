@@ -15,6 +15,10 @@ class User(models.Model):
     email = models.CharField(max_length=50)
     password = models.CharField(max_length=50)
     avatar = models.TextField(default="/img/img.png")
+    
+    #2FA
+    mfa_enable = models.BooleanField(default=True)
+    mfa_secret = models.CharField(max_length=16, blank=True, null=True)
 
     # User information
     created_at = models.DateTimeField(auto_now_add=True)
