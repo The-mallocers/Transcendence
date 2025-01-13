@@ -12,11 +12,10 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 
 import os
-import environ
-
 import sys
-
 from pathlib import Path
+
+import environ
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -74,7 +73,8 @@ INSTALLED_APPS = [
     'account.apps.AccountConfig',
     'shared.apps.SharedConfig',
     'error.apps.ErrorConfig',
-    'admin.apps.AdminConfig'
+    'admin.apps.AdminConfig',
+    'api.apps.ApiConfig'
 ]
 
 MIDDLEWARE = [
