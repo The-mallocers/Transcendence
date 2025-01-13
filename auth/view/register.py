@@ -4,7 +4,7 @@ import bcrypt
 from django.http import JsonResponse
 from django.shortcuts import render
 
-from shared.models import User
+from shared.models import Client
 from utils.jwt.jwt import generate_access_token
 
 
@@ -79,7 +79,8 @@ def post(req):
         }, status=400)
 
 def get(req):
-    users = User.objects.all()
+    users = Client.objects.all()
+
     context = {"users": users}
 
     return render(req, "auth/register.html", context)

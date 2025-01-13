@@ -48,7 +48,7 @@
 - **Sécurité** : JWT, authentification à deux facteurs.
 
 ## Équipe
-- **Mathieu** : Frontend, backend, IA, stats.
+- **Mathieu** : Frontend, backend, IA, stats
 - **Alex** : Backend, IA, chat en direct.
 - **Bastien** : Backend, cybersécurité, monitoring.
 - **Leny** : Authentification distante, langues, chat.

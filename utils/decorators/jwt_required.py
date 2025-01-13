@@ -6,7 +6,7 @@ from django.conf import settings
 from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
 from django.shortcuts import redirect
 
-from shared.models import User
+from shared.models import Client
 from utils.jwt.jwt import generate_access_token
 
 def jwt_required(view_func):

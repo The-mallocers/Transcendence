@@ -53,6 +53,11 @@ jobs:
         run: |
           pipenv sync --dev
 
+      - name: Installer les migrations
+        run: |
+          pipenv run python manage.py makemigrations
+          pipenv run python manage.py migrate
+
       # Lancer les tests
       - name: Lancer les tests
         run: |

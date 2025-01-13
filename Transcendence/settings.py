@@ -12,11 +12,10 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 
 import os
-import environ
-
 import sys
-
 from pathlib import Path
+
+import environ
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -74,6 +73,8 @@ INSTALLED_APPS = [
     'account.apps.AccountConfig',
     'shared.apps.SharedConfig',
     'error.apps.ErrorConfig',
+    'admin.apps.AdminConfig',
+    'api.apps.ApiConfig'
 ]
 
 MIDDLEWARE = [
@@ -147,3 +148,12 @@ STATICFILES_DIRS = [
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+#Media
+MEDIA_URL = '/media/' #Url publique pour acceder au media
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+#Env variables
+USERNAME_LENGHT = ENV('USERNAME_LENGHT', default=15)
+FIRSTNAME_LENGHT = ENV('FIRSTNAME_LENGHT', default=50)
+LASTNAME_LENGHT = ENV('LASTNAME_LENGHT', default=50)
