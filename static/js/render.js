@@ -1,4 +1,7 @@
-import {buildClassesDropDown} from "./componentBuilderHelpers.js"
+import {buildClassesDropDown, evaluateEmpty, deleteClass} from "./componentBuilderHelpers.js"
+import { addEventToAllDescendants, addBasicEventsToPage} from "./basicEventManager.js"
+import { dragoverHandler, dragleaveHandler, dropHandler, addDragEvents } from "./dragDrop.js"
+
 
 export const addChild = () => {
     let div = document.createElement("div")
