@@ -39,6 +39,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const result = await response.json();
 
             if (response.status === 200) {
+                sessionStorage.setItem('access_token', result.access_token);
                 window.location.href = '/';
             }
             else{

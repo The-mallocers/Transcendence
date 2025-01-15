@@ -38,7 +38,8 @@ PROTECTED_PATHS = [
 EXCLUDED_PATHS = [
     '/api/auth/login',
     '/api/auth/register',
-    '/api/auth/refresh-token'
+    '/auth/login',
+    '/auth/register',
 ]
 ROLE_PROTECTED_PATHS = {
     '/admin/*': ['admin']

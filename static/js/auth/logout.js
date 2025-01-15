@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded", function () {
         // Récupération des valeurs des champs
         try {
             // Envoi de la requête POST avec fetch
-            const response = await fetch("/auth/logout", { // Remplace "/login" par l'URL de ton endpoint
+            const response = await fetch("/api/auth/logout", { // Remplace "/login" par l'URL de ton endpoint
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -19,8 +19,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const result = await response.json();
 
             if (response.status === 200 && result.success){
-                alert(result.message || "You are log out")
-                window.location.href = result.redirect_url;
+                window.location.href = '/auth/login';
             }
         } catch (error) {
             console.error("Erreur lors de la connexion :", error);

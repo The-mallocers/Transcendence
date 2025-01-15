@@ -3,6 +3,7 @@ from django.shortcuts import render
 
 from shared.models import Clients
 
+
 def index_view(req):
     if req.method == 'GET':
         return get(req)
@@ -16,8 +17,8 @@ def index_view(req):
 
 def get(req):
     users = Clients.objects.all()
-
     context = {"users": users}
+
     return render(req, "index.html", context)
 
 def post(req):

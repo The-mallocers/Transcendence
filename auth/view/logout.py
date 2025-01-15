@@ -1,27 +1,6 @@
-import uuid
-
-from django.http import HttpResponseRedirect, JsonResponse
-
-def logout_view(req):
-    if req.method == 'GET':
-        return get(req)
-    if req.method == 'POST':
-        return post(req)
-    else:
-        return JsonResponse({
-            "success": False,
-            "message": "Method not allowed"
-        }, status=405)
-
-def get(req):
-    return HttpResponseRedirect('/')
+from django.http import JsonResponse
 
 def post(req):
-    user = User.get_user(req)
-    if user:
-        user.session_user = uuid.uuid4()
-        user.save()
-
     response = JsonResponse({
         "success": True,
         "message": "Logout successefuly",

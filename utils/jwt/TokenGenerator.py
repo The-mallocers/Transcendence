@@ -9,7 +9,7 @@ from shared.models import Clients
 
 class TokenGenerator:
     def __init__(self):
-        self.secret_key = settings.SECRET_KEY
+        self.secret_key = getattr(settings, 'JWT_SECRET_KEY')
         self.issuer = "https://api.transcendence.fr"
 
     def generate_access_token(self, user_id: Clients.id) -> str:
@@ -29,7 +29,9 @@ class TokenGenerator:
             'type': 'access',
 
             #     Necessary informations for auth
-            'roles': None,
+            'roles': [
+                'client'
+            ],
             'permissions': None,
 
             #     Security context

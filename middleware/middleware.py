@@ -39,15 +39,8 @@ class JWTMiddleware:
 
     def _extract_token(self, request):
         # Extract the token from header
-        auth_header = request.headers.get('Authorization')
-        if not auth_header:
-            return None
-
-        parts = auth_header.split()
-        if parts[0].lower() != 'bearer' or len(parts) != 2:
-            return None
-
-        return parts[1]
+        token = request.COOKIES.get('access_token')
+        return token
 
     def _validate_token(self, token):
         # Validate the token
@@ -57,6 +50,7 @@ class JWTMiddleware:
             if payload['type'] != 'access':
                 raise jwt.InvalidTokenError(
                     f'Invalid token type: {str(payload['type'])}')
+            return payload
         except jwt.ExpiredSignatureError:
             raise jwt.InvalidTokenError('Token expired')
         except jwt.InvalidTokenError as e:
@@ -83,13 +77,13 @@ class JWTMiddleware:
             required_roles = self._get_required_roles(path)
             if required_roles:
                 user_roles = payload.get('roles', [])
+                print(user_roles)
                 if not any(role in user_roles for role in required_roles):
                     return JsonResponse(
                         {'error': 'Not enough permissions'},
                         status=403
                     )
             return self.get_response(request)
-
         except jwt.InvalidTokenError as e:
             return JsonResponse(
                 {'error': str(e)},

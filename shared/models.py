@@ -20,12 +20,20 @@ class Clients(models.Model):
 
     #Funcions
     @staticmethod
-    def get_client(req):
+    def get_client_by_id(req):
         client_id = req.session.get('client_id')
         if client_id is None:
             return None
-        user = Clients.objects.get(id=client_id)
-        return user
+        client = Clients.objects.get(id=client_id)
+        return client
+
+    @staticmethod
+    def get_client_by_email(email: Profile.email):
+        profile = Profile.get_profile(email)
+        if profile is None:
+            return None
+        client = Clients.objects.get(profile=profile)
+        return client
 
     @staticmethod
     def create_client(username: str, first_name: str, last_name: str,

@@ -1,6 +1,5 @@
-from django.http import HttpResponse, JsonResponse
+from index.view.index_view import index_view
+
 
 def index(req):
-    user_data = req.token_payload
-    return JsonResponse({'message': f'Bonjour {user_data["sub"]}'})
-    # return index_view(req)
+    return index_view(req)
