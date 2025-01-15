@@ -2,9 +2,6 @@ import uuid
 
 from django.http import HttpResponseRedirect, JsonResponse
 
-from shared.models import Client
-
-
 def logout_view(req):
     if req.method == 'GET':
         return get(req)

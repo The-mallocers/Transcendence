@@ -4,8 +4,7 @@ import bcrypt
 from django.http import JsonResponse
 from django.shortcuts import render
 
-from shared.models import Client
-from utils.jwt.jwt import generate_access_token
+from shared.models import Clients
 
 def login_view(req):
     if req.method == 'GET':
@@ -23,7 +22,7 @@ def post(req):
         data = json.loads(req.body)
         email = data.get("email")
         password = data.get("password")
-        client = Client.objects.filter(email=email).first()
+        client = Clients.objects.filter(email=email).first()
 
         if (email or password) is None:
             return JsonResponse({
@@ -62,7 +61,7 @@ def post(req):
         }, status=400)
 
 def get(req):
-    users = Client.objects.all()
+    users = Clients.objects.all()
 
     context = {"users": users}
 

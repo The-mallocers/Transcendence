@@ -1,10 +1,6 @@
-from django.http import HttpResponse
-from django.shortcuts import render
-from index.view.index_view import index_view
-from utils.decorators.activity_checker import activity_checker
-from utils.decorators.jwt_required import jwt_required
+from django.http import HttpResponse, JsonResponse
 
-@jwt_required
-@activity_checker
 def index(req):
-    return index_view(req)
+    user_data = req.token_payload
+    return JsonResponse({'message': f'Bonjour {user_data["sub"]}'})
+    # return index_view(req)

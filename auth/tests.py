@@ -1,10 +1,10 @@
-from django.test import TestCase, Client
+from django.test import TestCase, Clients
 
 
 # Create your tests here.
 class AuthTest(TestCase):
     def setUp(self):
-        self.client = Client()
+        self.client = Clients()
 
     def test(self):
         url = '/auth/login'

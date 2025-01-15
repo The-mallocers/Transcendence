@@ -1,20 +1,21 @@
 import uuid
 
-from django.db import models
+from django.core.exceptions import ValidationError
+from django.db import models, IntegrityError
 
-from account.models import Profile, default_profile
-from admin.models import Admin
-from auth.models import Auth, default_auth
+from account.models import Profile
+from admin.models import Rights
+from auth.models import Password
 
 
-class Client(models.Model):
+class Clients(models.Model):
     #Primary key
     id = models.UUIDField(primary_key=True, default=uuid.uuid4(), editable=False, null=False)
 
     #Joined tables
-    auth = models.ForeignKey(Auth, on_delete=models.CASCADE, default=1)
+    password = models.ForeignKey(Password, on_delete=models.CASCADE, default=1)
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE, default=1)
-    admin = models.ForeignKey(Admin, on_delete=models.CASCADE, null=True)
+    rights = models.ForeignKey(Rights, on_delete=models.CASCADE, null=True)
     # log = models.ForeignKey(Log, on_delete=models.CASCADE)
 
     #Funcions
@@ -23,5 +24,37 @@ class Client(models.Model):
         client_id = req.session.get('client_id')
         if client_id is None:
             return None
-        user = Client.objects.get(id=client_id)
+        user = Clients.objects.get(id=client_id)
         return user
+
+    @staticmethod
+    def create_client(username: str, first_name: str, last_name: str,
+                      email: str, password: str) -> id:
+        try:
+            if Profile.get_profile(email) is not None:
+                raise IntegrityError(
+                    f'Profile with email {email} already exist.')
+            id = uuid.uuid4()
+
+            password_mod = Password(id=id, password=password)
+            password_mod.save()
+
+            profile_mod = Profile(id=id, first_name=first_name,
+                                  last_name=last_name, username=username,
+                                  email=email)
+            profile_mod.save()
+
+            rights_mod = Rights(id=id, right=True)
+            rights_mod.save()
+
+            client = Clients(id=id, password=password_mod, profile=profile_mod,
+                             rights=rights_mod)
+            client.save()
+
+            return client.id
+        except IntegrityError as e:
+            raise IntegrityError(f"Database integrity error: {e}")
+        except ValidationError as e:
+            raise ValidationError(f"Data validation error: {e}")
+        except Exception as e:
+            raise Exception(f"An unexpected error occurred: {e}")

@@ -1,7 +1,7 @@
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 
-from shared.models import Client
+from shared.models import Clients
 
 def index_view(req):
     if req.method == 'GET':
@@ -15,7 +15,7 @@ def index_view(req):
         }, status=405)
 
 def get(req):
-    users = Client.objects.all()
+    users = Clients.objects.all()
 
     context = {"users": users}
     return render(req, "index.html", context)

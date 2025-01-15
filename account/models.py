@@ -1,3 +1,5 @@
+import uuid
+
 from django.db import models
 
 from Transcendence.settings import USERNAME_LENGHT, FIRSTNAME_LENGHT, \
@@ -8,6 +10,7 @@ class Profile(models.Model):
     email = models.EmailField(primary_key=True, null=False, editable=True, default='default@default.fr')
 
     #Secondary key
+    id = models.UUIDField(default=uuid.uuid4(), editable=False, null=False)
     username = models.CharField(null=False, max_length=USERNAME_LENGHT, editable=True, default='default')
     first_name = models.CharField(null=True, max_length=FIRSTNAME_LENGHT, editable=True)
     last_name = models.CharField(null=True, max_length=LASTNAME_LENGHT, editable=True)
@@ -15,10 +18,10 @@ class Profile(models.Model):
 
     #Functions
     @staticmethod
-    def get_profile(email):
+    def get_profile(email) -> email:
         if email is None:
             return None
-        profile = Profile.objects.get(email=email)
+        profile = Profile.objects.filter(email=email).first()
         if profile is None:
             return None
         return profile
@@ -38,8 +41,4 @@ class Profile(models.Model):
             case _:
                 return None
         self.save()
-
-def default_profile():
-    profile = Profile.objects.create(email='default@default.fr', username='default')
-    return profile
 
