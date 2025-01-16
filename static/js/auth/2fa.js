@@ -14,9 +14,12 @@ async function validateCode() {
 				}),
 			});
 			
-			if(response.status === 200)
+			const result = await response.json();
+
+			if(response.status === 200 && result.success)
 			{
 				console.log(response);
+				window.location.href = result.redirect_url;
 			}
 			alert('Code submitted: ' + code);
 		}catch(err)
