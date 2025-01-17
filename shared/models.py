@@ -5,7 +5,7 @@ from django.db import models, IntegrityError
 
 from account.models import Profile
 from admin.models import Rights
-from auth.models import Password
+from auth.models import Password, TwoFA
 
 
 class Clients(models.Model):
@@ -15,6 +15,7 @@ class Clients(models.Model):
     #Joined tables
     password = models.ForeignKey(Password, on_delete=models.CASCADE, default=1)
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE, default=1)
+    twoFa = models.ForeignKey(TwoFA, on_delete=models.CASCADE, default=1)
     rights = models.ForeignKey(Rights, on_delete=models.CASCADE, null=True)
     # log = models.ForeignKey(Log, on_delete=models.CASCADE)
 
@@ -54,8 +55,11 @@ class Clients(models.Model):
             rights_mod = Rights(id=id, right=True)
             rights_mod.save()
 
+            two_fa = TwoFA()
+            two_fa.save()
+
             client = Clients(id=id, password=password_mod, profile=profile_mod,
-                             rights=rights_mod)
+                             rights=rights_mod, twoFa=two_fa)
             client.save()
 
             return client
