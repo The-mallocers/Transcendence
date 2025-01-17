@@ -6,6 +6,7 @@ import jwt
 from django.conf import settings
 from django.http import HttpResponse
 
+from Transcendence import settings
 from shared.models import Clients
 
 
@@ -96,10 +97,10 @@ class TokenGenerator:
         self.issuer = "https://api.transcendence.fr"
         self.token_key: str = ''
         if token_type is TokenType.ACCESS:
-            self.exp = settings.JWT_EXP_ACCESS_TOKEN
+            self.exp = getattr(settings, 'JWT_EXP_ACCESS_TOKEN')
         if token_type is TokenType.REFRESH:
-            self.exp = settings.JWT_EXP_REFRESH_TOKEN
-        self.token: Token = Token(client, self.exp, token_type)
+            self.exp = getattr(settings, 'JWT_EXP_REFRESH_TOKEN')
+        self.token: Token = Token(client, int(self.exp), token_type)
 
     def set_cookie(self, response: HttpResponse):
         headers = {

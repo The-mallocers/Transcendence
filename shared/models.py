@@ -10,7 +10,8 @@ from auth.models import Password, TwoFA
 
 class Clients(models.Model):
     #Primary key
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4(), editable=False, null=False)
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False,
+                          null=False)
 
     #Joined tables
     password = models.ForeignKey(Password, on_delete=models.CASCADE, default=1)
@@ -42,24 +43,23 @@ class Clients(models.Model):
             if Profile.get_profile(email) is not None:
                 raise IntegrityError(
                     f'Profile with email {email} already exist.')
-            id = uuid.uuid4()
 
-            password_mod = Password(id=id, password=password)
+            password_mod = Password(password=password)
             password_mod.save()
 
-            profile_mod = Profile(id=id, first_name=first_name,
+            profile_mod = Profile(first_name=first_name,
                                   last_name=last_name, username=username,
                                   email=email)
             profile_mod.save()
 
-            rights_mod = Rights(id=id, right=True)
+            rights_mod = Rights(right=True)
             rights_mod.save()
 
-            two_fa = TwoFA()
-            two_fa.save()
+            two_fa_mod = TwoFA()
+            two_fa_mod.save()
 
-            client = Clients(id=id, password=password_mod, profile=profile_mod,
-                             rights=rights_mod, twoFa=two_fa)
+            client = Clients(password=password_mod, profile=profile_mod,
+                             rights=rights_mod, twoFa=two_fa_mod)
             client.save()
 
             return client

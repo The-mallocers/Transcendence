@@ -7,7 +7,8 @@ from django.db import models
 
 class Password(models.Model):
     #Primary key
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4(), editable=False, null=False)
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False,
+                          null=False)
 
     #Secondary key
     password = models.CharField(max_length=512, null=False, editable=True)
@@ -35,7 +36,7 @@ class Password(models.Model):
 
 class TwoFA(models.Model):
     # Primary key
-    key = models.CharField(primary_key=True, default=pyotp.random_base32(),
+    key = models.CharField(primary_key=True, default=pyotp.random_base32,
                            max_length=32, null=False, editable=True)
 
     # Secondary key
