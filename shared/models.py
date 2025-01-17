@@ -20,11 +20,10 @@ class Clients(models.Model):
 
     #Funcions
     @staticmethod
-    def get_client_by_id(req):
-        client_id = req.session.get('client_id')
-        if client_id is None:
+    def get_client_by_id(id: uuid.UUID):
+        if id is None:
             return None
-        client = Clients.objects.get(id=client_id)
+        client = Clients.objects.get(id=id)
         return client
 
     @staticmethod
@@ -37,7 +36,7 @@ class Clients(models.Model):
 
     @staticmethod
     def create_client(username: str, first_name: str, last_name: str,
-                      email: str, password: str) -> id:
+                      email: str, password: str):
         try:
             if Profile.get_profile(email) is not None:
                 raise IntegrityError(
@@ -59,7 +58,7 @@ class Clients(models.Model):
                              rights=rights_mod)
             client.save()
 
-            return client.id
+            return client
         except IntegrityError as e:
             raise IntegrityError(f"Database integrity error: {e}")
         except ValidationError as e:

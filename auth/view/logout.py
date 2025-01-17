@@ -8,4 +8,5 @@ def post(req):
     }, status=200)
     response.delete_cookie('access_token')
     response.delete_cookie('refresh_token')
+    response.delete_cookie('csrf_token')
     return response

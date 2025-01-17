@@ -5,7 +5,7 @@ from django.shortcuts import render
 
 from account.models import Profile
 from shared.models import Clients
-from utils.jwt.TokenGenerator import TokenGenerator
+from utils.jwt.TokenGenerator import TokenGenerator, TokenType
 
 
 def post(req):
@@ -36,30 +36,15 @@ def post(req):
                 "message": "Email already existe"
             }, status=400)
 
-        client_id = Clients.create_client(username, first_name, last_name,
+        client = Clients.create_client(username, first_name, last_name,
                                           email, password)
 
-        token_gen = TokenGenerator()
         response = JsonResponse({
             "success": True,
             "message": "Login successful"
         }, status=200)
-
-        response.set_cookie(
-            'access_token',
-            token_gen.generate_access_token(client_id),
-            httponly=True,
-            secure=True,
-            samesite='Strict'
-        )
-
-        response.set_cookie(
-            'refresh_token',
-            token_gen.generate_refresh_token(client_id),
-            httponly=True,
-            secure=True,
-            samesite='Strict'
-        )
+        TokenGenerator(client, TokenType.ACCESS).set_cookie(response=response)
+        TokenGenerator(client, TokenType.REFRESH).set_cookie(response=response)
 
         return response
     except json.JSONDecodeError:

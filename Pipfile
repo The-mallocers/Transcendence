@@ -10,6 +10,7 @@ pyjwt = "*"
 django-environ = "*"
 python-dotenv = "*"
 pillow = "*"
+clients = "*"
 
 [dev-packages]
 django-extensions = "*"

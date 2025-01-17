@@ -12,7 +12,6 @@ def register_post(req):
     return post_register(req)
 
 
-@csrf_exempt
 @require_http_methods(["GET"])
 def register_get(req):
     return get_register(req)
@@ -22,11 +21,9 @@ def register_get(req):
 def login_post(req):
     return post_login(req)
 
-@csrf_exempt
 @require_http_methods(["GET"])
 def login_get(req):
     return get_login(req)
-
 
 @csrf_exempt
 @require_http_methods(["POST"])

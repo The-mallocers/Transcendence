@@ -28,7 +28,7 @@ document.addEventListener("DOMContentLoaded", function () {
             }
             else{
                 alert(result.message || "Login failed.");
-                window.location.href = "/api/auth/register"
+                window.location.href = "/auth/register"
             }
         } catch (error) {
             console.error("Erreur lors de la connexion :", error);
