@@ -60,8 +60,11 @@ ALLOWED_HOSTS = [
 ]
 
 # Application definition
+# had to add django.contrib.auth, not sure why
 
 INSTALLED_APPS = [
+    'channels',
+    'django.contrib.auth',
     'pong.apps.PongConfig',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -80,6 +83,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'middleware.middleware.JWTMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -107,7 +111,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'Transcendence.wsgi.application'
-
+ASGI_APPLICATION = 'Transcendence.asgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
@@ -142,9 +146,15 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_DIRS = [
-    BASE_DIR / "static",
+    os.path.join(BASE_DIR, 'static'),
 ]
+
+# STATICFILES_DIRS = [
+#     BASE_DIR / "static",
+# ]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
