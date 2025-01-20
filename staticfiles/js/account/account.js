@@ -18,7 +18,7 @@ const user = async (form) => {
 
             const result = await response.json();
 
-            if (response.status === 200 && result.success){
+            if (response.status === 200 && result.success) {
                 alert(result.message || "You are log out")
                 window.location.href = result.redirect_url;
             }

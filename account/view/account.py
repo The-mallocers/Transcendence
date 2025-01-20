@@ -3,7 +3,7 @@ import json
 from django.http import JsonResponse
 from django.shortcuts import render
 
-from shared.models import Client
+from shared.models import Clients
 
 def account_view(request):
     if request.method == 'GET':
@@ -21,7 +21,7 @@ def account_view(request):
         }, status=405)
 
 def get(request):
-    client = Client.get_client(request)
+    client = Clients.get_client(request)
     context = {"client": client}
     return render(request, "account/account.html", context)
 
@@ -35,7 +35,7 @@ def put(request):
     return JsonResponse({})
 
 def patch(request):
-    client = Client.get_client(request)
+    client = Clients.get_client(request)
     try:
         body = json.loads(request.body)
         data = body.get('data')

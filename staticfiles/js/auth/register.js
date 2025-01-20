@@ -12,8 +12,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const password = document.getElementById("password").value;
         const password_verif = document.getElementById("password_verif").value;
 
-        if (password !== password_verif)
-        {
+        if (password !== password_verif) {
             alert("Password missmatch" || "Error")
             return;
         }
@@ -37,10 +36,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
             const result = await response.json();
 
-            if (response.status === 200 && result.success){
+            if (response.status === 200 && result.success) {
                 window.location.href = result.redirect_url;
-            }
-            else{
+            } else {
                 alert(result.message || "Login failed.");
             }
         } catch (error) {

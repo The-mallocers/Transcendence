@@ -18,37 +18,38 @@ from pathlib import Path
 import environ
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
-
 ENV = environ.Env(DEBUG_MODE=True)
 ENV.read_env(env_file=os.path.join(BASE_DIR, '.env'))
-
-print(os.path.join(BASE_DIR, '.env'))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = ENV('DJANGO_SECRET_KEY', default='1234')
-EXPIRATION_ACCESS_TOKEN = ENV('DJANGO_EXPIRATION_ACCESS_TOKEN', default=30) #30 minutes
-EXPIRATION_REFRESH_TOKEN = ENV('DJANGO_EXPIRATION_REFRESH_TOKEN', default=30) #30 days
 
-# COOKIES SECURITY
-# SESSION_COOKIE_SECURE = True
-# SESSION_COOKIE_HTTPONLY = True
-# CSRF_COOKIE_SECURE = True
-# CSRF_COOKIE_HTTPONLY = True
-# SESSION_COOKIE_SAMESITE = 'Lax'
-
-# HEADER SETTINGS
-# SECURE_HSTS_SECONDS = 31536000  # 1 an
-# SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-# SECURE_HSTS_PRELOAD = True
-# SECURE_CONTENT_TYPE_NOSNIFF = True
-# SECURE_BROWSER_XSS_FILTER = True
-# SECURE_SSL_REDIRECT = True
-
+# JWT Settings
+JWT_SECRET_KEY = ENV('JWT_SECRET_KEY', default='1234')
+JWT_EXP_ACCESS_TOKEN = ENV('JWT_EXP_ACCESS_TOKEN', default=10)  # 30 minutes
+JWT_EXP_REFRESH_TOKEN = ENV('JWT_EXP_REFRESH_TOKEN', default=30)  # 30 days
+JWT_ALGORITH = 'HS256'
+CSRF_METHODS = [
+    'POST',
+    'PUT',
+    'PATCH',
+    'DELETE'
+]
+PROTECTED_PATHS = [
+    '/*'
+]
+EXCLUDED_PATHS = [
+    '/api/auth/login',
+    '/api/auth/register',
+    '/auth/login',
+    '/auth/register',
+]
+ROLE_PROTECTED_PATHS = {
+    '/admin/*': ['admin']
+}
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = ENV('DJANGO_DEBUG', default=False)
@@ -59,7 +60,7 @@ ALLOWED_HOSTS = [
 ]
 
 # Application definition
-#had to add django.contrib.auth, not sure why
+# had to add django.contrib.auth, not sure why
 
 INSTALLED_APPS = [
     'channels',
@@ -84,6 +85,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'middleware.middleware.JWTMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',

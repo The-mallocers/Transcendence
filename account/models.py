@@ -2,6 +2,11 @@ from django.db import models
 
 from Transcendence.settings import USERNAME_LENGHT, FIRSTNAME_LENGHT, \
     LASTNAME_LENGHT
+from django.db import models
+
+from Transcendence.settings import USERNAME_LENGHT, FIRSTNAME_LENGHT, \
+    LASTNAME_LENGHT
+
 
 class Profile(models.Model):
     #Primary key
@@ -15,10 +20,10 @@ class Profile(models.Model):
 
     #Functions
     @staticmethod
-    def get_profile(email):
+    def get_profile(email) -> email:
         if email is None:
             return None
-        profile = Profile.objects.get(email=email)
+        profile = Profile.objects.filter(email=email).first()
         if profile is None:
             return None
         return profile
@@ -38,8 +43,4 @@ class Profile(models.Model):
             case _:
                 return None
         self.save()
-
-def default_profile():
-    profile = Profile.objects.create(email='default@default.fr', username='default')
-    return profile
 

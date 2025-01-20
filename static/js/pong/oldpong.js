@@ -60,10 +60,9 @@ class Ball {
         if (this.x < rectangle.x + rectangle.width &&
             this.x + this.width > rectangle.x &&
             this.y < rectangle.y + rectangle.height &&
-            this.y + this.height > rectangle.y) 
-        {
+            this.y + this.height > rectangle.y) {
             this.dy = -this.dy; // Reverse direction on collision
-            const BALL_CENTER = (this.x + this.width) / 2; 
+            const BALL_CENTER = (this.x + this.width) / 2;
             const RECTANGLE_CENTER = (rectangle.x + rectangle.width) / 2;
             this.dx = (BALL_CENTER - RECTANGLE_CENTER) / 10;
         }
@@ -83,14 +82,11 @@ const ball = new Ball(450, 250, 25, 25);
 window.addEventListener('keydown', (e) => {
     if (e.key === 'a' || e.key === 'A') {
         rectangle.moveDirection = -1;
-    } 
-    else if (e.key === 'd' || e.key === 'D') {
+    } else if (e.key === 'd' || e.key === 'D') {
         rectangle.moveDirection = 1;
-    }
-    else if (e.key === 'j' || e.key === 'J') {
+    } else if (e.key === 'j' || e.key === 'J') {
         rectangle2.moveDirection = -1;
-    } 
-    else if (e.key === 'l' || e.key === 'L') {
+    } else if (e.key === 'l' || e.key === 'L') {
         rectangle2.moveDirection = 1;
     }
 });

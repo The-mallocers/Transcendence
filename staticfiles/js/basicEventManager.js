@@ -1,7 +1,6 @@
-
 import {enebaleEditMode, changeClass} from "./componentBuilderHelpers.js"
 import {addChild} from "./render.js"
-import { updateRight } from "./render.js"
+import {updateRight} from "./render.js"
 
 
 function addEventListenerOnce(element, event, handler) {
@@ -25,23 +24,26 @@ export let addEventToAllDescendants = (parent, event, handler) => {
     }
 }
 
-export const addBasicEventsToPage = ()=>{
-    root.addEventListener('click', (e)=>{
+export const addBasicEventsToPage = () => {
+    root.addEventListener('click', (e) => {
         enebaleEditMode(e);
     });
-    
-    
-    
-    classAnchor.addEventListener('click', (e)=>{changeClass(e)})
-    
-    
-    classAdd.addEventListener("click", ()=>{
-        if (currentClickedElement){
+
+
+    classAnchor.addEventListener('click', (e) => {
+        changeClass(e)
+    })
+
+
+    classAdd.addEventListener("click", () => {
+        if (currentClickedElement) {
             currentClickedElement.classList.add("new-class")
             updateRight(currentClickedElement)
         }
-    
+
     })
-    
-    childAdd.addEventListener('click', (e)=>{addChild()})
+
+    childAdd.addEventListener('click', (e) => {
+        addChild()
+    })
 }

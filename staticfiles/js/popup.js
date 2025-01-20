@@ -1,9 +1,9 @@
-const openPopup = (popup, untouchable)=>{
+const openPopup = (popup, untouchable) => {
     popup.classList.add("displayed")
     untouchable.classList.add("untouchable")
 }
 
-export const selectImg = () =>{
+export const selectImg = () => {
 
 
     const imgPop = document.getElementById("imgSelectPopup")
@@ -13,8 +13,8 @@ export const selectImg = () =>{
 
     let test = imgPop.querySelectorAll('.imgDisplay')
 
-    for (let i = 0; i < test.length ; i++){
-        test[i].addEventListener("click", (e)=>{
+    for (let i = 0; i < test.length; i++) {
+        test[i].addEventListener("click", (e) => {
             let img = e.target.querySelector("img")
             console.log(img.getAttribute("src"))
             currentClickedElement.setAttribute("src", img.getAttribute("src"))

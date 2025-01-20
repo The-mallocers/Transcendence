@@ -12,13 +12,12 @@ document.addEventListener("DOMContentLoaded", function () {
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({
-                }),
+                body: JSON.stringify({}),
             });
 
             const result = await response.json();
 
-            if (response.status === 200 && result.success){
+            if (response.status === 200 && result.success) {
                 alert(result.message || "You are log out")
                 window.location.href = result.redirect_url;
             }

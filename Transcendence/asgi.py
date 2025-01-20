@@ -27,7 +27,7 @@ application = ProtocolTypeRouter({
     ),
 })
 
-#We're doing a lot here, but the idea is that we are setting up asgi, when
-#we will want to access a page, as in the http protocol, we will return our basic django app
-#but if we are trying to connect a websocket, we will go to the url patterns
-#as defined in the routing.py of the app we are currently using.
+# We're doing a lot here, but the idea is that we are setting up asgi, when
+# we will want to access a page, as in the http protocol, we will return our basic django app
+# but if we are trying to connect a websocket, we will go to the url patterns
+# as defined in the routing.py of the app we are currently using.

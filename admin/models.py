@@ -2,10 +2,12 @@ import uuid
 
 from django.db import models
 
+
 # Create your models here.
-class Admin(models.Model):
+class Rights(models.Model):
     #Primary key
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4(), editable=False, null=False)
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False,
+                          null=False)
 
     #Secondary key
     right = models.BooleanField(default=False)

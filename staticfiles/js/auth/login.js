@@ -23,10 +23,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
             const result = await response.json();
 
-            if (response.status === 200 && result.success){
+            if (response.status === 200 && result.success) {
                 window.location.href = result.redirect_url;
-            }
-            else{
+            } else {
                 alert(result.message || "Login failed.");
                 window.location.href = "/auth/register"
             }

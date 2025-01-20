@@ -1,18 +1,31 @@
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
 
-from auth.view.login import login_view
-from auth.view.logout import logout_view
-from auth.view.register import register_view
+from auth.view.login import post as post_login, get as get_login
+from auth.view.logout import post as post_logout
+from auth.view.register import post as post_register, get as get_register
 
-
-@csrf_exempt
-def register(req):
-    return register_view(req)
 
 @csrf_exempt
-def login(req):
-    return login_view(req)
+@require_http_methods(["POST"])
+def register_post(req):
+    return post_register(req)
+
+
+@require_http_methods(["GET"])
+def register_get(req):
+    return get_register(req)
 
 @csrf_exempt
+@require_http_methods(["POST"])
+def login_post(req):
+    return post_login(req)
+
+@require_http_methods(["GET"])
+def login_get(req):
+    return get_login(req)
+
+@csrf_exempt
+@require_http_methods(["POST"])
 def logout(req):
-    return logout_view(req)
+    return post_logout(req)
