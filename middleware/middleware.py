@@ -1,6 +1,4 @@
 import re
-import secrets
-from datetime import datetime, timezone
 
 import jwt
 from django.conf import settings
@@ -19,7 +17,6 @@ class JWTMiddleware:
         self.protected_paths = getattr(settings, 'PROTECTED_PATHS')
         self.excluded_paths = getattr(settings, 'EXCLUDED_PATHS')
         self.role_protected_paths = getattr(settings, 'ROLE_PROTECTED_PATHS')
-        self.csrf_methods = getattr(settings, 'CSRF_METHODS')
 
     def _should_check_path(self, path: str) -> bool:
         """Check if the path need to be protected"""
@@ -58,32 +55,6 @@ class JWTMiddleware:
             raise jwt.InvalidKeyError(f'Token missing')
         return token_key
 
-    def _generate_csrf_token(self) -> str:
-        return secrets.token_urlsafe(32)
-
-    def _validate_csrf(self, request: HttpRequest) -> bool:
-        if request.method not in self.csrf_methods:
-            return True
-
-        csrf_cookie = request.COOKIES.get('csrf_token')
-        csrf_header = request.headers.get('X-CSRF-Token')
-
-        if not csrf_cookie or not csrf_header:
-            return False
-
-        return secrets.compare_digest(csrf_cookie, csrf_header)
-
-    def _set_csrf_token(self, response: HttpResponse):
-        csrf_token = self._generate_csrf_token()
-        response.set_cookie(
-            'csrf_token',
-            csrf_token,
-            httponly=False,
-            secure=True,
-            samesite='Lax'
-        )
-        response['X-CSRF-Token'] = csrf_token
-
     def _validate_token(self, token_key: str, token_type: str) -> Token:
         """Take token key in argument and check the token"""
         try:
@@ -100,7 +71,6 @@ class JWTMiddleware:
             raise jwt.InvalidTokenError(f'Invalid {token_type} token: {str(e)}')
 
     def _refresh_token(self, request: HttpRequest, response: HttpResponse):
-        now = datetime.now(tz=timezone.utc)
         try:
             self._validate_token(self._extract_access_token(request),
                                  TokenType.ACCESS)
@@ -126,11 +96,6 @@ class JWTMiddleware:
         if not self._should_check_path(path):  # If the not need to be protected
             return self.get_response(request)
 
-        if not self._validate_csrf(request):
-            return JsonResponse({
-                'error': 'CSRF validation failed'
-            }, status=403)
-
         try:
             token_key: str = self._extract_access_token(request)
             token: Token = self._validate_token(token_key, TokenType.ACCESS)
@@ -145,18 +110,16 @@ class JWTMiddleware:
                         {'error': 'Not enough permissions'},
                         status=403
                     )
-            self._set_csrf_token(response)
             return response
-        except jwt.ExpiredSignatureError as e:
+        except jwt.ExpiredSignatureError:
             try:
                 self._refresh_token(request, response)
-                self._set_csrf_token(response)
                 return response
-            except Exception as e:
+            except Exception:
                 return HttpResponseRedirect('/auth/login')
-        except jwt.InvalidTokenError as e:
+        except jwt.InvalidTokenError:
             return HttpResponseRedirect('/auth/login')
-        except jwt.InvalidKeyError as e:
+        except jwt.InvalidKeyError:
             return HttpResponseRedirect('/auth/login')
         except Exception as e:
             return JsonResponse(

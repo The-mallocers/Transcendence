@@ -1,38 +1,36 @@
 document.addEventListener("DOMContentLoaded", function () {
-    const loginForm = document.getElementById("login-form");
+    // Sélectionner le formulaire et ajouter un événement de soumission
+    const form = document.querySelector("form");
 
-    loginForm.addEventListener("submit", async function (event) {
-        event.preventDefault(); // Empêche le rechargement de la page lors de l'envoi du formulaire
+    // Empêcher le comportement de soumission par défaut
+    form.addEventListener("submit", function (event) {
+        event.preventDefault();
 
-        // Récupération des valeurs des champs
-        const email = document.getElementById("email").value;
-        const password = document.getElementById("password").value;
+        // Récupérer les données du formulaire
+        const formData = new FormData(form);
+        const errorDiv = document.getElementById("error-message")
 
-        try {
-            // Envoi de la requête POST avec fetch
-            const response = await fetch("/api/auth/login", { // Remplace "/login" par l'URL de ton endpoint
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    email: email,
-                    password: password,
-                }),
+        // Utilisation de l'API Fetch pour envoyer les données
+        fetch(form.action, {
+            method: "POST",  // Méthode de la requête (POST)
+            body: formData,  // Corps de la requête (les données du formulaire)
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            },
+        })
+            .then(response => response.json())  // Réponse en JSON
+            .then(data => {
+                if (data.success) {
+                    // Si la soumission est réussie, vous pouvez afficher un message ou rediriger l'utilisateur
+                    window.location.href = '/';  // Redirige si une URL de redirection est fournie
+                } else {
+                    // En cas d'erreur, afficher un message d'erreur
+                    errorDiv.textContent = data.message;
+                }
+            })
+            .catch(error => {
+                console.error("There was an error with the fetch operation:", error);
+                errorDiv.textContent = error;
             });
-
-            const result = await response.json();
-
-            if (response.status === 200 && result.success){
-                window.location.href = '/';
-            }
-            else{
-                alert(result.message || "Login failed.");
-                window.location.href = "/auth/register"
-            }
-        } catch (error) {
-            console.error("Erreur lors de la connexion :", error);
-            alert("Une erreur s'est produite. Veuillez réessayer.");
-        }
     });
 });

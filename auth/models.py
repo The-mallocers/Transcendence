@@ -16,6 +16,8 @@ class Password(models.Model):
     #Functions
     def save(self, *args, **kwargs):
         salt = bcrypt.gensalt(prefix=b'2b')
+        if self.password == '' or self.password is None:
+            raise ValueError("Password can't be empty")
         if not self.password.startswith('$2b$'):
             self.password = bcrypt.hashpw(self.password.encode('utf-8'),
                                           salt).decode('utf-8')
