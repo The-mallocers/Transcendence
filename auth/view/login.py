@@ -27,19 +27,21 @@ def post(req: HttpRequest):
 
     if client.password.check_pwd(password):
         if client.twoFa.enable:
+            two_fa(client)
+            print("two fa enable")
             redirUrl = "/auth/2fa"
         else :
+            print("two fa disable")
             redirUrl = "/"
         response = JsonResponse({
             "success": True,
             "message": "You've been corectlly login",
-                "redirect_url": redirUrl
+            "redirect_url": redirUrl
         }, status=200)
         TokenGenerator(client, TokenType.ACCESS).set_cookie(
             response=response)
         TokenGenerator(client, TokenType.REFRESH).set_cookie(
             response=response)
-        print(response)
         return response
     else:
         return JsonResponse({
@@ -56,7 +58,6 @@ def get(req):
 
 def two_fa(user):
     # check if twofa is activated
-    if(user.TwoFa.enable):
-        uri = pyotp.totp.TOTP(settings.SECRET_FA_KEY).provisioning_uri(name=user.first_name, issuer_name="Transcendance")
-        qrcode.make(uri).save("./static/img/qrcode.png")
-        return True
+    uri = pyotp.totp.TOTP(settings.SECRET_FA_KEY).provisioning_uri(name=user.profile.first_name, issuer_name="Transcendance")
+    qrcode.make(uri).save("./static/img/qrcode.png")
+    return True

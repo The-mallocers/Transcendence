@@ -56,4 +56,3 @@ class TwoFA(models.Model):
             case _:
                 return None
         self.save()
-    # def 

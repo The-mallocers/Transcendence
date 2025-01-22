@@ -7,7 +7,7 @@ from django.http import JsonResponse
 
 from auth.view.login import post as post_login, get as get_login
 from auth.view.logout import post as post_logout
-from auth.view.register import post as post_register, get as get_register
+from auth.view.register import post, get
 from shared.models import Clients
 
 import pyotp
@@ -16,11 +16,11 @@ import json
 @csrf_exempt
 @require_http_methods(["POST"])
 def register_post(req):
-    return post_register(req)
+    return post(req)
 
 @require_http_methods(["GET"])
 def register_get(req):
-    return get_register(req)
+    return get(req)
 
 @require_http_methods(["POST"])
 def login_post(req):
@@ -36,9 +36,11 @@ def logout(req):
 
 # @csrf_exempt
 def render_two_fa(req):
+    print("inside rendering two fa")
     users = Clients.objects.all()
     context = {"users": users}
     if req.method == 'POST':
+        print("inside post method")
         data = json.loads(req.body.decode('utf-8'))
         print(data['code'])
         totp = pyotp.TOTP(settings.SECRET_FA_KEY)
@@ -60,14 +62,15 @@ def change_two_fa(req):
         print(data['status'])
         client = Clients.get_client_by_request(req)
         if client is not None :
-            print("changinf 2fa state")
-            client.twoFa.enable = data['status']
-        else :
+            print("changing 2fa state")
+            client.twoFa.update("enable", data['status'])
+            # client.twoFa.enable = data['status']
             response = JsonResponse({
                 "success" : True,
                 "message" : "State 2fa change"
             }, status=200)
-        response = JsonResponse({
+        else :
+            response = JsonResponse({
             "success" : False,
             "message" : "No client available"
         }, status=403)
