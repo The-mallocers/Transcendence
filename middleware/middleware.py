@@ -94,7 +94,7 @@ class JWTMiddleware:
         response = self.get_response(request)
 
         if not self._should_check_path(path):  # If the not need to be protected
-            return self.get_response(request)
+            return response
 
         try:
             token_key: str = self._extract_access_token(request)
