@@ -26,10 +26,10 @@ def post(req: HttpRequest):
         }, status=401)
 
     if client.password.check_pwd(password):
-            if client.twoFa.enable:
-                redirUrl = "/auth/2fa"
-            else :
-                redirUrl = "/"
+        if client.twoFa.enable:
+            redirUrl = "/auth/2fa"
+        else :
+            redirUrl = "/"
         response = JsonResponse({
             "success": True,
             "message": "You've been corectlly login",
@@ -39,7 +39,7 @@ def post(req: HttpRequest):
             response=response)
         TokenGenerator(client, TokenType.REFRESH).set_cookie(
             response=response)
-            print(response)
+        print(response)
         return response
     else:
         return JsonResponse({

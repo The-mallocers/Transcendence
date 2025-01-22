@@ -11,9 +11,9 @@ django-environ = "*"
 python-dotenv = "*"
 pillow = "*"
 pyotp = "*"
-channels = "*"
 daphne = "*"
 whitenoise = "*"
+channels = "*"
 
 [dev-packages]
 django-extensions = "*"
