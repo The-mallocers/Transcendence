@@ -38,8 +38,10 @@ CSRF_METHODS = [
     'PATCH',
     'DELETE'
 ]
+#HELLO TFREYDIE GET RID OF THIS BEFORE PUSHING
+#I cant see the pong game otherwise since loggin in is hard
 PROTECTED_PATHS = [
-    '/*'
+    #'/*'
 ]
 EXCLUDED_PATHS = [
     '/api/auth/login',

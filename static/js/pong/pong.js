@@ -14,16 +14,16 @@ document.addEventListener('keypress', function (event) {
 
     switch (event.key.toLowerCase()) {
         case 'a':
-            data = {paddle: 'top', direction: 'left'};
+            data = {paddle: 'left', direction: 'up'};
             break;
         case 'd':
-            data = {paddle: 'top', direction: 'right'};
+            data = {paddle: 'left', direction: 'down'};
             break;
         case 'j':
-            data = {paddle: 'bottom', direction: 'left'};
+            data = {paddle: 'right', direction: 'down'};
             break;
         case 'l':
-            data = {paddle: 'bottom', direction: 'right'};
+            data = {paddle: 'right', direction: 'up'};
             break;
     }
 
@@ -52,7 +52,7 @@ function drawGame() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     // Draw paddles
-    ctx.fillStyle = 'white';
+    ctx.fillStyle = 'black';
     // Top paddle
     ctx.fillRect(gameState.top_paddle_x, 0, 100, 10);
     // Bottom paddle
