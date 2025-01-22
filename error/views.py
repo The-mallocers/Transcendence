@@ -1,6 +1,8 @@
-from error.view.error_404 import error_404_view
+from django.views.decorators.http import require_http_methods
+
+from error.view.error_404 import get
 
 
-# Create your views here.
-def error_404(request, exception):
-    return error_404_view(request)
+@require_http_methods(["GET"])
+def error404_get(request, exception):
+    return get(request)

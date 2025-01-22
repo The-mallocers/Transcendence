@@ -13,7 +13,8 @@ class Password(models.Model):
     #Secondary key
     password = models.CharField(max_length=512, null=False, editable=True)
 
-    #Functions
+    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ SURCHARGE ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
+
     def save(self, *args, **kwargs):
         salt = bcrypt.gensalt(prefix=b'2b')
         if self.password == '' or self.password is None:
@@ -23,13 +24,10 @@ class Password(models.Model):
                                           salt).decode('utf-8')
         super().save(*args, **kwargs)
 
-    def update(self, data, value) -> None:
-        match data:
-            case "password":
-                self.password = value
-            case _:
-                return None
-        self.save()
+    def delete(self, *args, **kargs):
+        super().delete(*args, **kargs)
+
+    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ FUNCTIONS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
 
     def check_pwd(self, password: str) -> bool:
         return bcrypt.checkpw(password.encode('utf-8'),

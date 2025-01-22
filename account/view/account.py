@@ -1,5 +1,4 @@
-import json
-
+from django.core.exceptions import PermissionDenied
 from django.http import JsonResponse, HttpResponseRedirect, HttpRequest
 from django.shortcuts import render
 
@@ -13,8 +12,8 @@ def get(req):
         context = {"client": client}
         return render(req, "account/account.html", context)
     else:
-        return HttpResponseRedirect('/auth/login')
-
+        return HttpResponseRedirect(
+            '/auth/login')  # todo il faut afficher une erreur sur le html au lieu de rediriger vers login
 
 def post(request: HttpRequest):
     client = Clients.get_client_by_request(request)
@@ -45,7 +44,7 @@ def post(request: HttpRequest):
                 'success': True,
                 'message': 'Profile updated successfully'
             }, status=200)
-        except ValueError as e:
+        except PermissionDenied as e:
             return JsonResponse({
                 'success': False,
                 'message': str(e)
@@ -55,10 +54,6 @@ def post(request: HttpRequest):
             'success': False,
             'message': 'Client not found.'
         })
-
-def put(request):
-    return JsonResponse({})
-
 
 def delete(request):
     client = Clients.get_client_by_request(request)
@@ -73,26 +68,3 @@ def delete(request):
             'success': False,
             'message': 'Account not found'
         }, status=404)
-
-def patch(request):
-    client = Clients.get_client(request)
-    try:
-        body = json.loads(request.body)
-        data = body.get('data')
-        value = body.get('value')
-        if client.update(data, value) is None:
-            return JsonResponse({
-                "success": False,
-                "message": "Client update failed"
-            }, status=401)
-        else:
-            return JsonResponse({
-                "success": True,
-                "message": "Client update"
-            }, status=200)
-
-    except json.JSONDecodeError:
-        return JsonResponse({
-            "success": False,
-            "message": "Invalid json format"
-        }, status= 401)

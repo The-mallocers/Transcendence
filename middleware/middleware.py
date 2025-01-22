@@ -19,7 +19,6 @@ class JWTMiddleware:
         self.role_protected_paths = getattr(settings, 'ROLE_PROTECTED_PATHS')
 
     def _should_check_path(self, path: str) -> bool:
-        """Check if the path need to be protected"""
         for excluded in self.excluded_paths:
             if self._path_matches(excluded, path):
                 return False
@@ -30,7 +29,6 @@ class JWTMiddleware:
         return False
 
     def _get_required_roles(self, path: str):
-        """Check if the path need to have permission"""
         for pattern, roles in self.role_protected_paths.items():
             if self._path_matches(pattern, path):
                 return roles
@@ -41,22 +39,18 @@ class JWTMiddleware:
         return bool(re.match(f'^{regex_pattern}$', path))
 
     def _extract_access_token(self, request: HttpRequest) -> str:
-        """Return token key from cookies"""
         token_key: str = request.COOKIES.get('access_token')
         if token_key is None:
             raise jwt.InvalidKeyError(f'Token missing')
         return token_key
 
-    # Return token key
     def _extract_refresh_token(self, request: HttpRequest) -> str:
-        """Return token key from cookies"""
         token_key: str = request.COOKIES.get('refresh_token')
         if token_key is None:
             raise jwt.InvalidKeyError(f'Token missing')
         return token_key
 
     def _validate_token(self, token_key: str, token_type: str) -> Token:
-        """Take token key in argument and check the token"""
         try:
             payload = jwt.decode(token_key, self.secret_key,
                                  algorithms=[self.algorithm])
@@ -89,11 +83,10 @@ class JWTMiddleware:
             raise jwt.InvalidTokenError(f'{str(e)}')
 
     def __call__(self, request: HttpRequest):
-        # Function execute when middleware call
         path = request.path_info
         response = self.get_response(request)
 
-        if not self._should_check_path(path):  # If the not need to be protected
+        if not self._should_check_path(path):
             return response
 
         try:

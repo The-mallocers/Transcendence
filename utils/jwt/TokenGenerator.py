@@ -35,9 +35,10 @@ class Token:
 
         self.TYPE: str = token_type
 
-        self.ROLES: list[str] = [
-            'client'
-        ]
+        self.ROLES: list[str] = ['client']
+        if self.client.rights.is_admin:
+            self.ROLES.append('admin')
+
         self.PERMISSIONS: list[str] = None
 
         self.DEVICE_ID: str = None
@@ -72,7 +73,7 @@ class Token:
     @classmethod
     def get_token(cls, data: dict):
         exp = data['exp']
-        client = Clients(id=data['sub'])
+        client = Clients.get_client_by_id(data['sub'])
         token = cls(
             client=client,
             exp=exp,  # calcul de la durée d'expiration en minutes

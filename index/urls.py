@@ -1,10 +1,10 @@
 from django.urls import path
 
-from error.views import error_404
+from error.views import error404_get
 from . import views
 
 urlpatterns = [
-    path('', views.index, name='index'),
+    path('', views.index_get, name='index'),
 ]
 
-handler404 = error_404
+handler404 = error404_get
