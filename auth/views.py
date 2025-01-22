@@ -16,11 +16,11 @@ import json
 @csrf_exempt
 @require_http_methods(["POST"])
 def register_post(req):
-    return post(req)
+    return post_register(req)
 
 @require_http_methods(["GET"])
 def register_get(req):
-    return get(req)
+    return get_register(req)
 
 @require_http_methods(["POST"])
 def login_post(req):
