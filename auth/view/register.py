@@ -1,56 +1,36 @@
-import json
-
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpRequest
 from django.shortcuts import render
 
-from account.models import Profile
 from shared.models import Clients
 from utils.jwt.TokenGenerator import TokenGenerator, TokenType
 
 
-def post(req):
-    try:
-        data = json.loads(req.body)
-        first_name = data.get('first_name')
-        last_name = data.get('last_name')
-        username = data.get('username')
-        email = data.get('email')
-        password = data.get('password')
-        password_check = data.get('password_check')
+def post(req: HttpRequest):
+    client = Clients.get_client_by_email(req.POST.get('email'))
+    if client is None:
+        username = req.POST.get('username')
+        email = req.POST.get('email')
+        password = req.POST.get('password')
+        password_check = req.POST.get('password_check')
 
-        if all(v is None for v in
-               [first_name, last_name, username, email, password,
-                password_check]):
-            return JsonResponse({
-                "success": False,
-                "message": "Incorrect data"
-            }, status=400)
         if password != password_check:
             return JsonResponse({
                 "success": False,
                 "message": "Password missmatch"
             }, status=400)
-        if Profile.get_profile(email) is not None:
-            return JsonResponse({
-                "success": False,
-                "message": "Email already existe"
-            }, status=400)
 
-        client = Clients.create_client(username, first_name, last_name,
-                                          email, password)
-
+        client = Clients.create_client(username, email, password)
         response = JsonResponse({
             "success": True,
-            "message": "Login successful"
+            "message": "Register successful"
         }, status=200)
         TokenGenerator(client, TokenType.ACCESS).set_cookie(response=response)
         TokenGenerator(client, TokenType.REFRESH).set_cookie(response=response)
-
         return response
-    except json.JSONDecodeError:
+    else:
         return JsonResponse({
             "success": False,
-            "message": "Invalid JSON format"
+            "message": "Account already exist"
         }, status=400)
 
 

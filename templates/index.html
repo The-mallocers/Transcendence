@@ -4,39 +4,41 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
-    {% load static %}
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <title>Home</title>
+    <link rel="stylesheet" href="{% static 'css/index.css' %}">
 </head>
 <body>
-    <ul>
-        {% for user in users %}
-            <li>{{ user }}</li>
-        {% endfor %}
-    </ul>
-    <h1>Test</h1>
-    <img src="{% static 'img/img.png' %}" alt="">
+<header>
+    <div style="display: flex; align-items: center; justify-content: center; gap: 15px;">
+        <img src="{{ client.profile.profile_picture.url }}"
+             alt="Profile Picture" class="profile-img">
+        <h1>Welcome {{ client.profile.username }}</h1>
+    </div>
+</header>
 
-    <!-- Boutons ajoutés -->
-    <div>
-        <!-- Bouton pour aller à la page de connexion -->
-        <button onclick="window.location.href='{% url 'login' %}'">Login</button>
-
-        <!-- Bouton pour aller à la page d'inscription -->
-        <button onclick="window.location.href='{% url 'register' %}'">Register</button>
-
-        <!-- Bouton pour aller à la page de l'account -->
-        <button onclick="window.location.href='{% url 'account' %}'">Account</button>
-
-        <!-- Bouton pour aller à la page de l'edit -->
+<div class="container">
+    <div class="buttons">
+        <button onclick="window.location.href='{% url 'login' %}'">Login
+        </button>
+        <button onclick="window.location.href='{% url 'register' %}'">Register
+        </button>
+        <button onclick="window.location.href='{% url 'account' %}'">Account
+        </button>
         <button onclick="window.location.href='{% url 'edit' %}'">Edit</button>
+        <button onclick="window.location.href='{% url 'admin' %}'">Admin
+        </button>
+        <button id="logout-btn">Logout</button>
+    </div>
 
-        <!-- Bouton pour aller à la page de l'admin -->
-        <button onclick="window.location.href='{% url 'admin' %}'">Admin</button>
-
-        <!-- Bouton pour se déconnecter -->
-        <form id="logout-form" style="display:inline;">
-            <button>Logout</button>
-        </form>
+    <div class="user-list">
+        <h2>List of Users</h2>
+        <ul>
+            {% for user in clients %}
+                <li>{{ user.profile }}</li>
+            {% endfor %}
+        </ul>
+    </div>
     </div>
 </body>
 <script src="{% static 'js/auth/logout.js' %}"></script>
