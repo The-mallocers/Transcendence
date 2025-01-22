@@ -1,5 +1,8 @@
-from index.view.index_view import index_view
+from django.views.decorators.http import require_http_methods
+
+from index.view.index_view import get
 
 
-def index(req):
-    return index_view(req)
+@require_http_methods(["GET"])
+def index_get(req):
+    return get(req)

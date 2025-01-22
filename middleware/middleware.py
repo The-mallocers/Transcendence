@@ -1,6 +1,4 @@
 import re
-import secrets
-from datetime import datetime, timezone
 
 import jwt
 from django.conf import settings
@@ -19,10 +17,8 @@ class JWTMiddleware:
         self.protected_paths = getattr(settings, 'PROTECTED_PATHS')
         self.excluded_paths = getattr(settings, 'EXCLUDED_PATHS')
         self.role_protected_paths = getattr(settings, 'ROLE_PROTECTED_PATHS')
-        self.csrf_methods = getattr(settings, 'CSRF_METHODS')
 
     def _should_check_path(self, path: str) -> bool:
-        """Check if the path need to be protected"""
         for excluded in self.excluded_paths:
             if self._path_matches(excluded, path):
                 return False
@@ -33,7 +29,6 @@ class JWTMiddleware:
         return False
 
     def _get_required_roles(self, path: str):
-        """Check if the path need to have permission"""
         for pattern, roles in self.role_protected_paths.items():
             if self._path_matches(pattern, path):
                 return roles
@@ -44,48 +39,18 @@ class JWTMiddleware:
         return bool(re.match(f'^{regex_pattern}$', path))
 
     def _extract_access_token(self, request: HttpRequest) -> str:
-        """Return token key from cookies"""
         token_key: str = request.COOKIES.get('access_token')
         if token_key is None:
             raise jwt.InvalidKeyError(f'Token missing')
         return token_key
 
-    # Return token key
     def _extract_refresh_token(self, request: HttpRequest) -> str:
-        """Return token key from cookies"""
         token_key: str = request.COOKIES.get('refresh_token')
         if token_key is None:
             raise jwt.InvalidKeyError(f'Token missing')
         return token_key
 
-    def _generate_csrf_token(self) -> str:
-        return secrets.token_urlsafe(32)
-
-    def _validate_csrf(self, request: HttpRequest) -> bool:
-        if request.method not in self.csrf_methods:
-            return True
-
-        csrf_cookie = request.COOKIES.get('csrf_token')
-        csrf_header = request.headers.get('X-CSRF-Token')
-
-        if not csrf_cookie or not csrf_header:
-            return False
-
-        return secrets.compare_digest(csrf_cookie, csrf_header)
-
-    def _set_csrf_token(self, response: HttpResponse):
-        csrf_token = self._generate_csrf_token()
-        response.set_cookie(
-            'csrf_token',
-            csrf_token,
-            httponly=False,
-            secure=True,
-            samesite='Lax'
-        )
-        response['X-CSRF-Token'] = csrf_token
-
     def _validate_token(self, token_key: str, token_type: str) -> Token:
-        """Take token key in argument and check the token"""
         try:
             payload = jwt.decode(token_key, self.secret_key,
                                  algorithms=[self.algorithm])
@@ -100,7 +65,6 @@ class JWTMiddleware:
             raise jwt.InvalidTokenError(f'Invalid {token_type} token: {str(e)}')
 
     def _refresh_token(self, request: HttpRequest, response: HttpResponse):
-        now = datetime.now(tz=timezone.utc)
         try:
             self._validate_token(self._extract_access_token(request),
                                  TokenType.ACCESS)
@@ -119,17 +83,11 @@ class JWTMiddleware:
             raise jwt.InvalidTokenError(f'{str(e)}')
 
     def __call__(self, request: HttpRequest):
-        # Function execute when middleware call
         path = request.path_info
         response = self.get_response(request)
 
-        if not self._should_check_path(path):  # If the not need to be protected
-            return self.get_response(request)
-
-        if not self._validate_csrf(request):
-            return JsonResponse({
-                'error': 'CSRF validation failed'
-            }, status=403)
+        if not self._should_check_path(path):
+            return response
 
         try:
             token_key: str = self._extract_access_token(request)
@@ -145,18 +103,16 @@ class JWTMiddleware:
                         {'error': 'Not enough permissions'},
                         status=403
                     )
-            self._set_csrf_token(response)
             return response
-        except jwt.ExpiredSignatureError as e:
+        except jwt.ExpiredSignatureError:
             try:
                 self._refresh_token(request, response)
-                self._set_csrf_token(response)
                 return response
-            except Exception as e:
+            except Exception:
                 return HttpResponseRedirect('/auth/login')
-        except jwt.InvalidTokenError as e:
+        except jwt.InvalidTokenError:
             return HttpResponseRedirect('/auth/login')
-        except jwt.InvalidKeyError as e:
+        except jwt.InvalidKeyError:
             return HttpResponseRedirect('/auth/login')
         except Exception as e:
             return JsonResponse(

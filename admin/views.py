@@ -1,4 +1,8 @@
-from admin.view.admin import admin_view
+from django.views.decorators.http import require_http_methods
 
-def admin(request):
-    return admin_view(request)
+from admin.view.admin import get
+
+
+@require_http_methods(["GET"])
+def admin_get(request):
+    return get(request)

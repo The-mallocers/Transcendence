@@ -4,7 +4,7 @@ from datetime import datetime, timezone, timedelta
 
 import jwt
 from django.conf import settings
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpRequest
 
 from Transcendence import settings
 from shared.models import Clients
@@ -35,9 +35,10 @@ class Token:
 
         self.TYPE: str = token_type
 
-        self.ROLES: list[str] = [
-            'client'
-        ]
+        self.ROLES: list[str] = ['client']
+        if self.client.rights.is_admin:
+            self.ROLES.append('admin')
+
         self.PERMISSIONS: list[str] = None
 
         self.DEVICE_ID: str = None
@@ -72,7 +73,7 @@ class Token:
     @classmethod
     def get_token(cls, data: dict):
         exp = data['exp']
-        client = Clients(id=data['sub'])
+        client = Clients.get_client_by_id(data['sub'])
         token = cls(
             client=client,
             exp=exp,  # calcul de la durée d'expiration en minutes
@@ -90,10 +91,12 @@ class Token:
         token.TOKEN_VERSION = data.get('token_version', 0)
         return token
 
+
 class TokenGenerator:
+    secret_key = getattr(settings, 'JWT_SECRET_KEY')
+    algorithm = getattr(settings, 'JWT_ALGORITH')
+
     def __init__(self, client: Clients, token_type: str):
-        self.secret_key = getattr(settings, 'JWT_SECRET_KEY')
-        self.algorithm = getattr(settings, 'JWT_ALGORITH')
         self.issuer = "https://api.transcendence.fr"
         self.token_key: str = ''
         if token_type is TokenType.ACCESS:
@@ -120,3 +123,17 @@ class TokenGenerator:
             samesite='Lax'
         )
         return response
+
+    @classmethod
+    def extract_token(cls, request: HttpRequest,
+                      token_type: TokenType) -> Token:
+        token_key = request.COOKIES.get(str(token_type) + '_token')
+        try:
+            payload = jwt.decode(token_key, cls.secret_key,
+                                 algorithms=[cls.algorithm])
+            token: Token = Token.get_token(payload)
+            return token
+        except jwt.ExpiredSignatureError as e:
+            return None
+        except jwt.InvalidTokenError as e:
+            return None
