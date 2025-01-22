@@ -2,6 +2,7 @@ import uuid
 
 from django.core.exceptions import ValidationError
 from django.db import models, IntegrityError
+from django.http import HttpRequest
 
 from account.models import Profile
 from admin.models import Rights
@@ -26,7 +27,15 @@ class Clients(models.Model):
             return None
         client = Clients.objects.get(id=id)
         return client
-
+    
+    @staticmethod
+    def get_client_by_request(request: HttpRequest):
+        from utils.jwt.TokenGenerator import TokenGenerator, TokenType
+        token = TokenGenerator.extract_token(request, TokenType.ACCESS)
+        if token is not None:
+            return Clients.get_client_by_id(token.SUB)
+        return None
+    
     @staticmethod
     def get_client_by_email(email: Profile.email):
         profile = Profile.get_profile(email)

@@ -7,6 +7,7 @@
     <title>Title</title>
     {% load static %}
 </head>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
 <body>
     <ul>
         {% for user in users %}
@@ -14,7 +15,7 @@
         {% endfor %}
     </ul>
     <h1>Test</h1>
-    <img src="{% static 'img/img.png' %}" alt="">
+    <!-- <img src="{% static 'img/img.png' %}" alt=""> -->
 
     <!-- Boutons ajoutés -->
     <div>
@@ -38,6 +39,13 @@
             <button>Logout</button>
         </form>
     </div>
+<!-- Rounded switch -->
+    <label class="switch">
+        <input type="checkbox" id="toggleSwitch">
+        <span class="slider round"></span>
+    </label>
+    <div>2FA</div>
 </body>
 <script src="{% static 'js/auth/logout.js' %}"></script>
+<script src="{% static 'js/auth/twofa.js' %}"></script>
 </html>

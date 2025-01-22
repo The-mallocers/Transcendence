@@ -99,7 +99,7 @@ class TokenGenerator:
             self.exp = settings.JWT_EXP_ACCESS_TOKEN
         if token_type is TokenType.REFRESH:
             self.exp = settings.JWT_EXP_REFRESH_TOKEN
-        self.token: Token = Token(client, self.exp, token_type)
+        self.token: Token = Token(client, int(self.exp), token_type)
 
     def set_cookie(self, response: HttpResponse):
         headers = {

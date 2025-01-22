@@ -2,10 +2,13 @@ import json
 
 from django.http import JsonResponse
 from django.shortcuts import render
+from django.conf import settings
 
 from shared.models import Clients
 from utils.jwt.TokenGenerator import TokenGenerator, TokenType
 
+import pyotp
+import qrcode
 
 def post(req):
     try:
@@ -27,14 +30,20 @@ def post(req):
             }, status=401)
 
         if client.password.check_pwd(password):
+            if client.twoFa.enable:
+                redirUrl = "/auth/2fa"
+            else :
+                redirUrl = "/"
             response = JsonResponse({
                 "success": True,
-                "message": "Login successful"
+                "message": "Login successful",
+                "redirect_url": redirUrl
             }, status=200)
             TokenGenerator(client, TokenType.ACCESS).set_cookie(
                 response=response)
             TokenGenerator(client, TokenType.REFRESH).set_cookie(
                 response=response)
+            print(response)
             return response
         else:
             return JsonResponse({
@@ -53,3 +62,10 @@ def get(req):
     context = {"users": users}
 
     return render(req, "auth/login.html", context)
+
+def two_fa(user):
+    # check if twofa is activated
+    if(user.TwoFa.enable):
+        uri = pyotp.totp.TOTP(settings.SECRET_FA_KEY).provisioning_uri(name=user.first_name, issuer_name="Transcendance")
+        qrcode.make(uri).save("./static/img/qrcode.png")
+        return True

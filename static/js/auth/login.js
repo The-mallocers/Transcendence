@@ -20,11 +20,13 @@ document.addEventListener("DOMContentLoaded", function () {
                     password: password,
                 }),
             });
-
+            
             const result = await response.json();
 
             if (response.status === 200 && result.success){
-                window.location.href = '/';
+                console.log(result.redirect_url);
+                // window.location.href = result.redirect_url;
+                window.location.href = "/"
             }
             else{
                 alert(result.message || "Login failed.");
