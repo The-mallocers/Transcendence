@@ -51,23 +51,21 @@ class MyConsumer(AsyncWebsocketConsumer):
             pass
 
     def handleMove(self, data):
-        paddle = data.get('paddle')
+        paddle_data = data.get('paddle')
         direction = data.get('direction')
-        paddle_y = None
-        new_value = None
+        paddle = None
 
-        if paddle == 'left':
-            paddle_y = self.game_state.l_paddle.y
-        elif paddle == 'right':
-            paddle_y = self.game_state.r_paddle.y
+        if paddle_data == 'left':
+            paddle = self.game_state.l_paddle
+        elif paddle_data == 'right':
+            paddle = self.game_state.r_paddle
         
-        if paddle_y:
+        if paddle:
             if direction == 'top':
-                new_value = max(0, self.game_state.l_paddle.y - speed)
+                paddle.y = max(0, paddle.y - speed)
             elif direction == 'down': 
-                limit = self.game_state
-                new_value = max ()
-
+                limit = self.game_state.CANVAS_HEIGHT - paddle.heigth
+                paddle.y = min(limit, paddle.y + speed)
 
 class GameState:
     CANVAS_WIDTH: int = 1000
