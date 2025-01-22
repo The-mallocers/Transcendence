@@ -10,12 +10,15 @@ pyjwt = "*"
 django-environ = "*"
 python-dotenv = "*"
 pillow = "*"
-clients = "*"
 pyotp = "*"
+channels = "*"
+daphne = "*"
+whitenoise = "*"
 
 [dev-packages]
 django-extensions = "*"
 werkzeug = "*"
+pyasyncore = "*"
 
 [requires]
 python_version = "3.10"

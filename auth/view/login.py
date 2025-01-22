@@ -1,6 +1,4 @@
-import json
-
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpRequest
 from django.shortcuts import render
 from django.conf import settings
 
@@ -10,51 +8,44 @@ from utils.jwt.TokenGenerator import TokenGenerator, TokenType
 import pyotp
 import qrcode
 
-def post(req):
-    try:
-        data = json.loads(req.body)
-        email = data.get("email")
-        password = data.get("password")
-        client = Clients.get_client_by_email(email)
+def post(req: HttpRequest):
+    email = req.POST.get('email')
+    password = req.POST.get("password")
+    client = Clients.get_client_by_email(email)
 
-        if all(v is None for v in [email, password]):
-            return JsonResponse({
-                "success": False,
-                "message": "Invalid post request"
-            }, status=400)
+    if all(v is None for v in [email, password]):
+        return JsonResponse({
+            "success": False,
+            "message": "Invalid post request"
+        }, status=400)
 
-        if client is None:
-            return JsonResponse({
-                "success": False,
-                "message": "Wrong credentials"
-            }, status=401)
+    if client is None:
+        return JsonResponse({
+            "success": False,
+            "message": "Wrong credentials"
+        }, status=401)
 
-        if client.password.check_pwd(password):
+    if client.password.check_pwd(password):
             if client.twoFa.enable:
                 redirUrl = "/auth/2fa"
             else :
                 redirUrl = "/"
-            response = JsonResponse({
-                "success": True,
-                "message": "Login successful",
+        response = JsonResponse({
+            "success": True,
+            "message": "You've been corectlly login",
                 "redirect_url": redirUrl
-            }, status=200)
-            TokenGenerator(client, TokenType.ACCESS).set_cookie(
-                response=response)
-            TokenGenerator(client, TokenType.REFRESH).set_cookie(
-                response=response)
+        }, status=200)
+        TokenGenerator(client, TokenType.ACCESS).set_cookie(
+            response=response)
+        TokenGenerator(client, TokenType.REFRESH).set_cookie(
+            response=response)
             print(response)
-            return response
-        else:
-            return JsonResponse({
-                "success": False,
-                "message": "Wrong credentials"
-            }, status=401)
-    except json.JSONDecodeError:
+        return response
+    else:
         return JsonResponse({
             "success": False,
-            "message": "Invalid JSON format"
-        }, status=400)
+            "message": "Wrong credentials"
+        }, status=401)
 
 def get(req):
     users = Clients.objects.all()

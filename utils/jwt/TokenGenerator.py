@@ -4,8 +4,9 @@ from datetime import datetime, timezone, timedelta
 
 import jwt
 from django.conf import settings
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpRequest
 
+from Transcendence import settings
 from shared.models import Clients
 
 
@@ -89,16 +90,18 @@ class Token:
         token.TOKEN_VERSION = data.get('token_version', 0)
         return token
 
+
 class TokenGenerator:
+    secret_key = getattr(settings, 'JWT_SECRET_KEY')
+    algorithm = getattr(settings, 'JWT_ALGORITH')
+
     def __init__(self, client: Clients, token_type: str):
-        self.secret_key = getattr(settings, 'JWT_SECRET_KEY')
-        self.algorithm = getattr(settings, 'JWT_ALGORITH')
         self.issuer = "https://api.transcendence.fr"
         self.token_key: str = ''
         if token_type is TokenType.ACCESS:
-            self.exp = settings.JWT_EXP_ACCESS_TOKEN
+            self.exp = getattr(settings, 'JWT_EXP_ACCESS_TOKEN')
         if token_type is TokenType.REFRESH:
-            self.exp = settings.JWT_EXP_REFRESH_TOKEN
+            self.exp = getattr(settings, 'JWT_EXP_REFRESH_TOKEN')
         self.token: Token = Token(client, int(self.exp), token_type)
 
     def set_cookie(self, response: HttpResponse):
@@ -119,3 +122,17 @@ class TokenGenerator:
             samesite='Lax'
         )
         return response
+
+    @classmethod
+    def extract_token(cls, request: HttpRequest,
+                      token_type: TokenType) -> Token:
+        token_key = request.COOKIES.get(str(token_type) + '_token')
+        try:
+            payload = jwt.decode(token_key, cls.secret_key,
+                                 algorithms=[cls.algorithm])
+            token: Token = Token.get_token(payload)
+            return token
+        except jwt.ExpiredSignatureError as e:
+            return None
+        except jwt.InvalidTokenError as e:
+            return None

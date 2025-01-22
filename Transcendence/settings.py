@@ -25,19 +25,13 @@ ENV.read_env(env_file=os.path.join(BASE_DIR, '.env'))
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = ENV('DJANGO_SECRET_KEY')
+SECRET_KEY = ENV('DJANGO_SECRET_KEY', default='1234')
 
 # JWT Settings
-JWT_SECRET_KEY = ENV('JWT_SECRET_KEY')
-JWT_EXP_ACCESS_TOKEN = ENV('JWT_EXP_ACCESS_TOKEN')  # 30 minutes
+JWT_SECRET_KEY = ENV('JWT_SECRET_KEY', default='1234')
+JWT_EXP_ACCESS_TOKEN = ENV('JWT_EXP_ACCESS_TOKEN', default=10)  # 30 minutes
 JWT_EXP_REFRESH_TOKEN = ENV('JWT_EXP_REFRESH_TOKEN', default=30)  # 30 days
 JWT_ALGORITH = 'HS256'
-CSRF_METHODS = [
-    'POST',
-    'PUT',
-    'PATCH',
-    'DELETE'
-]
 PROTECTED_PATHS = [
     '/*'
 ]
@@ -60,8 +54,11 @@ ALLOWED_HOSTS = [
 ]
 
 # Application definition
+# had to add django.contrib.auth, not sure why
 
 INSTALLED_APPS = [
+    'channels',
+    'django.contrib.auth',
     'pong.apps.PongConfig',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -80,6 +77,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'middleware.middleware.JWTMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -107,7 +105,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'Transcendence.wsgi.application'
-
+ASGI_APPLICATION = 'Transcendence.asgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
@@ -142,9 +140,15 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_DIRS = [
-    BASE_DIR / "static",
+    os.path.join(BASE_DIR, 'static'),
 ]
+
+# STATICFILES_DIRS = [
+#     BASE_DIR / "static",
+# ]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
