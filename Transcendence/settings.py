@@ -32,8 +32,9 @@ JWT_SECRET_KEY = ENV('JWT_SECRET_KEY', default='1234')
 JWT_EXP_ACCESS_TOKEN = ENV('JWT_EXP_ACCESS_TOKEN', default=10)  # 30 minutes
 JWT_EXP_REFRESH_TOKEN = ENV('JWT_EXP_REFRESH_TOKEN', default=30)  # 30 days
 JWT_ALGORITH = 'HS256'
+#petit trick a enlever quand on va merge
 PROTECTED_PATHS = [
-    '/*'
+    #'/*'
 ]
 EXCLUDED_PATHS = [
     '/api/auth/login',
@@ -57,6 +58,7 @@ ALLOWED_HOSTS = [
 # had to add django.contrib.auth, not sure why
 
 INSTALLED_APPS = [
+    'index_spa',
     'channels',
     'django.contrib.auth',
     'pong.apps.PongConfig',

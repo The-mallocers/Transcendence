@@ -11,7 +11,8 @@ urlpatterns = [
     path('auth/', include("auth.urls")),
     path('admin/', include("admin.urls")),
     path('pong/', include('pong.urls')),
-    path('edit/', include("componentBuilder.urls"))
+    path('edit/', include("componentBuilder.urls")),
+    path('spa/', include('index_spa.urls')),
 ]
 
 handler404 = error_404
