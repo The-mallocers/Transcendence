@@ -1,6 +1,5 @@
 from django.db import models
 
-
 class Profile(models.Model):
     #Primary key
     email = models.EmailField(primary_key=True, null=False, editable=True, default='default@default.fr')
@@ -14,45 +13,32 @@ class Profile(models.Model):
                                         default="profile/default.png",
                                         editable=True, null=True)
 
+    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ SURCHARGE ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
+
     def __str__(self):
         return f'Email: {self.email}\nUsername: {self.username}'
 
     def save(self, *args, **kwargs):
-        from shared.models import Clients
-
         if self.email is None or self.username is None:
             raise ValueError("Email or username can't be empty")
 
+        from shared.models import Clients
         client = Clients.get_client_by_email(self.email)
 
-        if client is None:
+        if client is None:  # When i want to create profile
             return super().save(*args, **kwargs)
-        # if not client.rights.has_permission('edit_profile'):
-        #     raise PermissionDenied('You do not have permission to edit profile')
 
-        super().save(*args, **kwargs)
+        super().save(*args, **kwargs)  #When I want to edit profile
 
-    #Functions
+    def delete(self, *args, **kargs):
+        super().delete(*args, **kargs)
+
+    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ FUNCTIONS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
+
     @staticmethod
-    def get_profile(email):
+    def get_profile_by_email(email):
         try:
             return Profile.objects.filter(email=email).first()
         except Profile.DoesNotExist:
             return None
-
-    def update(self, data, value):
-        match data:
-            case "username":
-                self.username = value
-            case "first_name":
-                self.first_name = value
-            case "last_name":
-                self.last_name = value
-            case "email":
-                self.email = value
-            case "profile_picture":
-                self.profile_picture = value
-            case _:
-                return None
-        self.save()
 

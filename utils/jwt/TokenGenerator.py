@@ -17,7 +17,8 @@ class TokenType:
 
 
 class Token:
-    def __init__(self, client: Clients, exp: int, token_type: str):
+    def __init__(self, client: Clients, token_type: str):
+        self.EXP = None
         self.client: Clients = client
         self.issuer = "https://api.transcendence.fr"
         now = datetime.now(tz=timezone.utc)
@@ -27,24 +28,27 @@ class Token:
         self.JTI: uuid.UUID = uuid.uuid4()
 
         self.IAT = now
-        self.EXP = 0
-        if token_type is TokenType.ACCESS:
-            self.EXP = now + timedelta(minutes=exp)
-        elif token_type is TokenType.REFRESH:
-            self.EXP = now + timedelta(days=exp)
+        if token_type == str(TokenType.ACCESS):
+            self.EXP = now + timedelta(
+                seconds=getattr(settings, 'JWT_EXP_ACCESS_TOKEN'))
+        elif token_type == str(TokenType.REFRESH):
+            self.EXP = now + timedelta(
+                seconds=getattr(settings, 'JWT_EXP_REFRESH_TOKEN'))
 
         self.TYPE: str = token_type
 
-        self.ROLES: list[str] = [
-            'client'
-        ]
-        self.PERMISSIONS: list[str] = None
+        self.ROLES: list[str] = ['client']
+        if self.client.rights.is_admin:
+            self.ROLES.append('admin')
 
         self.DEVICE_ID: str = None
         self.IP_ADDRESS: str = None
         self.USER_AGENT: str = None
         self.DEVICE_FINGERPRINT: str = None
         self.TOKEN_VERSION: int = 0
+
+    def __str__(self):
+        return f"{self.TYPE}_token expired in {self.EXP}, issue a {self.IAT}"
 
     def get_payload(self):
         token_dict = {
@@ -59,7 +63,6 @@ class Token:
 
         if self.TYPE == TokenType.ACCESS:
             token_dict['roles'] = self.ROLES
-            token_dict['permission'] = self.PERMISSIONS
             token_dict['ip_address'] = self.IP_ADDRESS
             token_dict['user_agent'] = self.USER_AGENT
 
@@ -71,18 +74,16 @@ class Token:
 
     @classmethod
     def get_token(cls, data: dict):
-        exp = data['exp']
-        client = Clients(id=data['sub'])
+        client = Clients.get_client_by_id(data['sub'])
         token = cls(
             client=client,
-            exp=exp,  # calcul de la durée d'expiration en minutes
             token_type=data['type']
         )
         # Remplissage des autres attributs
+        token.EXP = data.get('exp')
         token.JTI = uuid.UUID(data['jti'])
         token.IAT = data.get('iat')
         token.ROLES = data.get('roles', [])
-        token.PERMISSIONS = data.get('permission', [])
         token.DEVICE_ID = data.get('device_id')
         token.IP_ADDRESS = data.get('ip_address')
         token.USER_AGENT = data.get('user_agent')
@@ -98,13 +99,9 @@ class TokenGenerator:
     def __init__(self, client: Clients, token_type: str):
         self.issuer = "https://api.transcendence.fr"
         self.token_key: str = ''
-        if token_type is TokenType.ACCESS:
-            self.exp = getattr(settings, 'JWT_EXP_ACCESS_TOKEN')
-        if token_type is TokenType.REFRESH:
-            self.exp = getattr(settings, 'JWT_EXP_REFRESH_TOKEN')
-        self.token: Token = Token(client, int(self.exp), token_type)
+        self.token: Token = Token(client, token_type)
 
-    def set_cookie(self, response: HttpResponse):
+    def set_cookie(self, response: HttpResponse) -> HttpResponse:
         headers = {
             'typ': 'JWT',
             'alg': self.algorithm,
@@ -119,20 +116,21 @@ class TokenGenerator:
             f'{self.token_key}',
             httponly=True,
             secure=True,
-            samesite='Lax'
+            samesite='Lax',
         )
+
         return response
 
     @classmethod
     def extract_token(cls, request: HttpRequest,
-                      token_type: TokenType) -> Token:
+                      token_type: TokenType) -> Token | None:
         token_key = request.COOKIES.get(str(token_type) + '_token')
         try:
             payload = jwt.decode(token_key, cls.secret_key,
                                  algorithms=[cls.algorithm])
             token: Token = Token.get_token(payload)
             return token
-        except jwt.ExpiredSignatureError as e:
+        except jwt.ExpiredSignatureError:
             return None
-        except jwt.InvalidTokenError as e:
+        except jwt.InvalidTokenError:
             return None

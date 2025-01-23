@@ -19,16 +19,13 @@ class Clients(models.Model):
     twoFa = models.ForeignKey(TwoFA, on_delete=models.CASCADE)
     rights = models.ForeignKey('admin.Rights', on_delete=models.CASCADE,
                                null=True)
-    # log = models.ForeignKey(Log, on_delete=models.CASCADE)
+
+    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ SURCHARGE ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
 
     def __str__(self):
         return f"Client data => Email:{self.profile.email}, Username:{self.profile.username}"
 
     def save(self, *args, **kwargs):
-        self.password.save()
-        self.profile.save()
-        self.twoFa.save()
-        self.rights.save()
         super().save(*args, **kwargs)
 
     def delete(self, *args, **kargs):
@@ -38,7 +35,8 @@ class Clients(models.Model):
         self.rights.delete()
         super().delete(*args, **kargs)
 
-    #Funcions
+    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ FUNCIONS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
+
     @staticmethod
     def get_client_by_id(id: uuid.UUID):
         if id is None:
@@ -48,7 +46,7 @@ class Clients(models.Model):
 
     @staticmethod
     def get_client_by_email(email: Profile.email):
-        profile = Profile.get_profile(email)
+        profile = Profile.get_profile_by_email(email)
         if profile is None:
             return None
         client = Clients.objects.filter(profile=profile).first()
@@ -56,9 +54,8 @@ class Clients(models.Model):
 
     @staticmethod
     def get_client_by_request(request: HttpRequest):
-        from utils.jwt.TokenGenerator import TokenGenerator, TokenType
-        token = TokenGenerator.extract_token(request, TokenType.ACCESS)
-        if token is not None:
+        if hasattr(request, 'access_token'):
+            token = request.access_token
             return Clients.get_client_by_id(token.SUB)
         return None
 

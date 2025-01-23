@@ -2,7 +2,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import path, include
 
-from error.views import error_404
+from error.views import error404_get
 
 urlpatterns = [
     path('', include("index.urls")),
@@ -14,6 +14,6 @@ urlpatterns = [
     path('edit/', include("componentBuilder.urls"))
 ]
 
-handler404 = error_404
+handler404 = error404_get
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -1,11 +1,10 @@
 from django.urls import path
-from django.views.generic import RedirectView
 
 from . import views
-from .views import error_404
+from .views import error404_get
 
 urlpatterns = [
-    path('404', views.error_404, name='error_404'),
+    path('404', views.error404_get, name='error_404'),
 ]
 
-handler404 = error_404
+handler404 = error404_get
