@@ -34,10 +34,11 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     button_delete.addEventListener("click", function (event) {
+        const client_id = button_delete.getAttribute('client_id');
         event.preventDefault();  // Empêche le comportement par défaut du bouton
         event.stopPropagation(); // Empêche la propagation de l'événement
         if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
-            fetch('/api/account/', {
+            fetch(`/api/account/delete/${client_id}`, {
                 method: "DELETE",  // Méthode de la requête (POST)
                 headers: {
                     'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,

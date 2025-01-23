@@ -1,4 +1,13 @@
 from django.shortcuts import render
 
+from shared.models import Clients
+
+
 def get(req):
-    return render(req, "admin/admin.html")
+    client = Clients.get_client_by_request(req)
+    if client is not None:
+        context = {
+            "client": client,
+            "clients": Clients.objects.all()
+        }
+        return render(req, "admin/admin.html", context)

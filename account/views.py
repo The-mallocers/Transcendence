@@ -9,10 +9,10 @@ def account_get(req):
 
 
 @require_http_methods(["POST"])
-def account_post(req):
-    return post(req)
+def account_post(req, client_id):
+    return post(req, client_id)
 
 
 @require_http_methods(["DELETE"])
-def account_delete(req):
-    return delete(req)
+def account_delete(req, client_id):
+    return delete(req, client_id)

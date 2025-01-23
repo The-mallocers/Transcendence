@@ -30,10 +30,10 @@ class Token:
         self.IAT = now
         if token_type == str(TokenType.ACCESS):
             self.EXP = now + timedelta(
-                seconds=getattr(settings, 'JWT_EXP_ACCESS_TOKEN'))
+                minutes=getattr(settings, 'JWT_EXP_ACCESS_TOKEN'))
         elif token_type == str(TokenType.REFRESH):
             self.EXP = now + timedelta(
-                seconds=getattr(settings, 'JWT_EXP_REFRESH_TOKEN'))
+                days=getattr(settings, 'JWT_EXP_REFRESH_TOKEN'))
 
         self.TYPE: str = token_type
 

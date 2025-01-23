@@ -102,10 +102,7 @@ class JWTMiddleware:
             required_roles = self._get_required_roles(path)
             if required_roles:
                 if not any(role in token.ROLES for role in required_roles):
-                    return JsonResponse(
-                        {'error': 'Not enough permissions'},
-                        status=403
-                    )
+                    return HttpResponseRedirect('/')
             return self.get_response(request)
         except jwt.ExpiredSignatureError:
             try:
