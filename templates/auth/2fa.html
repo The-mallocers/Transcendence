@@ -5,74 +5,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'css/auth/2fa.css' %}">
     <title>Two-Factor Authentication</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 600px;
-            margin: 40px auto;
-            padding: 20px;
-            text-align: center;
-            background-color: #f5f5f5;
-        }
-
-        .container {
-            background-color: white;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        h1 {
-            color: #333;
-            margin-bottom: 30px;
-        }
-
-        .qr-container {
-            margin: 20px 0;
-            padding: 20px;
-            background-color: white;
-            display: inline-block;
-        }
-
-        img {
-            max-width: 200px;
-            height: auto;
-        }
-
-        .instructions {
-            color: #666;
-            margin: 20px 0;
-            text-align: left;
-            line-height: 1.6;
-        }
-
-        input {
-            width: 200px;
-            padding: 12px;
-            margin: 20px 0;
-            border: 2px solid #ddd;
-            border-radius: 4px;
-            font-size: 16px;
-            text-align: center;
-            letter-spacing: 2px;
-        }
-
-        button {
-            background-color: #4CAF50;
-            color: white;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: background-color 0.3s;
-        }
-
-        button:hover {
-            background-color: #45a049;
-        }
-    </style>
+    <script>
+        const email = {{ client.profile.email}};
+    </script>
 </head>
 <body>
     <div class="container">
@@ -84,11 +21,12 @@
             <p>2. Scan the QR code below</p>
             <p>3. Enter the 6-digit code shown in your app</p>
         </div>
-
+        <div>{{ client.profile.email}}</div>
+        {% if not client.twoFa.scanned %}
         <div class="qr-container">
-            <img src="{% static 'img/qrcode.png' %}" alt="2FA QR Code">
+            <img src="{{ client.twoFa.qrcode.url }}" alt="2FA QR Code">
         </div>
-
+        {% endif %}
         <form onsubmit="event.preventDefault(); validateCode();">
             <input type="text" 
                    id="authCode" 

@@ -1,16 +1,19 @@
+
+
 async function validateCode() {
 	const code = document.getElementById('authCode').value;
 	if(code.length === 6 && /^\d+$/.test(code)) {
 		// Here you would typically send the code to your server for validation
 		try{
 			console.log(code);
-			const response = await fetch("/auth/2fa", { // Remplace "/login" par l'URL de ton endpoint
+			const response = await fetch("/auth/2facode", { // Remplace "/login" par l'URL de ton endpoint
 				method: "POST",
 				headers: {
 					'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
 				},
 				body: JSON.stringify({
-					code : code
+					code : code,
+					email: email
 				}),
 			});
 			

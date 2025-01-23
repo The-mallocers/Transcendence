@@ -5,7 +5,7 @@ document.getElementById('logout-btn').addEventListener('click', function () {
         method: 'POST',
         headers: {
             'X-CSRFToken': csrfToken,  // Inclus le CSRF token
-            'Content-Type': 'application/json'  // Type de contenu JSON même si aucune donnée n'est envoyée
+            // 'Content-Type': 'application/json'  // Type de contenu JSON même si aucune donnée n'est envoyée
         },
         body: JSON.stringify({})  // Envoi d'un corps vide
     })
@@ -23,4 +23,26 @@ document.getElementById('logout-btn').addEventListener('click', function () {
         .catch(error => {
             console.error('Error during logout:', error);
     });
+});
+
+//file to send a request to the server to enable or not 2fa
+const toggleSwitch = document.getElementById('toggleSwitch');
+toggleSwitch.addEventListener('change', async function() {
+	try
+	{
+		const response = await fetch("/api/auth/change_two_fa", { // Remplace "/login" par l'URL de ton endpoint
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({
+				status : this.checked,
+			}),
+		});
+		const result = await response.json();
+		console.log(result);
+	}catch(err)
+	{
+		console.log(err);
+	}
 });

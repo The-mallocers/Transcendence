@@ -41,13 +41,11 @@
         </ul>
     </div>
     </div>
-<!-- Rounded switch -->
     <label class="switch">
-        <input type="checkbox" id="toggleSwitch">
+        <input type="checkbox" id="toggleSwitch" {% if client.twoFa.enable %}checked{% endif %}>
         <span class="slider round"></span>
     </label>
     <div>2FA</div>
 </body>
-<script src="{% static 'js/auth/logout.js' %}"></script>
-<script src="{% static 'js/auth/user.js' %}"></script>
+<script src="{% static 'js/auth/index.js' %}"></script>
 </html>

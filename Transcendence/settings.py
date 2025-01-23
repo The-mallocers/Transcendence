@@ -42,6 +42,7 @@ EXCLUDED_PATHS = [
     '/api/auth/register',
     '/auth/login',
     '/auth/register',
+    '/auth/2fa',
 ]
 ROLE_PROTECTED_PATHS = {
     '/admin/*': ['admin']

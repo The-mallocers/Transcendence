@@ -16,11 +16,9 @@ document.addEventListener("DOMContentLoaded", function () {
                 },
                 body: formData
             });
-
             const result = await response.json();
 
             if (response.status === 200 && result.success){
-                console.log(result.redirect_url)
                 window.location.href = result.redirect_url;
             }
             else{
@@ -28,7 +26,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 window.location.href = "/auth/register"
             }
         } catch (error) {
-            console.error("Erreur lors de la connexion :", error);
+            console.error(error);
             errorDiv.textContent = error;
         }
     });
