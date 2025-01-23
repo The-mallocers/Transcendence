@@ -18,8 +18,12 @@ def indexspa(request):
         render_to_string('index_spa/indexspa.html', context)
     )
 
-# @require_GET
-# def about_content(request):
-#     return HttpResponse(
-#         render_to_string('partials/about.html')
-#     ) 
+@require_GET
+def partial(request, partial_id):
+    NUMBER_OF_IDS = 3
+    if (partial_id <= NUMBER_OF_IDS and partial_id > 0):
+        return HttpResponse(
+            render_to_string('index_spa/partial' + str(partial_id) + '.html')
+        )
+
+    

@@ -8,8 +8,11 @@
 </head>
 <body>
     <p>Voici mon message : {{ welcome_message }}</p>
+    <button id="part1" data-url="/partial/1" >BOUTON PARTIAL 1</button>
+    <button id="part2" data-url="/partial/2" >BOUTON PARTIAL 2</button>
+    <button id="part3" data-url="/partial/3" >BOUTON PARTIAL 3</button>
     <div id="app"></div>
     <script src="{% static 'js/spa/router.js' %}"></script>
-    <script src="/static/js/app.js"></script>
+    <!-- <script src="   /static/js/app.js"></script> -->
 </body>
 </html>
