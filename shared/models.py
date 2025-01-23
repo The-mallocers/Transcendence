@@ -26,6 +26,10 @@ class Clients(models.Model):
         return f"Client data => Email:{self.profile.email}, Username:{self.profile.username}"
 
     def save(self, *args, **kwargs):
+        self.password.save()
+        self.profile.save()
+        self.twoFa.save()
+        self.rights.save()
         super().save(*args, **kwargs)
 
     def delete(self, *args, **kargs):

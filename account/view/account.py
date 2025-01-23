@@ -6,8 +6,11 @@ from account.models import Profile
 from shared.models import Clients
 
 
-def get(req):
-    client = Clients.get_client_by_request(req)
+def get(req, client_id=None):
+    if client_id is not None:
+        client = Clients.get_client_by_id(client_id)
+    else:
+        client = Clients.get_client_by_request(req)
     if client is not None:
         context = {"client": client}
         return render(req, "account/account.html", context)
@@ -15,8 +18,9 @@ def get(req):
         return HttpResponseRedirect(
             '/auth/login')  # todo il faut afficher une erreur sur le html au lieu de rediriger vers login
 
-def post(request: HttpRequest):
-    client = Clients.get_client_by_request(request)
+
+def post(request: HttpRequest, client_id):
+    client = Clients.get_client_by_id(client_id)
     if client is not None:
         profile: Profile = client.profile
         email = request.POST.get("email")
@@ -55,8 +59,9 @@ def post(request: HttpRequest):
             'message': 'Client not found.'
         })
 
-def delete(request):
-    client = Clients.get_client_by_request(request)
+
+def delete(request, client_id):
+    client = Clients.get_client_by_id(client_id)
     if client is not None:
         client.delete()
         return JsonResponse({

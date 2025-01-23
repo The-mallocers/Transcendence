@@ -16,7 +16,7 @@
 </header>
 
 <div class="container">
-    <form method="POST" action="{% url 'account_update' %}"
+    <form method="POST" action="{% url 'account_update' client.id %}"
           enctype="multipart/form-data">
         {% csrf_token %}
         <div class="form-grid">
@@ -67,7 +67,8 @@
             </div>
             <div class="form-group">
                 <label for="delete-account-btn">Delete account</label>
-                <button id="delete-account-btn" class="delete-btn">Delete
+                <button id="delete-account-btn" class="delete-btn"
+                        client_id="{{ client.id }}">Delete
                 </button>
             </div>
         </div>
