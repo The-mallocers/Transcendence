@@ -54,9 +54,8 @@ class Clients(models.Model):
 
     @staticmethod
     def get_client_by_request(request: HttpRequest):
-        from utils.jwt.TokenGenerator import TokenGenerator, TokenType
-        token = TokenGenerator.extract_token(request, TokenType.ACCESS)
-        if token is not None:
+        if hasattr(request, 'access_token'):
+            token = request.access_token
             return Clients.get_client_by_id(token.SUB)
         return None
 

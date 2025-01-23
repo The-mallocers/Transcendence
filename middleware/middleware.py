@@ -2,8 +2,7 @@ import re
 
 import jwt
 from django.conf import settings
-from django.http import JsonResponse, HttpRequest, HttpResponse, \
-    HttpResponseRedirect
+from django.http import JsonResponse, HttpRequest, HttpResponseRedirect
 
 from shared.models import Clients
 from utils.jwt.TokenGenerator import TokenType, Token, TokenGenerator
@@ -64,55 +63,57 @@ class JWTMiddleware:
         except jwt.InvalidTokenError as e:
             raise jwt.InvalidTokenError(f'Invalid {token_type} token: {str(e)}')
 
-    def _refresh_token(self, request: HttpRequest, response: HttpResponse):
+    def _refresh_token(self, request: HttpRequest):
         try:
-            self._validate_token(self._extract_access_token(request),
-                                 TokenType.ACCESS)
-        except jwt.ExpiredSignatureError:
-            try:
-                refresh_token: Token = self._validate_token(
-                    self._extract_refresh_token(request), TokenType.REFRESH)
-                client: Clients = Clients.get_client_by_id(refresh_token.SUB)
-                TokenGenerator(client, TokenType.ACCESS).set_cookie(response)
-                TokenGenerator(client, TokenType.REFRESH).set_cookie(response)
-            except jwt.ExpiredSignatureError as e:
-                raise jwt.ExpiredSignatureError(f'{str(e)}')
-            except jwt.InvalidTokenError as e:
-                raise jwt.InvalidTokenError(f'{str(e)}')
+            refresh_token: Token = self._validate_token(
+                self._extract_refresh_token(request), TokenType.REFRESH)
+
+            client: Clients = Clients.get_client_by_id(refresh_token.SUB)
+
+            access = TokenGenerator(client, TokenType.ACCESS)
+            refresh = TokenGenerator(client, TokenType.REFRESH)
+
+            request.COOKIES['access_token'] = access.token_key
+            request.COOKIES['refresh_token'] = refresh.token_key
+            request.access_token = access.token
+
+            response = self.get_response(request)
+            response = access.set_cookie(response)
+            response = refresh.set_cookie(response)
+
+            return response
+        except jwt.ExpiredSignatureError as e:
+            raise jwt.ExpiredSignatureError(f'{str(e)}')
         except jwt.InvalidTokenError as e:
             raise jwt.InvalidTokenError(f'{str(e)}')
 
     def __call__(self, request: HttpRequest):
         path = request.path_info
-        response = self.get_response(request)
 
         if not self._should_check_path(path):
-            return response
+            return self.get_response(request)
 
         try:
             token_key: str = self._extract_access_token(request)
             token: Token = self._validate_token(token_key, TokenType.ACCESS)
 
-            request.token_payload = token.get_payload()
+            request.access_token = token
 
             required_roles = self._get_required_roles(path)
             if required_roles:
-                user_roles = token.ROLES
-                if not any(role in user_roles for role in required_roles):
+                if not any(role in token.ROLES for role in required_roles):
                     return JsonResponse(
                         {'error': 'Not enough permissions'},
                         status=403
                     )
-            return response
+            return self.get_response(request)
         except jwt.ExpiredSignatureError:
             try:
-                self._refresh_token(request, response)
-                return response
-            except Exception:
+                return self._refresh_token(request)
+            except (jwt.ExpiredSignatureError, jwt.InvalidTokenError,
+                    jwt.InvalidKeyError):
                 return HttpResponseRedirect('/auth/login')
-        except jwt.InvalidTokenError:
-            return HttpResponseRedirect('/auth/login')
-        except jwt.InvalidKeyError:
+        except (jwt.InvalidTokenError, jwt.InvalidKeyError):
             return HttpResponseRedirect('/auth/login')
         except Exception as e:
             return JsonResponse(
