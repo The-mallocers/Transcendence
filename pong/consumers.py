@@ -34,6 +34,7 @@ class MyConsumer(AsyncWebsocketConsumer):
         data = json.loads(text_data)
         if data['type'] == 'paddle_move':
             self.handleMove(self, data)
+    
     async def send_game_state(self):
         await self.send(text_data=json.dumps({
             'type': 'game_state_update',
@@ -49,6 +50,11 @@ class MyConsumer(AsyncWebsocketConsumer):
                 await asyncio.sleep(1 / 60)  # crude 60 fps, to improve with delta time later.
         except asyncio.CancelledError:
             pass
+
+    def update_game_state(self):
+        if not self.game_state.game_active:
+            return
+
 
     def handleMove(self, data):
         paddle_data = data.get('paddle')
@@ -93,7 +99,6 @@ class GameState:
             'right_score': self.right_score,
             'game_active': self.game_active
         }
-
 
 
 @dataclass
