@@ -83,17 +83,17 @@ const router = new Router(routes);
 //Below is the actual that works
 
 // Navigation helper
-// function navigateTo(path) {
-//     router.navigate(path);
-// }
-
-//example of no url update
-async function navigateTo(path) {
-    console.log(path)
-    const response = await fetch(path);
-    const data = await response.text();
-    return data;
+function navigateTo(path) {
+    router.navigate(path);
 }
+
+//Below is my attempt at giving content without changing the url
+// async function navigateTo(path) {
+//     console.log(path)
+//     const response = await fetch(path);
+//     const data = await response.text();
+//     return data;
+// }
 
 
 let p1 = document.getElementById("part1")
@@ -101,11 +101,8 @@ let p2 = document.getElementById("part2")
 let p3 = document.getElementById("part3")
 
 
-//here is the mystery to solve, we are trying to have SPA without updating the url and failing.
 p1.addEventListener('click', async (e)=>{
-    console.log(e.target.dataset.url)
-    let app = document.getElementById('app')
-    app.innerHTML = await navigateTo(e.target.dataset.url)
+    navigateTo(e.target.dataset.url)
 })
 p2.addEventListener('click', (e)=>{
     navigateTo(e.target.dataset.url)
