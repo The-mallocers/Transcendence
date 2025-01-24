@@ -48,6 +48,7 @@ socket.onmessage = function (event) {
 function drawGame() {
     if (!gameState) return;
 
+    console.log("hello")
     // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 

@@ -10,12 +10,14 @@ PADDLE_SPEED = 20
 PADDLE_WIDTH = 10
 PADDLE_HEIGHT = 100
 BALL_RADIUS = 2
+FPS = 60
 
 class MyConsumer(AsyncWebsocketConsumer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        #more game related stuff, but the above innit the superclass.
         self.game_state = GameState()
+        self.game_loop_task = None
+        self.last_update:float = time.time()
 
     async def connect(self):
         await self.accept()
@@ -47,13 +49,45 @@ class MyConsumer(AsyncWebsocketConsumer):
             while True:
                 self.update_game_state()
                 await self.send_game_state()
-                await asyncio.sleep(1 / 60)  # crude 60 fps, to improve with delta time later.
+                await asyncio.sleep(1 / FPS)  # crude 60 fps, to improve with delta time later.
         except asyncio.CancelledError:
             pass
 
     def update_game_state(self):
         if not self.game_state.game_active:
             return
+        current_time = time.time()
+        delta_time = current_time - self.last_update
+        ball = self.game_state.ball
+
+        ball.x += ball.dx * delta_time * FPS
+        ball.y += ball.dy * delta_time * FPS
+
+        if (ball.y <= ball.radius or ball.y >= self.game_state.CANVAS_HEIGHT - ball.radius ):
+            ball.dy *= -1
+
+        #easiest way to tell which paddle im dealing with
+        if (ball.x >= self.game_state.CANVAS_WIDTH / 2):
+            paddle = self.game_state.l_paddle
+            if (ball.x - ball.radius <= paddle.x + paddle.width and ball.y + ball.radius >= paddle.y and ball.y + ball.radius <= paddle.y + paddle.height):
+                ball.dy *= -1
+        else:     
+            paddle = self.game_state.r_paddle
+            if (ball.x + ball.radius >= paddle.x and ball.y + ball.radius >= paddle.y and ball.y + ball.radius <= paddle.y + paddle.height):
+                ball.dy *= -1
+        
+        if self.game_state.ball_x <= 0:
+            self.game_state.bottom_score += 1
+            self.reset_ball()
+        elif self.game_state.ball_x >= self.game_state.CANVAS_HEIGHT:
+            self.game_state.top_score += 1
+            self.reset_ball()
+
+        def reset_ball(self):
+            self.game_state.ball_x = self.game_state.CANVAS_WIDTH / 2
+            self.game_state.ball_y = self.game_state.CANVAS_HEIGHT / 2
+            self.game_state.ball_dx = self.game_state.BALL_SPEED * ( 1 if random.random() > 0.5 else -1)
+            self.game_state.ball_dy = self.game_state.BALL_SPEED * ( 1 if random.random() > 0.5 else -1)
 
 
     def handleMove(self, data):
@@ -70,7 +104,7 @@ class MyConsumer(AsyncWebsocketConsumer):
             if direction == 'top':
                 paddle.y = max(0, paddle.y - speed)
             elif direction == 'down': 
-                limit = self.game_state.CANVAS_HEIGHT - paddle.heigth
+                limit = self.game_state.CANVAS_HEIGHT - paddle.height
                 paddle.y = min(limit, paddle.y + speed)
 
 class GameState:
@@ -112,7 +146,7 @@ class Ball:
 @dataclass
 class Paddle:
     width:float = PADDLE_WIDTH
-    heigth:float = PADDLE_HEIGHT
+    height:float = PADDLE_HEIGHT
     x:float = 0
     y:float = 0
     speed:float = PADDLE_SPEED
