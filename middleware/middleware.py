@@ -94,8 +94,7 @@ class JWTMiddleware:
         response = self.get_response(request)
 
         if not self._should_check_path(path):  # If the not need to be protected
-            return self.get_response(request)
-
+            return response
         # if not self._validate_csrf(request):
         #     return JsonResponse({
         #         'error': 'CSRF validation failed'

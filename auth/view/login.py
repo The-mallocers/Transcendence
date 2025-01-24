@@ -28,31 +28,32 @@ def post(req: HttpRequest):
         }, status=401)
 
     if client.password.check_pwd(password):
-        
         if client.twoFa.enable:
             if not client.twoFa.scanned:
                 get_qrcode(client)
-            redirUrl = "/auth/2fa"
+            response = JsonResponse({
+                "success": True,
+                "message": "You've been corectly login",
+                "redirect_url": "/auth/2fa"
+            }, status=200)
+            response.set_cookie(
+                key='email',
+                value=email,
+                httponly=True,
+                secure=True,
+                samesite='Lax'
+            )
         else :
+            print("inside login")
+            response = JsonResponse({
+                "success": True,
+                "message": "You've been corectly login",
+                "redirect_url": "/"
+            }, status=200)
             TokenGenerator(client, TokenType.ACCESS).set_cookie(
                 response=response)
             TokenGenerator(client, TokenType.REFRESH).set_cookie(
                 response=response)
-            redirUrl = "/"
-    
-        print(redirUrl)
-        response = JsonResponse({
-            "success": True,
-            "message": "You've been corectly login",
-            "redirect_url": redirUrl
-        }, status=200)
-        response.set_cookie(
-            key='email',
-            value=email,
-            httponly=True,
-            secure=True,
-            samesite='Lax'
-        )
         return response
     else:
         return JsonResponse({
@@ -69,15 +70,17 @@ def get(req):
 
 def get_qrcode(user):
     # create a qrcode and convert it
-    print("first_name" + user.profile.username)
-    uri = pyotp.totp.TOTP(user.twoFa.key).provisioning_uri(name=user.profile.username, issuer_name="Transcendance_" + str(user.profile.username))
-    qr_image = qrcode.make(uri)
-    buf = io.BytesIO()
-    qr_image.save(buf, "PNG")
-    contents = buf.getvalue()
-    
-    # convert it to adapt to a imagefield type in my db
-    image_file = ContentFile(contents, name=f"{user.profile.username}_qrcode.png")
-    user.twoFa.update("qrcode", image_file)
-    
-    return True
+    print("first_name: " + user.profile.username + " creating qrcode")
+    if not user.twoFa.qrcode:
+        uri = pyotp.totp.TOTP(user.twoFa.key).provisioning_uri(name=user.profile.username, issuer_name="Transcendance_" + str(user.profile.username))
+        qr_image = qrcode.make(uri)
+        buf = io.BytesIO()
+        qr_image.save(buf, "PNG")
+        contents = buf.getvalue()
+        
+        # convert it to adapt to a imagefield type in my db
+        image_file = ContentFile(contents, name=f"{user.profile.username}_qrcode.png")
+        user.twoFa.update("qrcode", image_file)
+        
+        return True
+    return False

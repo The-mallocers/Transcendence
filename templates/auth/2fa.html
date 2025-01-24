@@ -7,9 +7,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{% static 'css/auth/2fa.css' %}">
     <title>Two-Factor Authentication</title>
-    <script>
-        const email = {{ client.profile.email}};
-    </script>
 </head>
 <body>
     <div class="container">
@@ -21,6 +18,7 @@
             <p>2. Scan the QR code below</p>
             <p>3. Enter the 6-digit code shown in your app</p>
         </div>
+        <div id="data-email" email={{client.profile.email}}></div>
         <div>{{ client.profile.email}}</div>
         {% if not client.twoFa.scanned %}
         <div class="qr-container">

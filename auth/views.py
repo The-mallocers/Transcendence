@@ -48,39 +48,40 @@ def view_two_fa(req):
 
 def post_twofa_code(req):
     email = req.COOKIES.get('email')
-    print("email " + email)
     if email:
         client = Clients.get_client_by_email(email)
+        response = JsonResponse({
+            "success": False,
+            "message": "Error cant GET to this URL",
+            "redirect_url": "/auth/login"
+        }, status=400)
         if client is None:
-            print("error no client log")
-            return render(req, "/auth/login")
-        if req.method == 'POST':
+            return response
+        if req.method == "POST":
             data = json.loads(req.body.decode('utf-8'))
             totp = pyotp.TOTP(client.twoFa.key)
             is_valid = totp.verify(data['code'])
             email = data['code']
-            print(email)
             if is_valid:
                 if not client.twoFa.scanned:
                     client.twoFa.update("scanned", True)
-                TokenGenerator(client, TokenType.ACCESS).set_cookie(
-                    response=response)
-                TokenGenerator(client, TokenType.REFRESH).set_cookie(
-                    response=response)
                 response = JsonResponse({
                     "success" : True,
                     "message" : "Login Successful",
                     "redirect_url" : "/"
                 }, status=200)
+                TokenGenerator(client, TokenType.ACCESS).set_cookie(
+                    response=response)
+                TokenGenerator(client, TokenType.REFRESH).set_cookie(
+                    response=response)
                 return response
-        print("rendering client")
-        response = JsonResponse({
-            "success": True,
-            "message": "You've been corectlly login",
-            "redirect_url": "auth/2fa.html"
-        }, status=200)
         return response
-    return render(req,"/auth/login.html")
+    response = JsonResponse({
+        "success": False,
+        "message": "Error no email coresponding to this request",
+        "redirect_url": "/auth/login"
+    }, status=400)
+    return response
 
 @csrf_exempt
 def change_two_fa(req):

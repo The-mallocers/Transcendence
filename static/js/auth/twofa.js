@@ -1,4 +1,4 @@
-
+const email = document.getElementById("data-email").getAttribute("email");
 
 async function validateCode() {
 	const code = document.getElementById('authCode').value;
