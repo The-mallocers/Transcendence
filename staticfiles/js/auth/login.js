@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         try {
             // Envoi de la requête POST avec fetch
-            const response = await fetch("/auth/login", { // Remplace "/login" par l'URL de ton endpoint
+            const response = await fetch("/api/auth/login", { // Remplace "/login" par l'URL de ton endpoint
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -23,9 +23,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
             const result = await response.json();
 
-            if (response.status === 200 && result.success) {
-                window.location.href = result.redirect_url;
-            } else {
+            if (response.status === 200 && result.success){
+                window.location.href = '/';
+            }
+            else{
                 alert(result.message || "Login failed.");
                 window.location.href = "/auth/register"
             }

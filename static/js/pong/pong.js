@@ -8,38 +8,12 @@ const ctx = canvas.getContext('2d');
 // Game state will be updated from server
 let gameState = null;
 
-// Handle keyboard input
-document.addEventListener('keypress', function (event) {
-    let data = null;
-
-    switch (event.key.toLowerCase()) {
-        case 'a':
-            data = {paddle: 'left', direction: 'up'};
-            break;
-        case 'd':
-            data = {paddle: 'left', direction: 'down'};
-            break;
-        case 'j':
-            data = {paddle: 'right', direction: 'down'};
-            break;
-        case 'l':
-            data = {paddle: 'right', direction: 'up'};
-            break;
-    }
-
-    if (data) {
-        socket.send(JSON.stringify({
-            type: 'paddle_move',
-            ...data
-        }));
-    }
-});
-
 // Handle messages from server
 socket.onmessage = function (event) {
     const data = JSON.parse(event.data);
-
+    console.log("I have received a game update")
     if (data.type === 'game_state_update') {
+        console.log("I have received a legit game update")
         gameState = data.state;
         drawGame();
     }
@@ -54,10 +28,8 @@ function drawGame() {
 
     // Draw paddles
     ctx.fillStyle = 'black';
-    // Top paddle
-    ctx.fillRect(gameState.top_paddle_x, 0, 100, 10);
-    // Bottom paddle
-    ctx.fillRect(gameState.bottom_paddle_x, canvas.height - 10, 100, 10);
+    ctx.fillRect(25, gameState.left_paddle_y, 10, 100);
+    ctx.fillRect(canvas.width - 25, gameState.right_paddle_y, 10, 100);
 
     // Draw ball
     ctx.beginPath();
@@ -67,6 +39,40 @@ function drawGame() {
     // Draw scores
     ctx.font = '24px Arial';
     ctx.textAlign = 'center';
-    ctx.fillText(gameState.top_score, canvas.width / 2, 50);
-    ctx.fillText(gameState.bottom_score, canvas.width / 2, canvas.height - 30);
+    ctx.fillText(gameState.left_score, 100, 50);
+    ctx.fillText(gameState.right_score, canvas.width - 100, 50);
 }
+
+const keys = {
+    'a': false,
+    'd': false,
+    'j': false,
+    'l': false
+};
+
+document.addEventListener('keydown', (event) => {
+    switch(event.key.toLowerCase()) {
+        case 'a': keys.a = true; break;
+        case 'd': keys.d = true; break;
+        case 'j': keys.j = true; break;
+        case 'l': keys.l = true; break;
+    }
+});
+
+document.addEventListener('keyup', (event) => {
+    switch(event.key.toLowerCase()) {
+        case 'a': keys.a = false; break;
+        case 'd': keys.d = false; break;
+        case 'j': keys.j = false; break;
+        case 'l': keys.l = false; break;
+    }
+});
+
+function updatePaddles() {
+    if (keys.a) socket.send(JSON.stringify({type: 'paddle_move', paddle: 'left', direction: 'up'}));
+    if (keys.d) socket.send(JSON.stringify({type: 'paddle_move', paddle: 'left', direction: 'down'}));
+    if (keys.j) socket.send(JSON.stringify({type: 'paddle_move', paddle: 'right', direction: 'down'}));
+    if (keys.l) socket.send(JSON.stringify({type: 'paddle_move', paddle: 'right', direction: 'up'}));
+}
+
+setInterval(updatePaddles, 1000/60);  // 60 fps
