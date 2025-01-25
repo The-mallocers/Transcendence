@@ -1,0 +1,25 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Your SPA{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <script type="module" src="{% static 'js/main.js' %}" defer></script>
+</head>
+<body>
+    <!-- Include Header -->
+    {% include 'partials/header.html' %}
+
+    <!-- Main Content -->
+    <main id="app">
+        {% block content %}
+        <!-- Dynamic content will be injected here -->
+        {% endblock %}
+    </main>
+
+    <!-- Include Footer -->
+    {% include 'partials/footer.html' %}
+</body>
+</html>
