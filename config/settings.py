@@ -54,7 +54,16 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    # ────────────────────────────────── Custom Apps ─────────────────────────────────── #
+    'apps.admin.apps.AdminConfig',
+    'apps.auth.apps.AuthConfig',
+    'apps.componentBuilder.apps.ComponentbuilderConfig',
     'apps.index.apps.IndexConfig',
+    'apps.pageBuilder.apps.PagebuilderConfig',
+    'apps.pong.apps.PongConfig',
+    'apps.profile.apps.ProfileConfig',
+    'apps.shared.apps.SharedConfig'
 ]
 
 MIDDLEWARE = [

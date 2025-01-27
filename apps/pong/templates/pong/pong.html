@@ -1,0 +1,33 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PONG</title>
+    <link rel="stylesheet" href="{% static 'css/pong/pong.css' %}">
+</head>
+<body>
+    <div class="container">
+        <h1>PONG</h1>
+        <div class="canvas-wrapper">
+            <canvas id="myCanvas" width="1000" height="500"></canvas>
+        </div>
+    </div>
+
+    <!-- Instructions for Paddle Control -->
+    <div class="instructions top-left">
+        Top Paddle: <strong>A</strong> (left) / <strong>D</strong> (right)
+    </div>
+
+    <div class="instructions top-right">
+        Bottom Paddle: <strong>J</strong> (left) / <strong>L</strong> (right)
+    </div>
+
+    <script src="{% static 'js/pong/pong.js' %}"></script>
+</body>
+</html>
+
+
+
+        
