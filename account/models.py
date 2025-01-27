@@ -1,46 +1,44 @@
 from django.db import models
 
-from Transcendence.settings import USERNAME_LENGHT, FIRSTNAME_LENGHT, \
-    LASTNAME_LENGHT
-from django.db import models
-
-from Transcendence.settings import USERNAME_LENGHT, FIRSTNAME_LENGHT, \
-    LASTNAME_LENGHT
-
-
 class Profile(models.Model):
     #Primary key
     email = models.EmailField(primary_key=True, null=False, editable=True, default='default@default.fr')
 
     #Secondary key
-    username = models.CharField(null=False, max_length=USERNAME_LENGHT, editable=True, default='default')
-    first_name = models.CharField(null=True, max_length=FIRSTNAME_LENGHT, editable=True)
-    last_name = models.CharField(null=True, max_length=LASTNAME_LENGHT, editable=True)
-    profile_picture = models.ImageField(upload_to='profile_picture/', editable=True, null=True)
+    username = models.CharField(null=False, max_length=100, editable=True,
+                                default='default')
+    first_name = models.CharField(null=True, max_length=100, editable=True)
+    last_name = models.CharField(null=True, max_length=100, editable=True)
+    profile_picture = models.ImageField(upload_to='profile/',
+                                        default="profile/default.png",
+                                        editable=True, null=True)
 
-    #Functions
+    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ SURCHARGE ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
+
+    def __str__(self):
+        return f'Email: {self.email}\nUsername: {self.username}'
+
+    def save(self, *args, **kwargs):
+        if self.email is None or self.username is None:
+            raise ValueError("Email or username can't be empty")
+
+        from shared.models import Clients
+        client = Clients.get_client_by_email(self.email)
+
+        if client is None:  # When i want to create profile
+            return super().save(*args, **kwargs)
+
+        super().save(*args, **kwargs)  #When I want to edit profile
+
+    def delete(self, *args, **kargs):
+        super().delete(*args, **kargs)
+
+    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ FUNCTIONS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
+
     @staticmethod
-    def get_profile(email) -> email:
-        if email is None:
+    def get_profile_by_email(email):
+        try:
+            return Profile.objects.filter(email=email).first()
+        except Profile.DoesNotExist:
             return None
-        profile = Profile.objects.filter(email=email).first()
-        if profile is None:
-            return None
-        return profile
-
-    def update(self, data, value):
-        match data:
-            case "username":
-                self.username = value
-            case "first_name":
-                self.first_name = value
-            case "last_name":
-                self.last_name = value
-            case "email":
-                self.email = value
-            case "profile_picture":
-                self.profile_picture = value
-            case _:
-                return None
-        self.save()
 

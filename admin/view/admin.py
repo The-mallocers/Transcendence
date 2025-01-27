@@ -1,14 +1,13 @@
-from django.http import JsonResponse
 from django.shortcuts import render
 
-def admin_view(req):
-    if req.method == 'GET':
-        return get(req)
-    else:
-        return JsonResponse({
-            "success": False,
-            "message": "Method not allowed"
-        }, status=405)
+from shared.models import Clients
+
 
 def get(req):
-    return render(req, "admin/admin.html", status=404)
+    client = Clients.get_client_by_request(req)
+    if client is not None:
+        context = {
+            "client": client,
+            "clients": Clients.objects.all()
+        }
+        return render(req, "admin/admin.html", context)

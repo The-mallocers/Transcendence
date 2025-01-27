@@ -32,17 +32,9 @@ JWT_SECRET_KEY = ENV('JWT_SECRET_KEY', default='1234')
 JWT_EXP_ACCESS_TOKEN = ENV('JWT_EXP_ACCESS_TOKEN', default=10)  # 30 minutes
 JWT_EXP_REFRESH_TOKEN = ENV('JWT_EXP_REFRESH_TOKEN', default=30)  # 30 days
 JWT_ALGORITH = 'HS256'
-CSRF_METHODS = [
-    'POST',
-    'PUT',
-    'PATCH',
-    'DELETE'
-]
 
-#HELLO TFREYDIE GET RID OF THIS BEFORE PUSHING
-#I cant see the pong game otherwise since loggin in is hard
 PROTECTED_PATHS = [
-    #'/*'
+    '/*'
 ]
 EXCLUDED_PATHS = [
     '/api/auth/login',

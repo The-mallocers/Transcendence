@@ -1,22 +1,23 @@
-import uuid
-
+from django.contrib.contenttypes.models import ContentType
 from django.db import models
 
+from shared.models import Clients
 
-# Create your models here.
+
 class Rights(models.Model):
     #Primary key
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False,
-                          null=False)
+    id = models.AutoField(primary_key=True, null=False, editable=False)
 
     #Secondary key
-    right = models.BooleanField(default=False)
+    is_admin = models.BooleanField(default=False, null=False, editable=True)
 
-    #Functions
-    def update(self, data, value):
-        match data:
-            case "right":
-                self.right = value
-            case _:
-                return None
-        self.save()
+    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ SURCHARGE ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
+
+    def __str__(self):
+        return "Client is admin" if self.is_admin else "Client isn't admin"
+
+    def save(self, *args, **kargs):
+        super().save(*args, **kargs)
+
+    def delete(self, *args, **kargs):
+        super().delete(*args, **kargs)
