@@ -54,9 +54,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
     # ────────────────────────────────── Modules Apps ─────────────────────────────────── #
     'channels',
+    'django_extensions',
 
     # ────────────────────────────────── Custom Apps ─────────────────────────────────── #
     'apps.admin.apps.AdminConfig',
