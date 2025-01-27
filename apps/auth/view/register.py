@@ -39,4 +39,4 @@ def get(req):
 
     context = {"users": users}
 
-    return render(req, "apps/auth/register.html", context)
+    return render(req, "auth/register.html", context)

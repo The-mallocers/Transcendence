@@ -13,7 +13,7 @@ urlpatterns = [
 
     # ────────────────────────────────────── Api ─────────────────────────────────────── #
 
-    path('api/auth/', include('apps.auth.api.urls'))
+    # path('api/auth/', include('apps.auth.api.urls'))
 ]
 
 if settings.DEBUG:
