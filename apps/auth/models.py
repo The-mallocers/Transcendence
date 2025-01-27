@@ -13,6 +13,9 @@ class Password(models.Model):
     #Secondary key
     password = models.CharField(max_length=512, null=False, editable=True)
 
+    class Meta:
+        db_table = 'client_auth_pwd'
+
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ SURCHARGE ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
 
     def save(self, *args, **kwargs):
@@ -43,14 +46,5 @@ class TwoFA(models.Model):
     enable = models.BooleanField(default=False, editable=True)
     scanned = models.BooleanField(default=False, editable=True)
 
-    def update(self, data, value) -> None:
-        match data:
-            case "key":
-                self.key = value
-            case "enable":
-                self.enable = value
-            case "scanned":
-                self.scanned = value
-            case _:
-                return None
-        self.save()
+    class Meta:
+        db_table = 'client_auth_2fa'

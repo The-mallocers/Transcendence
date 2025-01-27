@@ -13,7 +13,7 @@ class Profile(models.Model):
                                         editable=True, null=True)
 
     class Meta:
-        db_table = "account"
+        db_table = "client_profile"
 
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ SURCHARGE ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
 

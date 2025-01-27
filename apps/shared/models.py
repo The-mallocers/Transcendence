@@ -20,6 +20,9 @@ class Clients(models.Model):
     rights = models.ForeignKey('admin.Rights', on_delete=models.CASCADE,
                                null=True)
 
+    class Meta:
+        db_table = 'client_list'
+
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ SURCHARGE ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
 
     def __str__(self):

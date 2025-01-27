@@ -1,7 +1,7 @@
 from django.http import JsonResponse, HttpRequest
 from django.shortcuts import render
 
-from shared.models import Clients
+from apps.shared.models import Clients
 from utils.jwt.TokenGenerator import TokenGenerator, TokenType
 
 

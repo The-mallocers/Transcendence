@@ -7,6 +7,9 @@ class Rights(models.Model):
     #Secondary key
     is_admin = models.BooleanField(default=False, null=False, editable=True)
 
+    class Meta:
+        db_table = 'client_rights'
+
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ SURCHARGE ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
 
     def __str__(self):

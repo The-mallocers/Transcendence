@@ -21,7 +21,6 @@ JWT_SECRET_KEY = ENV('JWT_SECRET_KEY', default='1234')
 JWT_EXP_ACCESS_TOKEN = ENV('JWT_EXP_ACCESS_TOKEN', default=10)  # 30 minutes
 JWT_EXP_REFRESH_TOKEN = ENV('JWT_EXP_REFRESH_TOKEN', default=30)  # 30 days
 JWT_ALGORITH = 'HS256'
-#petit trick a enlever quand on va merge
 
 #Middlware protected paths
 PROTECTED_PATHS = [
@@ -49,11 +48,15 @@ ALLOWED_HOSTS = [
 # had to add django.contrib.auth, not sure why
 
 INSTALLED_APPS = [
+    # ────────────────────────────────── Django Apps ─────────────────────────────────── #
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    # ────────────────────────────────── Modules Apps ─────────────────────────────────── #
+    'channels',
 
     # ────────────────────────────────── Custom Apps ─────────────────────────────────── #
     'apps.admin.apps.AdminConfig',
@@ -68,7 +71,9 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'middleware.jwt_middleware.JWTMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -123,7 +128,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = 'static/'
-
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
