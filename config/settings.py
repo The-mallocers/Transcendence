@@ -24,7 +24,7 @@ JWT_ALGORITH = 'HS256'
 
 #Middlware protected paths
 PROTECTED_PATHS = [
-    #'/*'
+    '/*'
 ]
 EXCLUDED_PATHS = [
     '/api/auth/login',
@@ -63,7 +63,6 @@ INSTALLED_APPS = [
     'apps.api.apps.ApiConfig',
     'apps.auth.apps.AuthConfig',
     'apps.componentBuilder.apps.ComponentbuilderConfig',
-    'apps.home.apps.HomeConfig',
     'apps.index.apps.IndexConfig',
     'apps.pageBuilder.apps.PagebuilderConfig',
     'apps.pong.apps.PongConfig',

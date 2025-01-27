@@ -1,5 +1,7 @@
-from django.views.generic import TemplateView
+from django.views.decorators.http import require_http_methods
 
+from apps.index.view.index_view import get
 
-class IndexView(TemplateView):
-    template_name = 'base.html'
+@require_http_methods(["GET"])
+def index_get(req):
+    return get(req)

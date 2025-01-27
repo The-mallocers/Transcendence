@@ -18,7 +18,7 @@ document.getElementById('logout-btn').addEventListener('click', function () {
         .then(data => {
             console.log('Logout successful:', data);
             // Vous pouvez rediriger ou afficher un message de succès ici
-            window.location.href = '/login';  // Par exemple, rediriger vers la page de connexion
+            window.location.href = '/auth/login';  // Par exemple, rediriger vers la page de connexion
         })
         .catch(error => {
             console.error('Error during logout:', error);

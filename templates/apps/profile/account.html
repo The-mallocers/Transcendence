@@ -16,7 +16,7 @@
 </header>
 
 <div class="container">
-    <form method="POST" action="{% url 'account_update' client.id %}"
+    <form method="POST" action="{% url 'profile_update' client.id %}"
           enctype="multipart/form-data">
         {% csrf_token %}
         <div class="form-grid">
@@ -56,7 +56,7 @@
             <div class="form-group">
                 <label for="two_factor">Enable 2FA:</label>
                 <button type="button"
-                        onclick="window.location.href='{% url 'account' %}'"
+                        onclick="window.location.href='{% url 'profile' %}'"
                         class="two-factor-btn {% if client.twoFa.enable %}disable-2fa{% else %}enable-2fa{% endif %}">
                     {% if client.twoFa.enable %}
                         Disable 2FA

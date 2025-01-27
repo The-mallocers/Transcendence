@@ -13,7 +13,7 @@ def get(req, client_id=None):
         client = Clients.get_client_by_request(req)
     if client is not None:
         context = {"client": client}
-        return render(req, "account/account.html", context)
+        return render(req, "apps/profile/account.html", context)
     else:
         return HttpResponseRedirect(
             '/auth/login')  # todo il faut afficher une erreur sur le html au lieu de rediriger vers login

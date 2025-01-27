@@ -3,7 +3,7 @@ from django.conf.urls.static import static
 from django.urls import path, include
 
 urlpatterns = [
-    path('', include('apps.home.urls')),
+    path('', include('apps.index.urls')),
     path('new', include("apps.index.urls")),
     path('account/', include("apps.profile.urls")),
     path('auth/', include("apps.auth.urls")),

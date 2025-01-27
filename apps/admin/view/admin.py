@@ -1,6 +1,6 @@
 from django.shortcuts import render
 
-from shared.models import Clients
+from apps.shared.models import Clients
 
 
 def get(req):
@@ -10,4 +10,4 @@ def get(req):
             "client": client,
             "clients": Clients.objects.all()
         }
-        return render(req, "admin/admin.html", context)
+        return render(req, "apps/admin/admin.html", context)
