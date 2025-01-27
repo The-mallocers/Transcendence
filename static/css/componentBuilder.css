@@ -154,7 +154,7 @@ body{
     }
 
     33%{
-        transform: translate(calc(-50% -.2rem), -50%);
+        transform: translate(calc(-50% - .2rem), -50%);
     }
     
     66%{

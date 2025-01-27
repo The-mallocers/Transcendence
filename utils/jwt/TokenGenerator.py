@@ -6,9 +6,7 @@ import jwt
 from django.conf import settings
 from django.http import HttpResponse, HttpRequest
 
-from Transcendence import settings
-from shared.models import Clients
-
+from apps.shared.models import Clients
 
 @dataclass
 class TokenType:
