@@ -1,6 +1,18 @@
+{% extends 'base.html' %}
 {% load static %}
 
-<!DOCTYPE html>
+
+
+{% block title %}
+Home Page
+{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{% static 'css/index.css' %}">
+{% endblock %}
+
+{% block content %}
+<!-- <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -8,7 +20,7 @@
     <title>Home</title>
     <link rel="stylesheet" href="{% static 'css/index.css' %}">
 </head>
-<body>
+<body> -->
 <header>
     <div style="display: flex; align-items: center; justify-content: center; gap: 15px;">
         <img src="{{ client.profile.profile_picture.url }}"
@@ -43,3 +55,4 @@
 </body>
 <script src="{% static 'js/apps/auth/logout.js' %}"></script>
 </html>
+{% endblock %}
