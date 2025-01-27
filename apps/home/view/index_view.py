@@ -22,7 +22,7 @@ def get(req):
             "client": client,
             "clients": Clients.objects.all()
         }
-        return render(req, "index.html", context)
+        return render(req, "apps/index.html", context)
     else:
         return HttpResponseRedirect('/auth/login')
 
