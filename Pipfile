@@ -14,7 +14,6 @@ pyotp = "*"
 channels = "*"
 daphne = "*"
 whitenoise = "*"
-gunicorn = "*"
 
 [dev-packages]
 django-extensions = "*"
