@@ -43,4 +43,4 @@ def get(req):
 
     context = {"users": users}
 
-    return render(req, "auth/login.html", context)
+    return render(req, "apps/auth/login.html", context)

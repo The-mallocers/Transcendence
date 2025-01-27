@@ -13,6 +13,7 @@ urlpatterns = [
 
     # ────────────────────────────────────── Api ─────────────────────────────────────── #
 
+    path('api/', include("apps.api.urls")),
     # path('api/auth/', include('apps.auth.api.urls'))
 ]
 
