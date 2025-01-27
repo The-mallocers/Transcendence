@@ -17,7 +17,6 @@ Home Page
 {% endblock %}
 
 {% block content %}
-<body>
 <header>
     <div style="display: flex; align-items: center; justify-content: center; gap: 15px;">
         <img src="{{ client.profile.profile_picture.url }}"
@@ -89,6 +88,5 @@ Home Page
     </form>
     <a href="{% url 'index' %}" class="cancel-btn">Cancel</a>
 </div>
-</body>
 <script src="{% static 'js/apps/account/account.js' %}"></script>
 {% endblock %}

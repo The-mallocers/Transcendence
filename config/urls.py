@@ -10,6 +10,7 @@ urlpatterns = [
     path('admin/', include("apps.admin.urls")),
     path('pong/', include('apps.pong.urls')),
     path('edit/', include("apps.componentBuilder.urls")),
+    path('profile/', include("apps.profile.urls")),
 
     # ────────────────────────────────────── Api ─────────────────────────────────────── #
 

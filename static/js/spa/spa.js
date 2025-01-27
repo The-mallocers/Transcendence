@@ -17,6 +17,8 @@ class SPA {
             button.addEventListener('click', (e) => {
                 e.preventDefault();
                 const path = e.target.getAttribute('data-path');
+                console.log("path im trying to log is")
+                console.log(path)
                 if (path) {
                     this.navigate(path);
                 }
