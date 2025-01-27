@@ -1,6 +1,6 @@
 class SPA {
     constructor() {
-        this.contentDiv = document.getElementById('content');
+        this.mainContent = document.getElementById('app');
         this.setupNavigation();
         
         // Handle back/forward browser buttons
@@ -13,11 +13,10 @@ class SPA {
     }
 
     setupNavigation() {
-        document.querySelectorAll('a, button[data-href]').forEach(element => {
-            element.addEventListener('click', (e) => {
+        document.querySelectorAll('button[data-path]').forEach(button => {
+            button.addEventListener('click', (e) => {
                 e.preventDefault();
-                console.log("hi im js im proccing");
-                const path = e.target.getAttribute('href') || e.target.getAttribute('data-href') || e.target.getAttribute('data-path');
+                const path = e.target.getAttribute('data-path');
                 if (path) {
                     this.navigate(path);
                 }
@@ -38,7 +37,8 @@ class SPA {
             this.updateContent(content);
         } catch (error) {
             console.error('Error loading content:', error);
-            this.contentDiv.innerHTML = '<p>Error loading content</p>';
+            //add the 404 error page here later.
+            // this.contentDiv.innerHTML = '<p>Error loading content</p>';
         }
     }
 
@@ -61,7 +61,15 @@ class SPA {
     }
 
     updateContent(content) {
-        this.contentDiv.innerHTML = content;
+        // Update the title if provided
+        if (content.title) {
+            document.title = content.title;
+        }
+
+        // Update the main content
+        if (content.content) {
+            this.mainContent.innerHTML = content.content;
+        }
     }
 }
 

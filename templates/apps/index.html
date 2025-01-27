@@ -31,16 +31,12 @@ Home Page
 
 <div class="container">
     <div class="buttons">
-        <button onclick="window.location.href='{% url 'login' %}'">Login
-        </button>
-        <button onclick="window.location.href='{% url 'register' %}'">Register
-        </button>
-        <button onclick="window.location.href='{% url 'profile' %}'">Account
-        </button>
-        <button onclick="window.location.href='{% url 'edit' %}'">Edit</button>
-        <button onclick="window.location.href='{% url 'admin' %}'">Admin
-        </button>
-        <button id="logout-btn">Logout</button>
+        <button data-path="/login">Login</button>
+        <button data-path="/register">Register</button>
+        <button data-path="/profile">Account</button>
+        <button data-path="/edit">Edit</button>
+        <button data-path="/admin">Admin</button>
+        <button data-path="/logout" id="logout-btn">Logout</button>
     </div>
 
     <div class="user-list">
@@ -51,8 +47,7 @@ Home Page
             {% endfor %}
         </ul>
     </div>
-    </div>
+</div>
 </body>
 <script src="{% static 'js/apps/auth/logout.js' %}"></script>
-</html>
 {% endblock %}
