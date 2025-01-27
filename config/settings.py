@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     'apps.admin.apps.AdminConfig',
     'apps.auth.apps.AuthConfig',
     'apps.componentBuilder.apps.ComponentbuilderConfig',
+    'apps.home.apps.HomeConfig',
     'apps.index.apps.IndexConfig',
     'apps.pageBuilder.apps.PagebuilderConfig',
     'apps.pong.apps.PongConfig',
