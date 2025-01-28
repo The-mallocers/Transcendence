@@ -4,7 +4,6 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-django = "*"
 bcrypt = "*"
 pyjwt = "*"
 django-environ = "*"
@@ -14,6 +13,8 @@ pyotp = "*"
 channels = "*"
 daphne = "*"
 whitenoise = "*"
+django = "*"
+djangorestframework = "*"
 
 [dev-packages]
 django-extensions = "*"
