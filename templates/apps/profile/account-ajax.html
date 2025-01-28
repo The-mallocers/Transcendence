@@ -1,22 +1,5 @@
-{% extends 'base.html' %}
 {% load static %}
-<!-- <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Edit Profile</title>
-    <link rel="stylesheet" href="{% static 'css/account/account.css' %}">
-</head> -->
-
-{% block title %}
-Home Page
-{% endblock %}
-
-{% block styles %}
 <link rel="stylesheet" href="{% static 'css/account/account.css' %}">
-{% endblock %}
-
-{% block content %}
 <header>
     <div style="display: flex; align-items: center; justify-content: center; gap: 15px;">
         <img src="{{ client.profile.profile_picture.url }}"
@@ -89,4 +72,3 @@ Home Page
     <a href="{% url 'index' %}" class="cancel-btn">Cancel</a>
 </div>
 <script src="{% static 'js/apps/account/account.js' %}"></script>
-{% endblock %}

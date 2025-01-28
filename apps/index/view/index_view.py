@@ -12,8 +12,6 @@ def get(request):
             "client": client,
             "clients": Clients.objects.all()
         }
-        html_content = render_to_string("apps/index.html", context, request=request)
-        return JsonResponse({'html': html_content})
-        # return render(request, "apps/index.html", context)
+        return render(request, "apps/index.html", context)
     else:
         return HttpResponseRedirect('/auth/login')

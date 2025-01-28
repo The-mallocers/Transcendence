@@ -8,26 +8,14 @@ from apps.profile.models import Profile
 from apps.shared.models import Clients
 
 
-def get(request, client_id=None):
+def get(req, client_id=None):
     if client_id is not None:
         client = Clients.get_client_by_id(client_id)
     else:
-        client = Clients.get_client_by_request(request)
+        client = Clients.get_client_by_request(req)
     if client is not None:
         context = {"client": client}
-        # # Check if it's an AJAX request, Im hoping i wont have to do this
-        # if req.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        #     print("profile.py recognize the XML request")
-        #     # Render just the content part to a string
-        #     content = render_to_string("apps/profile/account.html", context, request=req)
-        #     return JsonResponse({
-        #         'title': 'Profile Page SPA',
-        #         'content': content
-        #     })
-        # else:
-        html_content = render_to_string("apps/profile/account.html", context, request=request)
-        return JsonResponse({'html': html_content})
-        # return render(request, "apps/profile/account.html", context)
+        return render(req, "apps/profile/account.html", context)
     else:
         return HttpResponseRedirect(
             '/auth/login')  # todo il faut afficher une erreur sur le html au lieu de rediriger vers login

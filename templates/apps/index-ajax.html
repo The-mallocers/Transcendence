@@ -1,0 +1,30 @@
+{% load static %}
+<header>
+    <div style="display: flex; align-items: center; justify-content: center; gap: 15px;">
+        <img src="{{ client.profile.profile_picture.url }}"
+             alt="Profile Picture" class="profile-img">
+        <h1>Welcome {{ client.profile.username }}</h1>
+    </div>
+</header>
+
+<div class="container">
+    <div class="buttons">
+        <button data-path="/login">Login</button>
+        <button data-path="/register">Register</button>
+        <button data-path="/profile">Account</button>
+        <button data-path="/edit">Edit</button>
+        <button data-path="/admin">Admin</button>
+        <button data-path="/logout" id="logout-btn">Logout</button>
+    </div>
+
+    <div class="user-list">
+        <h2>List of Users</h2>
+        <ul>
+            {% for user in clients %}
+                <li>{{ user.profile }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+</body>
+<script src="{% static 'js/apps/auth/logout.js' %}"></script>

@@ -1,4 +1,4 @@
-console.log("SPA script loaded");
+// console.log("SPA script loaded");
 
 // class SPA {
 //     constructor() {
@@ -15,6 +15,9 @@ console.log("SPA script loaded");
 //     }
 
 //     setupNavigation() {
+//         const buttons = document.querySelectorAll('button[data-path]');
+//         console.log("Buttons found:", buttons); // Check if buttons are being selected
+        
 //         document.querySelectorAll('button[data-path]').forEach(button => {
 //             button.addEventListener('click', (e) => {
 //                 e.preventDefault();
@@ -50,6 +53,8 @@ console.log("SPA script loaded");
 //         // Add CSRF token to fetch request if needed
 //         const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
         
+//         console.log("trying to fetch the path")
+//         console.log(path)
 //         const response = await fetch(path, {
 //             headers: {
 //                 'X-Requested-With': 'XMLHttpRequest',
@@ -85,65 +90,3 @@ console.log("SPA script loaded");
 // document.addEventListener('DOMContentLoaded', () => {
 //     const spa = new SPA();
 // });
-
-class SPA {
-    constructor() {
-        this.setupNavigation();
-        
-        // Handle back/forward browser buttons
-        window.addEventListener('popstate', () => this.handleLocation());
-        
-        // Handle initial page load
-        this.handleLocation();
-    }
-
-    setupNavigation() {
-        document.querySelectorAll('button[data-path]').forEach(link => {
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                const path = e.target.getAttribute('data-path');
-                if (path) {
-                    this.navigate(path);
-                }
-            });
-        });
-    }
-
-    navigate(path) {
-        window.history.pushState({}, '', path);
-        this.handleLocation();
-    }
-
-    async handleLocation() {
-        const path = window.location.pathname;
-        try {
-            const html = await this.getPage(path);
-            this.updatePage(html);
-        } catch (error) {
-            console.error('Error loading page:', error);
-        }
-    }
-
-    async getPage(path) {
-        const response = await fetch(path, {
-            headers: { 'X-Requested-With': 'XMLHttpRequest' },
-        }); //Im adding the context thats its an xml request, im hoping to not have to use it, maybe well have to
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return await response.json();
-    }
-
-    updatePage(html) {
-        // Replace the entire document's HTML
-        console.log("updating page")
-        document.open();
-        document.write(html.html);
-        document.close();
-    }
-}
-
-// Initialize the SPA when the DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-    new SPA();
-});

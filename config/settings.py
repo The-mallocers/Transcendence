@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     # ────────────────────────────────── Modules Apps ─────────────────────────────────── #
     'channels',
     'django_extensions',
+    'rest_framework',
 
     # ────────────────────────────────── Custom Apps ─────────────────────────────────── #
     'apps.admin.apps.AdminConfig',
