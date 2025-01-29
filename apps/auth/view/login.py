@@ -2,7 +2,7 @@ from django.http import JsonResponse, HttpRequest
 from django.shortcuts import render
 
 from apps.shared.models import Clients
-from utils.jwt.TokenGenerator import TokenGenerator, TokenType
+from utils.jwt.JWTGenerator import JWTGenerator, JWTType
 
 
 def post(req: HttpRequest):
@@ -27,9 +27,9 @@ def post(req: HttpRequest):
             "success": True,
             "message": "You've been corectlly login"
         }, status=200)
-        TokenGenerator(client, TokenType.ACCESS).set_cookie(
+        JWTGenerator(client, JWTType.ACCESS).set_cookie(
             response=response)
-        TokenGenerator(client, TokenType.REFRESH).set_cookie(
+        JWTGenerator(client, JWTType.REFRESH).set_cookie(
             response=response)
         return response
     else:

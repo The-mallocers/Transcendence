@@ -28,19 +28,9 @@ class Clients(models.Model):
     def __str__(self):
         return f"Client data => Email:{self.profile.email}, Username:{self.profile.username}"
 
-    def save(self, *args, **kwargs):
-        self.password.save()
-        self.profile.save()
-        self.twoFa.save()
-        self.rights.save()
-        super().save(*args, **kwargs)
-
-    def delete(self, *args, **kargs):
-        self.password.delete()
-        self.profile.delete()
-        self.twoFa.delete()
-        self.rights.delete()
-        super().delete(*args, **kargs)
+    @property
+    def is_authenticated(self):
+        return True
 
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ FUNCIONS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
 

@@ -5,7 +5,7 @@ from django.conf import settings
 from django.http import JsonResponse, HttpRequest, HttpResponseRedirect
 
 from apps.shared.models import Clients
-from utils.jwt.TokenGenerator import TokenType, Token, TokenGenerator
+from utils.jwt.JWTGenerator import JWTType, JWT, JWTGenerator
 
 
 class JWTMiddleware:
@@ -49,29 +49,15 @@ class JWTMiddleware:
             raise jwt.InvalidKeyError(f'Token missing')
         return token_key
 
-    def _validate_token(self, token_key: str, token_type: str) -> Token:
-        try:
-            payload = jwt.decode(token_key, self.secret_key,
-                                 algorithms=[self.algorithm])
-            token = Token.get_token(payload)
-            if token.TYPE != token_type:
-                raise jwt.InvalidKeyError(
-                    f'Invalid token type: {token.TYPE}')
-            return token
-        except jwt.ExpiredSignatureError:
-            raise jwt.ExpiredSignatureError(f'Token {token_type} expired')
-        except jwt.InvalidTokenError as e:
-            raise jwt.InvalidTokenError(f'Invalid {token_type} token: {str(e)}')
-
     def _refresh_token(self, request: HttpRequest):
         try:
-            refresh_token: Token = self._validate_token(
-                self._extract_refresh_token(request), TokenType.REFRESH)
+            refresh_token: JWT = JWTGenerator.validate_token(
+                self._extract_refresh_token(request), JWTType.REFRESH)
 
             client: Clients = Clients.get_client_by_id(refresh_token.SUB)
 
-            access = TokenGenerator(client, TokenType.ACCESS)
-            refresh = TokenGenerator(client, TokenType.REFRESH)
+            access = JWTGenerator(client, JWTType.ACCESS)
+            refresh = JWTGenerator(client, JWTType.REFRESH)
 
             request.COOKIES['access_token'] = access.token_key
             request.COOKIES['refresh_token'] = refresh.token_key
@@ -95,7 +81,7 @@ class JWTMiddleware:
 
         try:
             token_key: str = self._extract_access_token(request)
-            token: Token = self._validate_token(token_key, TokenType.ACCESS)
+            token: JWT = JWTGenerator.validate_token(token_key, JWTType.ACCESS)
 
             request.access_token = token
 
