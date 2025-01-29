@@ -12,6 +12,7 @@ class Password(models.Model):
 
     #Secondary key
     password = models.CharField(max_length=512, null=False, editable=True)
+    old_password = models.CharField(max_length=521, null=True, editable=True)
 
     class Meta:
         db_table = 'client_auth_pwd'
@@ -20,21 +21,15 @@ class Password(models.Model):
 
     def save(self, *args, **kwargs):
         salt = bcrypt.gensalt(prefix=b'2b')
-        if self.password == '' or self.password is None:
-            raise ValueError("Password can't be empty")
         if not self.password.startswith('$2b$'):
             self.password = bcrypt.hashpw(self.password.encode('utf-8'),
                                           salt).decode('utf-8')
         super().save(*args, **kwargs)
 
-    def delete(self, *args, **kargs):
-        super().delete(*args, **kargs)
-
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ FUNCTIONS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
 
     def check_pwd(self, password: str) -> bool:
-        return bcrypt.checkpw(password.encode('utf-8'),
-                              self.password.encode('utf-8'))
+        return bcrypt.checkpw(password.encode('utf-8'), self.password.encode('utf-8'))
 
 
 class TwoFA(models.Model):

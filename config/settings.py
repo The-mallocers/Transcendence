@@ -27,8 +27,7 @@ PROTECTED_PATHS = [
     '/*'
 ]
 EXCLUDED_PATHS = [
-    '/api/auth/login',
-    '/api/auth/register',
+    '/api/*',
     '/auth/login',
     '/auth/register',
 ]
@@ -57,6 +56,7 @@ INSTALLED_APPS = [
     # ────────────────────────────────── Modules Apps ─────────────────────────────────── #
     'channels',
     'django_extensions',
+    'rest_framework',
 
     # ────────────────────────────────── Custom Apps ─────────────────────────────────── #
     'apps.admin.apps.AdminConfig',
@@ -98,6 +98,15 @@ TEMPLATES = [
         },
     },
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'utils.jwt.JWTAuthtication.JWTAuthentication',  # Replace with the actual path to your class
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.AllowAny',  # Optional: Require authentication globally
+    ],
+}
 
 WSGI_APPLICATION = 'config.wsgi.application'
 ASGI_APPLICATION = 'config.asgi.application'
