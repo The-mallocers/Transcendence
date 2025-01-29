@@ -1,14 +1,5 @@
 {% load static %}
 
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Page de creation</title>
-    <link rel="stylesheet" href="{% static 'css/auth/login.css' %}">
-</head>
-<body>
 <header>
     <div style="">
         <h1>Login</h1>
@@ -16,7 +7,7 @@
 </header>
 
 <div class="container">
-    <form id="register-form" action="{% url 'login_api' %}">
+    <form id="register-form" action="{% url 'login' %}">
         <div id="error-message" style="color: red;"></div>
         {% csrf_token %}
             <label for="email">Adresse e-mail</label>
@@ -33,5 +24,3 @@
         </div>
     </div>
     <script src="{% static 'js/apps/auth/login.js' %}"></script>
-</body>
-</html>
