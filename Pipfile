@@ -15,6 +15,7 @@ channels = "*"
 daphne = "*"
 whitenoise = "*"
 djangorestframework = "*"
+websockets = "*"
 
 [dev-packages]
 django-extensions = "*"
