@@ -7,6 +7,7 @@ from asyncio import Queue
 
 class PongCLI:
     def __init__(self, websocket_url):
+        self.websocket = None
         self.websocket_url = websocket_url
         self.game_state = None
         self.message_queue = Queue()
