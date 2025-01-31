@@ -16,6 +16,7 @@ daphne = "*"
 whitenoise = "*"
 djangorestframework = "*"
 websockets = "*"
+django-redis = "*"
 
 [dev-packages]
 django-extensions = "*"

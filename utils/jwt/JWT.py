@@ -1,20 +1,20 @@
 import uuid
 from dataclasses import dataclass
 from datetime import timezone, datetime, timedelta
+from enum import Enum
 
 from django.conf import settings
 
 from apps.shared.models import Clients
 
 
-@dataclass
-class JWTType:
-    ACCESS: str = str('access')
-    REFRESH: str = str('refresh')
+class JWTType(str, Enum):
+    ACCESS: str = 'access'
+    REFRESH: str = 'refresh'
 
 
 class JWT:
-    def __init__(self, client: Clients, token_type: str):
+    def __init__(self, client: Clients, token_type: JWTType):
         self.EXP = None
         self.client: Clients = client
         self.issuer = "https://api.transcendence.fr"
@@ -25,14 +25,14 @@ class JWT:
         self.JTI: uuid.UUID = uuid.uuid4()
 
         self.IAT = now
-        if token_type == str(JWTType.ACCESS):
+        if token_type == JWTType.ACCESS:
             self.EXP = now + timedelta(
                 minutes=getattr(settings, 'JWT_EXP_ACCESS_TOKEN'))
-        elif token_type == str(JWTType.REFRESH):
+        elif token_type == JWTType.REFRESH:
             self.EXP = now + timedelta(
                 days=getattr(settings, 'JWT_EXP_REFRESH_TOKEN'))
 
-        self.TYPE: str = token_type
+        self.TYPE: JWTType = token_type
 
         self.ROLES: list[str] = ['client']
         if self.client.rights.is_admin:

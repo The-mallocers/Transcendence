@@ -22,7 +22,7 @@ class PasswordSerializer(serializers.ModelSerializer):
     class Meta:
         model = Password
         fields = ['id', 'password', 'old_password']
-        write_only_field = ['password', 'old_password']
+        write_only_fields = ['password', 'old_password']
 
     def validate_password(self, value):
         instance = self.instance

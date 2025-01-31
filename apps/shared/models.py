@@ -4,6 +4,7 @@ from django.core.exceptions import ValidationError
 from django.db import models, IntegrityError, transaction
 from django.http import HttpRequest
 
+from apps.player.models import Player
 from apps.profile.models import Profile
 from apps.auth.models import Password, TwoFA
 
@@ -17,8 +18,8 @@ class Clients(models.Model):
     password = models.ForeignKey(Password, on_delete=models.CASCADE)
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
     twoFa = models.ForeignKey(TwoFA, on_delete=models.CASCADE)
-    rights = models.ForeignKey('admin.Rights', on_delete=models.CASCADE,
-                               null=True)
+    rights = models.ForeignKey('admin.Rights', on_delete=models.CASCADE, null=True)
+    player = models.ForeignKey(Player, on_delete=models.CASCADE, null=True)
 
     class Meta:
         db_table = 'client_list'
@@ -76,8 +77,11 @@ class Clients(models.Model):
                 two_fa_mod = TwoFA()
                 two_fa_mod.save()
 
+                player_mod = Player(nickname=profile_mod.username)
+                player_mod.save()
+
                 client = Clients(password=password_mod, profile=profile_mod,
-                                 rights=rights_mod, twoFa=two_fa_mod)
+                                 rights=rights_mod, twoFa=two_fa_mod, player=player_mod)
                 client.save()
 
                 return client

@@ -10,7 +10,7 @@ class JWTGenerator:
     secret_key = getattr(settings, 'JWT_SECRET_KEY')
     algorithm = getattr(settings, 'JWT_ALGORITH')
 
-    def __init__(self, client: Clients, token_type: str):
+    def __init__(self, client: Clients, token_type: JWTType):
         self.issuer = "https://api.transcendence.fr"
         self.token_key: str = ''
         self.token: JWT = JWT(client, token_type)
@@ -50,7 +50,7 @@ class JWTGenerator:
             return None
 
     @classmethod
-    def validate_token(cls, token_key: str, token_type: str) -> JWT:
+    def validate_token(cls, token_key: str, token_type: JWTType) -> JWT:
         try:
             payload = jwt.decode(token_key, cls.secret_key,
                                  algorithms=[cls.algorithm])

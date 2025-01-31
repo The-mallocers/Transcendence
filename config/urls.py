@@ -11,6 +11,8 @@ urlpatterns = [
     path('pong/', include('apps.pong.urls')),
     path('edit/', include("apps.componentBuilder.urls")),
 
+    path('test/', include('apps.game.urls')),
+
     # ────────────────────────────────────── Api ─────────────────────────────────────── #
 
     path('api/', include("apps.api.urls")),

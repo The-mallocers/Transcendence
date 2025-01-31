@@ -126,43 +126,43 @@ class MyConsumer(AsyncWebsocketConsumer):
                 limit = self.game_state.CANVAS_HEIGHT - paddle.height
                 paddle.y = min(limit, paddle.y + paddle.speed)
 
-class GameState:
-    CANVAS_WIDTH: int = 1000
-    CANVAS_HEIGHT: int = 500
+# class GameState:
+#     CANVAS_WIDTH: int = 1000
+#     CANVAS_HEIGHT: int = 500
+#
+#     def __init__(self):
+#         self.ball: Ball = Ball(x = self.CANVAS_WIDTH / 2, y = self.CANVAS_HEIGHT / 2)
+#         self.l_paddle: Paddle = Paddle(x = OFFSET_PADDLE, y = self.CANVAS_HEIGHT / 2)
+#         self.r_paddle: Paddle = Paddle(x = self.CANVAS_WIDTH - Paddle.width - OFFSET_PADDLE, y = self.CANVAS_HEIGHT / 2)
+#         self.game_active:bool = True
+#         self.left_score:int = 0
+#         self.right_score:int = 0
+#
+#     def to_dict(self):
+#         return {
+#             'left_paddle_y': self.l_paddle.y,
+#             'right_paddle_y': self.r_paddle.y,
+#             'ball_x': self.ball.x,
+#             'ball_y': self.ball.y,
+#             'left_score': self.left_score,
+#             'right_score': self.right_score,
+#             'game_active': self.game_active
+#         }
 
-    def __init__(self):
-        self.ball: Ball = Ball(x = self.CANVAS_WIDTH / 2, y = self.CANVAS_HEIGHT / 2)
-        self.l_paddle: Paddle = Paddle(x = OFFSET_PADDLE, y = self.CANVAS_HEIGHT / 2)
-        self.r_paddle: Paddle = Paddle(x = self.CANVAS_WIDTH - Paddle.width - OFFSET_PADDLE, y = self.CANVAS_HEIGHT / 2)
-        self.game_active:bool = True
-        self.left_score:int = 0
-        self.right_score:int = 0
- 
-    def to_dict(self):
-        return {
-            'left_paddle_y': self.l_paddle.y,
-            'right_paddle_y': self.r_paddle.y,
-            'ball_x': self.ball.x,
-            'ball_y': self.ball.y,
-            'left_score': self.left_score,
-            'right_score': self.right_score,
-            'game_active': self.game_active
-        }
 
-
-@dataclass
-class Ball:
-    radius:float = BALL_RADIUS 
-    x:float = 0
-    y:float = 0
-    dx:float = BALL_SPEED
-    dy:float = BALL_SPEED
-    
-@dataclass
-class Paddle:
-    width:float = PADDLE_WIDTH
-    height:float = PADDLE_HEIGHT
-    x:float = 0
-    y:float = 0
-    speed:float = PADDLE_SPEED
+# @dataclass
+# class Ball:
+#     radius:float = BALL_RADIUS
+#     x:float = 0
+#     y:float = 0
+#     dx:float = BALL_SPEED
+#     dy:float = BALL_SPEED
+#
+# @dataclass
+# class Paddle:
+#     width:float = PADDLE_WIDTH
+#     height:float = PADDLE_HEIGHT
+#     x:float = 0
+#     y:float = 0
+#     speed:float = PADDLE_SPEED
         

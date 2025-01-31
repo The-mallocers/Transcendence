@@ -5,6 +5,7 @@ from pathlib import Path
 import environ
 from django.contrib.messages.middleware import MessageMiddleware
 from django.contrib.sessions.middleware import SessionMiddleware
+from django.core.cache.backends.redis import RedisCache
 from django.middleware.clickjacking import XFrameOptionsMiddleware
 from django.middleware.common import CommonMiddleware
 from django.middleware.csrf import CsrfViewMiddleware
@@ -24,9 +25,10 @@ JWT_ALGORITH = 'HS256'
 
 #Middlware protected paths
 PROTECTED_PATHS = [
-    '/*'
+    '/'
 ]
 EXCLUDED_PATHS = [
+    '/test'
     '/api/*',
     '/auth/login',
     '/auth/register',
@@ -68,7 +70,8 @@ INSTALLED_APPS = [
     'apps.pong.apps.PongConfig',
     'apps.profile.apps.ProfileConfig',
     'apps.shared.apps.SharedConfig',
-    'apps.player.apps.PlayerConfig'
+    'apps.player.apps.PlayerConfig',
+    'apps.game.apps.GameConfig'
 ]
 
 MIDDLEWARE = [
@@ -108,6 +111,25 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.AllowAny',  # Optional: Require authentication globally
     ],
 }
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/1",  # Base Redis 1
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    }
+}
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer",  # Use Redis in production
+    },
+}
+
+SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+SESSION_CACHE_ALIAS = 'default'
 
 WSGI_APPLICATION = 'config.wsgi.application'
 ASGI_APPLICATION = 'config.asgi.application'
