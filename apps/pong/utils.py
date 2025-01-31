@@ -1,3 +1,4 @@
+import copy
 import time
 from dataclasses import dataclass
 from enum import Enum
@@ -6,7 +7,7 @@ BALL_SPEED = 2
 PADDLE_SPEED = 10
 PADDLE_WIDTH = 10
 PADDLE_HEIGHT = 100
-BALL_RADIUS = 2
+BALL_RADIUS = 1
 FPS = 60
 OFFSET_PADDLE = 25
 CANVAS_WIDTH = 1000
@@ -18,25 +19,21 @@ class GameState:
         self.id: str = id
         self.task = None
         self.ball: Ball = Ball()
-        self.game_active: bool = False
+        self.active: bool = False
         self.last_update: float = time.time()
-        self.game_status: GameStatus = GameStatus.CREATING
+        self.status: GameStatus = GameStatus.CREATING
         self.player_1: Player = None
         self.player_2: Player = None
 
-    def to_dict(self):
+    def get_snapshot(self):
         return {
-            'p1_paddle': self.player_1.paddle_y,
-            'p2_paddle': self.player_2.paddle_y,
-            'p1_score': self.player_1.score,
-            'p2_score': self.player_2.score,
-            'ball_x': self.ball.x,
-            'ball_y': self.ball.y,
-            'game_active': self.game_active
+            "ball": copy.deepcopy(self.ball),
+            "p1_score": self.player_1.score if self.player_1 else None,
+            "p2_score": self.player_2.score if self.player_2 else None,
         }
 
     def __str__(self):
-        return f"Game state id: {str(self.id)}\nIs active: {self.game_active}\nPlayer 1: {self.player_1}\nPlayer 2: {self.player_2}\n-------------------"
+        return f"Game state id: {str(self.id)}\nIs active: {self.active}\nPlayer 1: {self.player_1}\nPlayer 2: {self.player_2}\n-------------------"
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ ENUMS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
 
@@ -50,9 +47,11 @@ class GameStatus(int, Enum):
 
 class RequestType(str, Enum):
     JOIN_GAME = 'join_game'
+    START_GAME = 'start_game'
     PADDLE_MOVE = 'paddle_move'
-    GAME_STATE = 'game_state'
-    PLAYER_ACTION = 'player_action'
+    BALL_UPDATE = 'ball_update'
+    P1_SCORE_UPDATE = 'p1_score_update'
+    P2_SCORE_UPDATE = 'p2_score_update'
 
 class ErrorType(str, Enum):
     GAME_FULL = 'Game full'

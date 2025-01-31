@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from apps.pong.utils import Paddle
+from apps.pong.utils import Paddle, Ball
 
 
 class PaddleSerializer(serializers.Serializer):
@@ -12,6 +12,21 @@ class PaddleSerializer(serializers.Serializer):
 
     def create(self, validated_data):
         return Paddle(**validated_data)
+
+    def update(self, instance, validated_data):
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        return instance
+
+class BallSerializer(serializers.Serializer):
+    radius = serializers.FloatField()
+    x = serializers.FloatField()
+    y = serializers.FloatField()
+    dx = serializers.FloatField()
+    dy = serializers.FloatField()
+
+    def create(self, validated_data):
+        return Ball(**validated_data)
 
     def update(self, instance, validated_data):
         for attr, value in validated_data.items():

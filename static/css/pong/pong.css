@@ -20,6 +20,39 @@ h1 {
     text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3);
 }
 
+.button-container {
+    margin-bottom: 20px;
+    position: relative;
+    z-index: 2;
+}
+
+.button-container button {
+    font-size: 18px;
+    padding: 10px 20px;
+    margin: 5px;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+#start_game {
+    background-color: #4CAF50; /* Green */
+}
+
+#start_game:hover {
+    background-color: #45a049;
+}
+
+#play_btn_p1, #play_btn_p2 {
+    background-color: #8b4513;
+}
+
+#play_btn_p1:hover, #play_btn_p2:hover {
+    background-color: #a0522d;
+}
+
 .canvas-wrapper {
     display: inline-block;
     border: 8px solid #8b4513;
@@ -40,13 +73,13 @@ canvas {
 }
 
 .top-left {
-    top: 25%;
-    left: 45%;
+    top: 15%;
+    left: 40%;
     transform: translate(-130%, -50%);
 }
 
 .top-right {
-    top: 25%;
-    left: 55%;
+    top: 15%;
+    left: 60%;
     transform: translate(30%, -50%);
 }

@@ -55,7 +55,7 @@ class GameRoom(models.Model, AsyncWebsocketConsumer):
 
     async def connect(self):
         self.room_name = self.scope['url_route']['kwargs']['room_name']
-        self.room_group_name = f'game_{self.room_name}'
+        self.room_group_name = f'group_{self.room_name}'
 
         try:
             await sync_to_async(GameRoom.objects.get)(id=self.room_name)

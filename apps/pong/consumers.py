@@ -51,7 +51,7 @@ class MyConsumer(AsyncWebsocketConsumer):
             pass
 
     def update_game_state(self):
-        if not self.game_state.game_active:
+        if not self.game_state.active:
             return
         current_time = time.time()
         delta_time = current_time - self.last_update
