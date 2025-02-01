@@ -1,5 +1,8 @@
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
+from django.template.loader import render_to_string
+from django.middleware.csrf import get_token
+
 
 from apps.shared.models import Clients
 
@@ -10,6 +13,11 @@ def get(req):
             "client": client,
             "clients": Clients.objects.all()
         }
-        return render(req, "apps/index.html", context)
+        html_content = render_to_string("apps/index.html", context)
+        return JsonResponse({'html': html_content})
     else:
-        return HttpResponseRedirect('/auth/login')
+        csrf_token = get_token(req)
+        html_content = render_to_string("apps/auth/login.html", {"csrf_token": csrf_token})
+        return JsonResponse({
+            'html': html_content,
+        })

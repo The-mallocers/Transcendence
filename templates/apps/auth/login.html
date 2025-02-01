@@ -1,21 +1,7 @@
 {% load static %}
 
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Page de creation</title>
-    <link rel="stylesheet" href="{% static 'css/auth/login.css' %}">
-</head>
-<body>
-<header>
-    <div style="">
-        <h1>Login</h1>
-    </div>
-</header>
-
 <div class="container">
+    <link rel="stylesheet" href="{% static 'css/auth/login.css' %}">
     <form id="register-form" action="{% url 'login_api' %}">
         <div id="error-message" style="color: red;"></div>
         {% csrf_token %}
@@ -31,7 +17,5 @@
             <p>Pas encore inscrit ? <a href="/auth/register">S'enregister</a>
             </p>
         </div>
-    </div>
-    <script src="{% static 'js/apps/auth/login.js' %}"></script>
-</body>
-</html>
+</div>
+<script src="{% static 'js/apps/auth/login.js' %}"></script>

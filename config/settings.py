@@ -67,7 +67,8 @@ INSTALLED_APPS = [
     'apps.pageBuilder.apps.PagebuilderConfig',
     'apps.pong.apps.PongConfig',
     'apps.profile.apps.ProfileConfig',
-    'apps.shared.apps.SharedConfig'
+    'apps.shared.apps.SharedConfig',
+    'apps.pages.apps.PagesConfig',
 ]
 
 MIDDLEWARE = [
