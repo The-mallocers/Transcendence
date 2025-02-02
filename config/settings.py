@@ -24,7 +24,7 @@ JWT_ALGORITH = 'HS256'
 
 #Middlware protected paths
 PROTECTED_PATHS = [
-    '/*'
+    #'/*'
 ]
 EXCLUDED_PATHS = [
     '/api/*',

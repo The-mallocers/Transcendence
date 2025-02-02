@@ -55,7 +55,8 @@ const routes = [
     {
         path: '/',
         template: async () => {
-            const response = await fetch('pages/', {
+            console.log("about to fetch: pages/");
+            const response = await fetch('/pages/', {
                 headers: {
                     'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content
                 }
