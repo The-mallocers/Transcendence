@@ -1,3 +1,5 @@
+console.log("ALLOO :", window.location.pathname);
+
 class Router {
     constructor(routes) {
         this.routes = routes;
@@ -62,18 +64,18 @@ const routes = [
             return data.html;
         },
     },
-    // {
-    //     path: '/auth/login',
-    //     template: async () => {
-    //         const response = await fetch('api/auth/login', {
-    //             headers: {
-    //                 'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content
-    //             }
-    //         });
-    //         const data = await response.json();
-    //         return data.html;
-    //     },
-    // },
+    {
+        path: 'pages/auth/login',
+        template: async () => {
+            const response = await fetch('pages/auth/login', {
+                headers: {
+                    'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content
+                }
+            });
+            const data = await response.json();
+            return data.html;
+        },
+    },
 ];
 
 const router = new Router(routes);

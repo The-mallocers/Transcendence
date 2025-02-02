@@ -7,6 +7,10 @@ from django.http import JsonResponse, HttpRequest, HttpResponseRedirect
 from apps.shared.models import Clients
 from utils.jwt.JWTGenerator import JWTType, JWT, JWTGenerator
 
+from django.middleware.csrf import get_token
+from django.template.loader import render_to_string
+
+
 
 class JWTMiddleware:
     def __init__(self, get_response):
@@ -95,9 +99,20 @@ class JWTMiddleware:
                 return self._refresh_token(request)
             except (jwt.ExpiredSignatureError, jwt.InvalidTokenError,
                     jwt.InvalidKeyError):
-                return HttpResponseRedirect('/auth/login')
+        #         csrf_token = get_token(request)
+        #         html_content = render_to_string("apps/auth/login.html", {"csrf_token": csrf_token})
+        #         return JsonResponse({
+        #             'html': html_content,
+        # })
+            #Here we redirect, but we want it to be spa, but i got no fucking how to send json to somewhere useful to render a page
+                return HttpResponseRedirect('pages/auth/login')
         except (jwt.InvalidTokenError, jwt.InvalidKeyError):
-            return HttpResponseRedirect('/auth/login')
+            # csrf_token = get_token(request)
+            # html_content = render_to_string("apps/auth/login.html", {"csrf_token": csrf_token})
+            # return JsonResponse({
+            #         'html': html_content,
+            # })
+            return HttpResponseRedirect('pages/auth/login')
         except Exception as e:
             return JsonResponse(
                 {'error': f'Internal server error: {str(e)}'},
