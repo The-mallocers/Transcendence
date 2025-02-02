@@ -40,7 +40,7 @@ class Router {
 }
 
 window.onload = async ()=>{
-    console.log(pongRoute.possibleRoutes)
+    // console.log(pongRoute.possibleRoutes)
     console.log(window.location.pathname)
     await router.handleLocation();
 }
@@ -51,33 +51,45 @@ function navigateTo(path) {
 }
 
 // Example route definitions
+const header = {'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content}
+
+async function fetchRoute(path) {
+    const response = await fetch(path, {
+        headers: header
+    });
+    const data = await response.json();
+    return data.html;
+}
+
 const routes = [
     {
         path: '/',
         template: async () => {
-            console.log("about to fetch: pages/");
-            const response = await fetch('/pages/', {
-                headers: {
-                    'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content
-                }
-            });
-            const data = await response.json();
-            return data.html;
+            return await fetchRoute('/pages/');
         },
     },
     {
-        path: 'pages/auth/login',
+        path: '/pages/auth/login',
         template: async () => {
-            const response = await fetch('pages/auth/login', {
-                headers: {
-                    'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content
-                }
-            });
-            const data = await response.json();
-            return data.html;
+            return await fetchRoute('/pages/auth/login');
+        },
+    },
+    {
+        path: '/pages/auth/register',
+        template: async () => {
+            return await fetchRoute('/pages/auth/register');
         },
     },
 ];
+
+//Need to do this so that the event listerner also listens to the dynamic html
+document.addEventListener('click', (e) => {
+    if (e.target.matches('[data-route]')) {
+        const route = e.target.dataset.route;
+        navigateTo(route);
+    }
+});
+
 
 const router = new Router(routes);
 

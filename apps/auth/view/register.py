@@ -4,6 +4,9 @@ from django.shortcuts import render
 from apps.shared.models import Clients
 from utils.jwt.JWTGenerator import JWTGenerator, JWTType
 
+from django.template.loader import render_to_string
+from django.middleware.csrf import get_token
+
 
 def post(req: HttpRequest):
     client = Clients.get_client_by_email(req.POST.get('email'))
@@ -35,8 +38,11 @@ def post(req: HttpRequest):
 
 
 def get(req):
-    users = Clients.objects.all()
-
-    context = {"users": users}
-
-    return render(req, "apps/auth/register.html", context)
+    print("in the register get view!")
+    html_content = render_to_string("apps/auth/login.html", {"csrf_token": get_token(req)})
+    return JsonResponse({
+        'html': html_content,
+    })
+    # users = Clients.objects.all()
+    # context = {"users": users}
+    # return render(req, "apps/auth/register.html", context)

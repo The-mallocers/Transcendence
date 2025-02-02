@@ -18,8 +18,7 @@ def get(req):
         return JsonResponse({'html': html_content})
     else:
         print("allo je suis la")
-        csrf_token = get_token(req)
-        html_content = render_to_string("apps/auth/login.html", {"csrf_token": csrf_token})
+        html_content = render_to_string("apps/auth/login.html", {"csrf_token": get_token(req)})
         return JsonResponse({
             'html': html_content,
         })
