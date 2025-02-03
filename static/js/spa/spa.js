@@ -9,7 +9,7 @@ class Router {
     //Claude said the above method is better than : document.querySelector('#app');
     init() {
         window.addEventListener('popstate', () => this.handleLocation());
-        this.handleLocation();
+        //this.handleLocation();
     }
 
     async handleLocation() {
@@ -51,7 +51,10 @@ function navigateTo(path) {
 }
 
 // Example route definitions
-const header = {'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content}
+const header = {
+    'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content,
+    'X-Requested-With': 'XMLHttpRequest',
+};
 
 async function fetchRoute(path) {
     const response = await fetch(path, {
@@ -65,17 +68,18 @@ const routes = [
     {
         path: '/',
         template: async () => {
+            console.log("I am fetching a route in spa.js")
             return await fetchRoute('/pages/');
         },
     },
     {
-        path: '/pages/auth/login',
+        path: '/auth/login',
         template: async () => {
             return await fetchRoute('/pages/auth/login');
         },
     },
     {
-        path: '/pages/auth/register',
+        path: '/auth/register',
         template: async () => {
             return await fetchRoute('/pages/auth/register');
         },

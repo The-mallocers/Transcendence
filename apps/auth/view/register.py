@@ -39,7 +39,7 @@ def post(req: HttpRequest):
 
 def get(req):
     print("in the register get view!")
-    html_content = render_to_string("apps/auth/login.html", {"csrf_token": get_token(req)})
+    html_content = render_to_string("apps/auth/register.html", {"csrf_token": get_token(req)})
     return JsonResponse({
         'html': html_content,
     })
