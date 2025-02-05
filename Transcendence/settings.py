@@ -14,8 +14,11 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 import os
 import sys
 from pathlib import Path
+from dotenv import load_dotenv
 
 import environ
+
+load_dotenv('.env')
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 ENV = environ.Env(DEBUG_MODE=True)
@@ -25,7 +28,8 @@ ENV.read_env(env_file=os.path.join(BASE_DIR, '.env'))
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = ENV('DJANGO_SECRET_KEY', default='1234')
+# SECRET_KEY = ENV('DJANGO_SECRET_KEY', default='1234')
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 
 # JWT Settings
 JWT_SECRET_KEY = ENV('JWT_SECRET_KEY', default='1234')
@@ -51,12 +55,15 @@ ROLE_PROTECTED_PATHS = {
 }
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = ENV('DJANGO_DEBUG', default=False)
+# DEBUG = ENV('DJANGO_DEBUG', default=False)
+DEBUG = bool(os.getenv("DEBUG", default=0))
 
-ALLOWED_HOSTS = [
-    'localhost',
-    '127.0.0.1'
-]
+# ALLOWED_HOSTS = [
+#     'localhost',
+#     '127.0.0.1'
+# ]
+ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS","127.0.0.1").split(",")
+CSRF_TRUSTED_ORIGINS = os.getenv("DJANGO_CSRF_TRUSTED_ORIGINS","https://127.0.0.1").split(",")
 
 # Application definition
 # had to add django.contrib.auth, not sure why

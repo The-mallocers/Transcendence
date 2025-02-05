@@ -1,0 +1,109 @@
+services:
+  nginx:
+    # depends_on:
+    #   - wordpress
+    build: ./nginx
+    image: nginx
+    env_file: .env
+    ports: 
+      - "80:80"
+    # volumes:
+    #   - wordpress:/var/www/html
+    #   - ../secrets:/etc/nginx/certs:ro
+    networks:
+      - wp-networks
+
+
+#   wordpress:
+#     build: ./requirements/wordpress
+#     image: wordpress
+#     env_file: .env
+#     volumes:
+#       - wordpress:/var/www/html
+#     depends_on:
+#       - mariadb
+#       - redis
+#     expose:
+#       - "9000"
+#     networks:
+#       - wp-networks
+
+#   mariadb:
+#     build: ./requirements/mariadb
+#     env_file: .env
+#     image: mariadb
+#     volumes:
+#       - mariadb:/var/lib/mysql
+#     restart: always
+#     expose: 
+#       - 3306
+#     ports:
+#       - "3306:3306"
+#     networks:
+#       - wp-networks
+  
+#   redis:
+#     build: ./requirements/bonus/redis
+#     image: redis
+#     restart: always
+#     ports:
+#       - '6379:6379'
+#     expose:
+#       - '6379'
+#     networks:
+#       - wp-networks
+
+#   ftp:
+#     build: ./requirements/bonus/ftp
+#     image: ftp
+#     restart: always
+#     networks:
+#       - wp-networks
+#     volumes:
+#       - wordpress:/srv/ftp:ro
+#     ports:
+#       - "21:21"
+#       - "21100-21110:21100-21110"
+  
+#   website:
+#     build: ./requirements/bonus/website
+#     image: website
+#     restart: always
+#     ports: 
+#       - "8080:8080"
+#     networks:
+#       - wp-networks
+
+#   weather:
+#     build: ./requirements/bonus/weather
+#     volumes:
+#       - weather:/var/www/weather
+#     image: weather
+#     restart: always
+#     networks:
+#       - wp-networks
+
+# volumes:
+#   mariadb:
+#     driver: local
+#     driver_opts:
+#       type: none
+#       o: bind
+#       device: /home/bpoyet/data/mariadb
+
+#   wordpress:
+#     driver: local
+#     driver_opts:
+#       type: none
+#       o: bind
+#       device: /home/bpoyet/data/wordpress
+#   weather:
+#     driver: local
+#     driver_opts:
+#       type: none
+#       o: bind
+#       device: /home/bpoyet/data/weather
+
+# networks:
+#   wp-networks:
+#     driver: bridge
