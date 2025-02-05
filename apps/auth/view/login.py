@@ -13,6 +13,7 @@ def post(req: HttpRequest):
     password = req.POST.get("password")
     client = Clients.get_client_by_email(email)
 
+    print("in post login")
     if all(v is None for v in [email, password]):
         return JsonResponse({
             "success": False,
@@ -28,7 +29,7 @@ def post(req: HttpRequest):
     if client.password.check_pwd(password):
         response = JsonResponse({
             "success": True,
-            "message": "You've been corectlly login"
+            "message": "You've been correctly login"
         }, status=200)
         JWTGenerator(client, JWTType.ACCESS).set_cookie(
             response=response)

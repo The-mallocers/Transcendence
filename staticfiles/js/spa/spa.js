@@ -1,6 +1,5 @@
 console.log("ALLOO :", window.location.pathname);
 
-
 class Router {
     constructor(routes) {
         this.routes = routes;
@@ -47,7 +46,7 @@ window.onload = async ()=>{
 }
 
 // Navigation helper
-export function navigateTo(path) {
+function navigateTo(path) {
     router.navigate(path);
 }
 

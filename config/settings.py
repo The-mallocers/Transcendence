@@ -27,6 +27,7 @@ PROTECTED_PATHS = [
     #'/*'
 ]
 EXCLUDED_PATHS = [
+    '/api/auth/login',
     '/api/*',
     '/pages/auth/login',
     '/auth/register',
