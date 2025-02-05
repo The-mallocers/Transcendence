@@ -18,16 +18,16 @@ async function validateCode() {
 			});
 			
 			const result = await response.json();
-
+			console.log(result);
 			if(response.status === 200 && result.success)
 			{
-				console.log(response);
 				window.location.href = result.redirect_url;
 			}
 			alert('Code submitted: ' + code);
 		}catch(err)
 		{
 			console.log(err);
+			window.location.href = result.redirect_url;
 		}
 	} else {
 		alert('Please enter a valid 6-digit code');

@@ -44,17 +44,19 @@ def view_two_fa(req):
         context = {"client" : client}
         return render(req,"auth/2fa.html", context)
     return render(req,"auth/2fa.html")
-    
+
+def formulate_json_response(state,status, message, redirect_url):
+    return(JsonResponse({
+            "success": state,
+            "message": message,
+            "redirect_url":redirect_url
+        }, status=status))
 
 def post_twofa_code(req):
     email = req.COOKIES.get('email')
     if email:
         client = Clients.get_client_by_email(email)
-        response = JsonResponse({
-            "success": False,
-            "message": "Error cant GET to this URL",
-            "redirect_url": "/auth/login"
-        }, status=400)
+        response = formulate_json_response(False, 400, "Error getting the user", "/auth/login") 
         if client is None:
             return response
         if req.method == "POST":
@@ -65,22 +67,15 @@ def post_twofa_code(req):
             if is_valid:
                 if not client.twoFa.scanned:
                     client.twoFa.update("scanned", True)
-                response = JsonResponse({
-                    "success" : True,
-                    "message" : "Login Successful",
-                    "redirect_url" : "/"
-                }, status=200)
+                response = formulate_json_response(True, 200, "Login Successful", "/")
+                print(response)
                 TokenGenerator(client, TokenType.ACCESS).set_cookie(
                     response=response)
                 TokenGenerator(client, TokenType.REFRESH).set_cookie(
                     response=response)
                 return response
         return response
-    response = JsonResponse({
-        "success": False,
-        "message": "Error no email coresponding to this request",
-        "redirect_url": "/auth/login"
-    }, status=400)
+    response = formulate_json_response(False, 400, "No email match this request", "/auth/login")
     return response
 
 @csrf_exempt
