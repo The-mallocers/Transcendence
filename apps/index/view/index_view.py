@@ -17,7 +17,7 @@ def get(req):
         html_content = render_to_string("apps/index.html", context)
         return JsonResponse({'html': html_content})
     else:
-        print("allo je suis la")
+        print("no client detected")
         html_content = render_to_string("apps/auth/login.html", {"csrf_token": get_token(req)})
         return JsonResponse({
             'html': html_content,

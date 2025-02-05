@@ -27,11 +27,36 @@ class Router {
             try {
                 const content = await route.template();
                 this.rootElement.innerHTML = content;
-                // route.script && route.script();
+                this.reloadScripts();
             } catch (error) {
                 console.error('Route rendering failed:', error);
             }
         }
+    }
+
+    reloadScripts() {
+        // Execute all scripts in the new content
+        const scripts = this.rootElement.querySelectorAll('script');
+        scripts.forEach(oldScript => {
+            const newScript = document.createElement('script');
+            
+            // Copy src or inline content
+            if (oldScript.src) {
+                newScript.src = oldScript.src;
+            } else {
+                newScript.textContent = oldScript.textContent;
+            }
+            
+            // Copy other attributes
+            Array.from(oldScript.attributes).forEach(attr => {
+                if (attr.name !== 'src') { // Skip src as we handled it above
+                    newScript.setAttribute(attr.name, attr.value);
+                }
+            });
+            
+            // Replace old script with new one
+            oldScript.parentNode.replaceChild(newScript, oldScript);
+        });
     }
 
     navigate(path) {
@@ -139,8 +164,6 @@ const pongRoute = new Route(
     
 )
 
-
-
 /// routes
 
 /*
@@ -149,3 +172,5 @@ const pongRoute = new Route(
         directSubRoutes: [{route object}]
     }
 */
+
+

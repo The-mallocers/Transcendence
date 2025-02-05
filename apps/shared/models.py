@@ -7,6 +7,8 @@ from django.http import HttpRequest
 from apps.profile.models import Profile
 from apps.auth.models import Password, TwoFA
 
+import json
+
 
 class Clients(models.Model):
     #Primary key
@@ -51,6 +53,11 @@ class Clients(models.Model):
 
     @staticmethod
     def get_client_by_request(request: HttpRequest):
+        print("request is: ", request)
+        # print("Headers:", request.headers)
+        # data = json.loads(request.body)
+        # print("JSON data:", data)
+
         if hasattr(request, 'access_token'):
             token = request.access_token
             return Clients.get_client_by_id(token.SUB)
