@@ -122,15 +122,30 @@ ASGI_APPLICATION = 'Transcendence.asgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'transcendence.sqlite3',
+#         'TEST': {
+#             'NAME': BASE_DIR / 'test_db.sqlite3',
+#         },
+#     }
+# }
+
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'transcendence.sqlite3',
-        'TEST': {
-            'NAME': BASE_DIR / 'test_db.sqlite3',
-        },
-    }
+     'default': {
+         'ENGINE': 'django.db.backends.{}'.format(
+             os.getenv('DATABASE_ENGINE', 'sqlite3')
+         ),
+         'NAME': os.getenv('DATABASE_NAME', 'polls'),
+         'USER': os.getenv('DATABASE_USERNAME', 'myprojectuser'),
+         'PASSWORD': os.getenv('DATABASE_PASSWORD', 'password'),
+         'HOST': os.getenv('DATABASE_HOST', '127.0.0.1'),
+         'PORT': os.getenv('DATABASE_PORT', 5432),
+     }
 }
+
+
 
 if 'test' in sys.argv:
     DATABASES['default']['NAME'] = BASE_DIR / 'test_db.sqlite3'

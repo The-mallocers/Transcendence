@@ -1,18 +1,46 @@
 services:
+  db:
+    image: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    ports:
+      - "5432:5432"
+    env_file:
+      - .env
+    networks:
+      - wp-networks
+  
+  django-web:
+    depends_on:
+      - db
+    expose:
+      - 8000
+    build: .
+    volumes:
+      - ./static:/app/staticfiles
+    env_file:
+      - .env
+
   nginx:
-    # depends_on:
-    #   - wordpress
-    build: ./nginx
     image: nginx
-    env_file: .env
     ports: 
-      - "80:80"
-    # volumes:
-    #   - wordpress:/var/www/html
-    #   - ../secrets:/etc/nginx/certs:ro
+      - "8001:80" #"HOST_PORT:CONTAINER_PORT"
+    depends_on:
+      - django-web
+    build: ./nginx
+    env_file: .env
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./static:/static:ro
     networks:
       - wp-networks
 
+networks:
+  wp-networks:
+    driver: bridge
+
+volumes:
+  postgres_data:
 
 #   wordpress:
 #     build: ./requirements/wordpress
@@ -53,36 +81,6 @@ services:
 #     networks:
 #       - wp-networks
 
-#   ftp:
-#     build: ./requirements/bonus/ftp
-#     image: ftp
-#     restart: always
-#     networks:
-#       - wp-networks
-#     volumes:
-#       - wordpress:/srv/ftp:ro
-#     ports:
-#       - "21:21"
-#       - "21100-21110:21100-21110"
-  
-#   website:
-#     build: ./requirements/bonus/website
-#     image: website
-#     restart: always
-#     ports: 
-#       - "8080:8080"
-#     networks:
-#       - wp-networks
-
-#   weather:
-#     build: ./requirements/bonus/weather
-#     volumes:
-#       - weather:/var/www/weather
-#     image: weather
-#     restart: always
-#     networks:
-#       - wp-networks
-
 # volumes:
 #   mariadb:
 #     driver: local
@@ -103,7 +101,3 @@ services:
 #       type: none
 #       o: bind
 #       device: /home/bpoyet/data/weather
-
-# networks:
-#   wp-networks:
-#     driver: bridge
