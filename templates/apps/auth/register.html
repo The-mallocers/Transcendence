@@ -8,7 +8,7 @@
 
 <div class="container">
     <link rel="stylesheet" href="{% static 'css/auth/login.css' %}">
-    <form method="POST" id="register-form" action="{% url 'register_api' %}"
+    <form method="POST" id="register-form" action="{% url 'register' %}"
             enctype="multipart/form-data">
         {% csrf_token %}
         <div id="error-message" style="color: red;"></div>

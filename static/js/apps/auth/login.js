@@ -12,36 +12,24 @@ form.addEventListener("submit", function (event) {
     const formData = new FormData(form);
     const errorDiv = document.getElementById("error-message")
 
-    console.log("About to fetch : ", form.action);
-    // Utilisation de l'API Fetch pour envoyer les données
     fetch(form.action, {
-        method: "POST",  // Méthode de la requête (POST)
-        body: formData,  // Corps de la requête (les données du formulaire)
+        method: "POST",
+        body: formData,
         headers: {
             'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
         },
     })
-        .then(response => response.json())  // Réponse en JSON
-        .then(data => {
-            if (data.success) {
-                // Si la soumission est réussie, vous pouvez afficher un message ou rediriger l'utilisateur
-                alert("Yo la team jsuis dans le js de login")
-                console.log("data", data)
-                console.log("allo ?")
-                navigateTo('/');
-                return
-                // window.location.href = '/';  // Redirige si une URL de redirection est fournie
-            } else {
-                // En cas d'erreur, afficher un message d'erreur
-                errorDiv.textContent = data.message;
-            }
-        })
-        .then((ZEBI => {
-                const allCookies = document.cookie;
-                console.log(allCookies);
-        }))
-        .catch(error => {
-            console.error("There was an error with the fetch operation:", error);
-            errorDiv.textContent = error;
-        });
+    .then(response => {
+        if (response.status === 401){
+            return Promise.reject('Unauthorized: Invalid credentials')
+        }
+    })
+    .then(data => {
+        navigateTo('/');
+    })
+    .catch(error => {
+        console.log("test");
+        console.error("There was an error with the fetch operation:", error);
+        errorDiv.textContent = error;
+    });
 });
