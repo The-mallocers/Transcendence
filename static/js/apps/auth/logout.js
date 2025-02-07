@@ -1,7 +1,7 @@
 document.getElementById('logout-btn').addEventListener('click', function () {
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-    fetch('/api/auth/logout', {
+    fetch('/api/auth/logout/', {
         method: 'POST',
         headers: {
             'X-CSRFToken': csrfToken,  // Inclus le CSRF token

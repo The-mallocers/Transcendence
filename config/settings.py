@@ -41,7 +41,7 @@ DEBUG = ENV('DJANGO_DEBUG', default=False)
 
 ALLOWED_HOSTS = [
     'localhost',
-    '127.0.0.1'
+    '127.0.0.1',
 ]
 
 # Application definition
@@ -102,9 +102,9 @@ TEMPLATES = [
 ]
 
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'utils.jwt.JWTAuthtication.JWTAuthentication',  # Replace with the actual path to your class
-    ],
+    # 'DEFAULT_AUTHENTICATION_CLASSES': [
+    #     'utils.jwt.JWTAuthtication.JWTAuthentication',  # Replace with the actual path to your class
+    # ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.AllowAny',  # Optional: Require authentication globally
     ],
