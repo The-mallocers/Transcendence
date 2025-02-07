@@ -2,7 +2,7 @@
 
 <div class="container">
     <link rel="stylesheet" href="{% static 'css/auth/login.css' %}">
-    <form id="register-form" enctype="multipart/form-data" action="{% url 'login_api' %}" >
+    <form id="register-form" enctype="multipart/form-data" action="{% url 'login' %}" >
         <div id="error-message" style="color: red;"></div>
         {% csrf_token %}
             <label for="email">Adresse e-mail</label>
