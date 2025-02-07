@@ -53,14 +53,16 @@ class Clients(models.Model):
 
     @staticmethod
     def get_client_by_request(request: HttpRequest):
-        print("request is: ", request)
-        # print("Headers:", request.headers)
-        # data = json.loads(request.body)
-        # print("JSON data:", data)
+        from utils.jwt.JWT import JWTType
+        from utils.jwt.JWTGenerator import JWTGenerator
 
-        if hasattr(request, 'access_token'):
-            token = request.access_token
+        if 'access_token' in request.COOKIES:
+            token = JWTGenerator.extract_token(request, JWTType.ACCESS)
+            if not token:
+                return None
+            print(f"my token {token.SUB}")
             return Clients.get_client_by_id(token.SUB)
+
         return None
 
     @staticmethod

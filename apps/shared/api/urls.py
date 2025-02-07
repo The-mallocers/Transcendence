@@ -1,7 +1,7 @@
 from django.urls import path
 
-from apps.shared.api.views import ClientCreateView
+from apps.shared.api.views import ClientApiView
 
 urlpatterns = [
-    path('', ClientCreateView.as_view(), name='client-create'),
+    path('', ClientApiView.as_view(), name='client-create'),
 ]
