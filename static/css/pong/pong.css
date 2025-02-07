@@ -37,20 +37,12 @@ h1 {
     transition: background 0.3s;
 }
 
-#start_game {
-    background-color: #4CAF50; /* Green */
+#ready-start-btn {
+    background-color: #2176d3; /* Green */
 }
 
-#start_game:hover {
-    background-color: #45a049;
-}
-
-#play_btn_p1, #play_btn_p2 {
-    background-color: #8b4513;
-}
-
-#play_btn_p1:hover, #play_btn_p2:hover {
-    background-color: #a0522d;
+#ready-start-btn:hover {
+    background-color: #1a5ba2;
 }
 
 .canvas-wrapper {

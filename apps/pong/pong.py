@@ -4,43 +4,68 @@ import time
 from typing import Dict
 
 from asgiref.sync import sync_to_async
+from channels.db import database_sync_to_async
 from channels.layers import get_channel_layer
 
 from apps.player.api.serializers import PlayerSerializer
 from apps.player.models import Player
-from apps.pong.api.serializers import BallSerializer
+from apps.pong.api.serializers import BallSerializer, PaddleSerializer
 from apps.pong.utils import RequestType, GameState, ErrorType, Paddle, FPS, \
     Ball, CANVAS_HEIGHT, CANVAS_WIDTH, BALL_SPEED
+from apps.shared.models import Clients
 
 
 class PongLogic:
     games: Dict[str, GameState] = {}
 
-    async def process_action(self, action: RequestType, data: Dict, room: str):
-        if room not in PongLogic.games:
-            PongLogic.games[room] = GameState(id=room)
+    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ DATABASE ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
+    @database_sync_to_async
+    def check_room_exists(self, player_id):
+        try:
+            Player.objects.get(id=player_id)
+            return True
+        except Player.DoesNotExist:
+            return False
 
+    @database_sync_to_async
+    def get_player(self, client_id):
+        try:
+            client = Clients.objects.get(id=client_id)
+            return client.player
+        except (Clients.DoesNotExist | Player.DoesNotExist):
+            return None
+
+    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ LOGIC ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    async def process_action(self, client_id, data: Dict, room: str):
+        request_type: RequestType = RequestType(data.get('action'))
+        player = await self.get_player(client_id)
         handlers = {
             RequestType.JOIN_GAME: self._handle_join_game,
             RequestType.PADDLE_MOVE: self._handle_paddle_move,
-            RequestType.START_GAME: self._handle_start_game
+            RequestType.START_GAME: self._handle_start_game,
+            RequestType.IS_READY: self._handle_is_ready,
         }
 
-        if action in handlers:
-            return await handlers[action](data, PongLogic.games[room])
+        if room not in PongLogic.games:
+            PongLogic.games[room] = GameState(id=room)
+        if not player:
+            raise ValueError(f'Unknown client: {client_id}')
+        if request_type in handlers:
+            return await handlers[request_type](data, PongLogic.games[room], player)
         else:
-            raise ValueError(f'Unknown action: {action}')
+            raise ValueError(f'Unknown action: {request_type}')
 
-    async def _handle_join_game(self, data: Dict, game: GameState):
-        player: Player = await sync_to_async(Player.objects.get, thread_sensitive=True)(id=data.get('player_id'))
+    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ HANDLES ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
 
+    async def _handle_join_game(self, data: Dict, game: GameState, player: Player):
         #Check if the player is arleady join
         if player == game.player_1 or player == game.player_2:
             return {
                 'error': ErrorType.ALREADY_JOIN,
                 'player_id': str(player.id)
             }
-        else:
+        else: #il faudra implementer le random pour savoir sur quel cote le joueur joue
             if game.player_1 is None:
                 player.position = 'right'
                 game.player_1 = player
@@ -59,14 +84,13 @@ class PongLogic:
             'player_id': str(player.id)
         }
 
-    async def _handle_paddle_move(self, data: Dict, game: GameState):
-        player: Player = await sync_to_async(Player.objects.get, thread_sensitive=True)(id=data.get('player_id'))
-
+    async def _handle_paddle_move(self, data: Dict, game: GameState, player: Player):
         if player == game.player_1 or player == game.player_2:
             await player.move(data.get('direction'))
             return {
                 'type': RequestType.PADDLE_MOVE,
-                'player': PlayerSerializer(player).data
+                'player_id': player.id,
+                'paddle': PaddleSerializer(player.paddle).data
             }
         else:
             return {
@@ -74,12 +98,26 @@ class PongLogic:
                 'player_id': str(player.id)
             }
 
-    async def _handle_start_game(self, data: Dict, game: GameState):
-        game.active = True
-        game.task = asyncio.create_task(self._game_task(game))
-        return {
-            'type': RequestType.START_GAME,
-        }
+    async def _handel_is_ready(self, data: Dict, game: GameState, player: Player):
+        if player == game.player_1 or player == game.player_2:
+            player.is_ready = True
+            return {
+                'type': RequestType.IS_READY,
+                'player_id': player.id,
+                'is_ready': player.is_ready
+            }
+
+    async def _handle_start_game(self, data: Dict, game: GameState, player: Player):
+        if game.player_1.is_ready and game.player_2.is_ready:
+            game.active = True
+            game.task = asyncio.create_task(self._game_task(game))
+            return {
+                'type': RequestType.START_GAME,
+            }
+        else:
+            return {
+                'error': ErrorType.NOT_READY
+            }
 
     async def handle_disconnect(self, room: str, player_id: str):
         if room in self.game_states and player_id in \
@@ -90,7 +128,7 @@ class PongLogic:
 
     async def _game_task(self, game: GameState):
         try:
-            while True:
+            while game.active:
                 previous_state = game.get_snapshot()
                 self._game_loop(game)
                 current_state = game.get_snapshot()
@@ -107,9 +145,6 @@ class PongLogic:
             pass
 
     def _game_loop(self, game: GameState):
-        if not game.active:
-            return
-
         current_time = time.time()
         delta_time = current_time - game.last_update
         ball: Ball = game.ball

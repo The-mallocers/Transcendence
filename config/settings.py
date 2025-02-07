@@ -29,7 +29,7 @@ PROTECTED_PATHS = [
 ]
 EXCLUDED_PATHS = [
     '/test'
-    '/api/*',
+    '/api/auth/login',
     '/auth/login',
     '/auth/register',
 ]

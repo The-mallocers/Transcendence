@@ -16,7 +16,8 @@ urlpatterns = [
     path('api/', include("apps.api.urls")),
     path('api/auth/', include('apps.auth.api.urls')),
     path('api/profile/', include('apps.profile.api.urls')),
-    path('api/client/', include('apps.shared.api.urls'))
+    path('api/client/', include('apps.shared.api.urls')),
+    path('api/player/', include('apps.player.api.urls')),
 ]
 
 if settings.DEBUG:

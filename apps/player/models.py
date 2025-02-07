@@ -4,7 +4,7 @@ from asgiref.sync import sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 from django.db import models
 from django.db.models import ManyToManyField, ImageField, ForeignKey
-from django.db.models.fields import CharField, IntegerField
+from django.db.models.fields import CharField, IntegerField, BooleanField
 
 from apps.pong.utils import Paddle, CANVAS_HEIGHT
 
@@ -28,6 +28,7 @@ class Player(models.Model, AsyncWebsocketConsumer):
     # ── Game Info ─────────────────────────────────────────────────────────────────────
     score = IntegerField(default=0)
     position = CharField(max_length=5, null=True)
+    is_ready = BooleanField(default=False)
     paddle = Paddle()
 
     # ━━ PLAYER INFOS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
@@ -62,4 +63,5 @@ class Player(models.Model, AsyncWebsocketConsumer):
         if direction == 'down':
             limit = CANVAS_HEIGHT - self.paddle.height
             self.paddle.y -= 1 # min(limit, self.paddle.y + self.paddle.speed)
-        await  self.async_save()
+        await self.async_save()
+        print(self, f"Pladdle = {self.paddle.y}")

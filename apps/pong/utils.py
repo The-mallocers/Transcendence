@@ -30,6 +30,8 @@ class GameState:
             "ball": copy.deepcopy(self.ball),
             "p1_score": self.player_1.score if self.player_1 else None,
             "p2_score": self.player_2.score if self.player_2 else None,
+            "p1_paddle": copy.deepcopy(self.player_1.paddle),
+            "p2_paddle": copy.deepcopy(self.player_2.paddle)
         }
 
     def __str__(self):
@@ -48,6 +50,7 @@ class GameStatus(int, Enum):
 class RequestType(str, Enum):
     JOIN_GAME = 'join_game'
     START_GAME = 'start_game'
+    IS_READY = 'is_ready'
     PADDLE_MOVE = 'paddle_move'
     BALL_UPDATE = 'ball_update'
     P1_SCORE_UPDATE = 'p1_score_update'
@@ -57,6 +60,7 @@ class ErrorType(str, Enum):
     GAME_FULL = 'Game full'
     ALREADY_JOIN = "Player has already join"
     NOT_IN_GAME = 'Player not int game'
+    NOT_READY = 'Players is not ready'
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ OBJECTS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
