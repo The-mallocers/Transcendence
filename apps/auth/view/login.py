@@ -27,6 +27,7 @@ def post(req: HttpRequest):
         }, status=401)
 
     if client.password.check_pwd(password):
+        print("giving tokens in my js response")
         response = JsonResponse({
             "success": True,
             "message": "You've been correctly login"

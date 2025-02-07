@@ -76,6 +76,13 @@ export function navigateTo(path) {
     router.navigate(path);
 }
 
+function getToken() {
+    return document.cookie
+        .split('; ')
+        .find(row => row.startsWith('access_token='))
+        ?.split('=')[1];
+}
+
 // Example route definitions
 const header = {
     'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content,
@@ -83,8 +90,12 @@ const header = {
 };
 
 async function fetchRoute(path) {
+    // console.log("trying to print my cookies :", document.cookie)
+    // console.log("Trying to print the access token specifically")
+    // console.log(getToken());
     const response = await fetch(path, {
-        headers: header
+        headers: header,
+        credentials: 'include'
     });
     const data = await response.json();
     return data.html;
