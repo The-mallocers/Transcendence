@@ -97,9 +97,17 @@ async function fetchRoute(path) {
         return data.html;
     }
     else {
-        console.log("magic here one day")
-        // return fetchRoute('/pages/auth/login'); //maybe its without the pages im big dumb
-        //Spooky recursion im crazy !
+        //GRUGS NO LIKE FUNCTION GRUGS COPY PASTE CODE GRUGS CODE GOOD
+        path = '/pages/auth/login'
+        console.log("REDIRECTION -> fetching the path :", path)
+        const response = await fetch(path, {
+            headers: header,
+            credentials: 'include'
+        });
+        const data = await response.json();
+        console.log("testing redirect, data is :", data);
+        window.history.pushState({}, '', '/auth/login');
+        return data.html
     }
 }
 
