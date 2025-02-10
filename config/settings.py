@@ -71,7 +71,7 @@ INSTALLED_APPS = [
     'apps.profile.apps.ProfileConfig',
     'apps.shared.apps.SharedConfig',
     'apps.player.apps.PlayerConfig',
-    'apps.game.apps.GameConfig'
+    'apps.game.apps.GameConfig',
     'apps.pages.apps.PagesConfig',
 ]
 
