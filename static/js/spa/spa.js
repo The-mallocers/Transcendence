@@ -133,7 +133,7 @@ const routes = [
     {
         path: '/auth/register',
         template: async () => {
-            return await fetchRoute('/pages/auth/register/');
+            return await fetchRoute('/pages/auth/register');
         },
     },
 ];
