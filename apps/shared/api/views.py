@@ -7,7 +7,7 @@ from apps.shared.api.serializers import ClientSerializer
 from apps.shared.models import Clients
 
 
-class ClientCreateView(APIView):
+class ClientApiView(APIView):
     authentication_classes = []
     # permission_classes = [ClientPermission]
 

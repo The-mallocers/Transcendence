@@ -1,36 +1,35 @@
-document.addEventListener("DOMContentLoaded", function () {
-    // Sélectionner le formulaire et ajouter un événement de soumission
-    const form = document.querySelector("form");
+import { navigateTo } from '../../spa/spa.js';
 
-    // Empêcher le comportement de soumission par défaut
-    form.addEventListener("submit", function (event) {
-        event.preventDefault();
+console.log("Loaded the dom in login.js")
+// Sélectionner le formulaire et ajouter un événement de soumission
+const form = document.querySelector("form");
 
-        // Récupérer les données du formulaire
-        const formData = new FormData(form);
-        const errorDiv = document.getElementById("error-message")
+// Empêcher le comportement de soumission par défaut
+form.addEventListener("submit", function (event) {
+    event.preventDefault();
 
-        // Utilisation de l'API Fetch pour envoyer les données
-        fetch(form.action, {
-            method: "POST",  // Méthode de la requête (POST)
-            body: formData,  // Corps de la requête (les données du formulaire)
-            headers: {
-                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
-            },
-        })
-            .then(response => response.json())  // Réponse en JSON
-            .then(data => {
-                if (data.success) {
-                    // Si la soumission est réussie, vous pouvez afficher un message ou rediriger l'utilisateur
-                    window.location.href = '/';  // Redirige si une URL de redirection est fournie
-                } else {
-                    // En cas d'erreur, afficher un message d'erreur
-                    errorDiv.textContent = data.message;
-                }
-            })
-            .catch(error => {
-                console.error("There was an error with the fetch operation:", error);
-                errorDiv.textContent = error;
-            });
+    // Récupérer les données du formulaire
+    const formData = new FormData(form);
+    const errorDiv = document.getElementById("error-message")
+
+    fetch(form.action, {
+        method: "POST",
+        body: formData,
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+        },
+    })
+    .then(response => {
+        if (response.status === 401){
+            return Promise.reject('Unauthorized: Invalid credentials')
+        }
+    })
+    .then(data => {
+        navigateTo('/');
+    })
+    .catch(error => {
+        console.log("test");
+        console.error("There was an error with the fetch operation:", error);
+        errorDiv.textContent = error;
     });
 });

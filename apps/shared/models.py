@@ -8,6 +8,8 @@ from apps.player.models import Player
 from apps.profile.models import Profile
 from apps.auth.models import Password, TwoFA
 
+import json
+
 
 class Clients(models.Model):
     #Primary key
@@ -52,9 +54,16 @@ class Clients(models.Model):
 
     @staticmethod
     def get_client_by_request(request: HttpRequest):
-        if hasattr(request, 'access_token'):
-            token = request.access_token
+        from utils.jwt.JWT import JWTType
+        from utils.jwt.JWTGenerator import JWTGenerator
+
+        if 'access_token' in request.COOKIES:
+            token = JWTGenerator.extract_token(request, JWTType.ACCESS)
+            if not token:
+                return None
+            print(f"my token {token.SUB}")
             return Clients.get_client_by_id(token.SUB)
+
         return None
 
     @staticmethod

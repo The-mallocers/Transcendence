@@ -25,12 +25,12 @@ JWT_ALGORITH = 'HS256'
 
 #Middlware protected paths
 PROTECTED_PATHS = [
-    '/'
+    '/*'
 ]
 EXCLUDED_PATHS = [
-    '/test'
     '/api/auth/login',
-    '/auth/login',
+    '/api/*',
+    '/pages/auth/login',
     '/auth/register',
 ]
 ROLE_PROTECTED_PATHS = {
@@ -42,7 +42,7 @@ DEBUG = ENV('DJANGO_DEBUG', default=False)
 
 ALLOWED_HOSTS = [
     'localhost',
-    '127.0.0.1'
+    '127.0.0.1',
 ]
 
 # Application definition
@@ -72,6 +72,7 @@ INSTALLED_APPS = [
     'apps.shared.apps.SharedConfig',
     'apps.player.apps.PlayerConfig',
     'apps.game.apps.GameConfig'
+    'apps.pages.apps.PagesConfig',
 ]
 
 MIDDLEWARE = [

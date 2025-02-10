@@ -1,23 +1,19 @@
 from django.conf import settings
 from django.conf.urls.static import static
-from django.urls import path, include
+from django.urls import path, include, re_path
+from django.views.generic import TemplateView
 
 urlpatterns = [
-    path('', include('apps.index.urls')),
-    path('new', include("apps.index.urls")),
-    path('account/', include("apps.profile.urls")),
-    path('auth/', include("apps.auth.urls")),
-    path('admin/', include("apps.admin.urls")),
-    path('pong/', include('apps.pong.urls')),
-    path('edit/', include("apps.componentBuilder.urls")),
+    path('pages/', include("apps.pages.urls")),
 
-    # ────────────────────────────────────── Api ─────────────────────────────────────── #
-
-    path('api/', include("apps.api.urls")),
     path('api/auth/', include('apps.auth.api.urls')),
-    path('api/profile/', include('apps.profile.api.urls')),
-    path('api/client/', include('apps.shared.api.urls')),
-    path('api/player/', include('apps.player.api.urls')),
+    # ────────────────────────────────────── Api ─────────────────────────────────────── #
+    re_path(r'^.*$', TemplateView.as_view(template_name='base.html')),
+
+    # path('api/', include("apps.api.urls")),
+    # path('api/auth/', include('apps.auth.api.urls')),
+    # path('api/profile/', include('apps.profile.api.urls')),
+    # path('api/client/', include('apps.shared.api.urls'))
 ]
 
 if settings.DEBUG:
