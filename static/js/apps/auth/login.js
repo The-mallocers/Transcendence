@@ -19,31 +19,18 @@ form.addEventListener("submit", function (event) {
             'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
         },
     })
-        // .then(response => {
-        //     if (response.ok) {
-        //         navigateTo('/');
-        //     }
-        //     else {
-        //         response.json().then(errorData => {
-        //             errorDiv.textContent = errorData.error || "An error occurred";
-        //         });
-        //     }
-        // })
-        // .catch(error => {
-        //     console.error("There was an error with the fetch operation:", error);
-        //     errorDiv.textContent = error;
-        // });
-    .then(response => {
-        if (response.status === 401){
-            return Promise.reject('Unauthorized: Invalid credentials')
-        }
-    })
-    .then(data => {
-        navigateTo('/');
-    })
-    .catch(error => {
-        console.log("test");
-        console.error("There was an error with the fetch operation:", error);
-        errorDiv.textContent = error;
-    });
+        .then(response => {
+            if (response.ok) {
+                navigateTo('/');
+            }
+            else {
+                response.json().then(errorData => {
+                    errorDiv.textContent = errorData.error || "An error occurred";
+                });
+            }
+        })
+        .catch(error => {
+            console.error("There was an error with the fetch operation:", error);
+            errorDiv.textContent = "Error, please check your internet and try again later";
+        });
 });
