@@ -4,7 +4,7 @@ from django.urls import path, include, re_path
 from django.views.generic import TemplateView
 
 urlpatterns = [
-    path('pages/', include("apps.pages.urls")),
+    path('pages', include("apps.pages.urls")),
 
     path('api/auth/', include('apps.auth.api.urls')),
     # ────────────────────────────────────── Api ─────────────────────────────────────── #

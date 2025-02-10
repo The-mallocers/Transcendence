@@ -98,7 +98,15 @@ async function fetchRoute(path) {
         credentials: 'include'
     });
     const data = await response.json();
-    return data.html;
+    alert("hein")
+    console.log("testing redirect, data is :", data)
+    if (response.ok) {
+        return data.html;
+    }
+    else {
+        console.log("in the else", data)
+        // navigateTo(response.redirect)
+    }
 }
 
 const routes = [
@@ -106,7 +114,7 @@ const routes = [
         path: '/',
         template: async () => {
             console.log("I am fetching a route in spa.js")
-            return await fetchRoute('/pages/');
+            return await fetchRoute('/pages');
         },
     },
     {

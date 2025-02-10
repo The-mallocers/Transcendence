@@ -24,13 +24,17 @@ JWT_ALGORITH = 'HS256'
 
 #Middlware protected paths
 PROTECTED_PATHS = [
-    #'/*'
+    '/*'
 ]
 EXCLUDED_PATHS = [
     '/api/auth/login',
     '/api/*',
     '/pages/auth/login',
+    '/auth/login',
     '/auth/register',
+    '/pages/auth/register',
+    '/',
+    '/pages'
 ]
 ROLE_PROTECTED_PATHS = {
     '/admin/*': ['admin']
