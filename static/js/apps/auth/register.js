@@ -8,11 +8,23 @@ const error = document.getElementById("error-message");
 form.addEventListener("submit", function (event) {
     event.preventDefault();
 
-    const formData = new FormData(form);
+    const username = document.getElementById('username').value;
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+
+    const data = {
+        profile: {
+            username: username,
+            email: email
+        },
+        password: {
+            password: password
+        }
+    }
 
     fetch(form.action, {
         method: "POST",
-        body: formData,
+        body: data,
         headers: {
             'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
         },
