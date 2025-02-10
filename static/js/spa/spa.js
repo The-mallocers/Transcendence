@@ -28,6 +28,7 @@ class Router {
                 console.log("About to try the route template of the route :", route);
                 const content = await route.template();
                 this.rootElement.innerHTML = content;
+                console.log("SCRIPT ARE BEING RELOADED ON THIS PAGE WAHOOOO")
                 this.reloadScripts();
             } catch (error) {
                 console.error('Route rendering failed:', error);
@@ -72,6 +73,7 @@ window.onload = async ()=>{
     await router.handleLocation();
 }
 
+
 // Navigation helper
 export function navigateTo(path) {
     router.navigate(path);
@@ -84,9 +86,6 @@ const header = {
 };
 
 async function fetchRoute(path) {
-    // console.log("trying to print my cookies :", document.cookie)
-    // console.log("Trying to print the access token specifically")
-    // console.log(getToken());
     console.log("fetching the path :", path)
     const response = await fetch(path, {
         headers: header,
@@ -98,8 +97,9 @@ async function fetchRoute(path) {
         return data.html;
     }
     else {
-        console.log("in the else", data)
-        // navigateTo(response.redirect)
+        console.log("magic here one day")
+        // return fetchRoute('/pages/auth/login'); //maybe its without the pages im big dumb
+        //Spooky recursion im crazy !
     }
 }
 
@@ -133,7 +133,7 @@ const routes = [
     {
         path: '/auth/register',
         template: async () => {
-            return await fetchRoute('/pages/auth/register');
+            return await fetchRoute('/pages/auth/register/');
         },
     },
 ];

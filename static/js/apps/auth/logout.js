@@ -1,8 +1,10 @@
 import { navigateTo } from '../../spa/spa.js';
 
+console.log("logoust.js online")
+
 document.getElementById('logout-btn').addEventListener('click', function () {
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-
+    console.log("i just clicked !")
     fetch('/api/auth/logout/', {
         method: 'POST',
         headers: {
