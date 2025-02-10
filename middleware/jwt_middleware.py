@@ -22,7 +22,7 @@ class JWTMiddleware:
         self.role_protected_paths = getattr(settings, 'ROLE_PROTECTED_PATHS')
 
     def _should_check_path(self, path: str) -> bool:
-        if path.startswith('/pages') == False and path.startswith('/api') == False:
+        if path.startswith('/pages/') == False and path.startswith('/api/') == False:
             return False
         #the idea is that we only want to check the actual stuff that our websites is made of
         #if it doesnt start with that, it means its something the user typed in (ideally)
@@ -87,7 +87,6 @@ class JWTMiddleware:
         path = request.path_info
 
         if not self._should_check_path(path):
-            print("returning the response for no need to check")
             return self.get_response(request)
 
         try:
@@ -107,11 +106,13 @@ class JWTMiddleware:
                 return self._refresh_token(request)
             except (jwt.ExpiredSignatureError, jwt.InvalidTokenError, jwt.InvalidKeyError):
 
+                print("jwt redirection happening")
                 return JsonResponse({
                     'status': 'unauthorized',
                     'redirect': '/auth/login',
                     'message': 'Session expired' }, status=401)
         except (jwt.InvalidTokenError, jwt.InvalidKeyError):
+            print("jwt redirection happening")
             return JsonResponse({
                     'status': 'unauthorized',
                     'redirect': '/auth/login',

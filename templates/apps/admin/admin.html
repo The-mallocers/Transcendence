@@ -1,21 +1,13 @@
 {% load static %}
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="csrf-token" content="{{ csrf_token }}">
-    <title>Admin Panel</title>
-    <link rel="stylesheet" href="{% static 'css/admin/admin.css' %}">
-</head>
-<body>
 <header>
     <div style="display: flex; align-items: center; justify-content: center; gap: 15px;">
         <h1>Admin Panel</h1>
     </div>
 </header>
-
+    
 <div class="container">
+    <link rel="stylesheet" href="{% static 'css/admin/admin.css' %}">
 
     <div class="user-list">
         <h2>List of Users</h2>
@@ -71,7 +63,4 @@
         <button type="button" onclick="closePopup()">Cancel</button>
     </form>
 </div>
-
 <script src="{% static 'js/apps/admin/admin.js' %}"></script>
-</body>
-</html>

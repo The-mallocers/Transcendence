@@ -34,7 +34,7 @@ EXCLUDED_PATHS = [
     '/auth/register',
     '/pages/auth/register',
     '/',
-    '/pages'
+    '/pages/'
 ]
 ROLE_PROTECTED_PATHS = {
     '/admin/*': ['admin']

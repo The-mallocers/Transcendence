@@ -25,6 +25,7 @@ class Router {
         }
         else {
             try {
+                console.log("About to try the route template of the route :", route);
                 const content = await route.template();
                 this.rootElement.innerHTML = content;
                 this.reloadScripts();
@@ -76,13 +77,6 @@ export function navigateTo(path) {
     router.navigate(path);
 }
 
-function getToken() {
-    return document.cookie
-        .split('; ')
-        .find(row => row.startsWith('access_token='))
-        ?.split('=')[1];
-}
-
 // Example route definitions
 const header = {
     'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content,
@@ -93,12 +87,12 @@ async function fetchRoute(path) {
     // console.log("trying to print my cookies :", document.cookie)
     // console.log("Trying to print the access token specifically")
     // console.log(getToken());
+    console.log("fetching the path :", path)
     const response = await fetch(path, {
         headers: header,
         credentials: 'include'
     });
     const data = await response.json();
-    alert("hein")
     console.log("testing redirect, data is :", data)
     if (response.ok) {
         return data.html;
@@ -114,7 +108,7 @@ const routes = [
         path: '/',
         template: async () => {
             console.log("I am fetching a route in spa.js")
-            return await fetchRoute('/pages');
+            return await fetchRoute('/pages/');
         },
     },
     {
@@ -124,9 +118,22 @@ const routes = [
         },
     },
     {
+        path: '/pong/',
+        template: async () => {
+            console.log("fetching pong")
+            return await fetchRoute('/pages/pong/');
+        },
+    },
+    {
+        path: '/admin/',
+        template: async () => {
+            return await fetchRoute('/pages/admin/');
+        },
+    },
+    {
         path: '/auth/register',
         template: async () => {
-            return await fetchRoute('/pages/auth/register');
+            return await fetchRoute('/pages/auth/register/');
         },
     },
 ];
