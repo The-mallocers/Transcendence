@@ -21,25 +21,16 @@ form.addEventListener("submit", function (event) {
             'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
         },
     })
-        .then(response => response.json())  // Réponse en JSON
-        .then(data => {
-            if (data.success) {
-                // Si la soumission est réussie, vous pouvez afficher un message ou rediriger l'utilisateur
-                alert("Yo la team jsuis dans le js de login")
-                console.log("data", data)
-                console.log("allo ?")
+        .then(response => {
+            if (response.ok) {
                 navigateTo('/');
-                return
-                // window.location.href = '/';  // Redirige si une URL de redirection est fournie
-            } else {
-                // En cas d'erreur, afficher un message d'erreur
-                errorDiv.textContent = data.message;
+            }
+            else {
+                response.json().then(errorData => {
+                    errorDiv.textContent = errorData.error || "An error occurred";
+                });
             }
         })
-        .then((ZEBI => {
-                const allCookies = document.cookie;
-                console.log(allCookies);
-        }))
         .catch(error => {
             console.error("There was an error with the fetch operation:", error);
             errorDiv.textContent = error;

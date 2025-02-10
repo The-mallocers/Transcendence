@@ -64,7 +64,7 @@ class LoginApiView(APIView):
 
         if client is None or client.password.check_pwd(password=pwd) is False:
             return Response({
-                "error": "Invalid email"
+                "error": "Invalid credentials"
             }, status=status.HTTP_401_UNAUTHORIZED)
         else:
             response = Response({
