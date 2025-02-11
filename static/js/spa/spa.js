@@ -98,6 +98,8 @@ async function fetchRoute(path) {
     }
     else {
         //GRUGS NO LIKE FUNCTION GRUGS COPY PASTE CODE GRUGS CODE GOOD
+        //For real tho, this else really should be a redirection (but i dont think it can really fail ?)
+        //We just want to redirect to login if the guy doesnt have the right
         path = '/pages/auth/login'
         console.log("REDIRECTION -> fetching the path :", path)
         const response = await fetch(path, {
@@ -141,7 +143,7 @@ const routes = [
     {
         path: '/auth/register',
         template: async () => {
-            return await fetchRoute('/pages/auth/register/');
+            return await fetchRoute('/pages/auth/register');
         },
     },
 ];
