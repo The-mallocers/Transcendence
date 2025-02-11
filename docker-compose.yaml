@@ -1,25 +1,35 @@
 services:
   db:
-    image: postgres
+    build: ./postgres
     volumes:
       - postgres_data:/var/lib/postgresql/data/
+      # - ./postgres/init_db.sh:/docker-entrypoint-initdb.d/init_db.sh
     ports:
       - "5432:5432"
     env_file:
       - .env
     networks:
       - wp-networks
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: always
   
   django-web:
     depends_on:
-      - db
+      db:
+        condition: service_healthy 
     expose:
       - 8000
     build: .
     volumes:
-      - ./static:/app/staticfiles
+      # - ./static:/app/staticfiles
+      - ./staticdocker:/app/staticfiles
     env_file:
       - .env
+    restart: always
 
   nginx:
     image: nginx
@@ -31,9 +41,10 @@ services:
     env_file: .env
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./static:/static:ro
+      - ./staticdocker:/static:ro
     networks:
       - wp-networks
+    restart: always
 
 networks:
   wp-networks:
