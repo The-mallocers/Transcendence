@@ -26,7 +26,7 @@ class JWTGenerator:
                                     algorithm=self.algorithm, headers=headers)
 
         response.set_cookie(
-            f'{self.token.TYPE}_token',
+            f'{self.token.TYPE.value}_token',
             f'{self.token_key}',
             httponly=True,
             secure=True,

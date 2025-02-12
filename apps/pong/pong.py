@@ -3,16 +3,16 @@ import random
 import time
 from typing import Dict
 
-from asgiref.sync import sync_to_async
 from channels.db import database_sync_to_async
 from channels.layers import get_channel_layer
 
-from apps.player.api.serializers import PlayerSerializer
 from apps.player.models import Player
-from apps.pong.api.serializers import BallSerializer, PaddleSerializer
-from apps.pong.utils import RequestType, GameState, ErrorType, Paddle, FPS, \
-    Ball, CANVAS_HEIGHT, CANVAS_WIDTH, BALL_SPEED
+from apps.pong.api.serializers import BallSerializer
+from apps.pong.utils import GameState
 from apps.shared.models import Clients
+from utils.pong.enums import RequestType
+from utils.pong.objects import FPS, Ball, CANVAS_HEIGHT, CANVAS_WIDTH, \
+    BALL_SPEED
 
 
 class PongLogic:
@@ -35,94 +35,9 @@ class PongLogic:
         except (Clients.DoesNotExist | Player.DoesNotExist):
             return None
 
-    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ LOGIC ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-    async def process_action(self, client_id, data: Dict, room: str):
-        request_type: RequestType = RequestType(data.get('action'))
-        player = await self.get_player(client_id)
-        handlers = {
-            RequestType.JOIN_GAME: self._handle_join_game,
-            RequestType.PADDLE_MOVE: self._handle_paddle_move,
-            RequestType.START_GAME: self._handle_start_game,
-            RequestType.IS_READY: self._handle_is_ready,
-        }
-
-        if room not in PongLogic.games:
-            PongLogic.games[room] = GameState(id=room)
-        if not player:
-            raise ValueError(f'Unknown client: {client_id}')
-        if request_type in handlers:
-            return await handlers[request_type](data, PongLogic.games[room], player)
-        else:
-            raise ValueError(f'Unknown action: {request_type}')
-
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ HANDLES ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
 
-    async def _handle_join_game(self, data: Dict, game: GameState, player: Player):
-        #Check if the player is arleady join
-        if player == game.player_1 or player == game.player_2:
-            return {
-                'error': ErrorType.ALREADY_JOIN,
-                'player_id': str(player.id)
-            }
-        else: #il faudra implementer le random pour savoir sur quel cote le joueur joue
-            if game.player_1 is None:
-                player.position = 'right'
-                game.player_1 = player
-            elif game.player_2 is None:
-                player.position = 'left'
-                game.player_2 = player
-            else:
-                return {
-                    'error': ErrorType.GAME_FULL,
-                    'player_id': str(player.id)
-                }
-            await player.async_save()
 
-        return {
-            'type': RequestType.JOIN_GAME,
-            'player_id': str(player.id)
-        }
-
-    async def _handle_paddle_move(self, data: Dict, game: GameState, player: Player):
-        if player == game.player_1 or player == game.player_2:
-            await player.move(data.get('direction'))
-            return {
-                'type': RequestType.PADDLE_MOVE,
-                'player_id': player.id,
-                'paddle': PaddleSerializer(player.paddle).data
-            }
-        else:
-            return {
-                'error': ErrorType.NOT_IN_GAME,
-                'player_id': str(player.id)
-            }
-
-    async def _handel_is_ready(self, data: Dict, game: GameState, player: Player):
-        if player == game.player_1 or player == game.player_2:
-            player.is_ready = True
-            return {
-                'type': RequestType.IS_READY,
-                'player_id': player.id,
-                'is_ready': player.is_ready
-            }
-
-    async def _handle_start_game(self, data: Dict, game: GameState, player: Player):
-        if game.player_1.is_ready and game.player_2.is_ready:
-            game.active = True
-            game.task = asyncio.create_task(self._game_task(game))
-            return {
-                'type': RequestType.START_GAME,
-            }
-        else:
-            return {
-                'error': ErrorType.NOT_READY
-            }
-
-    async def handle_disconnect(self, room: str, player_id: str):
-        if room in self.game_states and player_id in \
-                self.game_states[room]['players']:
-            self.game_states[room]['players'][player_id].is_active = False
 
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ LOOP LOGIC ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
 

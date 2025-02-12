@@ -1,146 +1,139 @@
-import json
-import uuid
-from urllib.parse import parse_qs
+import asyncio
+from datetime import timedelta
+from typing import Dict
 
 import redis
-
-from datetime import timedelta
-
-from asgiref.sync import sync_to_async
 from channels.db import database_sync_to_async
-from channels.generic.websocket import AsyncWebsocketConsumer
 from django.db import models
-from django.db.models import IntegerField, ForeignKey
-from django.db.models.fields import BooleanField, DurationField
+from django.db.models import IntegerField, ForeignKey, CharField, \
+    ManyToManyField
+from django.db.models.fields import BooleanField, DurationField, DateTimeField
+from django.utils import timezone
 
-from apps.player.models import Player
-from apps.pong.utils import RequestType
+from apps.game.manager import GameManager
+from apps.player.manager import PlayerManager
+from apps.player.models import Player, PlayerGame
+from apps.pong.api.serializers import PaddleSerializer
+from apps.pong.utils import GameState
 from apps.shared.models import Clients
+from utils.pong.enums import RequestType, GameStatus, ErrorType
 from utils.utils import generate_unique_code
 
 redis = redis.StrictRedis(host='localhost', port=6379, db=0, decode_responses=True)
 
-class GameRoom(models.Model, AsyncWebsocketConsumer):
+class Game(models.Model):
     class Meta:
-        db_table = 'games'
+        db_table = 'pong_games'
 
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ PRIMARY FIEDLS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, null=False)
+    id = IntegerField(primary_key=True, editable=False, null=False, default=generate_unique_code, unique=True)
 
     # ── Game Informations ───────────────────────────────────────────────────────────── #
-    is_active = BooleanField(editable=True, default=False, null=False)
-    in_tounament = BooleanField(editable=False, default=False, null=False)
-    timer = DurationField(default=timedelta(minutes=0), editable=False, null=True) #In default there is no timer
-    code = IntegerField(editable=False, null=False, default=generate_unique_code, unique=True)
-    # mode = ForeignKey('GameMode', on_delete=models.SET_NULL, null=True) Add game mode with another model
-
-    # ── Players ────────────────────────────────────────────────────────────────── #
-    p1 = ForeignKey(Player, on_delete=models.SET_NULL, null=True, related_name='player_right', editable=False)
-    p2 = ForeignKey(Player, on_delete=models.SET_NULL, null=True, related_name='player_left', editable=False)
+    created_at = DateTimeField(default=timezone.now)
+    in_tournament = BooleanField(editable=False, default=False, null=False)
     winner = ForeignKey(Player, on_delete=models.SET_NULL, null=True, related_name='winner', editable=False, blank=True)
 
-    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ FUNCTION ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
+    # ── Game Settings ───────────────────────────────────────────────────────────── #
+    status = CharField(max_length=20, choices=[(status.name, status.value) for status in GameStatus], default=GameStatus.CREATING.value)
+    players = ManyToManyField(Player, through='player.PlayerGame')
+    timer = DurationField(default=timedelta(minutes=0), editable=False, null=True) #In default there is no timer
 
-    def __str__(self):
-        return f"Game room id: {str(self.id)}\nIs active: {self.is_active}\nPlayer 1: {self.p1}\nPlayer 2: {self.p2}\n-------------------"
+    # ── Functions ───────────────────────────────────────────────────────────── #
 
-    async def async_save(self, *args, **kwargs):
-        await sync_to_async(self.save)(*args, **kwargs)
-
-    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ DATABASE ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
+    @staticmethod
     @database_sync_to_async
-    def check_room_exists(self, room_name):
+    def get(game_id):
         try:
-            GameRoom.objects.get(id=room_name)
-            return True
-        except GameRoom.DoesNotExist:
-            return False
+            return Game.objects.get(id=game_id)
+        except Game.DoesNotExist:
+            return None
 
-    @database_sync_to_async
-    def check_client_exists(self, client_id):
-        try:
-            Clients.objects.get(id=client_id)
-            return True
-        except GameRoom.DoesNotExist:
-            return False
+class GameService:
+    def __init__(self):
+        self.game_manager = GameManager()
+        self.player1_manager = PlayerManager()
+        self.player2_manager = PlayerManager()
 
-    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ WEBSOCKET ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
+    async def process_action(self, player: Player, data: Dict, game: Game):
+        request_type: RequestType = RequestType(data.get('action'))
+        handlers = {
+            RequestType.JOIN_GAME: self._handle_join_game,
+            RequestType.PADDLE_MOVE: self._handle_paddle_move,
+            RequestType.START_GAME: self._handle_start_game,
+            RequestType.IS_READY: self._handle_is_ready,
+        }
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        from apps.pong.pong import PongLogic
-        self.game_logic = PongLogic()
-        self.room_group_id = None
-        self.room_id = None
+        if request_type in handlers:
+            return await handlers[request_type](data, game, player)
+        else:
+            raise ValueError(f'Unknown action: {request_type}')
 
-    async def connect(self):
-        self.room_id = self.scope['url_route']['kwargs']['room_name']
+    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ HANDLES ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
 
-        # Get client ID from query parameters
-        query_string = self.scope['query_string'].decode()
-        query_params = parse_qs(query_string)
-        self.client_id = query_params.get('id', ['default'])[0]
-
-        print(self.client_id)
-
-        if not await self.check_client_exists(self.client_id):
-            await self.close(code=403, reason='Client does not exist')
-            return
-
-        if not await self.check_room_exists(self.room_id):
-            await self.close(code=403, reason='Room does not exist')
-            return
-
-        # Join room group
-        self.room_group_id = f'group_{self.room_id}'
-        await self.channel_layer.group_add(self.room_group_id, self.channel_name)
-
-        await self.accept()
-
-    async def disconnect(self, close_code):
-        if self.room_group_id:
-            await self.channel_layer.group_discard(
-                self.room_group_id,
-                self.channel_name
-            )
-        # if self.client_id:
-        #     await self.game_logic.handle_disconnect(self.room_id,
-        #                                             self.client_id)
-
-    async def receive(self, text_data=None, bytes_data=None):
-        try:
-            data = json.loads(text_data)
-
-            response = await self.game_logic.process_action(
-                client_id=self.client_id,
-                data=data,
-                room=self.room_id
-            )
-
-            if 'error' in response:
-                await self.send(text_data=json.dumps(response))
-                await self.close(code=4000)
-                return
-
-            await self.channel_layer.group_send(
-                self.room_group_id,
-                {
-                    'type': 'game_message',
-                    'message': response,
-                    'sender': self.client_id
+    async def _handle_join_game(self, data: Dict, game: GameState, player: Player):
+        #Check if the player is arleady join
+        if player == game.player_1 or player == game.player_2:
+            return {
+                'error': ErrorType.ALREADY_JOIN,
+                'player_id': str(player.id)
+            }
+        else: #il faudra implementer le random pour savoir sur quel cote le joueur joue
+            if game.player_1 is None:
+                player.position = 'right'
+                game.player_1 = player
+            elif game.player_2 is None:
+                player.position = 'left'
+                game.player_2 = player
+            else:
+                return {
+                    'error': ErrorType.GAME_FULL,
+                    'player_id': str(player.id)
                 }
-            )
-        except json.JSONDecodeError:
-            await self.send(text_data=json.dumps({
-                'error': 'Invalid JSON format'
-            }))
-        except Exception as e:
-            await self.send(text_data=json.dumps({
-                'error': str(e)
-            }))
+            await player.async_save()
 
-    async def game_message(self, event):
-        message = event['message']
-        if event['sender'] != self.client_id:
-            await self.send(text_data=json.dumps(message))
+        return {
+            'type': RequestType.JOIN_GAME,
+            'player_id': str(player.id)
+        }
+
+    async def _handle_paddle_move(self, data: Dict, game: GameState, player: Player):
+        if player == game.player_1 or player == game.player_2:
+            await player.move(data.get('direction'))
+            return {
+                'type': RequestType.PADDLE_MOVE,
+                'player_id': player.id,
+                'paddle': PaddleSerializer(player.paddle).data
+            }
+        else:
+            return {
+                'error': ErrorType.NOT_IN_GAME,
+                'player_id': str(player.id)
+            }
+
+    async def _handle_is_ready(self, data: Dict, game: GameState, player: Player):
+        if player == game.player_1 or player == game.player_2:
+            player.is_ready = True
+            return {
+                'type': RequestType.IS_READY,
+                'player_id': player.id,
+                'is_ready': player.is_ready
+            }
+
+    async def _handle_start_game(self, data: Dict, game: GameState, player: Player):
+        if game.player_1.is_ready and game.player_2.is_ready:
+            game.active = True
+            game.task = asyncio.create_task(self._game_task(game))
+            return {
+                'type': RequestType.START_GAME,
+            }
+        else:
+            return {
+                'error': ErrorType.NOT_READY
+            }
+
+    async def handle_disconnect(self, room: str, player_id: str):
+        if room in self.game_states and player_id in \
+                self.game_states[room]['players']:
+            self.game_states[room]['players'][player_id].is_active = False
+
 

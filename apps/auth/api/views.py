@@ -15,7 +15,6 @@ from utils.jwt.JWTGenerator import JWTGenerator
 
 
 class PasswordApiView(APIView):
-    print("in passwordapiview")
     permission_classes = [PasswordPermission]
 
     def get_object(self, pk):
@@ -43,7 +42,6 @@ class RegisterApiView(APIView):
     authentication_classes = []
 
     def post(self, request, *args, **kwargs):
-        print("in registerapiview")
         serializer = ClientSerializer(data=request.data)
         if serializer.is_valid():
             client = serializer.save()
@@ -56,11 +54,9 @@ class LoginApiView(APIView):
     authentication_classes = []
 
     def post(self, request: HttpRequest, *args, **kwargs):
-        print("in loginapiview")
         email = request.POST.get('email')
         pwd = request.POST.get('password')
         client = Clients.get_client_by_email(email)
-        print(email, pwd, client)
 
         if client is None or client.password.check_pwd(password=pwd) is False:
             return Response({
@@ -79,7 +75,6 @@ class LogoutApiView(APIView):
     authentication_classes = []
 
     def post(self, request: HttpRequest, *args, **kwargs):
-        print("coucou je suis logoutApiView")
         if request.COOKIES.get('access_token') is not None:
             response = Response({"message": "Successfully logged out."}, status=status.HTTP_200_OK)
             response.delete_cookie('access_token')

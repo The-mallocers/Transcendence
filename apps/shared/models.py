@@ -1,5 +1,7 @@
 import uuid
 
+from asgiref.sync import async_to_sync
+from channels.db import database_sync_to_async
 from django.core.exceptions import ValidationError
 from django.db import models, IntegrityError, transaction
 from django.http import HttpRequest
@@ -61,7 +63,6 @@ class Clients(models.Model):
             token = JWTGenerator.extract_token(request, JWTType.ACCESS)
             if not token:
                 return None
-            print(f"my token {token.SUB}")
             return Clients.get_client_by_id(token.SUB)
 
         return None
@@ -100,3 +101,20 @@ class Clients(models.Model):
             raise ValidationError(f"Data validation error: {e}")
         except Exception as e:
             raise Exception(f"An unexpected error occurred: {e}")
+
+    @staticmethod
+    @database_sync_to_async
+    def exists(client_id):
+        try:
+            Clients.objects.get(id=client_id)
+            return True
+        except Clients.DoesNotExist:
+            return False
+
+    @staticmethod
+    @database_sync_to_async
+    def get(client_id):
+        try:
+            return Clients.objects.select_related('player').get(id=client_id)
+        except Clients.DoesNotExist:
+            return None

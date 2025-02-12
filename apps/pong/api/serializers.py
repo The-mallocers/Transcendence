@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from apps.pong.utils import Paddle, Ball
+from utils.pong.objects import Paddle, Ball
 
 
 class PaddleSerializer(serializers.Serializer):

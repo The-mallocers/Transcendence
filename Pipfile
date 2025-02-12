@@ -17,6 +17,8 @@ whitenoise = "*"
 djangorestframework = "*"
 websockets = "*"
 django-redis = "*"
+aioredis = "*"
+celery = "*"
 
 [dev-packages]
 django-extensions = "*"

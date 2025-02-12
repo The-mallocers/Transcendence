@@ -9,7 +9,6 @@ from apps.shared.models import Clients
 def get(req):
     client = Clients.get_client_by_request(req)
     if client is not None:
-        print("je suis la ya un client")
         context = {
             "client": client,
             "clients": Clients.objects.all()
@@ -17,7 +16,6 @@ def get(req):
         html_content = render_to_string("apps/index.html", context)
         return JsonResponse({'html': html_content})
     else:
-        print("no client detected")
         html_content = render_to_string("apps/auth/login.html", {"csrf_token": get_token(req)})
         return JsonResponse({
             'html': html_content,

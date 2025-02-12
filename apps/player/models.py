@@ -1,67 +1,65 @@
 import uuid
 
-from asgiref.sync import sync_to_async
-from channels.generic.websocket import AsyncWebsocketConsumer
+from channels.db import database_sync_to_async
 from django.db import models
-from django.db.models import ManyToManyField, ImageField, ForeignKey
-from django.db.models.fields import CharField, IntegerField, BooleanField
+from django.db.models import ManyToManyField, ForeignKey, \
+    OneToOneField
+from django.db.models.fields import CharField, IntegerField, BooleanField, \
+    DateTimeField
 
-from apps.pong.utils import Paddle, CANVAS_HEIGHT
+from utils.pong.enums import Side
 
 
-class Rank(models.Model):
+class Player(models.Model):
     class Meta:
-        db_table = 'ranks_list'
-
-    name = CharField(primary_key=True, max_length=100, editable=False, null=False)
-    icon = ImageField(upload_to='rank_icon/', null=False)
-    mmr_min = IntegerField(null=False)
-    mmr_max = IntegerField(null=False)
-
-class Player(models.Model, AsyncWebsocketConsumer):
-    class Meta:
-        db_table = 'client_player'
+        db_table = 'players_list'
 
     # ━━ PRIMARY FIELD ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, null=False)
 
-    # ── Game Info ─────────────────────────────────────────────────────────────────────
-    score = IntegerField(default=0)
-    position = CharField(max_length=5, null=True)
-    is_ready = BooleanField(default=False)
-    paddle = Paddle()
-
     # ━━ PLAYER INFOS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
     nickname = CharField(max_length=20, null=True, editable=False)
     friends = ManyToManyField('self', symmetrical=False, blank=True, related_name='friends_with')
-    firends_requests = ManyToManyField('self', symmetrical=False, blank=True, related_name='invited_by')
-    firends_invitations = ManyToManyField('self', symmetrical=False, blank=True, related_name='requested_by')
-    mmr = IntegerField(default=100, blank=True)
-    rank = ForeignKey('Rank', on_delete=models.SET_NULL, null=True, blank=True)
+    friends_requests = ManyToManyField('self', symmetrical=False, blank=True, related_name='invited_by')
+    friends_invitations = ManyToManyField('self', symmetrical=False, blank=True, related_name='requested_by')
 
     # ── Custom ──────────────────────────────────────────────────────────────────────── #
     skin_ball = CharField(max_length=100, null=True) #A voir quel field il faut mettre
     skin_paddle = CharField(max_length=100, null=True)
 
-    # ── Stats ───────────────────────────────────────────────────────────────────────── #
-    game_win = IntegerField(default=0)
-    game_loose = IntegerField(default=0)
-    tournament_win = IntegerField(default=0)
-    tournament_loose = IntegerField(default=0)
+    @staticmethod
+    @database_sync_to_async
+    def get(player_id):
+        try:
+            return Player.objects.get(id=player_id)
+        except Player.DoesNotExist:
+            return None
 
-    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ FUNCTION ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
+class PlayerGame(models.Model):
+    class Meta:
+        db_table = 'player_game'
+        unique_together = ('player', 'game')
 
-    def __str__(self):
-        return f"Player '{str(self.nickname)}' with {self.mmr} mmr."
+    # ── Links ─────────────────────────────────────────────────────────────────────────
+    player = ForeignKey(Player, on_delete=models.CASCADE)
+    game = ForeignKey('game.Game', on_delete=models.CASCADE)
 
-    async def async_save(self, *args, **kwargs):
-        await sync_to_async(self.save)(*args, **kwargs)
+    # ── Informations ──────────────────────────────────────────────────────────────────
+    side = CharField(max_length=5, null=True, choices=[(side.name, side.value) for side in Side], default=None)
+    score = IntegerField(default=0)
+    joined_at = DateTimeField(auto_now_add=True)
+    is_ready = BooleanField(default=False)
 
-    async def move(self, direction: str):
-        if direction == 'up':
-            self.paddle.y += 1 # max(0, self.paddle.y - self.paddle.speed)
-        if direction == 'down':
-            limit = CANVAS_HEIGHT - self.paddle.height
-            self.paddle.y -= 1 # min(limit, self.paddle.y + self.paddle.speed)
-        await self.async_save()
-        print(self, f"Pladdle = {self.paddle.y}")
+class PlayerStats(models.Model):
+    class Meta:
+        db_table = 'player_stats'
+
+    # ── Links ─────────────────────────────────────────────────────────────────────────
+    player = OneToOneField(Player, on_delete=models.CASCADE)
+
+    # ── Informations ──────────────────────────────────────────────────────────────────
+    total_game = IntegerField(default=0)
+    wins = IntegerField(default=0)
+    losses = IntegerField(default=0)
+    mmr = IntegerField(default=100, blank=True)
+    rank = ForeignKey('pong.Rank', on_delete=models.SET_NULL, null=True, blank=True)
