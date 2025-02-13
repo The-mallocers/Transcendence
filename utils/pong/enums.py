@@ -10,6 +10,7 @@ class GameStatus(str, Enum):
     ENDING: str = 'ending'
     DESTROING: str = 'destroing'
     FINISHED: str = 'finished'
+    ERROR: str = 'error'
 
 class RequestType(str, Enum):
     JOIN_GAME = 'join_game'

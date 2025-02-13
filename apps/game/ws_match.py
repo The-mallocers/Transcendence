@@ -3,13 +3,15 @@ import logging
 from urllib.parse import parse_qs
 
 from asgiref.sync import sync_to_async
+from channels.generic.websocket import AsyncWebsocketConsumer
 from django.db import transaction
 from redis.asyncio import Redis
-from channels.generic.websocket import AsyncWebsocketConsumer
 
-import utils.utils
+from apps.game.manager import GameManager
+from apps.player.manager import PlayerManager
 from apps.player.models import Player
 from apps.shared.models import Clients
+from utils.pong.enums import GameStatus
 
 redis_client = Redis(host="localhost", port=6379, db=0)
 
@@ -27,41 +29,43 @@ class MatchMaking(AsyncWebsocketConsumer):
             await self.close(code=403)
             return
 
-        channel = f'group_{str(self.player.id)}'
-        logging.warn(channel)
-
-        # Join game group
-        await self.channel_layer.group_add(
-            channel,
-            self.channel_name
-        )
-
+        await self.channel_layer.group_add(f'group_{str(self.player.id)}', self.channel_name)
         await redis_client.sadd("matchmaking_players", str(self.player.id))
         await self.accept()
 
     async def disconnect(self, close_code):
         if self.player:
-            player_id = self.player.id.bytes.hex() if hasattr(self.player.id,'bytes') else str(self.player.id)
-            await redis_client.srem("matchmaking_players", player_id)
+            await redis_client.srem("matchmaking_players", str(self.player.id))
 
     async def receive(self, text_data=None, bytes_data=None):
-        # creer la game avec le GameManager
-        # ajouter le user dans la game
-        # chercher dans la liste matchmaking de redis un user qui est en recherche
-        # renvoyer le code de la game
-        # fermer la connexion
-
-        # il faut regarder comment stocker la liste des game en cours
         try:
             data = json.loads(text_data)
+
+            # ── Starting ──────────────────────────────────────────────────────────────
+            if data.get('type') == 'joined':
+                game_id = data.get('game_id')
+                player_id = data.get('player_id')
+
+                if not await GameManager.exist(game_id):
+                    return await self.send(text_data=json.dumps({
+                        'error': 'Invalid game ID'
+                    }))
+                if not await PlayerManager.exist(player_id):
+                    return await self.send(text_data=json.dumps({
+                        'error': 'Invalid player ID'
+                    }))
+
+                game_manager = await GameManager.get_instance(game_id)
+                await game_manager.set_status(GameStatus.STARTING)
+
+                await self.channel_layer.group_discard(f'group_{player_id}', self.channel_name)
+                await self.close()
+                return
+
 
         except json.JSONDecodeError:
             await self.send(text_data=json.dumps({
                 'error': 'Invalid JSON format'
-            }))
-        except Exception as e:
-            await self.send(text_data=json.dumps({
-                'error': str(e)
             }))
 
     async def matchmaking_info(self, event):
@@ -73,4 +77,3 @@ class MatchMaking(AsyncWebsocketConsumer):
     def get_player_db(self, client_id):
         with transaction.atomic():
             return Clients.objects.get(id=client_id).player
-        return None

@@ -1,28 +1,37 @@
 import redis
 
-from apps.player.api.serializers import PlayerSerializer
+import redis.asyncio as aioredis
+from asgiref.sync import sync_to_async
+from django.conf import settings
+from django.db import transaction
+
+from apps.player.models import Player
 
 redis = redis.StrictRedis(host='localhost', port=6379, db=0, decode_responses=True)
 
 class PlayerManager:
-    @classmethod
-    def get_player(cls, player_id):
-        player_data = redis.get(f"pong:players:{player_id}")
+    _instance = None
+    _redis = aioredis.Redis(host=settings.REDIS_HOST, port=settings.REDIS_PORT, db=0)
 
-        if player_data:
-            serializer = PlayerSerializer(data=player_data)
-
-            if serializer.is_valid():
-                return serializer.validated_data
-        else:
-            return None
+    def __init__(self):
+        self._player: Player = None
 
     @classmethod
-    def get_player_list(cls):
-        return redis.smembers("pong:list:players")
+    def get_instance(cls):
+        if not cls._instance:
+            cls._instance = PlayerManager()
+        return cls._instance
 
-    @classmethod
-    def delete_player(cls, player_id):
-        key = f"pong:players:{player_id}"
-        redis.delete(key)
-        redis.srem("pong:list:players", player_id)
+    @sync_to_async
+    def exist(self, player_id):
+        """Check if the game ID is a real game"""
+        from apps.game.models import Player
+        with transaction.atomic():
+            return Player.objects.filter(id=player_id).exists()
+
+    @sync_to_async
+    def get_player_id_client(self, client_id):
+        """Check if the game ID is a real game"""
+        from apps.game.models import Clients
+        with transaction.atomic():
+            return Clients.objects.get(id=client_id).player.id

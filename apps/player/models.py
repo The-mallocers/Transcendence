@@ -6,6 +6,7 @@ from django.db.models import ManyToManyField, ForeignKey, \
     OneToOneField
 from django.db.models.fields import CharField, IntegerField, BooleanField, \
     DateTimeField
+from django.utils import timezone
 
 from utils.pong.enums import Side
 
@@ -47,7 +48,7 @@ class PlayerGame(models.Model):
     # ── Informations ──────────────────────────────────────────────────────────────────
     side = CharField(max_length=5, null=True, choices=[(side.name, side.value) for side in Side], default=None)
     score = IntegerField(default=0)
-    joined_at = DateTimeField(auto_now_add=True)
+    joined_at = DateTimeField(default=timezone.now)
     is_ready = BooleanField(default=False)
 
 class PlayerStats(models.Model):

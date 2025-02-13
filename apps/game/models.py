@@ -38,16 +38,6 @@ class Game(models.Model):
     players = ManyToManyField(Player, through='player.PlayerGame')
     timer = DurationField(default=timedelta(minutes=0), editable=False, null=True) #In default there is no timer
 
-    # ── Functions ───────────────────────────────────────────────────────────── #
-
-    @staticmethod
-    @database_sync_to_async
-    def get(game_id):
-        try:
-            return Game.objects.get(id=game_id)
-        except Game.DoesNotExist:
-            return None
-
 class GameService:
     def __init__(self):
         self.game_manager = GameManager()
@@ -55,7 +45,7 @@ class GameService:
         self.player2_manager = PlayerManager()
 
     async def process_action(self, player: Player, data: Dict, game: Game):
-        request_type: RequestType = RequestType(data.get('action'))
+        request_type: RequestType = RequestType(data.get('type'))
         handlers = {
             RequestType.JOIN_GAME: self._handle_join_game,
             RequestType.PADDLE_MOVE: self._handle_paddle_move,

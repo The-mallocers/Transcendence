@@ -48,7 +48,7 @@ const ctx = canvas.getContext('2d');
 
 function startGame() {
     socket.send(JSON.stringify({
-        action: 'start_game',
+        type: 'start_game',
     }));
 }
 
@@ -137,8 +137,8 @@ document.addEventListener('keyup', (event) => {
 
 function updatePaddles() {
     // gauche
-    if (keys.a) socket.send(JSON.stringify({action: 'paddle_move', player_id: p1_id, direction: 'up'}));
-    if (keys.d) socket.send(JSON.stringify({action: 'paddle_move', player_id: p1_id, direction: 'down'}));
+    if (keys.a) socket.send(JSON.stringify({type: 'paddle_move', player_id: p1_id, direction: 'up'}));
+    if (keys.d) socket.send(JSON.stringify({type: 'paddle_move', player_id: p1_id, direction: 'down'}));
 }
 
 setInterval(updatePaddles, 1000/60);  // 60 fps
