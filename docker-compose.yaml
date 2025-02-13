@@ -2,8 +2,8 @@ services:
   db:
     build: ./postgres
     volumes:
-      - postgres_data:/var/lib/postgresql/data/
-      # - ./postgres/init_db.sh:/docker-entrypoint-initdb.d/init_db.sh
+      # - postgres_data:/var/lib/postgresql/data/
+      - ./postgres/init_db.sh:/docker-entrypoint-initdb.d/init_db.sh
     ports:
       - "5432:5432"
     env_file:
@@ -11,10 +11,15 @@ services:
     networks:
       - wp-networks
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      test: ["CMD-SHELL", "pg_isready -h localhost"]
       interval: 5s
       timeout: 5s
       retries: 5
+    user: postgres
+    environment:
+      - POSTGRES_USER=${DATABASE_USERNAME}
+      - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
+      - PGUSER=${DATABASE_USERNAME}
     restart: always
   
   django-web:
@@ -30,6 +35,8 @@ services:
     env_file:
       - .env
     restart: always
+    networks:
+      - wp-networks
 
   nginx:
     image: nginx
@@ -52,63 +59,3 @@ networks:
 
 volumes:
   postgres_data:
-
-#   wordpress:
-#     build: ./requirements/wordpress
-#     image: wordpress
-#     env_file: .env
-#     volumes:
-#       - wordpress:/var/www/html
-#     depends_on:
-#       - mariadb
-#       - redis
-#     expose:
-#       - "9000"
-#     networks:
-#       - wp-networks
-
-#   mariadb:
-#     build: ./requirements/mariadb
-#     env_file: .env
-#     image: mariadb
-#     volumes:
-#       - mariadb:/var/lib/mysql
-#     restart: always
-#     expose: 
-#       - 3306
-#     ports:
-#       - "3306:3306"
-#     networks:
-#       - wp-networks
-  
-#   redis:
-#     build: ./requirements/bonus/redis
-#     image: redis
-#     restart: always
-#     ports:
-#       - '6379:6379'
-#     expose:
-#       - '6379'
-#     networks:
-#       - wp-networks
-
-# volumes:
-#   mariadb:
-#     driver: local
-#     driver_opts:
-#       type: none
-#       o: bind
-#       device: /home/bpoyet/data/mariadb
-
-#   wordpress:
-#     driver: local
-#     driver_opts:
-#       type: none
-#       o: bind
-#       device: /home/bpoyet/data/wordpress
-#   weather:
-#     driver: local
-#     driver_opts:
-#       type: none
-#       o: bind
-#       device: /home/bpoyet/data/weather
