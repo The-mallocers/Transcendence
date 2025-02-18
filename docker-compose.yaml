@@ -42,7 +42,7 @@ services:
   nginx:
     image: nginx
     ports: 
-      - "8001:80" #"HOST_PORT:CONTAINER_PORT"
+      - "8001:8080" #"HOST_PORT:CONTAINER_PORT"
     depends_on:
       - django-web
     build: ./nginx
