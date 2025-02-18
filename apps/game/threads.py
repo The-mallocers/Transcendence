@@ -21,6 +21,7 @@ class Threads(threading.Thread, ABC):
     def __init__(self):
         super().__init__(daemon=True)
         self.redis = redis.asyncio.Redis(host=settings.REDIS_HOST, port=settings.REDIS_PORT, db=0)
+        self._logger = logging.getLogger(self.__class__.__name__)
         self.loop = None
         self.running = False
 

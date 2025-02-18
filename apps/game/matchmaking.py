@@ -14,36 +14,33 @@ class MatchmakingThread(Threads):
         found: bool = True
         game_manager = GameManager()
         while self.running:
-            await asyncio.sleep(1)
             try:
-                # ── Creating ──────────────────────────────────────────────────────────
-                if found or await game_manager.get_status() is GameStatus.ERROR:
-                    await game_manager.create_game()
-
-                # ── Waiting ───────────────────────────────────────────────────────────
-                await game_manager.set_status(GameStatus.WAITING)
-
-                # ── Matchmaking ───────────────────────────────────────────────────────
+                # Check for players in queue
                 p1, p2 = await self.select_players()
-                if p1 is None or p2 is None:
-                    found = False
-                    continue
 
-                await game_manager.set_status(GameStatus.MATCHMAKING)
+                if p1 is not None and p2 is not None:
+                    self._logger.info(f"Found match: {p1} vs {p2}")
 
-                await game_manager.add_player(p1)
-                await self.redis.hdel('matchmaking_queue', p1)
-                await self.send_to_group(f'player_{p1}', SendType.MATCHMAKING,
+                    await game_manager.create_game()
+                    await game_manager.set_status(GameStatus.MATCHMAKING)
+
+                    await game_manager.add_player(p1)
+                    await self.redis.hdel('matchmaking_queue', p1)
+                    await self.send_to_group(f'player_{p1}',
+                                             SendType.MATCHMAKING,
                                              'join game')
 
-                await game_manager.add_player(p2)
-                await self.redis.hdel('matchmaking_queue', p2)
-                await self.send_to_group(f'player_{p2}', SendType.MATCHMAKING,
+                    await game_manager.add_player(p2)
+                    await self.redis.hdel('matchmaking_queue', p2)
+                    await self.send_to_group(f'player_{p2}',
+                                             SendType.MATCHMAKING,
                                              'join game')
 
-                found = True
-                await game_manager.set_status(GameStatus.STARTING)
-                GameThread(game_id=await game_manager.get_id()).start()
+                    await game_manager.set_status(GameStatus.STARTING)
+                    game_id = await game_manager.get_id()
+                    GameThread(game_id=game_id).start()
+
+                await asyncio.sleep(1)
 
             # Getter excpetion
             except (Game.DoesNotExist, Player.DoesNotExist) as e:
