@@ -1,6 +1,7 @@
 // console.log("ALLOO :", window.location.pathname);
 
 import { logout } from '../apps/auth/logout.js';
+import { login } from '../apps/auth/login.js';
 
 
 class Router {
@@ -164,6 +165,10 @@ document.addEventListener('click', async (e) => {
     if (e.target.matches('#logout-btn') || e.target.closest('#logout-btn')) {
         logout();
     }
+    if (e.target.matches('#login-btn') || e.target.closest('#login-btn')) {
+        login(e);
+    }
+
 });
 
 
