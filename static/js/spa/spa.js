@@ -1,5 +1,7 @@
 // console.log("ALLOO :", window.location.pathname);
 
+import { logout } from '../apps/auth/logout.js';
+
 
 class Router {
     constructor(routes) {
@@ -29,58 +31,40 @@ class Router {
                 const content = await route.template();
                 this.rootElement.innerHTML = content;
                 console.log("SCRIPT ARE BEING RELOADED ON THIS PAGE WAHOOOO")
-                await this.reloadScripts();
+                this.reloadScripts();
             } catch (error) {
                 console.error('Route rendering failed:', error);
             }
         }
     }
 
-    async reloadScripts() {
+    reloadScripts() {
+        // Execute all scripts in the new content
+        console.log("Je suis reload script")
         const scripts = this.rootElement.querySelectorAll('script');
-        console.log("Found scripts:", scripts.length);
-        
-        const loadScript = (script) => {
-            return new Promise((resolve, reject) => {
-                const newScript = document.createElement('script');
-                
-                // Copy src or inline content
-                if (script.src) {
-                    newScript.src = script.src;
-                    // Handle load event for external scripts
-                    newScript.onload = () => resolve();
-                    newScript.onerror = (error) => reject(error);
-                } else {
-                    newScript.textContent = script.textContent;
-                }
-                
-                // Copy all attributes except src
-                Array.from(script.attributes).forEach(attr => {
-                    if (attr.name !== 'src') {
-                        newScript.setAttribute(attr.name, attr.value);
-                    }
-                });
-                
-                // For inline scripts, execute immediately
-                if (!script.src) {
-                    script.parentNode.replaceChild(newScript, script);
-                    resolve();
-                } else {
-                    // For external scripts, wait for replacement
-                    script.parentNode.replaceChild(newScript, script);
+        console.log("scripts = ", scripts)
+        scripts.forEach(oldScript => {
+            const newScript = document.createElement('script');
+            
+            // Copy src or inline content
+            if (oldScript.src) {
+                newScript.src = oldScript.src;
+                console.log("hello, newscript.src :", newScript.src)
+            } else {
+                newScript.textContent = oldScript.textContent;
+            }
+            
+            // Copy other attributes
+            Array.from(oldScript.attributes).forEach(attr => {
+                if (attr.name !== 'src') { // Skip src as we handled it above
+                    newScript.setAttribute(attr.name, attr.value);
+                    console.log("new script attribute = ", attr.name, attr.value)
                 }
             });
-        };
-
-        try {
-            // Load scripts sequentially to maintain execution order
-            for (const script of scripts) {
-                await loadScript(script);
-                console.log("Loaded script:", script.src || 'inline script');
-            }
-        } catch (error) {
-            console.error("Error loading scripts:", error);
-        }
+            
+            // Replace old script with new one
+            oldScript.parentNode.replaceChild(newScript, oldScript);
+        });
     }
 
     navigate(path) {
@@ -171,10 +155,14 @@ const routes = [
 ];
 
 //Need to do this so that the event listerner also listens to the dynamic html
-document.addEventListener('click', (e) => {
+document.addEventListener('click', async (e) => {
     if (e.target.matches('[data-route]')) {
         const route = e.target.dataset.route;
         navigateTo(route);
+    }
+    //this may not look like it but this took a very long time to come up with
+    if (e.target.matches('#logout-btn') || e.target.closest('#logout-btn')) {
+        logout();
     }
 });
 

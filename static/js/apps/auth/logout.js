@@ -1,11 +1,9 @@
 import { navigateTo } from '../../spa/spa.js';
 
-console.log("logout.js online")
-console.log("document get element by id : ", document.getElementById('logout-btn'))
+console.log("logoust.js online")
 
-document.getElementById('logout-btn').addEventListener('click', function () {
+export function logout() {
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-    console.log("i just clicked !")
     fetch('/api/auth/logout/', {
         method: 'POST',
         headers: {
@@ -28,4 +26,4 @@ document.getElementById('logout-btn').addEventListener('click', function () {
         .catch(error => {
             console.error('Error during logout:', error);
     });
-});
+};
