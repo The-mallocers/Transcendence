@@ -7,6 +7,10 @@ from django.http import JsonResponse, HttpRequest, HttpResponseRedirect
 from apps.shared.models import Clients
 from utils.jwt.JWTGenerator import JWTType, JWT, JWTGenerator
 
+from django.middleware.csrf import get_token
+from django.template.loader import render_to_string
+
+
 
 class JWTMiddleware:
     def __init__(self, get_response):
@@ -18,8 +22,14 @@ class JWTMiddleware:
         self.role_protected_paths = getattr(settings, 'ROLE_PROTECTED_PATHS')
 
     def _should_check_path(self, path: str) -> bool:
+        if path.startswith('/pages/') == False and path.startswith('/api/') == False:
+            return False
+        #the idea is that we only want to check the actual stuff that our websites is made of
+        #if it doesnt start with that, it means its something the user typed in (ideally)
         for excluded in self.excluded_paths:
+            print(f"comparing : {excluded} vs {path}")
             if self._path_matches(excluded, path):
+                print("This is public no need to check")
                 return False
 
         for protected in self.protected_paths:
@@ -89,15 +99,24 @@ class JWTMiddleware:
             if required_roles:
                 if not any(role in token.ROLES for role in required_roles):
                     return HttpResponseRedirect('/')
+            print("hello :", self.get_response(request))
             return self.get_response(request)
         except jwt.ExpiredSignatureError:
             try:
                 return self._refresh_token(request)
-            except (jwt.ExpiredSignatureError, jwt.InvalidTokenError,
-                    jwt.InvalidKeyError):
-                return HttpResponseRedirect('/auth/login')
+            except (jwt.ExpiredSignatureError, jwt.InvalidTokenError, jwt.InvalidKeyError):
+
+                print("jwt redirection happening")
+                return JsonResponse({
+                    'status': 'unauthorized',
+                    'redirect': '/auth/login',
+                    'message': 'Session expired' }, status=401)
         except (jwt.InvalidTokenError, jwt.InvalidKeyError):
-            return HttpResponseRedirect('/auth/login')
+            print("jwt redirection happening")
+            return JsonResponse({
+                    'status': 'unauthorized',
+                    'redirect': '/auth/login',
+                    'message': 'Invalid authentication' }, status=401)
         except Exception as e:
             return JsonResponse(
                 {'error': f'Internal server error: {str(e)}'},

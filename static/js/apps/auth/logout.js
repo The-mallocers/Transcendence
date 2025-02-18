@@ -1,7 +1,10 @@
-document.getElementById('logout-btn').addEventListener('click', function () {
-    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+import { navigateTo } from '../../spa/spa.js';
 
-    fetch('/api/auth/logout', {
+console.log("logoust.js online")
+
+export function logout() {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    fetch('/api/auth/logout/', {
         method: 'POST',
         headers: {
             'X-CSRFToken': csrfToken,  // Inclus le CSRF token
@@ -18,9 +21,9 @@ document.getElementById('logout-btn').addEventListener('click', function () {
         .then(data => {
             console.log('Logout successful:', data);
             // Vous pouvez rediriger ou afficher un message de succès ici
-            window.location.href = '/auth/login';  // Par exemple, rediriger vers la page de connexion
+            navigateTo('/auth/login')
         })
         .catch(error => {
             console.error('Error during logout:', error);
     });
-});
+};

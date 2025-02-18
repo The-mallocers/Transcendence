@@ -27,9 +27,14 @@ PROTECTED_PATHS = [
     '/*'
 ]
 EXCLUDED_PATHS = [
+    '/api/auth/login',
     '/api/*',
+    '/pages/auth/login',
     '/auth/login',
     '/auth/register',
+    '/pages/auth/register',
+    '/',
+    '/pages/'
 ]
 ROLE_PROTECTED_PATHS = {
     '/admin/*': ['admin']
@@ -40,7 +45,7 @@ DEBUG = ENV('DJANGO_DEBUG', default=False)
 
 ALLOWED_HOSTS = [
     'localhost',
-    '127.0.0.1'
+    '127.0.0.1',
 ]
 
 # Application definition
@@ -67,7 +72,8 @@ INSTALLED_APPS = [
     'apps.pageBuilder.apps.PagebuilderConfig',
     'apps.pong.apps.PongConfig',
     'apps.profile.apps.ProfileConfig',
-    'apps.shared.apps.SharedConfig'
+    'apps.shared.apps.SharedConfig',
+    'apps.pages.apps.PagesConfig',
 ]
 
 MIDDLEWARE = [
@@ -100,9 +106,9 @@ TEMPLATES = [
 ]
 
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'utils.jwt.JWTAuthtication.JWTAuthentication',  # Replace with the actual path to your class
-    ],
+    # 'DEFAULT_AUTHENTICATION_CLASSES': [
+    #     'utils.jwt.JWTAuthtication.JWTAuthentication',  # Replace with the actual path to your class
+    # ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.AllowAny',  # Optional: Require authentication globally
     ],

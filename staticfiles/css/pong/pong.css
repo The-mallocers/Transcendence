@@ -1,0 +1,52 @@
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Arial', sans-serif;
+    background-color: #d2b48c; /* Wood brown */
+}
+
+.container {
+    text-align: center;
+}
+
+h1 {
+    font-size: 80px;
+    color: #8b4513; /* Darker brown for contrast */
+    margin-bottom: 20px;
+    text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3);
+}
+
+.canvas-wrapper {
+    display: inline-block;
+    border: 8px solid #8b4513;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+canvas {
+    display: block;
+}
+
+.instructions {
+    position: absolute;
+    font-size: 24px;
+    color: #8b4513;
+    font-family: 'Arial', sans-serif;
+}
+
+.top-left {
+    top: 25%;
+    left: 45%;
+    transform: translate(-130%, -50%);
+}
+
+.top-right {
+    top: 25%;
+    left: 55%;
+    transform: translate(30%, -50%);
+}
