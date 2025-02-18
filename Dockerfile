@@ -5,7 +5,6 @@ FROM python:3.11.4-slim-buster
 RUN mkdir /app
 WORKDIR /app
 
-
 # Install system dependencies including SQLite and PostgreSQL client
 RUN apt-get update && apt-get install -y \
     build-essential \

@@ -1,9 +1,10 @@
 services:
   db:
-    build: ./postgres
-    volumes:
-      # - postgres_data:/var/lib/postgresql/data/
-      - ./postgres/init_db.sh:/docker-entrypoint-initdb.d/init_db.sh
+    # build: ./postgres
+    image: postgres
+    # volumes:
+      # - ./postgres_data:/var/lib/postgresql/data/
+      # - ./postgres/init_db.sh:/docker-entrypoint-initdb.d/init_db.sh
     ports:
       - "5432:5432"
     env_file:
@@ -15,11 +16,10 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-    user: postgres
     environment:
       - POSTGRES_USER=${DATABASE_USERNAME}
       - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
-      - PGUSER=${DATABASE_USERNAME}
+      - POSTGRES_DB=${DATABASE_NAME}
     restart: always
   
   django-web:
@@ -57,5 +57,5 @@ networks:
   wp-networks:
     driver: bridge
 
-volumes:
-  postgres_data:
+# volumes:
+#   postgres_data:
