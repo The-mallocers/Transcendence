@@ -8,7 +8,7 @@ from django.db.models.fields import CharField, IntegerField, BooleanField, \
     DateTimeField
 from django.utils import timezone
 
-from utils.pong.enums import Side
+from utils.pong.enums import Side, Ranks
 
 
 class Player(models.Model):
@@ -20,25 +20,20 @@ class Player(models.Model):
 
     # ━━ PLAYER INFOS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
     nickname = CharField(max_length=20, null=True, editable=False)
-    friends = ManyToManyField('self', symmetrical=False, blank=True, related_name='friends_with')
-    friends_requests = ManyToManyField('self', symmetrical=False, blank=True, related_name='invited_by')
-    friends_invitations = ManyToManyField('self', symmetrical=False, blank=True, related_name='requested_by')
+    stats = ForeignKey('player.PlayerStats', on_delete=models.CASCADE, null=True)
+    # friends = ManyToManyField('self', symmetrical=False, blank=True, related_name='friends_with')
+    # friends_requests = ManyToManyField('self', symmetrical=False, blank=True, related_name='invited_by')
+    # friends_invitations = ManyToManyField('self', symmetrical=False, blank=True, related_name='requested_by')
 
     # ── Custom ──────────────────────────────────────────────────────────────────────── #
     skin_ball = CharField(max_length=100, null=True) #A voir quel field il faut mettre
     skin_paddle = CharField(max_length=100, null=True)
 
-    @staticmethod
-    @database_sync_to_async
-    def get(player_id):
-        try:
-            return Player.objects.get(id=player_id)
-        except Player.DoesNotExist:
-            return None
+
 
 class PlayerGame(models.Model):
     class Meta:
-        db_table = 'player_game'
+        db_table = 'players_games'
         unique_together = ('player', 'game')
 
     # ── Links ─────────────────────────────────────────────────────────────────────────
@@ -51,16 +46,18 @@ class PlayerGame(models.Model):
     joined_at = DateTimeField(default=timezone.now)
     is_ready = BooleanField(default=False)
 
+    def __str__(self):
+        return self.player.nickname
+
+
+
 class PlayerStats(models.Model):
     class Meta:
-        db_table = 'player_stats'
-
-    # ── Links ─────────────────────────────────────────────────────────────────────────
-    player = OneToOneField(Player, on_delete=models.CASCADE)
+        db_table = 'players_stats'
 
     # ── Informations ──────────────────────────────────────────────────────────────────
-    total_game = IntegerField(default=0)
-    wins = IntegerField(default=0)
-    losses = IntegerField(default=0)
-    mmr = IntegerField(default=100, blank=True)
-    rank = ForeignKey('pong.Rank', on_delete=models.SET_NULL, null=True, blank=True)
+    total_game = IntegerField(default=0, blank=True)
+    wins = IntegerField(default=0, blank=True)
+    losses = IntegerField(default=0, blank=True)
+    mmr = IntegerField(default=50, blank=True)
+    rank = ForeignKey('pong.Rank', on_delete=models.SET_NULL, null=True, blank=True, default=Ranks.BRONZE.value)

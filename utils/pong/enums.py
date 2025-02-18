@@ -13,13 +13,26 @@ class GameStatus(str, Enum):
     ERROR: str = 'error'
 
 class RequestType(str, Enum):
-    JOIN_GAME = 'join_game'
-    START_GAME = 'start_game'
-    IS_READY = 'is_ready'
-    PADDLE_MOVE = 'paddle_move'
-    BALL_UPDATE = 'ball_update'
-    P1_SCORE_UPDATE = 'p1_score_update'
-    P2_SCORE_UPDATE = 'p2_score_update'
+    MATCHMAKING: str = 'matchmaking'
+    GAME: str = 'game'
+
+class SendType(str, Enum):
+    MATCHMAKING: str = 'matchmaking'
+
+
+class RequestAction(str, Enum):
+    # ── Game Actions ──────────────────────────────────────────────────────────────────
+    JOIN_GAME: str = 'join_game'
+    START_GAME: str = 'start_game'
+    IS_READY: str = 'is_ready'
+    PADDLE_MOVE: str = 'paddle_move'
+    BALL_UPDATE: str = 'ball_update'
+    P1_SCORE_UPDATE: str = 'p1_score_update'
+    P2_SCORE_UPDATE: str = 'p2_score_update'
+
+    # ── Matchmaking Actions ───────────────────────────────────────────────────────────
+    JOIN_MM: str = 'join_matchmaking'
+    LEAVE_MM: str = 'leave_matchmaking'
 
 class ErrorType(str, Enum):
     GAME_FULL = 'Game full'

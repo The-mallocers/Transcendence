@@ -1,8 +1,8 @@
 import copy
 import time
-from dataclasses import dataclass
-from enum import Enum
 
+from utils.pong.enums import GameStatus
+from utils.pong.objects import Ball
 
 
 class GameState:

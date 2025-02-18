@@ -1,17 +1,16 @@
 import redis
-
-import redis.asyncio as aioredis
 from asgiref.sync import sync_to_async
 from django.conf import settings
 from django.db import transaction
+from redis.asyncio import Redis
 
 from apps.player.models import Player
-
-redis = redis.StrictRedis(host='localhost', port=6379, db=0, decode_responses=True)
+from apps.player.models import PlayerGame
+from apps.shared.models import Clients
 
 class PlayerManager:
     _instance = None
-    _redis = aioredis.Redis(host=settings.REDIS_HOST, port=settings.REDIS_PORT, db=0)
+    _redis = Redis(host=settings.REDIS_HOST, port=settings.REDIS_PORT, db=0)
 
     def __init__(self):
         self._player: Player = None
@@ -23,15 +22,34 @@ class PlayerManager:
         return cls._instance
 
     @sync_to_async
-    def exist(self, player_id):
-        """Check if the game ID is a real game"""
-        from apps.game.models import Player
-        with transaction.atomic():
-            return Player.objects.filter(id=player_id).exists()
+    def get_player_db(self, player_id):
+        """Get player from data base"""
+        try:
+            with transaction.atomic():
+                return Player.objects.get(id=player_id)
+        except Player.DoesNotExist:
+            return None
 
     @sync_to_async
-    def get_player_id_client(self, client_id):
-        """Check if the game ID is a real game"""
-        from apps.game.models import Clients
+    def get_player_game_db(self, player_id):
+        """Get player game with player_id from data base"""
+        try:
+            with transaction.atomic():
+                return PlayerGame.objects.filter(player__id=player_id).first()
+        except PlayerGame.DoesNotExist:
+            return None
+
+    @sync_to_async
+    def get_player_from_client_db(self, client_id) -> Player | None:
+        """Get player with client id from data base"""
+        try:
+            with transaction.atomic():
+                return Clients.objects.select_related('player__stats').get(id=client_id).player
+        except Clients.DoesNotExist:
+            return None
+
+    @sync_to_async
+    def get_player_id_db(self, player_game: PlayerGame):
+        """Get player from data base"""
         with transaction.atomic():
-            return Clients.objects.get(id=client_id).player.id
+            return player_game.player.id

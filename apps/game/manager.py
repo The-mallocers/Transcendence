@@ -1,7 +1,7 @@
 import asyncio
 import logging
 
-import redis.asyncio as aioredis
+from redis.asyncio import Redis
 from asgiref.sync import sync_to_async
 from django.conf import settings
 from django.db import transaction
@@ -27,7 +27,7 @@ class GameManager:
             return GameManager()  # Temporary instance
         if game_id not in cls._instances:
             instance = GameManager(game_id)
-            instance._game = await instance._load_game_from_db(game_id)
+            instance._game = await instance.get_game_db(game_id)
             cls._instances[game_id] = instance
         return cls._instances[game_id]
 
@@ -36,7 +36,7 @@ class GameManager:
         """Get or create Redis connection for current event loop"""
         loop = asyncio.get_running_loop()
         if loop not in cls._redis_connections:
-            cls._redis_connections[loop] = await aioredis.Redis(
+            cls._redis_connections[loop] = await Redis(
                 host=settings.REDIS_HOST,
                 port=settings.REDIS_PORT,
                 db=0,
@@ -65,11 +65,13 @@ class GameManager:
 
         redis = await self.get_redis()
         await redis.json().set(key, Path.root_path(), value)
-        return self._game
 
     async def add_player(self, player_id):
         """Add a player to the game and update Redis."""
         player = await self._get_player(player_id)
+
+        if player is None:
+            raise
 
         await self._add_player(player)
         serializer = PlayerSerializer(player, context={'paddle': Paddle()})
@@ -109,46 +111,59 @@ class GameManager:
         return self._game.status
 
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ DATABASE OPERATIONS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
-    @sync_to_async
-    def _create_game(self):
-        """Create a new game in the database."""
-        from apps.game.models import Game, GameStatus
-        with transaction.atomic():
-            return Game.objects.create(in_tournament=False, status=GameStatus.CREATING)
+
+    # ── Getter ────────────────────────────────────────────────────────────────────────
 
     @sync_to_async
     def _get_player(self, id):
         """Retrieve a player from the database."""
         from apps.game.models import Player
-        with transaction.atomic():
-            return Player.objects.get(id=id)
+        try:
+            with transaction.atomic():
+                return Player.objects.get(id=id)
+        except Player.DoesNotExist:
+            return None
+
+    @sync_to_async
+    def get_game_db(self, game_id):
+        """Load an existing game from the database."""
+        from apps.game.models import Game
+        try:
+            with transaction.atomic():
+                return Game.objects.get(id=game_id)
+        except Game.DoesNotExist:
+            return None
+
+    # ── Setter ────────────────────────────────────────────────────────────────────────
 
     @sync_to_async
     def _add_player(self, player):
         """Add a player to the game in the database."""
-        with transaction.atomic():
-            self._game.players.add(player)
+        try:
+            with transaction.atomic():
+                self._game.players.add(player)
+        except:
+            raise ValueError(f'Cannot add {player.id}')
 
     @sync_to_async
     def _update_status(self, status):
         """Update the game status in the database."""
-        with transaction.atomic():
-            self._game.status = status
-            self._game.save()
+        try:
+            with transaction.atomic():
+                self._game.status = status
+                self._game.save()
+        except:
+            raise ValueError(f'Cannot update status to {status}')
 
     @sync_to_async
-    def _load_game_from_db(self, game_id):
-        """Load an existing game from the database."""
-        from apps.game.models import Game
-        with transaction.atomic():
-            return Game.objects.get(id=game_id)
-
-    @sync_to_async
-    def exist(self, game_id):
-        """Check if the game ID is a real game"""
-        from apps.game.models import Game
-        with transaction.atomic():
-            return Game.objects.filter(id=game_id).exists()
+    def _create_game(self):
+        """Create a new game in the database."""
+        from apps.game.models import Game, GameStatus
+        try:
+            with transaction.atomic():
+                return Game.objects.create(in_tournament=False, status=GameStatus.CREATING)
+        except ValueError as e:
+            return ValueError(f'Cannot create game: {str(e)}')
 
     # async def update_ball(self, game_id, x, y):
     #     redis = await self.connect()

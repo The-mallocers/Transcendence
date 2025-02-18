@@ -3,8 +3,7 @@ from django.conf.urls.static import static
 from django.urls import path, include, re_path
 from django.views.generic import TemplateView
 
-from apps.game.ws_game import WebSocketGame
-from apps.game.ws_match import MatchMaking
+from apps.game.websocket import WebSocket
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ HTTP ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
 urlpatterns = [
@@ -13,6 +12,7 @@ urlpatterns = [
     path('pong/', include('apps.pong.urls')),
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ API ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
     path('api/auth/', include('apps.auth.api.urls')),
+    path('api/client/', include('apps.shared.api.urls')),
 
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ BASE ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
     re_path(r'^.*$', TemplateView.as_view(template_name='base.html')),
@@ -26,8 +26,7 @@ urlpatterns = [
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ WEBSOCKET ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
 
 websocket_urlpatterns = [
-    path("ws/game/matchmaking/", MatchMaking.as_asgi()),
-    re_path(r"ws/game/(?P<room_name>\w+)/$", WebSocketGame.as_asgi())
+    path("ws/game/", WebSocket.as_asgi()),
 ]
 
 if settings.DEBUG:

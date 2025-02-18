@@ -38,7 +38,7 @@ class JWTGenerator:
     @classmethod
     def extract_token(cls, request: HttpRequest,
                       token_type: JWTType) -> JWT | None:
-        token_key = request.COOKIES.get(str(token_type) + '_token')
+        token_key = request.COOKIES.get(token_type.value + '_token')
         try:
             payload = jwt.decode(token_key, cls.secret_key,
                                  algorithms=[cls.algorithm])

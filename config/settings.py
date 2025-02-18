@@ -25,7 +25,8 @@ JWT_ALGORITH = 'HS256'
 
 #Middlware protected paths
 PROTECTED_PATHS = [
-    '/'
+    '/',
+    '/pong/'
 ]
 EXCLUDED_PATHS = [
     '/api/auth/login',
@@ -191,7 +192,7 @@ LOGGING = {
     'disable_existing_loggers': False,
     'formatters': {
         'verbose': {
-            'format': '{levelname} {asctime} {module} {message}',
+            'format': '{levelname} {asctime} {module} | {message}',
             'style': '{',
         },
     },

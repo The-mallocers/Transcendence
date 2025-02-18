@@ -2,20 +2,53 @@ const room = "58d755a781fa4e9cb8e3e3c21fe90714"
 
 
 let player_id = null;
+let game_id   = null; 
 
-async function getPlayerId() {
-    if (playerId !== null) return playerId; // Si déjà récupéré, retourne-le
+let client_id = null;
+
+const startButton = document.getElementById("ready-start-btn");
+
+const match = async ()=>{
+    const clientId = await getClientId()
+    console.log(clientId)
+    const matchSocket = new WebSocket('ws://' + window.location.host + '/ws/game/matchmaking/?id=' + clientId);
+
+    matchSocket.onopen = ()=>{
+        console.log('lalalala')
+    }
+    matchSocket.onmessage = (e)=>{
+        data = JSON.parse(e.data)
+        console.log(data)
+
+        const type = "joined"
+        data = { ... data, type}
+        
+        // if (data.type === "matchmaking_info") {
+        //     matchSocket.send(data);
+        // }
+    }
+    matchSocket.onclose = ()=>{
+        console.log('lololololo')
+    }
+
+}
+
+startButton.addEventListener('click', ()=>{match()});
+
+
+async function getClientId() {
+    if (client_id !== null) return client_id; // Si déjà récupéré, retourne-le
 
     try {
-        const response = await fetch("/api/player-id/", {
+        const response = await fetch("/api/client/get-id", {
             method: "GET",
             credentials: "include",
         });
         const data = await response.json();
 
-        if (data.player_id) {
-            playerId = data.player_id;
-            return playerId;
+        if (data.client_id) {
+            client_id = data.client_id;
+            return client_id;
         } else {
             throw new Error(data.error);
         }
@@ -26,14 +59,14 @@ async function getPlayerId() {
 }
 
 // Exemple d'utilisation
-getPlayerId().then(id => {
-    console.log("L'ID du joueur est :", id);
-});
+// getPlayerId().then(id => {
+//     console.log("L'ID du joueur est :", id);
+// });
 
 // Create WebSocket connection
-console.log("ID du joueur :", player_id);
+// console.log("ID du joueur :", player_id);
 
-socket = new WebSocket('ws://' + window.location.host + '/ws/game/' + room +'/?id=' + player_id);
+// socket = new WebSocket('ws://' + window.location.host + '/ws/game/' + room +'/?id=' + player_id);
 
 let paddle_p1 = JSON.parse({"y": 0});
 let paddle_p2 = JSON.parse({"y": 0});

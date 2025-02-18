@@ -10,7 +10,7 @@ from apps.player.models import Player
 from apps.pong.api.serializers import BallSerializer
 from apps.pong.utils import GameState
 from apps.shared.models import Clients
-from utils.pong.enums import RequestType
+from utils.pong.enums import RequestAction
 from utils.pong.objects import FPS, Ball, CANVAS_HEIGHT, CANVAS_WIDTH, \
     BALL_SPEED
 
@@ -118,7 +118,7 @@ class PongLogic:
                 await channel_layer.group_send(f"group_{game.id}", {
                     'type': 'game_message',
                     'message': {
-                        'type': RequestType.BALL_UPDATE,
+                        'type': RequestAction.BALL_UPDATE,
                         'ball': BallSerializer(game.ball).data
                     }
                 })
@@ -126,7 +126,7 @@ class PongLogic:
                 await channel_layer.group_send(f"group_{game.id}", {
                     'type': 'game_message',
                     'message': {
-                        'type': RequestType.P1_SCORE_UPDATE,
+                        'type': RequestAction.P1_SCORE_UPDATE,
                         'score': game.player_1.score
                     }
                 })
@@ -134,7 +134,7 @@ class PongLogic:
                 await channel_layer.group_send(f"group_{game.id}", {
                     'type': 'game_message',
                     'message': {
-                        'type': RequestType.P2_SCORE_UPDATE,
+                        'type': RequestAction.P2_SCORE_UPDATE,
                         'score': game.player_2.score
                     }
                 })
