@@ -1,12 +1,17 @@
 import { navigateTo } from '../../spa/spa.js';
 
-console.log("I am register.js")
 
-const form = document.querySelector("form");
-const error = document.getElementById("error-message");
+// window.onload = function() {
+//     console.log("I am register.js")
+//     console.log("Page has fully loaded!");
+// };
 
-form.addEventListener("submit", function (event) {
+
+export function register (event) {
+    console.log("I am register.js")
     event.preventDefault();
+    const form = document.querySelector("form");
+    const error = document.getElementById("error-message");
 
     const username = document.getElementById('username').value;
     const email = document.getElementById('email').value;
@@ -40,4 +45,4 @@ form.addEventListener("submit", function (event) {
         .catch(error => {
             console.error("There was an error with the fetch operation:", error);
         });
-});
+};

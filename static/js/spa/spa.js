@@ -2,6 +2,7 @@
 
 import { logout } from '../apps/auth/logout.js';
 import { login } from '../apps/auth/login.js';
+import { register } from '../apps/auth/register.js';
 
 
 class Router {
@@ -167,6 +168,9 @@ document.addEventListener('click', async (e) => {
     }
     if (e.target.matches('#login-btn') || e.target.closest('#login-btn')) {
         login(e);
+    }
+    if (e.target.matches('#register-btn') || e.target.closest('#login-btn')) {
+        register(e);
     }
 
 });
