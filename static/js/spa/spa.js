@@ -1,4 +1,4 @@
-console.log("ALLOO :", window.location.pathname);
+// console.log("ALLOO :", window.location.pathname);
 
 
 class Router {
@@ -15,7 +15,7 @@ class Router {
 
     async handleLocation() {
         const path = window.location.pathname;
-        console.log("looking for the path: ", path)
+        // console.log("looking for the path: ", path)
         const route = this.routes.find(r => r.path === path);
         if (!route) {
             this.rootElement.innerHTML = `<div style="text-align: center; padding: 50px;">
@@ -25,40 +25,62 @@ class Router {
         }
         else {
             try {
-                console.log("About to try the route template of the route :", route);
+                // console.log("About to try the route template of the route :", route);
                 const content = await route.template();
                 this.rootElement.innerHTML = content;
                 console.log("SCRIPT ARE BEING RELOADED ON THIS PAGE WAHOOOO")
-                this.reloadScripts();
+                await this.reloadScripts();
             } catch (error) {
                 console.error('Route rendering failed:', error);
             }
         }
     }
 
-    reloadScripts() {
-        // Execute all scripts in the new content
+    async reloadScripts() {
         const scripts = this.rootElement.querySelectorAll('script');
-        scripts.forEach(oldScript => {
-            const newScript = document.createElement('script');
-            
-            // Copy src or inline content
-            if (oldScript.src) {
-                newScript.src = oldScript.src;
-            } else {
-                newScript.textContent = oldScript.textContent;
-            }
-            
-            // Copy other attributes
-            Array.from(oldScript.attributes).forEach(attr => {
-                if (attr.name !== 'src') { // Skip src as we handled it above
-                    newScript.setAttribute(attr.name, attr.value);
+        console.log("Found scripts:", scripts.length);
+        
+        const loadScript = (script) => {
+            return new Promise((resolve, reject) => {
+                const newScript = document.createElement('script');
+                
+                // Copy src or inline content
+                if (script.src) {
+                    newScript.src = script.src;
+                    // Handle load event for external scripts
+                    newScript.onload = () => resolve();
+                    newScript.onerror = (error) => reject(error);
+                } else {
+                    newScript.textContent = script.textContent;
+                }
+                
+                // Copy all attributes except src
+                Array.from(script.attributes).forEach(attr => {
+                    if (attr.name !== 'src') {
+                        newScript.setAttribute(attr.name, attr.value);
+                    }
+                });
+                
+                // For inline scripts, execute immediately
+                if (!script.src) {
+                    script.parentNode.replaceChild(newScript, script);
+                    resolve();
+                } else {
+                    // For external scripts, wait for replacement
+                    script.parentNode.replaceChild(newScript, script);
                 }
             });
-            
-            // Replace old script with new one
-            oldScript.parentNode.replaceChild(newScript, oldScript);
-        });
+        };
+
+        try {
+            // Load scripts sequentially to maintain execution order
+            for (const script of scripts) {
+                await loadScript(script);
+                console.log("Loaded script:", script.src || 'inline script');
+            }
+        } catch (error) {
+            console.error("Error loading scripts:", error);
+        }
     }
 
     navigate(path) {
@@ -68,8 +90,8 @@ class Router {
 }
 
 window.onload = async ()=>{
-    // console.log(pongRoute.possibleRoutes)
-    console.log(window.location.pathname)
+    console.log(pongRoute.possibleRoutes)
+    // console.log(window.location.pathname)
     await router.handleLocation();
 }
 
@@ -86,13 +108,13 @@ const header = {
 };
 
 async function fetchRoute(path) {
-    console.log("fetching the path :", path)
+    // console.log("fetching the path :", path)
     const response = await fetch(path, {
         headers: header,
         credentials: 'include'
     });
     const data = await response.json();
-    console.log("testing redirect, data is :", data)
+    // console.log("testing redirect, data is :", data)
     if (response.ok) {
         return data.html;
     }
@@ -101,13 +123,13 @@ async function fetchRoute(path) {
         //For real tho, this else really should be a redirection (but i dont think it can really fail ?)
         //We just want to redirect to login if the guy doesnt have the right
         path = '/pages/auth/login'
-        console.log("REDIRECTION -> fetching the path :", path)
+        // console.log("REDIRECTION -> fetching the path :", path)
         const response = await fetch(path, {
             headers: header,
             credentials: 'include'
         });
         const data = await response.json();
-        console.log("testing redirect, data is :", data);
+        // console.log("testing redirect, data is :", data);
         window.history.pushState({}, '', '/auth/login');
         return data.html
     }
@@ -117,7 +139,7 @@ const routes = [
     {
         path: '/',
         template: async () => {
-            console.log("I am fetching a route in spa.js")
+            // console.log("I am fetching a route in spa.js")
             return await fetchRoute('/pages/');
         },
     },
@@ -130,7 +152,7 @@ const routes = [
     {
         path: '/pong/',
         template: async () => {
-            console.log("fetching pong")
+            // console.log("fetching pong")
             return await fetchRoute('/pages/pong/');
         },
     },

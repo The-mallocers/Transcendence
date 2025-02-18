@@ -1,6 +1,7 @@
 import { navigateTo } from '../../spa/spa.js';
 
-console.log("logoust.js online")
+console.log("logout.js online")
+console.log("document get element by id : ", document.getElementById('logout-btn'))
 
 document.getElementById('logout-btn').addEventListener('click', function () {
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
