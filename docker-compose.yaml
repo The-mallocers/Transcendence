@@ -31,7 +31,6 @@ services:
       - 8000
     build: .
     volumes:
-      # - ./static:/app/staticfiles
       - ./staticdocker:/app/staticfiles
     env_file:
       - .env
