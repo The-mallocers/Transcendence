@@ -45,6 +45,7 @@ class RegisterApiView(APIView):
     def post(self, request, *args, **kwargs):
         print("in registerapiview")
         serializer = ClientSerializer(data=request.data)
+
         if serializer.is_valid():
             client = serializer.save()
             return Response(ClientSerializer(client).data, status=status.HTTP_201_CREATED)

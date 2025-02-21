@@ -1,10 +1,7 @@
 import { navigateTo } from '../../spa/spa.js';
 
-console.log("Loaded the dom in login.js")
-// Sélectionner le formulaire et ajouter un événement de soumission
-
-// Empêcher le comportement de soumission par défaut
 export function login(e) {
+    console.log("in login.js")
     e.preventDefault();
     
     const form = document.querySelector("form");

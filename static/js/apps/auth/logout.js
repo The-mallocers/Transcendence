@@ -1,8 +1,8 @@
 import { navigateTo } from '../../spa/spa.js';
 
-console.log("logoust.js online")
 
 export function logout() {
+    console.log("logout.js online")
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
     fetch('/api/auth/logout/', {
         method: 'POST',
