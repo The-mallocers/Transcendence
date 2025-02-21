@@ -54,14 +54,24 @@ services:
     restart: always
 
   prometheus:
-    build: 
-      ./prometheus
+    image: prom/prometheus
+    depends_on:
+      - django-web
     volumes:
       - "./prometheus/volume/prometheus.yml:/etc/prometheus/prometheus.yml"
     networks:
       - Tnetwork
     ports:
       - 9090:9090
+
+  node-exporter:
+    image: prom/node-exporter
+    depends_on:
+      - django-web
+    networks:
+      - Tnetwork
+    ports:
+      - 9101:9100
 
 networks:
   Tnetwork:
