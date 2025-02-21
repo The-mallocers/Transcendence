@@ -10,7 +10,7 @@ services:
     env_file:
       - .env
     networks:
-      - wp-networks
+      - Tnetwork
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -h localhost"]
       interval: 5s
@@ -36,12 +36,12 @@ services:
       - .env
     restart: always
     networks:
-      - wp-networks
+      - Tnetwork
 
   nginx:
-    image: nginx
+    # image: nginx
     ports: 
-      - "8001:8080" #"HOST_PORT:CONTAINER_PORT"
+      - "8001:443" #"HOST_PORT:CONTAINER_PORT" should not be inferior to 1024 when no sudo rights
     depends_on:
       - django-web
     build: ./nginx
@@ -50,11 +50,21 @@ services:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./staticdocker:/static:ro
     networks:
-      - wp-networks
+      - Tnetwork
     restart: always
 
+  prometheus:
+    build: 
+      ./prometheus
+    volumes:
+      - "./prometheus/volume/prometheus.yml:/etc/prometheus/prometheus.yml"
+    networks:
+      - Tnetwork
+    ports:
+      - 9090:9090
+
 networks:
-  wp-networks:
+  Tnetwork:
     driver: bridge
 
 # volumes:
