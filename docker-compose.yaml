@@ -12,13 +12,12 @@ services:
     networks:
       - Tnetwork
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -h localhost"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d dockerdjango"]
       interval: 5s
       timeout: 5s
       retries: 5
     environment:
-      - PGUSER=postgres
-      - POSTGRES_USER=postgres
+      # - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=${DATABASE_NAME}
     restart: always
@@ -72,10 +71,36 @@ services:
       - Tnetwork
     ports:
       - 9101:9100
+  grafana:
+    image: grafana/grafana-enterprise
+    container_name: grafana
+    restart: unless-stopped
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      # - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_AUTH.BASIC_ENABLED=false
+      - GF_AUTH_DISABLE_LOGIN_FORM=true
+    depends_on:
+      - prometheus
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./volumes/grafana/provisioning:/etc/grafana/provisioning
+      # - grafana_storage:/var/lib/grafana
+    networks:
+      - Tnetwork
 
 networks:
   Tnetwork:
     driver: bridge
+
+# volumes:
+#   grafana_storage:
+#     driver: local
+#     driver_opts:
+#       type: none
+#       o: bind
+#       device: ./volumes/grafana
 
 # volumes:
 #   postgres_data:
