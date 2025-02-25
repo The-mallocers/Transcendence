@@ -7,20 +7,19 @@ export function logout() {
     fetch('/api/auth/logout/', {
         method: 'POST',
         headers: {
-            'X-CSRFToken': csrfToken,  // Inclus le CSRF token
-            'Content-Type': 'application/json'  // Type de contenu JSON même si aucune donnée n'est envoyée
+            'X-CSRFToken': csrfToken, 
+            'Content-Type': 'application/json'
         },
-        body: JSON.stringify({})  // Envoi d'un corps vide
+        body: JSON.stringify({})  // sending an empty body for some reasons
     })
         .then(response => {
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
-            return response.json();  // Si vous attendez une réponse JSON
+            return response.json();
         })
         .then(data => {
             console.log('Logout successful:', data);
-            // Vous pouvez rediriger ou afficher un message de succès ici
             navigateTo('/auth/login')
         })
         .catch(error => {

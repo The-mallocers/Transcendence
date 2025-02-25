@@ -7,5 +7,4 @@ urlpatterns = [
     path('auth/', include("apps.auth.urls")),
     path('admin/', include("apps.admin.urls")),
     path('pong/', include('apps.pong.urls')),
-    path('edit/', include("apps.componentBuilder.urls")),
 ]
