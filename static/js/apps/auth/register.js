@@ -1,12 +1,5 @@
 import { navigateTo } from '../../spa/spa.js';
 
-
-// window.onload = function() {
-//     console.log("I am register.js")
-//     console.log("Page has fully loaded!");
-// };
-
-
 export function register (event) {
     console.log("I am register.js")
     event.preventDefault();
@@ -47,7 +40,7 @@ export function register (event) {
                 console.log(response);
                 response.json().then(error => {
                     
-                    error.textContent = "An error occurred" //figure out later how to do proper error messages clugi
+                    error.textContent = "An error occurred"
                 });
             }
         })
