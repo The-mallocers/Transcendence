@@ -94,7 +94,7 @@ networks:
   Tnetwork:
     driver: bridge
 
-# volumes:
+# volumes:  
 #   grafana_storage:
 #     driver: local
 #     driver_opts:
