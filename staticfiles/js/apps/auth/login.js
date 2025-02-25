@@ -1,11 +1,9 @@
 import { navigateTo } from '../../spa/spa.js';
 
 export function login(e) {
-    console.log("in login.js")
     e.preventDefault();
     
     const form = document.querySelector("form");
-    // Récupérer les données du formulaire
     const formData = new FormData(form);
     const errorDiv = document.getElementById("error-message")
 

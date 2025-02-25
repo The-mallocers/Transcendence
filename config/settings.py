@@ -65,11 +65,8 @@ INSTALLED_APPS = [
 
     # ────────────────────────────────── Custom Apps ─────────────────────────────────── #
     'apps.admin.apps.AdminConfig',
-    'apps.api.apps.ApiConfig',
     'apps.auth.apps.AuthConfig',
-    'apps.componentBuilder.apps.ComponentbuilderConfig',
     'apps.index.apps.IndexConfig',
-    'apps.pageBuilder.apps.PagebuilderConfig',
     'apps.pong.apps.PongConfig',
     'apps.profile.apps.ProfileConfig',
     'apps.shared.apps.SharedConfig',
