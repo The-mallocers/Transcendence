@@ -24,12 +24,8 @@ class JWTMiddleware:
     def _should_check_path(self, path: str) -> bool:
         if path.startswith('/pages/') == False and path.startswith('/api/') == False:
             return False
-        #the idea is that we only want to check the actual stuff that our websites is made of
-        #if it doesnt start with that, it means its something the user typed in (ideally)
         for excluded in self.excluded_paths:
-            print(f"comparing : {excluded} vs {path}")
             if self._path_matches(excluded, path):
-                print("This is public no need to check")
                 return False
 
         for protected in self.protected_paths:
@@ -105,14 +101,11 @@ class JWTMiddleware:
             try:
                 return self._refresh_token(request)
             except (jwt.ExpiredSignatureError, jwt.InvalidTokenError, jwt.InvalidKeyError):
-
-                print("jwt redirection happening")
                 return JsonResponse({
                     'status': 'unauthorized',
                     'redirect': '/auth/login',
                     'message': 'Session expired' }, status=401)
         except (jwt.InvalidTokenError, jwt.InvalidKeyError):
-            print("jwt redirection happening")
             return JsonResponse({
                     'status': 'unauthorized',
                     'redirect': '/auth/login',
