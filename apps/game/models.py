@@ -9,7 +9,7 @@ from django.utils import timezone
 from apps.player.models import Player, PlayerGame
 from apps.shared.models import Clients
 from utils.pong.enums import GameStatus
-from utils.utils import generate_unique_code
+from utils.util import generate_unique_code
 
 
 class Game(models.Model):

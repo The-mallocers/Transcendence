@@ -1,25 +1,26 @@
-import logging
-import signal
-import sys
+import atexit
 import types
 
 from django.apps import AppConfig
-
 
 
 class GameConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'apps.game'
 
+    def __init__(self, app_name: str, app_module: types.ModuleType | None):
+        super().__init__(app_name, app_module)
+        self.thread = None
+
     def ready(self):
         from apps.game.matchmaking import MatchmakingThread
-        matchmaking_thread = MatchmakingThread()
-        if not matchmaking_thread.is_alive():
-            matchmaking_thread.start()
+        self.thread = MatchmakingThread("MatchmakingThread")
+        self.thread.start()
 
-        signal.signal(signal.SIGTERM, self.shutdown)
-        signal.signal(signal.SIGINT, self.shutdown)
+        atexit.register(self.stop_thread)
 
-    def shutdown(self, *args):
-        logging.info("test")
-        sys.exit(0)
+
+    def stop_thread(self):
+        if self.thread:
+            self.thread.stop()
+            self.thread.join()

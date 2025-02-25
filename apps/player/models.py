@@ -29,6 +29,9 @@ class Player(models.Model):
     skin_ball = CharField(max_length=100, null=True) #A voir quel field il faut mettre
     skin_paddle = CharField(max_length=100, null=True)
 
+    def __str__(self):
+        return f"{self.nickname} with id: {self.id}"
+
 
 
 class PlayerGame(models.Model):

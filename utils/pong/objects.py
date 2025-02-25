@@ -1,5 +1,7 @@
 from dataclasses import dataclass
 
+from utils.pong.enums import Side
+
 BALL_SPEED = 2
 PADDLE_SPEED = 10
 PADDLE_WIDTH = 10

@@ -8,20 +8,22 @@ from redis.asyncio import Redis
 
 from apps.game.services import MatchmakingService, GameService
 from apps.player.manager import PlayerManager
-from apps.player.models import PlayerGame, Player
-from utils.pong.enums import RequestType
-from utils.utils import ServiceError
+from apps.player.models import Player
+from utils.pong.base_class import ServiceError
+from utils.pong.enums import EventType, ResponseError, ResponseAction
 
 
 class WebSocket(AsyncWebsocketConsumer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.redis_client = Redis(host=settings.REDIS_HOST, port=settings.REDIS_PORT, db=0)
+        self._redis = Redis(host=settings.REDIS_HOST, port=settings.REDIS_PORT, db=0)
+        self._logger = logging.getLogger(self.__class__.__name__)
         self.game_service = GameService()
         self.matchmaking_service = MatchmakingService()
         self.player: Player = None
 
     async def connect(self):
+        logging.getLogger('websocket.client').info(f'New WebSocket connection from {self.scope["client"]}')
         query_string = self.scope['query_string'].decode()
         query_params = parse_qs(query_string)
 
@@ -29,37 +31,59 @@ class WebSocket(AsyncWebsocketConsumer):
 
         if self.player is None:
             await self.accept()
-            await self.send(text_data=json.dumps({
-                'error': 'Player not found'
-            }), close=True)
+            await self.send_consumer_error(ResponseError.PLAYER_NOT_FOUND, close=True)
             return
 
+        await self._redis.set(f"user_ws:{self.player.id}", self.channel_name)
         await self.channel_layer.group_add(f'player_{str(self.player.pk)}', self.channel_name)
         await self.accept()
 
     async def disconnect(self, close_code):
+        logging.getLogger('websocket.client').info(f'WebSocket disconnected with code {close_code}')
         if self.player is not None:
             await self.channel_layer.group_discard(f'player_{str(self.player.id)}', self.channel_name)
 
     async def receive(self, text_data=None, bytes_data=None):
         try:
             data = json.loads(text_data)
-            request_type = RequestType(data.get('type'))
+            event_type = EventType(data['event'])
 
-            if request_type is RequestType.MATCHMAKING:
+            if event_type is EventType.MATCHMAKING:
                 await self.matchmaking_service.process_action(data, self.player)
-            if request_type is RequestType.GAME:
+            if event_type is EventType.GAME:
                 await self.game_service.process_action(data, self.player, None)
 
         except json.JSONDecodeError:
-            await self.send(text_data=json.dumps({
-                'error': 'Invalid JSON format'
-            }))
-        except ServiceError as e:
-            await self.send(text_data=json.dumps({
-                'error': f'{str(e)}'
-            }))
+            await self.send_consumer_error(ResponseError.JSON_ERROR)
 
-    async def group_send(self, event):
+        except ServiceError as e:
+            self._logger.error(e)
+            await self.send_consumer_error(ResponseError.SERVICE_ERROR, content=str(e))
+
+    async def game_send(self, event):
         message = event['message']
         await self.send(text_data=json.dumps(message))
+
+    async def player_send(self, event):
+        message = event['message']
+        await self.send(text_data=json.dumps(message))
+
+    async def send_consumer_error(self, error_type: ResponseError, content = None, close: bool = False):
+        await self.send(
+            text_data=json.dumps({
+                'event': EventType.ERROR,
+                'data': {
+                    'action': error_type.name,
+                    'content': error_type.value + str(content),
+                }
+            }), close=close)
+
+    async def send_consumer(self, event_type: EventType, msg_type: ResponseAction):
+        await self.send(
+            text_data=json.dumps({
+                'event': event_type,
+                'data': {
+                    'action': msg_type.name,
+                    'content': msg_type.value,
+                }
+            }))
