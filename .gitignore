@@ -83,6 +83,7 @@ target/
 
 ### Django ###
 *.log
+*.log.*
 *.pot
 migrations
 *.pyc
