@@ -76,14 +76,18 @@ services:
     # image: grafana/grafana-enterprise
     build: ./docker/grafana
     container_name: grafana
+    env_file:
+      - .env
     restart: unless-stopped
     environment:
     # Authentication settings
     - GF_SECURITY_ADMIN_USER=admin
-    - GF_SECURITY_ADMIN_PASSWORD=your-secure-password
+    - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
+    - GF_SERVER_SERVE_FROM_SUB_PATH=true
     # Other settings as before
-    - GF_AUTH_ANONYMOUS_ENABLED=true
-    - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+    # - GF_AUTH_ANONYMOUS_ENABLED=true
+    # - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+
 
       # - GF_AUTH_ANONYMOUS_ENABLED=true
       # - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
@@ -100,8 +104,9 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      # - ./docker/grafana/volumes/provisioning:/etc/grafana/provisioning
+      - ./docker/grafana/volumes/provisioning:/etc/grafana/provisioning
       - ./docker/grafana/volumes/grafana-init:/grafana-init
+      - ./docker/grafana/volumes/grafana-storage:/var/lib/grafana
     networks:
       - Tnetwork
 
@@ -109,13 +114,10 @@ networks:
   Tnetwork:
     driver: bridge
 
-# volumes:  
-#   grafana_storage:
-#     driver: local
-#     driver_opts:
-#       type: none
-#       o: bind
-#       device: ./volumes/grafana
-
-# volumes:
-#   postgres_data:
+volumes:  
+  grafana-storage:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./docker/grafana/volumes/grafana-storage
