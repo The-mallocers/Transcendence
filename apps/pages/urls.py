@@ -8,5 +8,6 @@ urlpatterns = [
     path('admin/', include("apps.admin.urls")),
     path('pong/', include('apps.pong.urls')),
     path('error/', include('apps.error.urls')),
+    path('chat/', include('apps.chat.urls')),
     #later, do the thing where 404 is an int and we pass it as context in the template
 ]

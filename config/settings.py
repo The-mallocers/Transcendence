@@ -73,6 +73,7 @@ INSTALLED_APPS = [
     'apps.shared.apps.SharedConfig',
     'apps.pages.apps.PagesConfig',
     'apps.error.apps.ErrorConfig',
+    'apps.chat.apps.ChatConfig',
 ]
 
 MIDDLEWARE = [
