@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/matchmaking.css">
+    <style>
+
+.content {
+  position: absolute;
+  top: 45%;
+  left: 57.5%;
+  transform: translate(-50%, -50%);
+  display: block;
+}
+
+.paddle{
+  height:60px;
+  width:10px;
+  background-color:white;
+  position:relative;
+}
+
+.player_one{
+
+  left:-400px;
+  animation: movePaddleOne 4s infinite;
+}
+
+.player_two{
+
+  left: 200px;
+  animation: movePaddleTwo 4s infinite;
+}
+
+.ball{
+  position:relative;
+  height:1rem;
+  width : 1rem;
+  border-radius:50%;
+  background-color:white;
+  animation: moveBall 4s infinite linear;
+
+  color: white;
+}
+
+@keyframes movePaddleOne{
+  0%, 100%{
+    transform:translate(0px, 90px);
+  }
+  25%{
+    transform:translate(0px, 40px);
+  }
+  50%{
+    transform:translate(0px, 30px);
+  }
+  75%{
+    transform:translate(0px, 0px);
+  }
+}
+
+@keyframes movePaddleTwo{
+  0%, 100%{
+     transform:translate(0px,-50px);
+  }
+  25%{
+       transform:translate(0px,40px); 
+  }
+  50%{
+        transform:translate(0px,20px);
+  }
+  75%{
+        transform:translate(0px,30px);
+  } 
+}
+
+@keyframes moveBall{
+   0%, 100%{
+    transform:translate(-400px, -20px);
+  }
+  25%{
+      transform:translate(190px, -10px);
+  }
+ 50%{
+     transform:translate(-400px, -55px);
+  }
+  75%{
+    transform:translate(190px, -30px);
+  }
+}
+    </style>
+</head> 
+<body>
+    <nav>
+        <div class="navElement">
+            <svg xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg" xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" version="1.1" id="Calque_1" x="0px" y="0px" viewBox="0 0 137.6 96.599998" enable-background="new 0 0 595.3 841.9" xml:space="preserve" inkscape:version="0.48.2 r9819" width="100%" height="100%" sodipodi:docname="42_logo.svg"><metadata id="metadata17"><rdf:RDF><cc:Work rdf:about=""><dc:format>image/svg+xml</dc:format><dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/></cc:Work></rdf:RDF></metadata><defs id="defs15"/><sodipodi:namedview pagecolor="#ffffff" bordercolor="#666666" borderopacity="1" objecttolerance="10" gridtolerance="10" guidetolerance="10" inkscape:pageopacity="0" inkscape:pageshadow="2" inkscape:window-width="1060" inkscape:window-height="811" id="namedview13" showgrid="false" fit-margin-top="0" fit-margin-left="0" fit-margin-right="0" fit-margin-bottom="0" inkscape:zoom="0.39642998" inkscape:cx="68.450005" inkscape:cy="48.350011" inkscape:window-x="670" inkscape:window-y="233" inkscape:window-maximized="0" inkscape:current-layer="Calque_1"/>
+                <g id="g3" transform="translate(-229.2,-372.70002)">
+                    <polygon points="229.2,443.9 279.9,443.9 279.9,469.3 305.2,469.3 305.2,423.4 254.6,423.4 305.2,372.7 279.9,372.7 229.2,423.4 " id="polygon5" style="fill:#ffffff"/>
+                    <polygon points="316.1,398.1 341.4,372.7 316.1,372.7 " id="polygon7" style="fill:#ffffff"/>
+                    <polygon points="341.4,398.1 316.1,423.4 316.1,448.7 341.4,448.7 341.4,423.4 366.8,398.1 366.8,372.7 341.4,372.7 " id="polygon9" style="fill:#ffffff"/>
+                    <polygon points="366.8,423.4 341.4,448.7 366.8,448.7 " id="polygon11" style="fill:#ffffff"/>
+                </g>
+            </svg>
+        </div>
+        <div class="navElement">
+            <svg version="1.1" id="MESSAGE" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1800 1800" enable-background="new 0 0 1800 1800" xml:space="preserve"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <g> <g> <path  d="M251.485,1662c-5.408,0-10.816-1.398-15.663-4.195c-9.693-5.598-15.663-15.938-15.663-27.13v-201.559 H86.872c-44.37,0-80.467-36.097-80.467-80.463V380.479c0-44.367,36.098-80.462,80.467-80.462h1467.337 c44.375,0,80.473,36.095,80.473,80.462v968.174c0,44.366-36.098,80.463-80.473,80.463H663.253l-396.105,228.688 C262.302,1660.602,256.894,1662,251.485,1662z M86.872,362.667c-9.824,0-17.817,7.991-17.817,17.813v968.174 c0,9.824,7.993,17.813,17.817,17.813h164.614c17.301,0,31.325,14.023,31.325,31.324v178.629l356.388-205.758 c4.761-2.749,10.163-4.195,15.662-4.195h899.349c9.829,0,17.822-7.989,17.822-17.813V380.479c0-9.822-7.993-17.813-17.822-17.813 H86.872z"></path> </g> <g> <path  d="M952.785,607.586H253.36c-17.302,0-31.325-14.023-31.325-31.325c0-17.301,14.023-31.325,31.325-31.325 h699.425c17.301,0,31.324,14.024,31.324,31.325C984.109,593.563,970.086,607.586,952.785,607.586z"></path> </g> <g> <path  d="M1387.721,794.601H253.36c-17.302,0-31.325-14.024-31.325-31.325c0-17.302,14.023-31.325,31.325-31.325 h1134.36c17.302,0,31.326,14.023,31.326,31.325C1419.047,780.577,1405.022,794.601,1387.721,794.601z"></path> </g> <g> <path  d="M1387.721,981.611H253.36c-17.302,0-31.325-14.023-31.325-31.324c0-17.302,14.023-31.325,31.325-31.325 h1134.36c17.302,0,31.326,14.023,31.326,31.325C1419.047,967.588,1405.022,981.611,1387.721,981.611z"></path> </g> <g> <path  d="M1387.721,1168.627H253.36c-17.302,0-31.325-14.024-31.325-31.325c0-17.302,14.023-31.325,31.325-31.325 h1134.36c17.302,0,31.326,14.023,31.326,31.325C1419.047,1154.603,1405.022,1168.627,1387.721,1168.627z"></path> </g> <g> <path d="M1712.124,145H244.786c-44.37,0-80.467,36.097-80.467,80.467v85.476h62.65v-85.476 c0-9.824,7.993-17.816,17.817-17.816h1467.338c9.828,0,17.821,7.993,17.821,17.816v968.17c0,9.824-7.993,17.813-17.821,17.813 h-108.769v62.65h108.769c44.374,0,80.472-36.098,80.472-80.463v-968.17C1792.596,181.097,1756.498,145,1712.124,145z"></path> </g> </g> </g></svg>
+        </div>
+        <div class="navElement">
+            <svg height="200px" width="200px" version="1.1" id="_x32_" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512" xml:space="preserve"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <style type="text/css"> </style> <g> <path class="st0" d="M502.08,430.441l-80.346-80.338c-3.204-3.228-5.027-6.135-6.232-9.147c-1.043-2.642-1.614-5.436-1.766-8.761 c-0.128-2.883,0.096-6.152,0.666-9.797c0.988-6.401,3.076-13.902,5.718-22.277c3.95-12.592,9.122-27.128,12.92-43.542 c3.783-16.407,6.168-34.789,4.329-54.93c-0.996-10.906-4.048-21.409-8.102-31.319c-6.112-14.857-14.536-28.421-22.735-39.72 c-4.095-5.645-8.151-10.712-11.861-15.058c-3.71-4.344-7.066-7.958-9.853-10.736c-0.892-0.892-2.281-2.386-3.975-4.256 c-2.546-2.811-5.822-6.513-9.718-10.761c-3.91-4.24-8.448-9.066-13.587-14.206c-11.821-11.821-26.846-25.361-44.971-37.832 c-18.126-12.456-39.395-23.868-63.662-31.256c-20.952-6.384-41.494-7.677-60.676-5.573c-28.814,3.156-54.548,13.78-75.7,26.059 C91.363,39.311,74.76,53.3,64.027,64.02c-7.16,7.163-15.74,16.921-24.34,28.911c-12.874,17.98-25.811,40.955-33.324,67.561 c-3.742,13.29-6.115,27.504-6.344,42.362c-0.225,14.848,1.71,30.339,6.493,46.039c7.388,24.276,18.796,45.542,31.256,63.674 c12.467,18.118,26.007,33.151,37.828,44.972c6.854,6.85,13.134,12.632,18.262,17.258c2.558,2.322,4.826,4.345,6.701,6.048 c1.875,1.686,3.361,3.075,4.26,3.975c3.706,3.702,8.902,8.448,15.318,13.66c9.621,7.806,21.928,16.624,35.809,23.996 c6.946,3.686,14.282,7.019,21.928,9.629c7.648,2.618,15.603,4.521,23.778,5.268c20.048,1.823,38.342-0.522,54.696-4.28 c12.267-2.819,23.474-6.417,33.624-9.709c7.609-2.465,14.62-4.746,20.952-6.456c4.746-1.286,9.107-2.224,13.014-2.755 c2.927-0.386,5.593-0.538,8.002-0.45c3.63,0.145,6.633,0.763,9.48,1.96c2.843,1.213,5.622,3.003,8.682,6.055L440.366,512 l71.632-71.633L502.08,430.441z M185.884,405.169c-1.631-0.57-3.261-1.196-4.899-1.871c-11.962-4.891-23.896-12.207-33.874-19.466 c-4.991-3.63-9.512-7.244-13.327-10.504c-3.818-3.26-6.958-6.183-9.126-8.352c-1.538-1.542-3.26-3.124-5.252-4.931 c-2.988-2.706-6.569-5.879-10.625-9.605c-4.047-3.718-8.568-7.966-13.346-12.744c-10.982-10.977-23.353-24.758-34.548-41.028 C49.7,280.39,39.719,261.654,33.354,240.726c-5.192-17.081-6.24-33.616-4.521-49.46c2.574-23.746,11.568-45.975,22.426-64.638 c5.412-9.316,11.275-17.731,16.937-24.959c5.661-7.212,11.126-13.258,15.675-17.804c6.063-6.063,14.768-13.749,25.417-21.378 c15.965-11.459,36.322-22.782,58.824-29.11c11.255-3.173,23.036-5.116,35.17-5.293c12.142-0.184,24.63,1.365,37.442,5.268 c20.928,6.369,39.668,16.35,55.942,27.538c16.274,11.186,30.05,23.562,41.032,34.548c6.372,6.368,11.801,12.262,16.29,17.234 c2.248,2.481,4.256,4.738,6.063,6.729c1.807,1.992,3.389,3.718,4.923,5.252c2.907,2.907,7.115,7.492,11.725,13.17 c6.914,8.513,14.768,19.538,21,31.272c2.931,5.525,5.476,11.194,7.468,16.792L185.884,405.169z M440.373,472.312l-70.428-70.428 c-5.598-5.606-11.926-9.829-18.639-12.472c-5.871-2.337-11.938-3.453-17.873-3.71c-5.2-0.225-10.319,0.185-15.37,0.972 c-8.838,1.38-17.519,3.903-26.372,6.681c-13.258,4.176-26.935,9.01-41.414,12.335c-9.432,2.176-19.177,3.71-29.356,4.119 l188.896-188.888c-0.401,10.095-1.919,19.772-4.071,29.144c-2.482,10.8-5.79,21.177-9.051,31.247 c-2.441,7.556-4.875,14.952-6.866,22.301c-1.478,5.525-2.723,11.026-3.469,16.623c-0.554,4.184-0.836,8.416-0.674,12.72 c0.224,6.425,1.461,13.026,4.144,19.362c2.658,6.329,6.738,12.319,12.062,17.619l70.428,70.429L440.373,472.312z"></path> </g> </g></svg>
+        </div>
+        <div class="navElement">
+            <svg viewBox="0 0 20 20" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <desc>Created with Sketch.</desc> <defs> </defs> <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"> <g id="Dribbble-Light-Preview" transform="translate(-140.000000, -2159.000000)"> <g id="icons" transform="translate(56.000000, 160.000000)"> <path d="M100.562548,2016.99998 L87.4381713,2016.99998 C86.7317804,2016.99998 86.2101535,2016.30298 86.4765813,2015.66198 C87.7127655,2012.69798 90.6169306,2010.99998 93.9998492,2010.99998 C97.3837885,2010.99998 100.287954,2012.69798 101.524138,2015.66198 C101.790566,2016.30298 101.268939,2016.99998 100.562548,2016.99998 M89.9166645,2004.99998 C89.9166645,2002.79398 91.7489936,2000.99998 93.9998492,2000.99998 C96.2517256,2000.99998 98.0830339,2002.79398 98.0830339,2004.99998 C98.0830339,2007.20598 96.2517256,2008.99998 93.9998492,2008.99998 C91.7489936,2008.99998 89.9166645,2007.20598 89.9166645,2004.99998 M103.955674,2016.63598 C103.213556,2013.27698 100.892265,2010.79798 97.837022,2009.67298 C99.4560048,2008.39598 100.400241,2006.33098 100.053171,2004.06998 C99.6509769,2001.44698 97.4235996,1999.34798 94.7348224,1999.04198 C91.0232075,1998.61898 87.8750721,2001.44898 87.8750721,2004.99998 C87.8750721,2006.88998 88.7692896,2008.57398 90.1636971,2009.67298 C87.1074334,2010.79798 84.7871636,2013.27698 84.044024,2016.63598 C83.7745338,2017.85698 84.7789973,2018.99998 86.0539717,2018.99998 L101.945727,2018.99998 C103.221722,2018.99998 104.226185,2017.85698 103.955674,2016.63598" id="profile_round-[#ffffff]"> </path> </g> </g> </g> </g></svg>
+        </div>
+    </nav>
+    <div class="searchBar">
+
+        <img class="magnifierIcon" src="imgs/loupe.png" alt="">
+        <input type="text" placeholder="search">
+    </div>
+
+    <main>
+        <div class="matchmakingPage">
+            <div class="matchmakingContainer d-flex container-fluid flex-column align-items-center justify-content-between ">
+                <h1>Searching for an oponent</h1>
+                <div class="content">
+                    <div class="player_one paddle"></div>
+                    <div class="player_two paddle"></div>
+                    <div class="ball"></div>
+                </div>
+                <div class="btn "> cancel</div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+</body>
+</html>
