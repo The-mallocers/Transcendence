@@ -35,6 +35,7 @@ EXCLUDED_PATHS = [
     '/pages/auth/register',
     '/',
     '/pages/'
+    '/pages/error/'
 ]
 ROLE_PROTECTED_PATHS = {
     '/admin/*': ['admin']
@@ -71,6 +72,7 @@ INSTALLED_APPS = [
     'apps.profile.apps.ProfileConfig',
     'apps.shared.apps.SharedConfig',
     'apps.pages.apps.PagesConfig',
+    'apps.error.apps.ErrorConfig',
 ]
 
 MIDDLEWARE = [

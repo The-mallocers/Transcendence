@@ -22,10 +22,7 @@ class Router {
         // console.log("looking for the path: ", path)
         const route = this.routes.find(r => r.path === path);
         if (!route) {
-            this.rootElement.innerHTML = `<div style="text-align: center; padding: 50px;">
-                    <h1>404 - Page Not Found</h1>
-                    <p>Sorry, the page you are looking for does not exist.</p>
-                </div>`;
+            navigateTo("/error/404/");
         }
         else {
             try {
@@ -105,9 +102,6 @@ async function fetchRoute(path) {
         return data.html;
     }
     else {
-        //GRUGS NO LIKE FUNCTION GRUGS COPY PASTE CODE GRUGS CODE GOOD
-        //For real tho, this else really should be a redirection (but i dont think it can really fail ?)
-        //We just want to redirect to login if the guy doesnt have the right
         path = '/pages/auth/login'
         // console.log("REDIRECTION -> fetching the path :", path)
         const response = await fetch(path, {
@@ -152,6 +146,12 @@ const routes = [
         path: '/auth/register',
         template: async () => {
             return await fetchRoute('/pages/auth/register');
+        },
+    },
+    {
+        path: '/error/404/',
+        template: async () => {
+            return await fetchRoute('/pages/error/404/');
         },
     },
 ];
