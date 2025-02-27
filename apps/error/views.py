@@ -12,4 +12,4 @@ def error(request, error_code):
     })
     return JsonResponse({
         'html': html_content,
-    }, error_code)
+    }, status=error_code)

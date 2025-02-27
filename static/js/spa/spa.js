@@ -97,22 +97,33 @@ async function fetchRoute(path) {
         credentials: 'include'
     });
     const data = await response.json();
-    // console.log("testing redirect, data is :", data)
+    console.log("testing redirect, data is :", data)
     if (response.ok) {
+        console.log("response is A ok")
         return data.html;
     }
-    else {
+    else if (response.status === 302) {
+        //redirection
         path = '/pages/auth/login'
-        // console.log("REDIRECTION -> fetching the path :", path)
         const response = await fetch(path, {
             headers: header,
             credentials: 'include'
         });
         const data = await response.json();
-        // console.log("testing redirect, data is :", data);
         window.history.pushState({}, '', '/auth/login');
         return data.html
     }
+    else if (response.status >= 400 && response.status < 500) 
+    {
+        return data.html;
+
+    }
+    else if (response.status == 500) {
+        //do something special
+    }
+    else {
+        console.log("error, this isnt a valid error handling, but what do you want me to do")
+    } 
 }
 
 const routes = [
