@@ -1,0 +1,28 @@
+
+{% load static %}
+
+<div class="gamemodesPage">
+    <div class="container-fluid gamemodesContainer ">
+        <h1>Gamemodes</h1>
+        <div class="container-fluid mt-3">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="gamemodeCardContainer" data-route="/pong/">
+                        <div class="d-flex flex-column align-items-center justify-content-center gamemodeCard  front">
+                            <h2>Online</h2>
+                            <img src="{% static '/assets/imgs/players.png' %}" alt="">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="gamemodeCardContainer" data-route="/pong/arena/">
+                        <div class="d-flex flex-column align-items-center justify-content-center gamemodeCard  front">
+                            <h2>Against A.I</h2>
+                            <img src="{% static '/assets/imgs/robot.png' %}" alt="">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

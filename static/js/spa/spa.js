@@ -165,12 +165,28 @@ const routes = [
             return await fetchRoute('/pages/error/404/');
         },
     },
+    {
+        path: '/pong/gamemodes/',
+        template: async () => {
+            return await fetchRoute('/pages/pong/gamemodes/');
+        },
+    },
+    {
+        path: '/pong/arena/',
+        template: async () => {
+            return await fetchRoute('/pages/pong/arena/');
+        },
+    },
 ];
 
 //Need to do this so that the event listerner also listens to the dynamic html
 document.addEventListener('click', async (e) => {
-    if (e.target.matches('[data-route]')) {
-        const route = e.target.dataset.route;
+    console.log("click !")
+    console.log(e);
+    const routeElement = e.target.closest('[data-route]');
+    if (routeElement) {
+        const route = routeElement.dataset.route;
+        console.log("in data route :", route);
         navigateTo(route);
     }
     //this may not look like it but this took a very long time to come up with
