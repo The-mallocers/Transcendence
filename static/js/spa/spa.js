@@ -22,10 +22,7 @@ class Router {
         // console.log("looking for the path: ", path)
         const route = this.routes.find(r => r.path === path);
         if (!route) {
-            this.rootElement.innerHTML = `<div style="text-align: center; padding: 50px;">
-                    <h1>404 - Page Not Found</h1>
-                    <p>Sorry, the page you are looking for does not exist.</p>
-                </div>`;
+            navigateTo("/error/404/");
         }
         else {
             try {
@@ -100,25 +97,33 @@ async function fetchRoute(path) {
         credentials: 'include'
     });
     const data = await response.json();
-    // console.log("testing redirect, data is :", data)
+    console.log("testing redirect, data is :", data)
     if (response.ok) {
+        console.log("response is A ok")
         return data.html;
     }
-    else {
-        //GRUGS NO LIKE FUNCTION GRUGS COPY PASTE CODE GRUGS CODE GOOD
-        //For real tho, this else really should be a redirection (but i dont think it can really fail ?)
-        //We just want to redirect to login if the guy doesnt have the right
+    else if (response.status === 302) {
+        //redirection
         path = '/pages/auth/login'
-        // console.log("REDIRECTION -> fetching the path :", path)
         const response = await fetch(path, {
             headers: header,
             credentials: 'include'
         });
         const data = await response.json();
-        // console.log("testing redirect, data is :", data);
         window.history.pushState({}, '', '/auth/login');
         return data.html
     }
+    else if (response.status >= 400 && response.status < 500) 
+    {
+        return data.html;
+
+    }
+    else if (response.status == 500) {
+        //do something special
+    }
+    else {
+        console.log("error, this isnt a valid error handling, but what do you want me to do")
+    } 
 }
 
 const routes = [
@@ -154,12 +159,46 @@ const routes = [
             return await fetchRoute('/pages/auth/register');
         },
     },
+    {
+        path: '/error/404/',
+        template: async () => {
+            return await fetchRoute('/pages/error/404/');
+        },
+    },
+    {
+        path: '/pong/gamemodes/',
+        template: async () => {
+            return await fetchRoute('/pages/pong/gamemodes/');
+        },
+    },
+    {
+        path: '/pong/arena/',
+        template: async () => {
+            return await fetchRoute('/pages/pong/arena/');
+        },
+    },
+    {
+        path: '/pong/matchmaking/',
+        template: async () => {
+            return await fetchRoute('/pages/pong/matchmaking/');
+        },
+    },
+    {
+        path: '/chat/',
+        template: async () => {
+            return await fetchRoute('/pages/chat/');
+        },
+    },
 ];
 
 //Need to do this so that the event listerner also listens to the dynamic html
 document.addEventListener('click', async (e) => {
-    if (e.target.matches('[data-route]')) {
-        const route = e.target.dataset.route;
+    console.log("click !")
+    console.log(e);
+    const routeElement = e.target.closest('[data-route]');
+    if (routeElement) {
+        const route = routeElement.dataset.route;
+        console.log("in data route :", route);
         navigateTo(route);
     }
     //this may not look like it but this took a very long time to come up with

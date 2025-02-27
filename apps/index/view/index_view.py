@@ -14,7 +14,7 @@ def get(req):
             "client": client,
             "clients": Clients.objects.all()
         }
-        html_content = render_to_string("apps/index.html", context)
+        html_content = render_to_string("apps/profile/myinformations.html", context)
         return JsonResponse({'html': html_content})
     else:
         print("no client detected")
