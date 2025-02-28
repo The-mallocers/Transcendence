@@ -22,6 +22,8 @@ class JWTMiddleware:
         self.role_protected_paths = getattr(settings, 'ROLE_PROTECTED_PATHS')
 
     def _should_check_path(self, path: str) -> bool:
+        if path.startswith('/pages/') == False and path.startswith('/api/') == False:
+            return False
         for excluded in self.excluded_paths:
             if self._path_matches(excluded, path):
                 return False
@@ -93,26 +95,21 @@ class JWTMiddleware:
             if required_roles:
                 if not any(role in token.ROLES for role in required_roles):
                     return HttpResponseRedirect('/')
+            print("hello :", self.get_response(request))
             return self.get_response(request)
         except jwt.ExpiredSignatureError:
             try:
                 return self._refresh_token(request)
-            except (jwt.ExpiredSignatureError, jwt.InvalidTokenError,
-                    jwt.InvalidKeyError):
-        #         csrf_token = get_token(request)
-        #         html_content = render_to_string("apps/auth/login.html", {"csrf_token": csrf_token})
-        #         return JsonResponse({
-        #             'html': html_content,
-        # })
-            #Here we redirect, but we want it to be spa, but i got no fucking how to send json to somewhere useful to render a page
-                return HttpResponseRedirect('pages/auth/login')
+            except (jwt.ExpiredSignatureError, jwt.InvalidTokenError, jwt.InvalidKeyError):
+                return JsonResponse({
+                    'status': 'unauthorized',
+                    'redirect': '/auth/login',
+                    'message': 'Session expired' }, status=302)
         except (jwt.InvalidTokenError, jwt.InvalidKeyError):
-            # csrf_token = get_token(request)
-            # html_content = render_to_string("apps/auth/login.html", {"csrf_token": csrf_token})
-            # return JsonResponse({
-            #         'html': html_content,
-            # })
-            return HttpResponseRedirect('pages/auth/login')
+            return JsonResponse({
+                    'status': 'unauthorized',
+                    'redirect': '/auth/login',
+                    'message': 'Invalid authentication' }, status=302)
         except Exception as e:
             return JsonResponse(
                 {'error': f'Internal server error: {str(e)}'},

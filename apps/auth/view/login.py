@@ -54,8 +54,3 @@ def get(req):
         'html': html_content,
         'users': list(users.values())
     })
-    # users = Clients.objects.all()
-
-    # context = {"users": users}
-
-    # return render(req, "apps/auth/login.html", context)

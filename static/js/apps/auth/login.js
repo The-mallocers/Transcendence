@@ -1,14 +1,9 @@
 import { navigateTo } from '../../spa/spa.js';
 
-console.log("Loaded the dom in login.js")
-// Sélectionner le formulaire et ajouter un événement de soumission
-const form = document.querySelector("form");
-
-// Empêcher le comportement de soumission par défaut
-form.addEventListener("submit", function (event) {
-    event.preventDefault();
-
-    // Récupérer les données du formulaire
+export function login(e) {
+    e.preventDefault();
+    
+    const form = document.querySelector("form");
     const formData = new FormData(form);
     const errorDiv = document.getElementById("error-message")
 
@@ -19,17 +14,18 @@ form.addEventListener("submit", function (event) {
             'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
         },
     })
-    .then(response => {
-        if (response.status === 401){
-            return Promise.reject('Unauthorized: Invalid credentials')
-        }
-    })
-    .then(data => {
-        navigateTo('/');
-    })
-    .catch(error => {
-        console.log("test");
-        console.error("There was an error with the fetch operation:", error);
-        errorDiv.textContent = error;
-    });
-});
+        .then(response => {
+            if (response.ok) {
+                navigateTo('/');
+            }
+            else {
+                response.json().then(errorData => {
+                    errorDiv.textContent = errorData.error || "An error occurred";
+                });
+            }
+        })
+        .catch(error => {
+            console.error("There was an error with the fetch operation:", error);
+            errorDiv.textContent = "Error, please check your internet and try again later";
+        });
+};

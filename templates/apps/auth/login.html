@@ -11,12 +11,11 @@
             <label for="password">Mot de passe</label>
             <input type="password" id="password" name="password" placeholder="Entrez votre mot de passe" required>
 
-        <button type="submit">Se connecter</button>
-        </form>
+        <button id="login-btn" type="submit">Se connecter</button>
+    </form>
         <div class="footer">
             <p>Pas encore inscrit ? 
                 <button type="button" data-route="/auth/register">S'enregistrer</button>
             </p>
         </div>
 </div>
-<script type="module" src="{% static 'js/apps/auth/login.js' %}"></script>
