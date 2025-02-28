@@ -87,7 +87,7 @@ services:
     # image: grafana/grafana-enterprise
     build: ./docker/grafana
     container_name: grafana
-    user : "1000:1000"
+    # user : "1000:1000"
     env_file:
       - .env
     restart: unless-stopped
