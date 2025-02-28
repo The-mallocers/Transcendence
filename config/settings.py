@@ -1,10 +1,16 @@
+import atexit
 import os
+import shutil
+import stat
 import sys
+from datetime import datetime
+from logging.handlers import RotatingFileHandler
 from pathlib import Path
 
 import environ
 from django.contrib.messages.middleware import MessageMiddleware
 from django.contrib.sessions.middleware import SessionMiddleware
+from django.core.cache.backends.redis import RedisCache
 from django.middleware.clickjacking import XFrameOptionsMiddleware
 from django.middleware.common import CommonMiddleware
 from django.middleware.csrf import CsrfViewMiddleware
@@ -71,6 +77,8 @@ INSTALLED_APPS = [
     'apps.pong.apps.PongConfig',
     'apps.profile.apps.ProfileConfig',
     'apps.shared.apps.SharedConfig',
+    'apps.player.apps.PlayerConfig',
+    'apps.game.apps.GameConfig',
     'apps.pages.apps.PagesConfig',
     'apps.error.apps.ErrorConfig',
     'apps.chat.apps.ChatConfig',
@@ -106,13 +114,35 @@ TEMPLATES = [
 ]
 
 REST_FRAMEWORK = {
-    # 'DEFAULT_AUTHENTICATION_CLASSES': [
-    #     'utils.jwt.JWTAuthtication.JWTAuthentication',  # Replace with the actual path to your class
-    # ],
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'utils.jwt.JWTAuthtication.JWTAuthentication',  # Replace with the actual path to your class
+    ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.AllowAny',  # Optional: Require authentication globally
     ],
 }
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/1",  # Base Redis 1
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    }
+}
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer",
+    },
+}
+
+SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+SESSION_CACHE_ALIAS = 'default'
+
+REDIS_HOST = 'localhost'
+REDIS_PORT = 6379
 
 WSGI_APPLICATION = 'config.wsgi.application'
 ASGI_APPLICATION = 'config.asgi.application'
@@ -136,10 +166,11 @@ if 'test' in sys.argv:
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'UTC'
-USE_I18N = True
+LANGUAGE_CODE = 'fr-fr'
+TIME_ZONE = 'Europe/Paris'
 USE_TZ = True
+USE_I18N = True
+USE_L10N = True
 
 
 # Static files (CSS, JavaScript, Images)
@@ -159,3 +190,114 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# Custom file handler with permissions setting
+class PermissionedRotatingFileHandler(RotatingFileHandler):
+    def _open(self):
+        # Open the file with standard permissions
+        rtv = super(PermissionedRotatingFileHandler, self)._open()
+
+        # Set the file permissions to 0o644 (owner can read/write, others can read)
+        os.chmod(self.baseFilename, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH)
+
+        return rtv
+
+
+# Define log directory
+LOG_DIR = os.path.join(BASE_DIR, 'logs')
+os.makedirs(LOG_DIR, exist_ok=True)
+
+# Define log file paths
+LOG_FILENAME = datetime.now().strftime('django_%Y%m%d_%H%M%S.log')
+LATEST_LOG_FILENAME = 'latest.log'
+
+# Maximum log size in bytes (5MB)
+MAX_LOG_SIZE = 5 * 1024 * 1024
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'filters': {
+        'require_debug_false': {
+            '()': 'django.utils.log.RequireDebugFalse',
+        },
+    },
+    'formatters': {
+        'verbose': {
+            'format': '%(asctime)s.%(msecs)03d [%(thread)s %(threadName)s] %(levelname)s %(name)s %(message)s',
+            'datefmt': '%Y-%m-%d %H:%M:%S'
+        },
+    },
+    'handlers': {
+        'file': {
+            'level': 'INFO',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(LOG_DIR, LOG_FILENAME),
+            'formatter': 'verbose',
+            'encoding': 'utf-8',
+            'maxBytes': MAX_LOG_SIZE,
+            'backupCount': 4,  # Keep 5 files max (original + 4 backups)
+        },
+        'latest_file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(LOG_DIR, LATEST_LOG_FILENAME),
+            'formatter': 'verbose',
+            'encoding': 'utf-8',
+            'mode': 'w',  # Overwrites the file each time
+        },
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        '': {  # Root logger
+            'handlers': ['console', 'file', 'latest_file'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'django': {  # Django framework logging
+            'handlers': ['console', 'file', 'latest_file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'django.server': {  # Django development server logging
+            'handlers': ['console', 'file', 'latest_file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'django.request': {  # Django request logging
+            'handlers': ['console', 'file', 'latest_file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'websocket': {  # WebSocket specific logging
+            'handlers': ['console', 'file', 'latest_file'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'websocket.protocol': {  # WebSocket protocol-level logging
+            'handlers': ['console', 'file', 'latest_file'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'websocket.client': {  # WebSocket client connections
+            'handlers': ['file', 'latest_file'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'apps.game': {  # Django request logging
+            'handlers': ['console', 'file', 'latest_file'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+    },
+}
+
+# Apply permissions to latest.log file if it exists
+latest_log_path = os.path.join(LOG_DIR, LATEST_LOG_FILENAME)
+if os.path.exists(latest_log_path):
+    os.chmod(latest_log_path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH)

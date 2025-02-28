@@ -10,7 +10,7 @@ class JWTGenerator:
     secret_key = getattr(settings, 'JWT_SECRET_KEY')
     algorithm = getattr(settings, 'JWT_ALGORITH')
 
-    def __init__(self, client: Clients, token_type: str):
+    def __init__(self, client: Clients, token_type: JWTType):
         self.issuer = "https://api.transcendence.fr"
         self.token_key: str = ''
         self.token: JWT = JWT(client, token_type)
@@ -26,7 +26,7 @@ class JWTGenerator:
                                     algorithm=self.algorithm, headers=headers)
 
         response.set_cookie(
-            f'{self.token.TYPE}_token',
+            f'{self.token.TYPE.value}_token',
             f'{self.token_key}',
             httponly=True,
             secure=True,
@@ -38,7 +38,7 @@ class JWTGenerator:
     @classmethod
     def extract_token(cls, request: HttpRequest,
                       token_type: JWTType) -> JWT | None:
-        token_key = request.COOKIES.get(str(token_type) + '_token')
+        token_key = request.COOKIES.get(token_type.value + '_token')
         try:
             payload = jwt.decode(token_key, cls.secret_key,
                                  algorithms=[cls.algorithm])
@@ -50,7 +50,7 @@ class JWTGenerator:
             return None
 
     @classmethod
-    def validate_token(cls, token_key: str, token_type: str) -> JWT:
+    def validate_token(cls, token_key: str, token_type: JWTType) -> JWT:
         try:
             payload = jwt.decode(token_key, cls.secret_key,
                                  algorithms=[cls.algorithm])

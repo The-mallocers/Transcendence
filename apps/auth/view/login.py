@@ -13,7 +13,6 @@ def post(req: HttpRequest):
     password = req.POST.get("password")
     client = Clients.get_client_by_email(email)
 
-    print("in post login")
     if all(v is None for v in [email, password]):
         return JsonResponse({
             "success": False,
@@ -27,7 +26,6 @@ def post(req: HttpRequest):
         }, status=401)
 
     if client.password.check_pwd(password):
-        print("giving tokens in my js response")
         response = JsonResponse({
             "success": True,
             "message": "You've been correctly login"
@@ -44,7 +42,6 @@ def post(req: HttpRequest):
         }, status=401)
 
 def get(req):
-    print("Bonjour je suis la view de auth/login youpi !")
     users = Clients.objects.all()
     # Get the CSRF token
     csrf_token = get_token(req)
