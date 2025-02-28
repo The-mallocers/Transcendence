@@ -1,4 +1,5 @@
 import atexit
+import sys
 import types
 
 from django.apps import AppConfig
@@ -13,14 +14,19 @@ class GameConfig(AppConfig):
         self.thread = None
 
     def ready(self):
+        if not self.is_running_server():
+            return
+
         from apps.game.matchmaking import MatchmakingThread
         self.thread = MatchmakingThread("MatchmakingThread")
         self.thread.start()
 
         atexit.register(self.stop_thread)
 
-
     def stop_thread(self):
         if self.thread:
             self.thread.stop()
             self.thread.join()
+
+    def is_running_server(self):
+        return any(arg in sys.argv for arg in ('runserver', 'daphne', 'uvicorn', 'gunicorn'))
