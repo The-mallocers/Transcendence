@@ -15,5 +15,5 @@ class GameSerializer(serializers.ModelSerializer):
         fields = ['id', 'players', 'ball', 'status', 'timer']
 
     def get_ball(self, obj):
-        ball = self.context.get('ball', Ball())
+        ball = self.context.get('ball')
         return BallSerializer(ball).data

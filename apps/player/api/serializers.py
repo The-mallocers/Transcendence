@@ -28,7 +28,7 @@ class PlayerSerializer(serializers.ModelSerializer):
         read_only_fields = ['id']
 
     def get_paddle(self, obj):
-        paddle = self.context.get('paddle', Paddle())
+        paddle = self.context.get('paddle')
         return PaddleSerializer(paddle).data
 
     def get_side(self, obj):

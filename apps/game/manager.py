@@ -1,6 +1,3 @@
-import json
-import logging
-
 from asgiref.sync import sync_to_async
 from django.conf import settings
 from django.db import transaction, DatabaseError
@@ -8,17 +5,19 @@ from redis.asyncio import Redis
 from redis.commands.json.path import Path
 
 from apps.game.models import Game
-from apps.player.api.serializers import PlayerSerializer
 from apps.player.models import PlayerGame
 from utils.pong.enums import GameStatus
-from utils.pong.objects import Ball, Paddle
+from utils.pong.objects import Ball
 
 
 class GameManager:
     def __init__(self, game_id = None):
         from apps.game.models import Game
+        from apps.player.manager import PlayerManager
         self._redis = Redis(host=settings.REDIS_HOST, port=settings.REDIS_PORT, db=0)
         self._game: Game = None
+        self.p1: PlayerManager = PlayerManager()
+        self.p2: PlayerManager = PlayerManager()
         self._game_key = None
 
         if game_id:
@@ -28,6 +27,8 @@ class GameManager:
         from apps.game.models import Game
         self._game = await Game.objects.aget(id=game_id)
         self._game_key = f"game:{game_id}"
+        await self.p1.init_player(await self.rget_player1_id(), game_id)
+        await self.p2.init_player(await self.rget_player2_id(), game_id)
 
     async def create_game(self):
         """Create a new game and store it in Redis."""
@@ -41,55 +42,48 @@ class GameManager:
 
         await self._redis.json().set(self._game_key, Path.root_path(), value)
 
-    async def init_game_manager(self, game_id):
+    async def init_game_manager(self, game_id, redis):
         self._game = await self.get_game_db(game_id)
         if self._game:
-            self._redis = Redis(host=settings.REDIS_HOST, port=settings.REDIS_PORT, db=0)
+            self._redis = redis
             self._game_key = f'game:{self._game.id}'
             return
         else:
             raise ValueError(f'This game does not exist: {game_id}')
 
-    async def set_status(self, status):
-        # Update in both database and Redis for consistency
-        self._game.status = status
-        await self._game.asave()
+    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ Functions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
 
     async def error_game(self):
-        await self.set_status(GameStatus.ERROR)
+        await self.rset_status(GameStatus.ERROR)
         await self._redis.delete(f'game:{str(self._game.id)}')
-
-    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ GETTER ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
 
     async def get_id(self):
         if self._game:
             return self._game.id
         return None
 
-    async def get_status(self):
-        return self._game.status
+    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ REDIS OPERATION ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
 
-    async def get_status_redis(self):
-        game_id = await self.get_id()
-        logging.info(f'id: {game_id}')
-        logging.info(f'redis :{self._redis}')
-        status = await self._redis.json().get(f'game:{game_id}', '$')
-        logging.info(status)
-        return status
+    async def rget_status(self) -> GameStatus | None:
+        status = await self._redis.json().get(self._game_key, Path('status'))
+        if status:
+            return GameStatus(status)
+        else:
+            return None
+
+    async def rset_status(self, status: GameStatus):
+        if self.rget_status() != status:
+            self._game.status = status
+            await self._game.asave()
+        await self._redis.json().set(self._game_key, Path('status'), status.value)
+
+    async def rget_player1_id(self):
+        return await self._redis.json().get(self._game_key, Path('players[0].id'))
+
+    async def rget_player2_id(self):
+        return await self._redis.json().get(self._game_key, Path('players[1].id'))
 
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ DATABASE OPERATIONS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
-
-    # ── Getter ────────────────────────────────────────────────────────────────────────
-
-    @sync_to_async
-    def _get_player(self, id):
-        """Retrieve a player from the database."""
-        from apps.game.models import Player
-        try:
-            with transaction.atomic():
-                return Player.objects.get(id=id)
-        except Player.DoesNotExist:
-            return None
 
     @sync_to_async
     def get_game_db(self, game_id):
@@ -101,8 +95,6 @@ class GameManager:
         except Game.DoesNotExist:
             return None
 
-    # ── Setter ────────────────────────────────────────────────────────────────────────
-
     @sync_to_async
     def add_player_db(self, player):
         """Add a player to the game in the database."""
@@ -111,16 +103,6 @@ class GameManager:
                 self._game.players.add(player)
         except:
             raise ValueError(f'Cannot add {player.id}')
-
-    @sync_to_async
-    def _update_status(self, status):
-        """Update the game status in the database."""
-        try:
-            with transaction.atomic():
-                self._game.status = status
-                self._game.save()
-        except:
-            raise ValueError(f'Cannot update status to {status}')
 
     @sync_to_async
     def _create_game(self):

@@ -3,7 +3,7 @@ from django.conf.urls.static import static
 from django.urls import path, include, re_path
 from django.views.generic import TemplateView
 
-from apps.game.websocket import WebSocket
+from utils.websockets.websocket import WebSocket
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ HTTP ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
 urlpatterns = [

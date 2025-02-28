@@ -1,147 +1,130 @@
 import asyncio
+import logging
 import random
 import time
-from typing import Dict
 
-from channels.db import database_sync_to_async
-from channels.layers import get_channel_layer
-
-from apps.player.models import Player
-from apps.pong.api.serializers import BallSerializer
-from apps.pong.utils import GameState
-from apps.shared.models import Clients
-from utils.pong.enums import RequestAction
+from apps.pong.api.serializers import PaddleSerializer
+from utils.pong.enums import EventType, ResponseAction
 from utils.pong.objects import FPS, Ball, CANVAS_HEIGHT, CANVAS_WIDTH, \
-    BALL_SPEED
+    BALL_SPEED, Paddle, Score
+from utils.websockets.channel_send import send_group
 
 
 class PongLogic:
-    games: Dict[str, GameState] = {}
+    def __init__(self, game_id, ball, paddle_p1, paddle_p2, score_p1, score_p2):
+        self._logger = logging.getLogger(self.__class__.__name__)
+        self.ball: Ball = ball
+        self.paddle_p1: Paddle = paddle_p1
+        self.paddle_p2: Paddle = paddle_p2
+        self.score_p1: Score = score_p1
+        self.score_p2: Score = score_p2
+        self.game_id = game_id
+        self.last_update: float = time.time()
 
-    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ DATABASE ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
-    @database_sync_to_async
-    def check_room_exists(self, player_id):
+    async def game_task(self):
         try:
-            Player.objects.get(id=player_id)
-            return True
-        except Player.DoesNotExist:
-            return False
+            # previous_state = game.get_snapshot()
+            await self._game_loop()
+            # current_state = game.get_snapshot()
 
-    @database_sync_to_async
-    def get_player(self, client_id):
-        try:
-            client = Clients.objects.get(id=client_id)
-            return client.player
-        except (Clients.DoesNotExist | Player.DoesNotExist):
-            return None
+            # changes = {
+            #     key: (previous_state[key], current_state[key])
+            #     for key in previous_state
+            #     if previous_state[key] != current_state[key]
+            # }
 
-    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ HANDLES ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
-
-
-
-    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ LOOP LOGIC ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
-
-    async def _game_task(self, game: GameState):
-        try:
-            while game.active:
-                previous_state = game.get_snapshot()
-                self._game_loop(game)
-                current_state = game.get_snapshot()
-
-                changes = {
-                    key: (previous_state[key], current_state[key])
-                    for key in previous_state
-                    if previous_state[key] != current_state[key]
-                }
-
-                await self._game_update(game, changes)
-                await asyncio.sleep(1/ FPS)
+            await self._game_update()
+            # await asyncio.sleep(1 / FPS)
+            await asyncio.sleep(2)
         except asyncio.CancelledError:
             pass
 
-    def _game_loop(self, game: GameState):
+    async def _game_loop(self):
         current_time = time.time()
-        delta_time = current_time - game.last_update
-        ball: Ball = game.ball
+        delta_time = current_time - self.last_update
 
-        ball.dx *= 1.001
-        ball.dy *= 1.001
+        await self.ball.multiply_dx(1.001)
+        await self.ball.multiply_dy(1.001)
 
-        ball.x += ball.dx * delta_time * FPS
-        ball.y += ball.dy * delta_time * FPS
+        await self.ball.increase_x(await self.ball.get_dx() * delta_time * FPS)
+        await self.ball.increase_y(await self.ball.get_dy() * delta_time * FPS)
 
-        # # Wall bounces (with akward code otherwise ball get stuck to wall sometimes)
-        if ball.y <= ball.radius or ball.y >= CANVAS_HEIGHT - ball.radius:
-            if ball.y < ball.radius:
-                ball.y = ball.radius
-            elif ball.y > CANVAS_HEIGHT - ball.radius:
-                ball.y = CANVAS_HEIGHT - ball.radius
-            ball.dy *= -1
-
-        paddle_p1 = game.player_1.paddle
-        paddle_p2 = game.player_2.paddle
+        # Ball collision with top and bottom walls
+        if await self.ball.get_y() <= await self.ball.get_radius() or await self.ball.get_y() >= CANVAS_HEIGHT - await self.ball.get_radius():
+            if await self.ball.get_y() < await self.ball.get_radius():
+                await self.ball.set_y(await self.ball.get_radius())  # Correct ball position
+            elif await self.ball.get_y() > CANVAS_HEIGHT - await self.ball.get_radius():
+                await self.ball.set_y(CANVAS_HEIGHT - await self.ball.get_radius())  # Correct ball position
+            # Reverse ball's vertical direction
+            await self.ball.set_dy(await self.ball.get_dy() * -1)
 
         # Left paddle collision
-        if (ball.x - ball.radius <= paddle_p1.x + paddle_p1.width and
-            ball.x >= paddle_p1.x and
-            ball.y >= paddle_p1.y and
-            ball.y <= paddle_p1.y + paddle_p1.height):
-            ball.dx = abs(ball.dx)  # Ensure ball moves right
-            ball.x = paddle_p1.x + paddle_p1.width + ball.radius
+        if (
+                await self.ball.get_x() - await self.ball.get_radius() <= await self.paddle_p1.get_x() + await self.paddle_p1.get_width() and
+                await self.ball.get_x() >= await self.paddle_p1.get_x() and
+                await self.ball.get_y() >= await self.paddle_p1.get_y() and
+                await self.ball.get_y() <= await self.paddle_p1.get_y() + await self.paddle_p1.get_height()):
+            await self.ball.set_dx(abs(await self.ball.get_dx()))  # Ensure ball moves right
+            await self.ball.set_x(
+                await self.paddle_p1.get_x() + await self.paddle_p1.get_width() + await self.ball.get_radius())
 
         # Right paddle collision
-        if (ball.x + ball.radius >= paddle_p2.x and
-            ball.x <= paddle_p2.x + paddle_p2.width and
-            ball.y >= paddle_p2.y and
-            ball.y <= paddle_p2.y + paddle_p2.height):
-            ball.dx = -abs(ball.dx)  # Ensure ball moves left
-            ball.x = paddle_p2.x - ball.radius
+        if (await self.ball.get_x() + await self.ball.get_radius() >= await self.paddle_p2.get_x() and
+                await self.ball.get_x() <= await self.paddle_p2.get_x() + await self.paddle_p2.get_width() and
+                await self.ball.get_y() >= await self.paddle_p2.get_y() and
+                await self.ball.get_y() <= await self.paddle_p2.get_y() + await self.paddle_p2.get_height()):
+            await self.ball.set_dx(-abs(await self.ball.get_dx()))  # Ensure ball moves left
+            await self.ball.set_x(await self.paddle_p2.get_x() - await self.ball.get_radius())
 
         # Scoring
-        if ball.x <= 0:
-            game.player_1.score += 1
-            self._reset_ball(ball)
-        elif ball.x >= CANVAS_WIDTH:
-            game.player_2.score += 1
-            self._reset_ball(ball)
+        if await self.ball.get_x() <= 0:
+            await self.score_p1.add_score()
+            await self._reset_ball(self.ball)
+        elif await self.ball.get_x() >= CANVAS_WIDTH:
+            await self.score_p2.add_score()
+            await self._reset_ball(self.ball)
 
-        game.last_update = current_time
+        self.last_update = current_time
 
-    async def _game_update(self, game: GameState, changes: dict):
-        if not changes:
-            return
+    async def _game_update(self):
+        await self.ball.update()
+        await self.paddle_p1.update()
+        # await send_game(self.game_id, EventType.UPDATE, ResponseAction.TEST, BallSerializer(self.ball).data)
+        await send_group(self.game_id, EventType.UPDATE, ResponseAction.TEST, PaddleSerializer(self.paddle_p1).data)
 
-        channel_layer = get_channel_layer()
+        # if not changes:
+        #     return
+        #
+        # channel_layer = get_channel_layer()
+        #
+        # for key, (old, new) in changes.items():
+        #     if key == 'ball':
+        #         await channel_layer.group_send(f"group_{game.id}", {
+        #             'type': 'game_message',
+        #             'message': {
+        #                 'type': RequestAction.BALL_UPDATE,
+        #                 'ball': BallSerializer(game.ball).data
+        #             }
+        #         })
+        #     elif key == 'p1_score':
+        #         await channel_layer.group_send(f"group_{game.id}", {
+        #             'type': 'game_message',
+        #             'message': {
+        #                 'type': RequestAction.P1_SCORE_UPDATE,
+        #                 'score': game.player_1.score
+        #             }
+        #         })
+        #     elif key == 'p2_score':
+        #         await channel_layer.group_send(f"group_{game.id}", {
+        #             'type': 'game_message',
+        #             'message': {
+        #                 'type': RequestAction.P2_SCORE_UPDATE,
+        #                 'score': game.player_2.score
+        #             }
+        #         })
 
-        for key, (old, new) in changes.items():
-            if key == 'ball':
-                await channel_layer.group_send(f"group_{game.id}", {
-                    'type': 'game_message',
-                    'message': {
-                        'type': RequestAction.BALL_UPDATE,
-                        'ball': BallSerializer(game.ball).data
-                    }
-                })
-            elif key == 'p1_score':
-                await channel_layer.group_send(f"group_{game.id}", {
-                    'type': 'game_message',
-                    'message': {
-                        'type': RequestAction.P1_SCORE_UPDATE,
-                        'score': game.player_1.score
-                    }
-                })
-            elif key == 'p2_score':
-                await channel_layer.group_send(f"group_{game.id}", {
-                    'type': 'game_message',
-                    'message': {
-                        'type': RequestAction.P2_SCORE_UPDATE,
-                        'score': game.player_2.score
-                    }
-                })
-
-    def _reset_ball(self, ball: Ball):
-        ball.x = CANVAS_WIDTH / 2
-        ball.y = CANVAS_HEIGHT / 2
-        ball.dx = BALL_SPEED * ( 1 if random.random() > 0.5 else -1)
-        ball.dy = BALL_SPEED * ( 1 if random.random() > 0.5 else -1)
-
+    async def _reset_ball(self, ball):
+        await ball.set_x(CANVAS_WIDTH / 2)
+        await ball.set_y(CANVAS_HEIGHT / 2)
+        await ball.set_dx(BALL_SPEED * (1 if random.random() > 0.5 else -1))
+        await ball.set_dy(BALL_SPEED * (1 if random.random() > 0.5 else -1))

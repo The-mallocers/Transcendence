@@ -14,6 +14,7 @@ class GameStatus(str, Enum):
 class EventType(str, Enum):
     MATCHMAKING: str = 'matchmaking'
     GAME: str = 'game'
+    UPDATE: str = 'update'
     ERROR: str = 'error'
 
 #All the action the client send to server
@@ -21,6 +22,8 @@ class RequestAction(str, Enum):
     # ── Game Actions ──────────────────────────────────────────────────────────────────
     JOIN_GAME: str = 'join_game'
     START_GAME: str = 'start_game'
+    STOP_GAME: str = 'stop_game'
+
     IS_READY: str = 'is_ready'
     PADDLE_MOVE: str = 'paddle_move'
     BALL_UPDATE: str = 'ball_update'
@@ -37,6 +40,9 @@ class ResponseAction(str, Enum):
     LEFT_QUEUE: str = 'Successfuly left queue'
     JOIN_GAME: str = 'Successfuly join game'
     LEFT_GAME: str = 'Successfuly left game'
+    STARTING: str = 'Waiting to game start'
+    STARTED: str = 'Game will start'
+    ENDING: str = 'Game end'
 
 
     TEST: str = 'test'
@@ -50,10 +56,10 @@ class ResponseError(str, Enum):
     JOINING_ERROR: str = 'Error when you try to join'
     INVALID_ID: str = 'Player does not exist'
     MATCHMAKING_ERROR: str = 'Leaving matchmaking because there is an error'
-    PLAYER_NOT_FOUND: str = 'Your id player corresponding to no player'
+    PLAYER_NOT_FOUND: str = 'Your player id not corresponding to a player'
     JSON_ERROR: str = 'Invalid json'
-    EXCEPTION: str = ''
-    SERVICE_ERROR: str = ''
+    EXCEPTION: str = 'Internal server error'
+    ACTION_ERROR: str = 'Action error'
 
 class Side(str, Enum):
     LEFT: str = 'left'

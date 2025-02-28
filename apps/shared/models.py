@@ -1,16 +1,14 @@
 import uuid
 
-from asgiref.sync import async_to_sync
+from asgiref.sync import sync_to_async
 from channels.db import database_sync_to_async
 from django.core.exceptions import ValidationError
 from django.db import models, IntegrityError, transaction
 from django.http import HttpRequest
 
+from apps.auth.models import Password, TwoFA
 from apps.player.models import Player
 from apps.profile.models import Profile
-from apps.auth.models import Password, TwoFA
-
-import json
 
 
 class Clients(models.Model):
@@ -47,6 +45,15 @@ class Clients(models.Model):
         return client
 
     @staticmethod
+    @sync_to_async
+    def get_client_by_id_async(id: uuid.UUID):
+        try:
+            with transaction.atomic():
+                return Clients.objects.get(id=id)
+        except Clients.DoesNotExist:
+            return None
+
+    @staticmethod
     def get_client_by_email(email: Profile.email):
         profile = Profile.get_profile_by_email(email)
         if profile is None:
@@ -66,6 +73,13 @@ class Clients(models.Model):
             return Clients.get_client_by_id(token.SUB)
 
         return None
+
+    @staticmethod
+    async def get_client_by_player(player_id):
+        try:
+            return await Clients.objects.aget(player__id=player_id)
+        except Clients.DoesNotExist:
+            return None
 
     @staticmethod
     def create_client(username: str, email: str, password: str):

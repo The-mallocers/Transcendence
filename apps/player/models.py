@@ -1,7 +1,8 @@
 import uuid
 
+from asgiref.sync import sync_to_async
 from channels.db import database_sync_to_async
-from django.db import models
+from django.db import models, transaction
 from django.db.models import ManyToManyField, ForeignKey, \
     OneToOneField
 from django.db.models.fields import CharField, IntegerField, BooleanField, \
@@ -31,8 +32,6 @@ class Player(models.Model):
 
     def __str__(self):
         return f"{self.nickname} with id: {self.id}"
-
-
 
 class PlayerGame(models.Model):
     class Meta:
