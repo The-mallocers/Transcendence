@@ -1,61 +1,29 @@
-import { navigateTo } from '../../spa/spa.js';
-
-export function register (event) {
-    console.log("I am register.js")
-    event.preventDefault();
+document.addEventListener("DOMContentLoaded", function () {
     const form = document.querySelector("form");
     const error = document.getElementById("error-message");
 
-    const username = document.getElementById('username').value;
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
+    form.addEventListener("submit", function (event) {
+        event.preventDefault();
 
-    const data = {
-        profile: {
-            username: username,
-            email: email
-        },
-        password: {
-            password: password
-        }
-    }
-    console.log(data);
-    console.log()
+        const formData = new FormData(form);
 
-    fetch(form.action, {
-        method: "POST",
-        body: JSON.stringify(data),
-        headers: {
-            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
-            "Content-Type": "application/json"
-        },
-    })
-        .then(response => {
-            if (response.ok)
-            {
-                navigateTo('/');
-            }
-            else {
-                console.log("we registered badly")
-                console.log(response);
-                response.json().then(error => {
-                    
-                    error.textContent = "An error occurred"
-                });
-            }
+        fetch(form.action, {
+            method: "POST",
+            body: formData,
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            },
         })
-        // .then(data => {
-        //     if (data.ok) {
-        //         console.log("we registered succesfully")
-        //         // window.location.href = '/';
-        //         navigateTo("/");
-        //     } else {
-        //         console.log("we registered badly")
-        //         console.log(data);
-        //         error.textContent = "You typed either a shit email OR a shit password (shit usernames are allowed"
-        // }
-        // })
-        .catch(error => {
-            console.error("There was an error with the fetch operation:", error);
-        });
-};
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                window.location.href = '/';
+                } else {
+                    error.textContent = data.message
+            }
+            })
+            .catch(error => {
+                console.error("There was an error with the fetch operation:", error);
+            });
+    });
+});

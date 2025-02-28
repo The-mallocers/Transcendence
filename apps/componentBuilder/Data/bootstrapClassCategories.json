@@ -1,0 +1,176 @@
+{
+    "Layout": {
+      "Containers": {
+        "classnames": ["container", "container-fluid"],
+        "container-{size}": ["container-sm", "container-md", "container-lg", "container-xl", "container-xxl"]
+      },
+      "Grid": {
+        "classnames": ["row"],
+        "row-cols-{x}": ["row-cols-1", "row-cols-2", "row-cols-3", "row-cols-4", "row-cols-5", "row-cols-6", "row-cols-auto"]
+      },
+      "Columns": {
+        "classnames": ["col"],
+        "col-{x}": ["col-1", "col-2", "col-3", "col-4", "col-5", "col-6", "col-7", "col-8", "col-9", "col-10", "col-11", "col-12"],
+        "col-sm-{x}": ["col-sm-1", "col-sm-2", "col-sm-3", "col-sm-4", "col-sm-5", "col-sm-6"],
+        "col-md-{x}": ["col-md-1", "col-md-2", "col-md-3", "col-md-4", "col-md-5", "col-md-6"],
+        "col-lg-{x}": ["col-lg-1", "col-lg-2", "col-lg-3", "col-lg-4", "col-lg-5", "col-lg-6"],
+        "col-xl-{x}": ["col-xl-1", "col-xl-2", "col-xl-3", "col-xl-4", "col-xl-5", "col-xl-6"],
+        "col-xxl-{x}": ["col-xxl-1", "col-xxl-2", "col-xxl-3", "col-xxl-4", "col-xxl-5", "col-xxl-6"]
+      },
+      "Gutters": {
+        "g-{x}": ["g-0", "g-1", "g-2", "g-3", "g-4", "g-5"],
+        "gx-{x}": ["gx-0", "gx-1", "gx-2", "gx-3", "gx-4", "gx-5"],
+        "gy-{x}": ["gy-0", "gy-1", "gy-2", "gy-3", "gy-4", "gy-5"]
+      },
+      "Display": {
+        "classnames": ["d-none", "d-inline", "d-inline-block", "d-block", "d-grid", "d-table", "d-table-cell", "d-table-row", "d-flex", "d-inline-flex"],
+        "d-sm-{value}": ["d-sm-none", "d-sm-inline", "d-sm-inline-block", "d-sm-block", "d-sm-grid", "d-sm-table", "d-sm-flex", "d-sm-inline-flex"],
+        "d-md-{value}": ["d-md-none", "d-md-inline", "d-md-inline-block", "d-md-block", "d-md-grid", "d-md-table", "d-md-flex", "d-md-inline-flex"],
+        "d-lg-{value}": ["d-lg-none", "d-lg-inline", "d-lg-inline-block", "d-lg-block", "d-lg-grid", "d-lg-table", "d-lg-flex", "d-lg-inline-flex"],
+        "d-xl-{value}": ["d-xl-none", "d-xl-inline", "d-xl-inline-block", "d-xl-block", "d-xl-grid", "d-xl-table", "d-xl-flex", "d-xl-inline-flex"]
+      },
+      "Flex": {
+        "classnames": ["d-flex", "d-inline-flex", "flex-row", "flex-row-reverse", "flex-column", "flex-column-reverse", "flex-wrap", "flex-nowrap", "flex-wrap-reverse"],
+        "flex-sm-{direction}": ["flex-sm-row", "flex-sm-column"],
+        "flex-md-{direction}": ["flex-md-row", "flex-md-column"],
+        "flex-lg-{direction}": ["flex-lg-row", "flex-lg-column"],
+        "flex-xl-{direction}": ["flex-xl-row", "flex-xl-column"],
+        "justify-content-{value}": [
+          "justify-content-start", "justify-content-end", "justify-content-center", "justify-content-between", "justify-content-around", "justify-content-evenly"
+        ],
+        "align-items-{value}": [
+          "align-items-start", "align-items-end", "align-items-center", "align-items-baseline", "align-items-stretch"
+        ],
+        "align-self-{value}": [
+          "align-self-start", "align-self-end", "align-self-center", "align-self-baseline", "align-self-stretch"
+        ],
+        "flex-grow-{x}": ["flex-grow-0", "flex-grow-1"],
+        "flex-shrink-{x}": ["flex-shrink-0", "flex-shrink-1"],
+        "order-{x}": ["order-0", "order-1", "order-2", "order-3", "order-4", "order-5"]
+      }
+    },
+
+    "Content": {
+        "Headings": {
+        "h-{size}": ["h1", "h2", "h3", "h4", "h5", "h6"]
+        },
+        "DisplayHeadings": {
+        "display-{size}": ["display-1", "display-2", "display-3", "display-4", "display-5", "display-6"]
+        },
+        "Lead": {
+        "classnames": ["lead"]
+        },
+        "TextAlignment": {
+        "text-{align}": ["text-start", "text-center", "text-end"]
+        },
+        "TextWrappingAndOverflow": {
+        "text-{wrap}": ["text-wrap", "text-nowrap"],
+        "text-{overflow}": ["text-truncate"]
+        },
+        "FontWeightAndItalic": {
+        "fw-{weight}": ["fw-light", "fw-normal", "fw-bold", "fw-bolder", "fw-lighter"],
+        "fst-{style}": ["fst-italic", "fst-normal"]
+        },
+        "TextColor": {
+        "text-{color}": [
+            "text-primary", "text-secondary", "text-success", "text-danger", "text-warning",
+            "text-info", "text-light", "text-dark", "text-body", "text-muted", "text-white",
+            "text-black-50", "text-white-50"
+        ]
+        },
+        "TextDecoration": {
+        "text-{decoration}": ["text-decoration-none", "text-decoration-underline", "text-decoration-line-through"]
+        },
+        "TextTransform": {
+        "text-{transform}": ["text-lowercase", "text-uppercase", "text-capitalize"]
+        },
+        "SmallText": {
+        "classnames": ["small"]
+        },
+        "Blockquotes": {
+        "blockquote": {
+            "classnames": ["blockquote"],
+            "footer": {
+            "classnames": ["blockquote-footer"]
+            }
+        }
+        },
+        "Lists": {
+        "list-{style}": ["list-unstyled", "list-inline"],
+        "list-inline-item": {
+            "classnames": ["list-inline-item"]
+        }
+        }
+    },
+
+    "Components" :{
+            "Alerts": {
+              "classnames": ["alert"],
+              "alert-{color}": ["alert-primary", "alert-secondary", "alert-success", "alert-danger", "alert-warning", "alert-info", "alert-light", "alert-dark"]
+            },
+            "Badges": {
+              "classnames": ["badge", "badge-pill"]
+            },
+            "Breadcrumb": {
+              "classnames": ["breadcrumb", "breadcrumb-item"]
+            },
+            "Buttons": {
+              "classnames": ["btn"],
+              "btn-{color}": ["btn-primary", "btn-secondary", "btn-success", "btn-danger", "btn-warning", "btn-info", "btn-light", "btn-dark", "btn-link"],
+              "btn-{size}": ["btn-lg", "btn-sm"],
+              "btn-outline-{color}": ["btn-outline-primary", "btn-outline-secondary", "btn-outline-success", "btn-outline-danger", "btn-outline-warning", "btn-outline-info", "btn-outline-light", "btn-outline-dark"]
+            },
+            "Button Group": {
+              "classnames": ["btn-group", "btn-toolbar"],
+              "btn-group-{size}": ["btn-group-lg", "btn-group-sm"]
+            },
+            "Cards": {
+              "classnames": ["card"],
+              "card-{element}": ["card-header", "card-body", "card-footer", "card-title", "card-subtitle", "card-text", "card-link"],
+              "card-img-{position}": ["card-img-top", "card-img-bottom"]
+            },
+            "Carousel": {
+              "classnames": ["carousel", "carousel-inner", "carousel-item"],
+              "carousel-control-{direction}": ["carousel-control-prev", "carousel-control-next"]
+            },
+            "Dropdowns": {
+              "classnames": ["dropdown", "dropdown-toggle", "dropdown-menu", "dropdown-item", "dropdown-divider", "dropdown-header"],
+              "drop{direction}": ["dropup", "dropend", "dropstart"]
+            },
+            "Forms": {
+              "classnames": ["form-control", "form-label", "form-text", "form-check", "form-switch", "form-floating"],
+              "form-control-{size}": ["form-control-lg", "form-control-sm"]
+            },
+            "List Group": {
+              "classnames": ["list-group", "list-group-item", "list-group-horizontal"],
+              "list-group-item-{color}": ["list-group-item-primary", "list-group-item-secondary", "list-group-item-success", "list-group-item-danger", "list-group-item-warning", "list-group-item-info", "list-group-item-light", "list-group-item-dark"]
+            },
+            "Modal": {
+              "classnames": ["modal", "modal-dialog", "modal-content"],
+              "modal-{element}": ["modal-header", "modal-body", "modal-footer", "modal-title"],
+              "modal-{size}": ["modal-sm", "modal-lg", "modal-xl"]
+            },
+            "Navbar": {
+              "classnames": ["navbar", "navbar-brand", "navbar-nav", "navbar-toggler", "navbar-collapse"],
+              "navbar-{theme}": ["navbar-light", "navbar-dark"],
+              "navbar-{placement}": ["navbar-fixed-top", "navbar-fixed-bottom", "navbar-sticky-top"]
+            },
+            "Pagination": {
+              "classnames": ["pagination", "page-item", "page-link"],
+              "pagination-{size}": ["pagination-lg", "pagination-sm"]
+            },
+            "Progress": {
+              "classnames": ["progress", "progress-bar"],
+              "progress-bar-{style}": ["progress-bar-striped", "progress-bar-animated"]
+            },
+            "Spinners": {
+              "classnames": ["spinner-border", "spinner-grow"],
+              "spinner-{size}": ["spinner-border-sm", "spinner-grow-sm"]
+            },
+            "Toasts": {
+              "classnames": ["toast", "toast-header", "toast-body"]
+            }
+        }
+    
+  }
+  
