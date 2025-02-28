@@ -48,6 +48,7 @@ class RegisterApiView(APIView):
             client = serializer.save()
             return Response(ClientSerializer(client).data, status=status.HTTP_201_CREATED)
         else:
+            print("im the fucked returning 400")
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class LoginApiView(APIView):

@@ -17,6 +17,9 @@ export function register (event) {
         },
         password: {
             password: password
+        },
+        player : {
+            nickname: username
         }
     }
     console.log(data);
@@ -38,8 +41,8 @@ export function register (event) {
             else {
                 console.log("we registered badly")
                 console.log(response);
-                response.json().then(error => {
-                    
+                response.json().then(data => {
+                    console.log("Error data:", data);
                     error.textContent = "An error occurred"
                 });
             }
