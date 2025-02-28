@@ -1,4 +1,4 @@
-from django.http import HttpResponseRedirect, JsonResponse
+from django.http import JsonResponse
 from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.middleware.csrf import get_token
@@ -13,7 +13,7 @@ def get(req):
             "client": client,
             "clients": Clients.objects.all()
         }
-        html_content = render_to_string("apps/index.html", context)
+        html_content = render_to_string("apps/profile/myinformations.html", context)
         return JsonResponse({'html': html_content})
     else:
         html_content = render_to_string("apps/auth/login.html", {"csrf_token": get_token(req)})

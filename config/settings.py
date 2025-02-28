@@ -30,14 +30,18 @@ JWT_ALGORITH = 'HS256'
 
 #Middlware protected paths
 PROTECTED_PATHS = [
-    '/',
-    '/pong/'
+    '/*'
 ]
 EXCLUDED_PATHS = [
     '/api/auth/login',
     '/api/*',
     '/pages/auth/login',
+    '/auth/login',
     '/auth/register',
+    '/pages/auth/register',
+    '/',
+    '/pages/'
+    '/pages/error/'
 ]
 ROLE_PROTECTED_PATHS = {
     '/admin/*': ['admin']
@@ -68,17 +72,16 @@ INSTALLED_APPS = [
 
     # ────────────────────────────────── Custom Apps ─────────────────────────────────── #
     'apps.admin.apps.AdminConfig',
-    'apps.api.apps.ApiConfig',
     'apps.auth.apps.AuthConfig',
-    'apps.componentBuilder.apps.ComponentbuilderConfig',
     'apps.index.apps.IndexConfig',
-    'apps.pageBuilder.apps.PagebuilderConfig',
     'apps.pong.apps.PongConfig',
     'apps.profile.apps.ProfileConfig',
     'apps.shared.apps.SharedConfig',
     'apps.player.apps.PlayerConfig',
     'apps.game.apps.GameConfig',
     'apps.pages.apps.PagesConfig',
+    'apps.error.apps.ErrorConfig',
+    'apps.chat.apps.ChatConfig',
 ]
 
 MIDDLEWARE = [

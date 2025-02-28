@@ -1,0 +1,26 @@
+
+.matchmakingPage{
+    padding: 1rem;
+
+}
+.matchmakingContainer {
+    padding: 1rem;
+    height: 50vh;
+    position: relative;
+    text-align: center;
+    color: white;
+    background-color: #1E2028;
+    border: 1px solid #323642;
+    padding: 2.5rem 0;
+}
+
+.matchmakingContainer .btn {
+    background-color: #FFA042;
+    color: white;
+    width: 10rem;
+    transition: background-color .2s;
+}
+
+.matchmakingContainer .btn:hover{
+    background-color: #eb9034;
+}

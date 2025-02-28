@@ -1,0 +1,33 @@
+{% load static %}
+
+<div class="container-fluid chatContainer p-0">
+    <div class="row h-100 g-0">
+        <div class="col-4 h-100 friends">
+
+        {% for i in my_range %}
+            <div class="friend d-flex align-items-center">
+                <img class="pic" src="{% static 'assets/imgs/matboyer.jpg' %}">
+                <div class="nickname">EZ2C</div>
+            </div>
+        {% endfor %}
+        
+        </div>
+        <div class="col-8 h-100 d-flex chatBox align-items-end justify-content-end flex-column">
+        <div class="history container-fluid d-flex chatHistory align-items-end justify-content-end flex-column">
+            <div class="msg me align-self-end">lalala</div>
+            <div class="msg you align-self-start">lololo</div>
+            <div class="msg me align-self-end">lalala</div>
+            <div class="msg you align-self-start">lololo</div>
+            <div class="msg me align-self-end">lalala</div>
+            <div class="msg you align-self-start">lololo</div>
+            <div class="msg me align-self-end">lalala</div>
+            <div class="msg you align-self-start">lololo</div>
+            <div class="msg me align-self-end">lalala</div>
+            <div class="msg you align-self-start">lololo</div>
+        </div>
+        <input type="text" placeholder="message">
+        </div>
+    </div>
+<div>
+
+
