@@ -7,7 +7,7 @@ from redis.commands.json.path import Path
 from apps.game.models import Game
 from apps.player.models import PlayerGame
 from utils.pong.enums import GameStatus
-from utils.pong.objects import Ball
+from utils.pong.objects.ball import Ball
 
 
 class GameManager:

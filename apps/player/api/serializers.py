@@ -5,7 +5,7 @@ from rest_framework import serializers
 from apps.player.models import Player
 from apps.pong.api.serializers import PaddleSerializer
 from utils.pong.enums import Side
-from utils.pong.objects import Paddle
+from utils.pong.objects import paddle
 
 
 class PlayerSerializer(serializers.ModelSerializer):

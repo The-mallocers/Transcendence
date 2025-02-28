@@ -19,30 +19,41 @@ class EventType(str, Enum):
 
 #All the action the client send to server
 class RequestAction(str, Enum):
+    # ── Matchmaking Actions ───────────────────────────────────────────────────────────
+    JOIN_QUEUE: str = 'join_queue'
+    LEAVE_QUEUE: str = 'leave_queue'
+
     # ── Game Actions ──────────────────────────────────────────────────────────────────
     JOIN_GAME: str = 'join_game'
     START_GAME: str = 'start_game'
     STOP_GAME: str = 'stop_game'
 
     IS_READY: str = 'is_ready'
-    PADDLE_MOVE: str = 'paddle_move'
+    # ── Update ────────────────────────────────────────────────────────────────────────
     BALL_UPDATE: str = 'ball_update'
-    P1_SCORE_UPDATE: str = 'p1_score_update'
-    P2_SCORE_UPDATE: str = 'p2_score_update'
+    PADDLE_MOVE: str = 'paddle_move'
+    SCORE_UPDATE: str = 'score_update'
 
-    # ── Matchmaking Actions ───────────────────────────────────────────────────────────
-    JOIN_QUEUE: str = 'join_queue'
-    LEAVE_QUEUE: str = 'leave_queue'
 
 #All the reponse the server send to client
 class ResponseAction(str, Enum):
+    # ── Matchmaking Actions ───────────────────────────────────────────────────────────
     JOIN_QUEUE: str = 'Successfuly join queue'
     LEFT_QUEUE: str = 'Successfuly left queue'
+
+    # ── Game Actions ──────────────────────────────────────────────────────────────────
     JOIN_GAME: str = 'Successfuly join game'
     LEFT_GAME: str = 'Successfuly left game'
     STARTING: str = 'Waiting to game start'
     STARTED: str = 'Game will start'
     ENDING: str = 'Game end'
+
+    # ── Update ────────────────────────────────────────────────────────────────────────
+    BALL_UPDATE: str = 'ball_update'
+    PADDLE_1_UPDATE: str = 'paddle_1_update'
+    PADDLE_2_UPDATE: str = 'paddle_2_update'
+    SCORE_1_UPDATE: str = 'score_1_update'
+    SCORE_2_UPDATE: str = 'score_2_update'
 
 
     TEST: str = 'test'

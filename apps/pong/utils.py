@@ -2,7 +2,7 @@ import copy
 import time
 
 from utils.pong.enums import GameStatus
-from utils.pong.objects import Ball
+from utils.pong.objects import ball
 
 
 class GameState:

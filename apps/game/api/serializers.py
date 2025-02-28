@@ -3,7 +3,7 @@ from rest_framework import serializers
 from apps.game.models import Game
 from apps.player.models import Player
 from apps.pong.api.serializers import BallSerializer
-from utils.pong.objects import Ball
+from utils.pong.objects import ball
 
 
 class GameSerializer(serializers.ModelSerializer):

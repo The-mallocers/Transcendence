@@ -3,39 +3,40 @@ import logging
 import random
 import time
 
-from apps.pong.api.serializers import PaddleSerializer
+from apps.pong.api.serializers import PaddleSerializer, BallSerializer
 from utils.pong.enums import EventType, ResponseAction
-from utils.pong.objects import FPS, Ball, CANVAS_HEIGHT, CANVAS_WIDTH, \
-    BALL_SPEED, Paddle, Score
+from utils.pong.objects import FPS, CANVAS_HEIGHT, CANVAS_WIDTH, BALL_SPEED
+from utils.pong.objects.ball import Ball
+from utils.pong.objects.objects_state import GameState
+from utils.pong.objects.paddle import Paddle
+from utils.pong.objects.score import Score
 from utils.websockets.channel_send import send_group
 
 
 class PongLogic:
     def __init__(self, game_id, ball, paddle_p1, paddle_p2, score_p1, score_p2):
         self._logger = logging.getLogger(self.__class__.__name__)
+        self.last_update: float = time.time()
+        self.game_id = game_id
+
+        # ── Objects ───────────────────────────────────────────────────────────────────
         self.ball: Ball = ball
         self.paddle_p1: Paddle = paddle_p1
         self.paddle_p2: Paddle = paddle_p2
         self.score_p1: Score = score_p1
         self.score_p2: Score = score_p2
-        self.game_id = game_id
-        self.last_update: float = time.time()
 
     async def game_task(self):
         try:
-            # previous_state = game.get_snapshot()
+            previous_state = GameState.create_copy(self)
             await self._game_loop()
-            # current_state = game.get_snapshot()
+            current_state = GameState.create_copy(self)
 
-            # changes = {
-            #     key: (previous_state[key], current_state[key])
-            #     for key in previous_state
-            #     if previous_state[key] != current_state[key]
-            # }
+            changes = GameState.get_differences(current_state, previous_state)
 
-            await self._game_update()
+            await self._game_update(changes)
             # await asyncio.sleep(1 / FPS)
-            await asyncio.sleep(2)
+            await asyncio.sleep(1)
         except asyncio.CancelledError:
             pass
 
@@ -84,44 +85,34 @@ class PongLogic:
             await self.score_p2.add_score()
             await self._reset_ball(self.ball)
 
-        self.last_update = current_time
-
-    async def _game_update(self):
         await self.ball.update()
         await self.paddle_p1.update()
-        # await send_game(self.game_id, EventType.UPDATE, ResponseAction.TEST, BallSerializer(self.ball).data)
-        await send_group(self.game_id, EventType.UPDATE, ResponseAction.TEST, PaddleSerializer(self.paddle_p1).data)
+        await self.paddle_p2.update()
+        await self.score_p1.update()
+        await self.score_p2.update()
 
-        # if not changes:
-        #     return
-        #
-        # channel_layer = get_channel_layer()
-        #
-        # for key, (old, new) in changes.items():
-        #     if key == 'ball':
-        #         await channel_layer.group_send(f"group_{game.id}", {
-        #             'type': 'game_message',
-        #             'message': {
-        #                 'type': RequestAction.BALL_UPDATE,
-        #                 'ball': BallSerializer(game.ball).data
-        #             }
-        #         })
-        #     elif key == 'p1_score':
-        #         await channel_layer.group_send(f"group_{game.id}", {
-        #             'type': 'game_message',
-        #             'message': {
-        #                 'type': RequestAction.P1_SCORE_UPDATE,
-        #                 'score': game.player_1.score
-        #             }
-        #         })
-        #     elif key == 'p2_score':
-        #         await channel_layer.group_send(f"group_{game.id}", {
-        #             'type': 'game_message',
-        #             'message': {
-        #                 'type': RequestAction.P2_SCORE_UPDATE,
-        #                 'score': game.player_2.score
-        #             }
-        #         })
+        self.last_update = current_time
+
+    async def _game_update(self, changes):
+        if changes['ball']:
+            await self.ball.update()
+            await send_group(self.game_id, EventType.UPDATE, ResponseAction.BALL_UPDATE, BallSerializer(self.ball).data)
+
+        if changes['paddle_p1']:
+            await self.paddle_p1.update()
+            await send_group(self.game_id, EventType.UPDATE, ResponseAction.PADDLE_1_UPDATE, PaddleSerializer(self.paddle_p1).data)
+
+        if changes['paddle_p2']:
+            await self.paddle_p2.update()
+            await send_group(self.game_id, EventType.UPDATE, ResponseAction.PADDLE_2_UPDATE, PaddleSerializer(self.paddle_p2).data)
+
+        if changes['score_p1']:
+            await self.score_p1.update()
+            await send_group(self.game_id, EventType.UPDATE, ResponseAction.SCORE_1_UPDATE, await self.score_p1.get_score())
+
+        if changes['score_p2']:
+            await self.score_p2.update()
+            await send_group(self.game_id, EventType.UPDATE, ResponseAction.SCORE_2_UPDATE, await self.score_p2.get_score())
 
     async def _reset_ball(self, ball):
         await ball.set_x(CANVAS_WIDTH / 2)

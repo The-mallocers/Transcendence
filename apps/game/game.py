@@ -5,10 +5,12 @@ from django.conf import settings
 from redis import Redis
 
 from apps.game.manager import GameManager
+from utils.pong.objects.ball import Ball
+from utils.pong.objects.paddle import Paddle
+from utils.pong.objects.score import Score
 from utils.threads import Threads
 from apps.pong.pong import PongLogic
 from utils.pong.enums import GameStatus, EventType, ResponseAction, ResponseError
-from utils.pong.objects import Ball, Paddle, Score
 from utils.websockets.channel_send import send_group, send_group_error
 
 
@@ -39,6 +41,8 @@ class GameThread(Threads):
 
         redis_sync = Redis(host=settings.REDIS_HOST, port=settings.REDIS_PORT, db=0)
         redis_sync.delete(f'game:{self.game_id}')
+        redis_sync.hdel('player_game', str(self.game_manager.p1.id))
+        redis_sync.hdel('player_game', str(self.game_manager.p2.id))
 
         self._logger.info("Cleanup of game complete")
 
@@ -73,6 +77,7 @@ class GameThread(Threads):
     async def _ending(self):
         if await self.game_manager.rget_status() is GameStatus.ENDING:
             await send_group(self.game_id, EventType.GAME, ResponseAction.ENDING)
+            await self.game_manager.rset_status(GameStatus.FINISHED)
             self._stop_event.set()
             await asyncio.sleep(5)
             self.stop()
