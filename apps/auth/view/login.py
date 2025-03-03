@@ -44,37 +44,37 @@ def post(req: HttpRequest):
         }, status=401)
 
 def get(req):
-    url = api_proxy(req);
+    print("ta mere")
+    # url = render_dashboard(req);
     users = Clients.objects.all()
 
-    context = {"users": users,
-               "url" : url,}
+    context = {"users": users}
 
     return render(req, "apps/auth/login.html", context)
 
 # For an API endpoint that returns JSON directly:
-def api_proxy(request) -> str:
-    secretkey = os.environ.get('GRAFANA_BEARERKEY')
-    print(secretkey)
-    api_url = "http://grafana:3000/api/search?type=dash-db"
+# def render_dashboard(request) -> str:
+#     secretkey = os.environ.get('GRAFANA_BEARERKEY')
+#     print(secretkey)
+#     api_url = "http://grafana:3000/api/search?type=dash-db"
     
-    my_headers = {
-        'Accept': 'application/json',
-        "Content-Type": "application/json",
-    "Authorization": f'Bearer {secretkey}'
-    }
-    try:
-        response = requests.get(
-            api_url,
-            params=request.GET.dict(),  # Pass along all query parameters
-            headers=my_headers
-        )
-        response.raise_for_status()
-        data = response.json()
-        print(data)
-        url = data[0].get('url')
-        return url
+#     my_headers = {
+#         'Accept': 'application/json',
+#         "Content-Type": "application/json",
+#     "Authorization": f'Bearer {secretkey}'
+#     }
+#     try:
+#         response = requests.get(
+#             api_url,
+#             params=request.GET.dict(),  # Pass along all query parameters
+#             headers=my_headers
+#         )
+#         response.raise_for_status()
+#         data = response.json()
+#         print(data)
+#         url = data[0].get('url')
+#         return url
     
-    except requests.exceptions.RequestException as e:
-        print(str(e))
-        return JsonResponse({'error': str(e)}, status=500)
+#     except requests.exceptions.RequestException as e:
+#         print(str(e))
+#         return JsonResponse({'error': str(e)}, status=500)
