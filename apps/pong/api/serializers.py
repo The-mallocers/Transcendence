@@ -11,7 +11,7 @@ class PaddleSerializer(serializers.Serializer):
     speed = serializers.FloatField()
 
     def create(self, validated_data):
-        return Paddle(**validated_data)
+        return paddle(**validated_data)
 
     def update(self, instance, validated_data):
         for attr, value in validated_data.items():
@@ -26,7 +26,7 @@ class BallSerializer(serializers.Serializer):
     dy = serializers.FloatField()
 
     def create(self, validated_data):
-        return Ball(**validated_data)
+        return ball(**validated_data)
 
     def update(self, instance, validated_data):
         for attr, value in validated_data.items():

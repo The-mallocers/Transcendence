@@ -11,7 +11,7 @@ from utils.pong.objects import paddle
 class PlayerSerializer(serializers.ModelSerializer):
     paddle = serializers.SerializerMethodField()
     side = serializers.SerializerMethodField()
-    score = serializers.IntegerField(default=0)
+    # score = serializers.IntegerField(default=0) #THIS WAS CRASHING REGISTER BECAUSE PLAYER MODEL DOESNT HAVE A SCORE
 
     nickname = serializers.CharField(validators=[
         MinLengthValidator(3),
@@ -24,7 +24,7 @@ class PlayerSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Player
-        fields = ['id', 'nickname', 'side', 'score', 'paddle']
+        fields = ['id', 'nickname', 'side', 'paddle'] #'score', #SEE ABOVE
         read_only_fields = ['id']
 
     def get_paddle(self, obj):
@@ -32,5 +32,6 @@ class PlayerSerializer(serializers.ModelSerializer):
         return PaddleSerializer(paddle).data
 
     def get_side(self, obj):
-        side = self.context.get('side', Side)
+        side = self.context.get('side', Side.LEFT) #
+        #THIS WILL PROBABLY MAKE ALL YOUR PADDLES BE ON THE LEFT BUT THIS CRASHES THE TERMINAL EVERYTIME SOMEONE REGISTERS IF SIDE BY ITSELF
         return side

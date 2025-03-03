@@ -10,6 +10,7 @@ from django.middleware.csrf import get_token
 
 def post(req: HttpRequest):
     client = Clients.get_client_by_email(req.POST.get('email'))
+    print("in register.py post")
     if client is None:
         username = req.POST.get('username')
         email = req.POST.get('email')

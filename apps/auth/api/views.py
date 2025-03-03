@@ -40,15 +40,25 @@ class PasswordApiView(APIView):
 class RegisterApiView(APIView):
     permission_classes = []
     authentication_classes = []
+    
 
     def post(self, request, *args, **kwargs):
         serializer = ClientSerializer(data=request.data)
-
+        # print("je suis la 2")
+        # print(request.data)
+        # print(serializer)
         if serializer.is_valid():
-            client = serializer.save()
-            return Response(ClientSerializer(client).data, status=status.HTTP_201_CREATED)
+            try:
+                client = serializer.save() #this can fail so we added a catch
+                print("\n\nSave successful!\n\n")
+                return Response(ClientSerializer(client).data, status=status.HTTP_201_CREATED)
+            except Exception as e:
+                import traceback
+                print("\n\nException during save:", str(e))
+                print(traceback.format_exc())
+                return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR) #this is ia stuff, maybe shouldnt be 500 idk
         else:
-            print("im the fucked returning 400")
+            print("Validation errors:", serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class LoginApiView(APIView):
