@@ -87,13 +87,13 @@ services:
     # image: grafana/grafana-enterprise
     build: ./docker/grafana
     container_name: grafana
-    # user : "1000:1000"
+    user: "472"
     env_file:
       - .env
     restart: unless-stopped
     environment:
     # Authentication settings
-    - GF_SECURITY_ADMIN_USER=admin
+    # - GF_SECURITY_ADMIN_USER=admin
     - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
     - GF_SERVER_SERVE_FROM_SUB_PATH=true
     - GF_SECURITY_ALLOW_EMBEDDING=true
@@ -102,9 +102,9 @@ services:
     ports:
       - "3000:3000"
     volumes:
+      - ./docker/grafana/volumes/grafana-storage:/var/lib/grafana
       - ./docker/grafana/volumes/provisioning:/etc/grafana/provisioning
-      - ./docker/grafana/volumes/grafana-init:/grafana-init
-      - grafana-storage:/var/lib/grafana
+      # - ./docker/grafana/volumes/grafana-init:/grafana-init
     networks:
       - Tnetwork
 
@@ -112,10 +112,10 @@ networks:
   Tnetwork:
     driver: bridge
 
-volumes:
-  grafana-storage:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: ./docker/grafana/volumes/grafana-storage
+# volumes:
+#   grafana-storage:
+#     driver: local
+#     driver_opts:
+#       type: none
+#       o: bind
+#       device: ./docker/grafana/volumes/grafana-storage

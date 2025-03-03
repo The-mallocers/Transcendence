@@ -3,6 +3,7 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Page de creation</title>
@@ -33,12 +34,29 @@
         </div>
     </div>
     <iframe 
-        src="http://localhost:3000{{ url }}?theme=light&kiosk=tv"
-        width="100%"
+        id="grafanaframe"
+        src="http://localhost:3000{{ url }}?refresh=5s&kiosk"
+        width="50%"
         height="800px"
         frameborder="0">
     </iframe>
     <script src="{% static 'js/apps/auth/login.js' %}"></script>
-    
+    <script>
+        $("#grafanaframe").on("load", function () {
+          this.contentWindow.addEventListener(
+            "keydown",
+            function (event) {
+              // Block user from exiting grafana ui easily (esc and F keys)
+              if (event.keyCode === 27 || event.keyCode === 70 ) {
+                console.log("stop");
+                event.preventDefault();
+                event.stopPropagation();
+                return false;
+              }
+            },
+            true
+          );
+        });
+      </script>
 </body>
 </html>
