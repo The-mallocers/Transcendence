@@ -54,12 +54,13 @@ def render_dashboard(request) -> str:
         print(str(e))
         return JsonResponse({'error': str(e)}, status=500)
 
+@require_http_methods(["GET"])
 def grafana_proxy(request):
     print("dans grafana_proxy")
     secretkey = os.environ.get('GRAFANA_BEARERKEY')
     
     # Step 1: Get the dashboard URL from the API
-    api_url = "http://grafana:3000/api/search?type=dash-db&output=embed"
+    api_url = "http://grafana:3000/api/search?type=dash-db"
     headers = {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
@@ -79,7 +80,7 @@ def grafana_proxy(request):
         
         print(api_response)
         # Step 2: Get the actual dashboard content
-        dashboard_full_url = f'http://grafana:3000{dashboard_url}?refresh=5s&kiosk&output=embed'
+        dashboard_full_url = f'http://grafana:3000{dashboard_url}?refresh=5s&kiosk'
         dashboard_response = requests.get(
             dashboard_full_url,
             headers={
