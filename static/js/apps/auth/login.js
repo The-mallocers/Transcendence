@@ -16,12 +16,15 @@ export function login(e) {
     })
         .then(response => {
             if (response.ok) {
+                console.log("trying to navigate to index");
                 navigateTo('/');
             }
             else if (response.status === 302) {
+                console.log("trying to navigate to 2FA");
                 navigateTo(response.redirect); //2FA
             }
             else {
+                console.log("Fetch of login failed");
                 response.json().then(errorData => {
                     errorDiv.textContent = errorData.error || "An error occurred";
                 });

@@ -69,8 +69,12 @@ class LoginApiView(APIView):
         email = request.POST.get('email')
         pwd = request.POST.get('password')
         client = Clients.get_client_by_email(email)
+        print("request is :")
+        print(request)
 
         if client is None or client.password.check_pwd(password=pwd) is False:
+            print(f"client is {client}")
+            # print(client.password.check_pwd(password=pwd))
             return Response({
                 "error": "Invalid credentials"
             }, status=status.HTTP_401_UNAUTHORIZED)
