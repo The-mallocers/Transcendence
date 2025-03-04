@@ -18,6 +18,9 @@ export function login(e) {
             if (response.ok) {
                 navigateTo('/');
             }
+            else if (response.status === 302) {
+                navigateTo(response.redirect); //2FA
+            }
             else {
                 response.json().then(errorData => {
                     errorDiv.textContent = errorData.error || "An error occurred";
@@ -29,3 +32,6 @@ export function login(e) {
             errorDiv.textContent = "Error, please check your internet and try again later";
         });
 };
+
+//Add logic to redirect to 2fa screen if needed
+

@@ -75,11 +75,22 @@ class LoginApiView(APIView):
                 "error": "Invalid credentials"
             }, status=status.HTTP_401_UNAUTHORIZED)
         else:
-            response = Response({
-                'message': 'Login successful'
-            }, status=status.HTTP_200_OK)
-            JWTGenerator(client, JWTType.ACCESS).set_cookie(response)
-            JWTGenerator(client, JWTType.REFRESH).set_cookie(response)
+            response = None   
+            #adding the 2fa check here
+            if client.twoFa.enable:
+                if not client.twoFa.scanned:
+                    get_qrcode(client)
+                response = Response({
+                    'message': '2FA activated, redirecting',
+                    'redirect': '/auth/2fa', #not 100% if i need pages in front of it
+                }, status=status.HTTP_302_FOUND)
+                response.set_cookie(key='email',value=email,httponly=True,secure=True,samesite='Lax')
+            else:
+                response = Response({
+                    'message': 'Login successful'
+                }, status=status.HTTP_200_OK)
+                JWTGenerator(client, JWTType.ACCESS).set_cookie(response)
+                JWTGenerator(client, JWTType.REFRESH).set_cookie(response)
             return response
         
 class LogoutApiView(APIView):
@@ -96,4 +107,48 @@ class LogoutApiView(APIView):
             return Response({
                 "error": "You are not log"
             }, status=status.HTTP_401_UNAUTHORIZED)
+        
+from django.http import JsonResponse
+import json
+
+#this does not use the restful api stuff like above, too bad !
+def change_two_fa(req):
+    if req.method == "POST":
+        data = json.loads(req.body.decode('utf-8'))
+        client = Clients.get_client_by_request(req)
+        if client is not None :
+            client.twoFa.update("enable", data['status'])
+            response = JsonResponse({
+                "success" : True,
+                "message" : "State 2fa change"
+            }, status=200)
+        else :
+            response = JsonResponse({
+            "success" : False,
+            "message" : "No client available"
+        }, status=403)
+        return response
+    
+#utils function for 2fa
+import pyotp
+import qrcode
+import io
+from django.core.files.base import ContentFile
+
+def get_qrcode(user):
+    # create a qrcode and convert it
+    print("first_name: " + user.profile.username + " creating qrcode")
+    if not user.twoFa.qrcode:
+        uri = pyotp.totp.TOTP(user.twoFa.key).provisioning_uri(name=user.profile.username, issuer_name="Transcendance_" + str(user.profile.username))
+        qr_image = qrcode.make(uri)
+        buf = io.BytesIO()
+        qr_image.save(buf, "PNG")
+        contents = buf.getvalue()
+        
+        # convert it to adapt to a imagefield type in my db
+        image_file = ContentFile(contents, name=f"{user.profile.username}_qrcode.png")
+        user.twoFa.update("qrcode", image_file)
+        
+        return True
+    return False
 
