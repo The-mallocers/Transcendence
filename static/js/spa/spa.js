@@ -189,6 +189,12 @@ const routes = [
             return await fetchRoute('/pages/chat/');
         },
     },
+    {
+        path: '/auth/2fa',
+        template: async () => {
+            return await fetchRoute('/pages/auth/2fa');
+        },
+    },
 ];
 
 //Need to do this so that the event listerner also listens to the dynamic html

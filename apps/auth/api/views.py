@@ -111,7 +111,7 @@ class LogoutApiView(APIView):
 from django.http import JsonResponse
 import json
 
-#this does not use the restful api stuff like above, too bad !
+#the 2FA does not use the restful api stuff like above, too bad !
 def change_two_fa(req):
     if req.method == "POST":
         data = json.loads(req.body.decode('utf-8'))
@@ -151,4 +151,38 @@ def get_qrcode(user):
         
         return True
     return False
+
+def formulate_json_response(state,status, message, redirect):
+    return(JsonResponse({
+            "success": state,
+            "message": message,
+            "redirect":redirect
+        }, status=status))
+
+
+def post_twofa_code(req):
+    email = req.COOKIES.get('email')
+    if email:
+        client = Clients.get_client_by_email(email)
+        response = formulate_json_response(False, 400, "Error getting the user", "/auth/login") 
+        if client is None:
+            return response
+        if req.method == "POST":
+            data = json.loads(req.body.decode('utf-8'))
+            totp = pyotp.TOTP(client.twoFa.key)
+            is_valid = totp.verify(data['code'])
+            email = data['code']
+            if is_valid:
+                if not client.twoFa.scanned:
+                    client.twoFa.update("scanned", True)
+                response = formulate_json_response(True, 200, "Login Successful", "/")
+                print(response)
+                JWTGenerator(client, JWTType.ACCESS).set_cookie(
+                    response=response)
+                JWTGenerator(client, JWTType.REFRESH).set_cookie(
+                    response=response)
+                return response
+        return response
+    response = formulate_json_response(False, 400, "No email match this request", "/auth/login")
+    return response
 
