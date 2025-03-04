@@ -2,6 +2,7 @@ services:
   db:
     # build: ./postgres
     image: postgres
+    container_name: postgresql
     # volumes:
       # - ./postgres_data:/var/lib/postgresql/data/
       # - ./postgres/init_db.sh:/docker-entrypoint-initdb.d/init_db.sh
@@ -54,12 +55,19 @@ services:
       - Tnetwork
     restart: always
 
+
+  # module grafana and prometheus
   prometheus:
     image: prom/prometheus
     depends_on:
       - django-web
     volumes:
       - "./docker/prometheus/volume/prometheus.yml:/etc/prometheus/prometheus.yml"
+    command: 
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
     networks:
       - Tnetwork
     ports:
@@ -73,17 +81,24 @@ services:
       - Tnetwork
     ports:
       - 9101:9100
-    # Other settings as before
-    # - GF_AUTH_ANONYMOUS_ENABLED=true
-    # - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
-    # - GF_AUTH_ANONYMOUS_ENABLED=true
-    # - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
-    # - GF_AUTH.BASIC_ENABLED=true
-    # - GF_AUTH_DISABLE_LOGIN_FORM=true
-    # - GF_SERVER_SERVE_FROM_SUB_PATH=true
-    # - GF_FEATURE_TOGGLES_ENABLE=publicDashboards
+
+  postgresql-exporter:
+      image: prometheuscommunity/postgres-exporter
+      container_name: postgresql-exporter
+      ports:
+          - "9187:9187"
+      environment:
+          DATA_SOURCE_NAME: "postgres://${DATABASE_USERNAME}:${DATABASE_PASSWORD}@${DATABASE_HOST}/${DATABASE_NAME}?sslmode=disable"
+      depends_on:
+          prometheus:
+              condition: service_started
+          db:
+              condition: service_healthy
+      restart: unless-stopped
+      networks:
+          - Tnetwork
+
   grafana:
-    # image: grafana/grafana-enterprise
     build: ./docker/grafana
     container_name: grafana
     user: "1000"
@@ -91,12 +106,9 @@ services:
       - .env
     restart: unless-stopped
     environment:
-    # Authentication settings
     - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
     - GF_SECURITY_X_CONTENT_TYPE_OPTIONS=false
-    # - GF_SERVER_SERVE_FROM_SUB_PATH=true
     - GF_SECURITY_ALLOW_EMBEDDING=true
-    # - GF_SERVER_ROOT_URL=http://grafana:3000
     ports:
       - "3000:3000"
     volumes:

@@ -46,9 +46,10 @@ def post(req: HttpRequest):
 def get(req):
     # url = render_dashboard(req);
     users = Clients.objects.all()
-    url = render_dashboard(req)
+    urlnode, urlsql = render_dashboard(req)
     context = {"users": users,
-               "url" :url}
+            "urlnode" :urlnode,
+            "urlsql" : urlsql}
 
     return render(req, "apps/auth/login.html", context)
 
@@ -72,8 +73,9 @@ def render_dashboard(request) -> str:
         response.raise_for_status()
         data = response.json()
         print(data)
-        url = data[0].get('url')
-        return url
+        urlnode = data[0].get('url')
+        urlsql = data[1].get('url')
+        return urlnode, urlsql
     
     except requests.exceptions.RequestException as e:
         print(str(e))

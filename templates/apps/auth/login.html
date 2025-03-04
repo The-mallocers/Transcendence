@@ -34,9 +34,19 @@
             </p>
         </div>
     </div>
+
     <iframe 
         id="grafanaframe"
-        src="http://localhost:3000{{ url }}?refresh=5s&kiosk"
+        src="http://localhost:3000{{ urlnode }}?refresh=5s&kiosk"
+        width="50%"
+        height="800px"
+        frameborder="0"
+        style="margin-bottom: 50px;">
+    </iframe>
+
+    <iframe 
+        id="grafanaframe"
+        src="http://localhost:3000{{ urlsql }}?refresh=5s&kiosk"
         width="50%"
         height="800px"
         frameborder="0">
