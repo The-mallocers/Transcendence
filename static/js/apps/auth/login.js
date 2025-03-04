@@ -20,8 +20,11 @@ export function login(e) {
                 navigateTo('/');
             }
             else if (response.status === 302) {
-                console.log("trying to navigate to 2FA");
-                navigateTo(response.redirect); //2FA
+                response.json().then(data => {
+                    console.log("trying to navigate to 2FA");
+                    console.log("redirect is :", data.redirect)
+                    navigateTo(data.redirect); //2FA
+                })
             }
             else {
                 console.log("Fetch of login failed");

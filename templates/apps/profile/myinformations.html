@@ -1,6 +1,7 @@
 {% load static %}
 
 <div class="myinformationsPage">
+    {% csrf_token %}
     <div class="container-fluid ">
         <div class="row align-items-start">
             <div class="col-7">
@@ -46,10 +47,12 @@
                                 bool_2fa = false;
                                 document.querySelector(".shieldPath").classList.remove("fillOrange");
                             }
+                            console.log("crsf token is : ", document.querySelector('[name=csrfmiddlewaretoken]').value)
                             const response = await fetch("/api/auth/change_two_fa", {
                                 method: "POST",
                                 headers: {
                                     "Content-Type": "application/json",
+                                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
                                 },
                                 body: JSON.stringify({
                                     status : bool_2fa,

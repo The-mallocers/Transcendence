@@ -11,7 +11,8 @@ def get(req):
     if client is not None:
         context = {
             "client": client,
-            "clients": Clients.objects.all()
+            "clients": Clients.objects.all(),
+            "csrf_token": get_token(req)
         }
         html_content = render_to_string("apps/profile/myinformations.html", context)
         return JsonResponse({'html': html_content})

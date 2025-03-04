@@ -1,5 +1,12 @@
 {% load static %}
 
+<!-- random css so it looks good for now -->
+
+<head>
+    <link rel="stylesheet" href="{% static 'css/auth/2fa.css' %}">
+    <title>Two-Factor Authentication</title>
+</head>
+
 <div class="container">
     {% csrf_token %}
     <h1>Two-Factor Authentication Setup</h1>
@@ -27,4 +34,4 @@
         <button type="submit">Verify Code</button>
     </form>
 </div>
-<script src="{% static 'js/auth/twofa.js' %}"></script>
+<script type="module" src="{% static '/js/apps/auth/twofa.js' %}"></script>

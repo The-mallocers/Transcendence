@@ -91,7 +91,7 @@ const header = {
 };
 
 async function fetchRoute(path) {
-    // console.log("fetching the path :", path)
+    console.log("fetching the path :", path)
     const response = await fetch(path, {
         headers: header,
         credentials: 'include'
@@ -214,7 +214,7 @@ document.addEventListener('click', async (e) => {
     if (e.target.matches('#login-btn') || e.target.closest('#login-btn')) {
         login(e);
     }
-    if (e.target.matches('#register-btn') || e.target.closest('#login-btn')) {
+    if (e.target.matches('#register-btn') || e.target.closest('#register-btn')) {
         register(e);
     }
 

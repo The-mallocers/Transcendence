@@ -71,7 +71,7 @@ class LoginApiView(APIView):
         client = Clients.get_client_by_email(email)
         print("request is :")
         print(request)
-
+        print(f"client is {client}")
         if client is None or client.password.check_pwd(password=pwd) is False:
             print(f"client is {client}")
             # print(client.password.check_pwd(password=pwd))
@@ -86,9 +86,10 @@ class LoginApiView(APIView):
                     get_qrcode(client)
                 response = Response({
                     'message': '2FA activated, redirecting',
-                    'redirect': '/auth/2fa', #not 100% if i need pages in front of it
+                    'redirect': '/auth/2fa',
                 }, status=status.HTTP_302_FOUND)
-                response.set_cookie(key='email',value=email,httponly=True,secure=True,samesite='Lax')
+                response.set_cookie(key='email', value=email, httponly=False, secure=True, samesite='Lax') #httpfalse is less ugly than the alternatives
+                
             else:
                 response = Response({
                     'message': 'Login successful'
@@ -117,6 +118,7 @@ import json
 
 #the 2FA does not use the restful api stuff like above, too bad !
 def change_two_fa(req):
+    print("I am changing the two FA setting !")
     if req.method == "POST":
         data = json.loads(req.body.decode('utf-8'))
         client = Clients.get_client_by_request(req)
@@ -163,30 +165,25 @@ def formulate_json_response(state,status, message, redirect):
             "redirect":redirect
         }, status=status))
 
-
+#changed the email cookie lookup with request lookup, which is what the jwt tokens are for
 def post_twofa_code(req):
-    email = req.COOKIES.get('email')
-    if email:
-        client = Clients.get_client_by_email(email)
-        response = formulate_json_response(False, 400, "Error getting the user", "/auth/login") 
-        if client is None:
-            return response
-        if req.method == "POST":
-            data = json.loads(req.body.decode('utf-8'))
-            totp = pyotp.TOTP(client.twoFa.key)
-            is_valid = totp.verify(data['code'])
-            email = data['code']
-            if is_valid:
-                if not client.twoFa.scanned:
-                    client.twoFa.update("scanned", True)
-                response = formulate_json_response(True, 200, "Login Successful", "/")
-                print(response)
-                JWTGenerator(client, JWTType.ACCESS).set_cookie(
-                    response=response)
-                JWTGenerator(client, JWTType.REFRESH).set_cookie(
-                    response=response)
-                return response
+    client = Clients.get_client_by_request(req)
+    response = formulate_json_response(False, 400, "Error getting the user", "/auth/login") 
+    if client is None:
         return response
-    response = formulate_json_response(False, 400, "No email match this request", "/auth/login")
+    if req.method == "POST":
+        data = json.loads(req.body.decode('utf-8'))
+        totp = pyotp.TOTP(client.twoFa.key)
+        is_valid = totp.verify(data['code'])
+        if is_valid:
+            if not client.twoFa.scanned:
+                client.twoFa.update("scanned", True)
+            response = formulate_json_response(True, 200, "Login Successful", "/")
+            print(response)
+            JWTGenerator(client, JWTType.ACCESS).set_cookie(
+                response=response)
+            JWTGenerator(client, JWTType.REFRESH).set_cookie(
+                response=response)
+            return response
     return response
 
