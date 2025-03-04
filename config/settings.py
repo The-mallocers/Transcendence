@@ -30,6 +30,7 @@ EXCLUDED_PATHS = [
     '/api/*',
     '/auth/login',
     '/auth/register',
+    '/auth/grafana'
 ]
 ROLE_PROTECTED_PATHS = {
     '/admin/*': ['admin']

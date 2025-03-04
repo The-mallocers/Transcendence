@@ -34,36 +34,12 @@
             </p>
         </div>
     </div>
-    {% comment %} <iframe 
+    <iframe 
         id="grafanaframe"
         src="http://localhost:3000{{ url }}?refresh=5s&kiosk"
         width="50%"
         height="800px"
         frameborder="0">
-    </iframe> {% endcomment %}
-    <iframe 
-        id="grafanaframe"
-        src="/auth/grafana-proxy"
-        width="50%"
-        height="800px"
-        frameborder="0">
     </iframe>
-    {% comment %} <script>
-        $("#grafanaframe").on("load", function () {
-          this.contentWindow.addEventListener(
-            "keydown",
-            function (event) {
-              // Block user from exiting grafana ui easily (esc and F keys)
-              if (event.keyCode === 27 || event.keyCode === 70 ) {
-                console.log("stop");
-                event.preventDefault();
-                event.stopPropagation();
-                return false;
-              }
-            },
-            true
-          );
-        });
-      </script> {% endcomment %}
 </body>
 </html>
