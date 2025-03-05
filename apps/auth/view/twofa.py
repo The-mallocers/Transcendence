@@ -12,5 +12,4 @@ def view_two_fa(req):
         "csrf_token": get_token(req),
         "client" : client,
         })
-    print(client.twoFa.qrcode.url)
     return JsonResponse({'html': html_content,})

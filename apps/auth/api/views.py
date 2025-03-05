@@ -44,9 +44,6 @@ class RegisterApiView(APIView):
 
     def post(self, request, *args, **kwargs):
         serializer = ClientSerializer(data=request.data)
-        # print("je suis la 2")
-        # print(request.data)
-        # print(serializer)
         if serializer.is_valid():
             try:
                 client = serializer.save() #this can fail so we added a catch
@@ -69,12 +66,7 @@ class LoginApiView(APIView):
         email = request.POST.get('email')
         pwd = request.POST.get('password')
         client = Clients.get_client_by_email(email)
-        print("request is :")
-        print(request)
-        print(f"client is {client}")
         if client is None or client.password.check_pwd(password=pwd) is False:
-            print(f"client is {client}")
-            # print(client.password.check_pwd(password=pwd))
             return Response({
                 "error": "Invalid credentials"
             }, status=status.HTTP_401_UNAUTHORIZED)
@@ -118,7 +110,6 @@ import json
 
 #the 2FA does not use the restful api stuff like above, too bad !
 def change_two_fa(req):
-    print("I am changing the two FA setting !")
     if req.method == "POST":
         data = json.loads(req.body.decode('utf-8'))
         client = Clients.get_client_by_request(req)
@@ -179,7 +170,6 @@ def post_twofa_code(req):
             if not client.twoFa.scanned:
                 client.twoFa.update("scanned", True)
             response = formulate_json_response(True, 200, "Login Successful", "/")
-            print(response)
             JWTGenerator(client, JWTType.ACCESS).set_cookie(
                 response=response)
             JWTGenerator(client, JWTType.REFRESH).set_cookie(

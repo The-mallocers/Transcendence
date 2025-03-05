@@ -24,13 +24,12 @@ async function validateCode() {
 			if(response.status === 200 && result.success)
 			{
 				navigateTo(result.redirect); //make sure to change to redirect
-				// window.location.href = result.redirect_url;
 			}
-			alert('Code submitted: ' + code);
+			// alert('Code submitted: ' + code);
 		}catch(err)
 		{
 			console.log(err);
-			window.location.href = result.redirect_url;
+			navigateTo(result.redirect);
 		}
 	} else {
 		alert('Please enter a valid 6-digit code');
@@ -42,7 +41,6 @@ document.getElementById('authCode').addEventListener('input', function(e) {
 	this.value = this.value.replace(/[^0-9]/g, '');
 });
 
-// Export the function to make it globally accessible
+// Export the function to make it globally accessible, probably not the best practice, but it works
 window.validateCode = validateCode;
-
 export { validateCode };
