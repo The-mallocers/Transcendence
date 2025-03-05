@@ -10,7 +10,7 @@ class PasswordSerializer(serializers.ModelSerializer):
         MinLengthValidator(
             limit_value=4,
             message="Password must be at least 4 charcaters"
-        ),
+        ),  
         RegexValidator(
             regex=r'^(?=.*[!@#$%^&*()_+\-=\[\]{};:\'",<>\./?\\|`~]).*(?=.*\d).+$',
             message="Password must contain at least one special character and one number."

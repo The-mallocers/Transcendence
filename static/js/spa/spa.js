@@ -29,7 +29,7 @@ class Router {
                 // console.log("About to try the route template of the route :", route);
                 const content = await route.template();
                 this.rootElement.innerHTML = content;
-                console.log("SCRIPT ARE BEING RELOADED ON THIS PAGE WAHOOOO")
+                console.log("Reloading Scripts")
                 this.reloadScripts();
             } catch (error) {
                 console.error('Route rendering failed:', error);
@@ -39,9 +39,9 @@ class Router {
 
     reloadScripts() {
         // Execute all scripts in the new content
-        console.log("Je suis reload script")
+        // console.log("Je suis reload script")
         const scripts = this.rootElement.querySelectorAll('script');
-        console.log("scripts = ", scripts)
+        // console.log("scripts = ", scripts)
         scripts.forEach(oldScript => {
             const newScript = document.createElement('script');
             
@@ -91,7 +91,7 @@ const header = {
 };
 
 async function fetchRoute(path) {
-    // console.log("fetching the path :", path)
+    console.log("fetching the path :", path)
     const response = await fetch(path, {
         headers: header,
         credentials: 'include'
@@ -189,12 +189,18 @@ const routes = [
             return await fetchRoute('/pages/chat/');
         },
     },
+    {
+        path: '/auth/2fa',
+        template: async () => {
+            return await fetchRoute('/pages/auth/2fa');
+        },
+    },
 ];
 
 //Need to do this so that the event listerner also listens to the dynamic html
 document.addEventListener('click', async (e) => {
-    console.log("click !")
-    console.log(e);
+    // console.log("click !")
+    // console.log(e);
     const routeElement = e.target.closest('[data-route]');
     if (routeElement) {
         const route = routeElement.dataset.route;
@@ -208,7 +214,7 @@ document.addEventListener('click', async (e) => {
     if (e.target.matches('#login-btn') || e.target.closest('#login-btn')) {
         login(e);
     }
-    if (e.target.matches('#register-btn') || e.target.closest('#login-btn')) {
+    if (e.target.matches('#register-btn') || e.target.closest('#register-btn')) {
         register(e);
     }
 

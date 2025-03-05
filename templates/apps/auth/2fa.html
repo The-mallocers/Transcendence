@@ -1,0 +1,37 @@
+{% load static %}
+
+<!-- random css so it looks good for now -->
+
+<head>
+    <link rel="stylesheet" href="{% static 'css/auth/2fa.css' %}">
+    <title>Two-Factor Authentication</title>
+</head>
+
+<div class="container">
+    {% csrf_token %}
+    <h1>Two-Factor Authentication Setup</h1>
+    
+    <div class="instructions">
+        <p>1. Open your authenticator app (Google Authenticator, Authy, etc.)</p>
+        <p>2. Scan the QR code below</p>
+        <p>3. Enter the 6-digit code shown in your app</p>
+    </div>
+    <div id="data-email" email={{client.profile.email}}></div>
+    <div>{{ client.profile.email}}</div>
+    {% if not client.twoFa.scanned %}
+    <div class="qr-container">
+        <img src="{{ client.twoFa.qrcode.url }}" alt="2FA QR Code">
+    </div>
+    {% endif %}
+    <form onsubmit="event.preventDefault(); validateCode();">
+        <input type="text" 
+                id="authCode" 
+                maxlength="6" 
+                placeholder="Enter 6-digit code"
+                pattern="[0-9]{6}"
+                required>
+        <br>
+        <button type="submit">Verify Code</button>
+    </form>
+</div>
+<script type="module" src="{% static '/js/apps/auth/twofa.js' %}"></script>

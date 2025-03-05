@@ -16,9 +16,18 @@ export function login(e) {
     })
         .then(response => {
             if (response.ok) {
+                console.log("trying to navigate to index");
                 navigateTo('/');
             }
+            else if (response.status === 302) {
+                response.json().then(data => {
+                    console.log("trying to navigate to 2FA");
+                    console.log("redirect is :", data.redirect)
+                    navigateTo(data.redirect); //2FA
+                })
+            }
             else {
+                console.log("Fetch of login failed");
                 response.json().then(errorData => {
                     errorDiv.textContent = errorData.error || "An error occurred";
                 });
@@ -29,3 +38,6 @@ export function login(e) {
             errorDiv.textContent = "Error, please check your internet and try again later";
         });
 };
+
+//Add logic to redirect to 2fa screen if needed
+
