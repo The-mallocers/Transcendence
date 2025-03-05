@@ -59,10 +59,11 @@ services:
   # module grafana and prometheus
   prometheus:
     image: prom/prometheus
+    container_name: prometheus
     depends_on:
       - django-web
     volumes:
-      - "./docker/prometheus/volume/prometheus.yml:/etc/prometheus/prometheus.yml"
+      - "./docker/prometheus/volume:/etc/prometheus"
     command: 
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
@@ -83,21 +84,41 @@ services:
       - 9101:9100
 
   postgresql-exporter:
-      image: prometheuscommunity/postgres-exporter
-      container_name: postgresql-exporter
-      ports:
-          - "9187:9187"
-      environment:
-          DATA_SOURCE_NAME: "postgres://${DATABASE_USERNAME}:${DATABASE_PASSWORD}@${DATABASE_HOST}/${DATABASE_NAME}?sslmode=disable"
-      depends_on:
-          prometheus:
-              condition: service_started
-          db:
-              condition: service_healthy
-      restart: unless-stopped
-      networks:
-          - Tnetwork
+    image: prometheuscommunity/postgres-exporter
+    container_name: postgresql-exporter
+    ports:
+        - "9187:9187"
+    environment:
+        DATA_SOURCE_NAME: "postgres://${DATABASE_USERNAME}:${DATABASE_PASSWORD}@${DATABASE_HOST}/${DATABASE_NAME}?sslmode=disable"
+    depends_on:
+        prometheus:
+            condition: service_started
+        db:
+            condition: service_healthy
+    restart: unless-stopped
+    networks:
+        - Tnetwork
 
+  mailhog:
+    image: mailhog/mailhog
+    ports:
+      - 1025:1025  # SMTP server
+      - 8025:8025  # Web interface
+    networks:
+      - Tnetwork
+
+  alertmanager:
+    image: prom/alertmanager:v0.23.0
+    restart: unless-stopped
+    ports:
+      - "9093:9093"
+    volumes:
+      - "./docker/alertmanager:/config"
+      # - alertmanager-data:/data
+    command: --config.file=/config/alertmanager.yml --log.level=debug
+    networks:
+      - Tnetwork
+      
   grafana:
     build: ./docker/grafana
     container_name: grafana
@@ -109,23 +130,15 @@ services:
     - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
     - GF_SECURITY_X_CONTENT_TYPE_OPTIONS=false
     - GF_SECURITY_ALLOW_EMBEDDING=true
+    # - GF_SECURITY_COOKIE_SAMESITE=none
     ports:
       - "3000:3000"
     volumes:
       - ./docker/grafana/volumes/grafana-storage:/var/lib/grafana
       - ./docker/grafana/volumes/provisioning:/etc/grafana/provisioning
-      # - ./docker/grafana/volumes/grafana-init:/grafana-init
     networks:
       - Tnetwork
 
 networks:
   Tnetwork:
     driver: bridge
-
-# volumes:
-#   grafana-storage:
-#     driver: local
-#     driver_opts:
-#       type: none
-#       o: bind
-#       device: ./docker/grafana/volumes/grafana-storage

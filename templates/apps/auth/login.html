@@ -3,12 +3,42 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="{% static 'js/apps/auth/login.js' %}"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Page de creation</title>
     <link rel="stylesheet" href="{% static 'css/auth/login.css' %}">
-    <script src="{% static 'js/apps/auth/login.js' %}"></script>
+    <style>
+        .display-dashboard {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        .dashboard-container {
+            width: 49%; /* Slightly less than 50% to account for spacing */
+            max-width: 49%;
+        }
+
+        .dashboard-iframe {
+            width: 100%;
+            height: 800px;
+            border: none;
+            margin-bottom: 50px;
+        }
+
+        @media (max-width: 1024px) {
+            .display-dashboard {
+                flex-direction: column;
+            }
+
+            .dashboard-container {
+                width: 100%;
+                max-width: 100%;
+                margin-bottom: 50px;
+            }
+        }
+    </style>
 </head>
 <body>
     <header>
@@ -35,21 +65,20 @@
         </div>
     </div>
 
-    <iframe 
-        id="grafanaframe"
-        src="http://localhost:3000{{ urlnode }}?refresh=5s&kiosk"
-        width="50%"
-        height="800px"
-        frameborder="0"
-        style="margin-bottom: 50px;">
-    </iframe>
+    <div class="display-dashboard">
+        <div class="dashboard-container">
+            <iframe 
+                class="dashboard-iframe"
+                src="http://localhost:3000{{ urlnode }}?refresh=5s&kiosk">
+            </iframe>
+        </div>
 
-    <iframe 
-        id="grafanaframe"
-        src="http://localhost:3000{{ urlsql }}?refresh=5s&kiosk"
-        width="50%"
-        height="800px"
-        frameborder="0">
-    </iframe>
+        <div class="dashboard-container">
+            <iframe 
+                class="dashboard-iframe"
+                src="http://localhost:3000{{ urlsql }}?refresh=5s&kiosk">
+            </iframe>
+        </div>
+    </div>
 </body>
 </html>

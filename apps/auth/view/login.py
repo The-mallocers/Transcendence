@@ -56,7 +56,6 @@ def get(req):
 # For an API endpoint that returns JSON directly:
 def render_dashboard(request) -> str:
     secretkey = os.environ.get('GRAFANA_BEARERKEY')
-    print(secretkey)
     api_url = "http://grafana:3000/api/search?type=dash-db"
     
     my_headers = {
