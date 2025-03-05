@@ -8,7 +8,7 @@ async function validateCode() {
 		// Here you would typically send the code to your server for validation
 		try{
 			console.log(code);
-			const response = await fetch("api/auth/2facode", { //added api as this is an api call
+			const response = await fetch("/api/auth/2facode", { //added api as this is an api call
 				method: "POST",
 				headers: {
 					'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
@@ -41,3 +41,8 @@ async function validateCode() {
 document.getElementById('authCode').addEventListener('input', function(e) {
 	this.value = this.value.replace(/[^0-9]/g, '');
 });
+
+// Export the function to make it globally accessible
+window.validateCode = validateCode;
+
+export { validateCode };

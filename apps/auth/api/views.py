@@ -165,9 +165,9 @@ def formulate_json_response(state,status, message, redirect):
             "redirect":redirect
         }, status=status))
 
-#changed the email cookie lookup with request lookup, which is what the jwt tokens are for
 def post_twofa_code(req):
-    client = Clients.get_client_by_request(req)
+    email = req.COOKIES.get('email')
+    client = Clients.get_client_by_email(email)
     response = formulate_json_response(False, 400, "Error getting the user", "/auth/login") 
     if client is None:
         return response
@@ -185,5 +185,6 @@ def post_twofa_code(req):
             JWTGenerator(client, JWTType.REFRESH).set_cookie(
                 response=response)
             return response
+    response = formulate_json_response(False, 400, "No email match this request", "/auth/login")
     return response
 
