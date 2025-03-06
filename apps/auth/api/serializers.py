@@ -10,7 +10,7 @@ class PasswordSerializer(serializers.ModelSerializer):
         MinLengthValidator(
             limit_value=4,
             message="Password must be at least 4 charcaters"
-        ),
+        ),  
         RegexValidator(
             regex=r'^(?=.*[!@#$%^&*()_+\-=\[\]{};:\'",<>\./?\\|`~]).*(?=.*\d).+$',
             message="Password must contain at least one special character and one number."
@@ -22,7 +22,7 @@ class PasswordSerializer(serializers.ModelSerializer):
     class Meta:
         model = Password
         fields = ['id', 'password', 'old_password']
-        write_only_field = ['password', 'old_password']
+        write_only_fields = ['password', 'old_password']
 
     def validate_password(self, value):
         instance = self.instance

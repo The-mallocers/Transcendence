@@ -1,41 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Error 404</title>
-</head>
-<body>
-
-<h1>Erreur 404 - Page non trouvée</h1>
-<p>La page que vous recherchez n'existe pas ou a été déplacée.</p>
-<a href="/">Retour à la page d'accueil</a>
-<style>
-    body {
-        font-family: Arial, sans-serif;
-        text-align: center;
-        margin: 50px;
-        color: #333;
-    }
-
-    h1 {
-        font-size: 2.5em;
-        color: #e74c3c;
-    }
-
-    p {
-        margin: 20px 0;
-        font-size: 1.2em;
-    }
-
-    a {
-        text-decoration: none;
-        color: #3498db;
-        font-size: 1.2em;
-    }
-
-    a:hover {
-        text-decoration: underline;
-    }
-</style>
-</body>
-</html>
+{% load static %}
+<div class="content">
+    <div class="player_one paddle"></div>
+    <div class="player_two paddle"></div>
+    <div class="ball">{{ error_code }}</div>
+</div>

@@ -1,28 +1,36 @@
-document.getElementById('logout-btn').addEventListener('click', function () {
-    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+import { navigateTo } from '../../spa/spa.js';
 
-    fetch('/api/auth/logout', {
+
+export function logout() {
+    console.log("logout.js online")
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    fetch('/api/auth/logout/', {
         method: 'POST',
         headers: {
+<<<<<<< HEAD:docker/staticdocker/js/apps/auth/logout.js
             'X-CSRFToken': csrfToken,  // Inclus le CSRF token
             // 'Content-Type': 'application/json'  // Type de contenu JSON même si aucune donnée n'est envoyée
+=======
+            'X-CSRFToken': csrfToken, 
+            'Content-Type': 'application/json'
+>>>>>>> 8b2353598921e80ad3a465c41683674a29b5626e:static/js/apps/auth/logout.js
         },
-        body: JSON.stringify({})  // Envoi d'un corps vide
+        body: JSON.stringify({})  // sending an empty body for some reasons
     })
         .then(response => {
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
-            return response.json();  // Si vous attendez une réponse JSON
+            return response.json();
         })
         .then(data => {
             console.log('Logout successful:', data);
-            // Vous pouvez rediriger ou afficher un message de succès ici
-            window.location.href = '/auth/login';  // Par exemple, rediriger vers la page de connexion
+            navigateTo('/auth/login')
         })
         .catch(error => {
             console.error('Error during logout:', error);
     });
+<<<<<<< HEAD:docker/staticdocker/js/apps/auth/logout.js
 });
 
 //file to send a request to the server to enable or not 2fa
@@ -46,3 +54,6 @@ toggleSwitch.addEventListener('change', async function() {
 		console.log(err);
 	}
 });
+=======
+};
+>>>>>>> 8b2353598921e80ad3a465c41683674a29b5626e:static/js/apps/auth/logout.js

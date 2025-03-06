@@ -7,7 +7,7 @@ from apps.profile.api.serializers import ProfileSerializer
 from apps.profile.models import Profile
 
 
-class ProfileUpdateView(APIView):
+class ProfileApiView(APIView):
     permission_classes = [ProfilePermission]
 
     def get_object(self, pk):
