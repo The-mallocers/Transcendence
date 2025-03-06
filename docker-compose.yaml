@@ -55,6 +55,16 @@ services:
       - Tnetwork
     restart: always
 
+  pong-server-cache:
+    image: redis:7.2.4-bookworm
+    healthcheck:
+        test: [ "CMD-SHELL", "redis-cli", "--raw", "INCR", "ping" ]
+        interval: 5s
+        timeout: 5s
+        retries: 60
+    networks:
+        - Tnetwork
+    restart: on-failure
 
   # module grafana and prometheus
   prometheus:
@@ -64,11 +74,11 @@ services:
       - django-web
     volumes:
       - "./docker/prometheus/volume:/etc/prometheus"
+      - "prometheus-data:/prometheus"
     command: 
       - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.retention.time=15d'
       - '--storage.tsdb.path=/prometheus'
-      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
-      - '--web.console.templates=/usr/share/prometheus/consoles'
     networks:
       - Tnetwork
     ports:
@@ -134,7 +144,7 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - ./docker/grafana/volumes/grafana-storage:/var/lib/grafana
+      - ./docker/grafana/volumes/grafana-storage/grafana.db:/var/lib/grafana/grafana.db
       - ./docker/grafana/volumes/provisioning:/etc/grafana/provisioning
     networks:
       - Tnetwork
@@ -142,3 +152,7 @@ services:
 networks:
   Tnetwork:
     driver: bridge
+
+volumes:
+  prometheus-data:
+    driver: local
