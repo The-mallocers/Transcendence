@@ -8,7 +8,9 @@ from django.middleware.csrf import get_token
 
 def get(req):
     csrf_token = get_token(req)
-    urlnode, urlsql = render_dashboard(req)
+    urlnode, urlsql = None, None
+    #Commenting this because this was causing logout to crash (but for some reason not just getting to the page)
+    # urlnode, urlsql = render_dashboard(req)
     users = Clients.objects.all()
     
     # Render the HTML template to a string
