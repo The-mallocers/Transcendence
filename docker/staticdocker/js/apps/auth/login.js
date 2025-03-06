@@ -1,33 +1,43 @@
-document.addEventListener("DOMContentLoaded", function () {
+import { navigateTo } from '../../spa/spa.js';
+
+export function login(e) {
+    e.preventDefault();
+    
     const form = document.querySelector("form");
+    const formData = new FormData(form);
+    const errorDiv = document.getElementById("error-message")
 
-    form.addEventListener("submit", async function (event) {
-        event.preventDefault(); // Empêche le rechargement de la page lors de l'envoi du formulaire
-
-        const formData = new FormData(form);
-        const errorDiv = document.getElementById("error-message")
-
-        try {
-            // Envoi de la requête POST avec fetch
-            const response = await fetch("/api/auth/login", { // Remplace "/login" par l'URL de ton endpoint
-                method: "POST",
-                headers: {
-                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
-                },
-                body: formData
-            });
-            const result = await response.json();
-
-            if (response.status === 200 && result.success){
-                window.location.href = result.redirect_url;
+    fetch(form.action, {
+        method: "POST",
+        body: formData,
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+        },
+    })
+        .then(response => {
+            if (response.ok) {
+                console.log("trying to navigate to index");
+                navigateTo('/');
             }
-            else{
-                alert(result.message || "Login failed.");
-                window.location.href = "/auth/register"
+            else if (response.status === 302) {
+                response.json().then(data => {
+                    console.log("trying to navigate to 2FA");
+                    console.log("redirect is :", data.redirect)
+                    navigateTo(data.redirect); //2FA
+                })
             }
-        } catch (error) {
-            console.error(error);
-            errorDiv.textContent = error;
-        }
-    });
-});
+            else {
+                console.log("Fetch of login failed");
+                response.json().then(errorData => {
+                    errorDiv.textContent = errorData.error || "An error occurred";
+                });
+            }
+        })
+        .catch(error => {
+            console.error("There was an error with the fetch operation:", error);
+            errorDiv.textContent = "Error, please check your internet and try again later";
+        });
+};
+
+//Add logic to redirect to 2fa screen if needed
+

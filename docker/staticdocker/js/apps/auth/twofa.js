@@ -1,3 +1,5 @@
+import { navigateTo } from '../../spa/spa.js';
+
 const email = document.getElementById("data-email").getAttribute("email");
 
 async function validateCode() {
@@ -6,7 +8,7 @@ async function validateCode() {
 		// Here you would typically send the code to your server for validation
 		try{
 			console.log(code);
-			const response = await fetch("/auth/2facode", { // Remplace "/login" par l'URL de ton endpoint
+			const response = await fetch("/api/auth/2facode", { //added api as this is an api call
 				method: "POST",
 				headers: {
 					'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
@@ -21,13 +23,13 @@ async function validateCode() {
 			console.log(result);
 			if(response.status === 200 && result.success)
 			{
-				window.location.href = result.redirect_url;
+				navigateTo(result.redirect); //make sure to change to redirect
 			}
-			alert('Code submitted: ' + code);
+			// alert('Code submitted: ' + code);
 		}catch(err)
 		{
 			console.log(err);
-			window.location.href = result.redirect_url;
+			navigateTo(result.redirect);
 		}
 	} else {
 		alert('Please enter a valid 6-digit code');
@@ -38,3 +40,7 @@ async function validateCode() {
 document.getElementById('authCode').addEventListener('input', function(e) {
 	this.value = this.value.replace(/[^0-9]/g, '');
 });
+
+// Export the function to make it globally accessible, probably not the best practice, but it works
+window.validateCode = validateCode;
+export { validateCode };
