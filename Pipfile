@@ -20,7 +20,7 @@ django-redis = "*"
 aioredis = "*"
 celery = "*"
 qrcode = "*"
-psycopg2 = "*"
+psycopg = "*"
 
 [dev-packages]
 django-extensions = "*"
