@@ -21,6 +21,7 @@ aioredis = "*"
 celery = "*"
 qrcode = "*"
 psycopg = "*"
+requests = "*"
 
 [dev-packages]
 django-extensions = "*"
