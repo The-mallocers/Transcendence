@@ -38,16 +38,13 @@ EXCLUDED_PATHS = [
     '/pages/auth/login',
     '/auth/login',
     '/auth/register',
-<<<<<<< HEAD
     '/auth/grafana'
-=======
     '/pages/auth/register',
     '/',
     '/pages/',
     '/pages/error/',
     '/auth/2fa',
     '/pages/auth/2fa',
->>>>>>> 8b2353598921e80ad3a465c41683674a29b5626e
 ]
 ROLE_PROTECTED_PATHS = {
     '/admin/*': ['admin']
