@@ -4,15 +4,17 @@ from apps.shared.models import Clients
 from django.template.loader import render_to_string
 from django.middleware.csrf import get_token
 
+import requests, os
 
 
 def get(req):
     csrf_token = get_token(req)
     urlnode, urlsql = None, None
     #Commenting this because this was causing logout to crash (but for some reason not just getting to the page)
-    # urlnode, urlsql = render_dashboard(req)
+    urlnode, urlsql = render_dashboard(req)
     users = Clients.objects.all()
-    
+    print(urlnode)
+    print(urlsql)
     # Render the HTML template to a string
     html_content = render_to_string("apps/auth/login.html", {
         "users": users, 
@@ -28,16 +30,11 @@ def get(req):
     })
 
 
-import requests
-import os
-
-
-
 # For an API endpoint that returns JSON directly:
 def render_dashboard(request) -> str:
     secretkey = os.environ.get('GRAFANA_BEARERKEY')
     api_url = "http://grafana:3000/api/search?type=dash-db"
-    
+    print(api_url)
     my_headers = {
         'Accept': 'application/json',
         "Content-Type": "application/json",
@@ -50,6 +47,7 @@ def render_dashboard(request) -> str:
             headers=my_headers
         )
         response.raise_for_status()
+        print(response)
         data = response.json()
         print(data)
         urlnode = data[0].get('url')
