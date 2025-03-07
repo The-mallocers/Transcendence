@@ -37,6 +37,7 @@ class WebSocket(AsyncWebsocketConsumer):
         # await self.channel_layer.group_add(self.room_group_name, self.channel_name)
 
         # await self.accept()
+        print("Trying to connect")
 
         logging.getLogger('websocket.client').info(f'New WebSocket connection from {self.scope["client"]}')
         query_string = self.scope['query_string'].decode()
