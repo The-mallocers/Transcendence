@@ -29,7 +29,7 @@ class WebSocket(AsyncWebsocketConsumer):
         # ── Services ──────────────────────────────────────────────────────────────────
         self.game_service = GameService()
         self.matchmaking_service = MatchmakingService()
-        self.chat_service = ChatService()  # Assurez-vous que cette ligne est présente
+        # self.chat_service = ChatService()  # Assurez-vous que cette ligne est présente
 
     async def connect(self):
         # self.room_group_name = 'chat'
@@ -104,9 +104,9 @@ class WebSocket(AsyncWebsocketConsumer):
                 player = await PlayerManager.get_player_from_client_db(self.client.id)
                 await self.game_service.process_action(data, player)
 
-            if event_type is EventType.CHAT:
-                player = await PlayerManager.get_player_from_client_db(self.client.id)
-                await self.chat_service.process_action(data, self.client, player)
+            # if event_type is EventType.CHAT:
+            #     player = await PlayerManager.get_player_from_client_db(self.client.id)
+            #     await self.chat_service.process_action(data, self.client, player)
 
         except json.JSONDecodeError as e:
             self._logger.error(f"JSONDecodeError: {e}")
