@@ -12,68 +12,37 @@ class ChatService(BaseServices):
     async def init(self, client: Clients, player: Player):
         channel_layer = get_channel_layer()
         channel_name = await self._redis.hget(name="consumers_channels", key=str(client.id))
-        await channel_layer.group_add(str(player.id), channel_name.decode('utf-8'))
+        # await channel_layer.group_add(str(player.id), channel_name.decode('utf-8'))
 
-    async def _handle_start_chat(self, data, client: Clients, player: Player):
+    async def _handle_start_chat(self, data: Dict, player: Player):
         try:
-            if 'recipient_id' not in data['data']:
-                raise KeyError("recipient_id is missing in data")
+          # Charger le JSON
+            text_data_json = json.loads(text_data)
+            
+            # Debug: Afficher la structure du JSON reçu
+            print("JSON reçu:", text_data_json)
+            
+            # Vérifier si 'data' existe bien dans le JSON
+            if 'data' in text_data_json and 'message' in text_data_json['data']:
+                message = text_data_json['data']['message']
+                # print(f"Received message: {message}")
+                await self.channel_layer.group_send(
+                    self.room_group_name,
+                    {
+                        'type': 'chat_message',
+                        'message': message
+                    }
+                )
+            else:
+                print("Erreur: Clé 'data' ou 'message' manquante dans le JSON reçu")
+        except json.JSONDecodeError as e:
+            print("Erreur de parsing JSON:", e)
 
-            recipient_id = data['data']['recipient_id']
-            recipient_id = str(recipient_id)  # Convertir en chaîne de caractères
-
-            # Vérifier si le destinataire est connecté
-            recipient_channel = await self._redis.hget(name="consumers_channels", key=recipient_id)
-            if not recipient_channel:
-                # Le destinataire n'est pas connecté, renvoyer une erreur au client
-                await send_group_error(client.id, ResponseError.PLAYER_NOT_FOUND, content="Recipient is not connected")
-                return
-
-            # Créer le nom du groupe de chat
-            chat_group_name = f"chat_{min(str(player.id), recipient_id)}_{max(str(player.id), recipient_id)}"
-
-            # Ajouter les deux clients au groupe de chat
-            channel_layer = get_channel_layer()
-            await channel_layer.group_add(chat_group_name, str(client.id))  # Expéditeur
-            await channel_layer.group_add(chat_group_name, recipient_id)    # Destinataire
-
-            # Envoyer une confirmation aux deux clients
-            await send_group(client.id, EventType.CHAT, ResponseAction.CHAT_STARTED, content={
-                'chat_group_name': chat_group_name,
-                'recipient_id': recipient_id
-            })
-            await send_group(recipient_id, EventType.CHAT, ResponseAction.CHAT_STARTED, content={
-                'chat_group_name': chat_group_name,
-                'sender_id': player.id
-            })
-        except KeyError as e:
-            self._logger.error(f"KeyError in _handle_start_chat: {e}")
-            raise ServiceError("Invalid chat start format")
-        except Exception as e:
-            self._logger.error(f"Error in _handle_start_chat: {e}")
-            raise ServiceError("Failed to start chat")
-
-    async def _handle_send_message(self, data, client: Clients, player: Player):
-        try:
-            chat_group_name = data['data']['chat_group_name']
-            message = data['data']['message']
-
-            # Vérifier si le groupe de chat existe
-            channel_layer = get_channel_layer()
-            if not await self._redis.exists(f"group:{chat_group_name}"):  # Exemple de vérification
-                raise ServiceError("Chat group does not exist")
-
-            # Envoyer le message au groupe de chat
-            await send_group(chat_group_name, EventType.CHAT, ResponseAction.MESSAGE, content={
-                'sender_id': player.id,
+        async def chat_message(self, event):
+            message = event['message']
+            await self.send(text_data=json.dumps({
                 'message': message
-            })
-        except KeyError as e:
-            self._logger.error(f"KeyError in _handle_send_message: {e}")
-            raise ServiceError("Invalid message format")
-        except Exception as e:
-            self._logger.error(f"Error in _handle_send_message: {e}")
-            raise ServiceError("Failed to send message")
+            }))
 
     async def _handle_disconnect(self):
         pass

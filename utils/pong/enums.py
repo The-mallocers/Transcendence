@@ -12,12 +12,11 @@ class GameStatus(str, Enum):
     ERROR: str = 'error'
 
 class EventType(str, Enum):
-    # CHAT = "chat"
     MATCHMAKING: str = 'matchmaking'
     GAME: str = 'game'
     UPDATE: str = 'update'
     ERROR: str = 'error'
-    # CHAT: str = 'chat'
+    CHAT: str = 'chat'
 
 #All the action the client send to server
 class RequestAction(str, Enum):
