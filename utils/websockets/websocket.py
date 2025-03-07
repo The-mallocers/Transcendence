@@ -14,6 +14,8 @@ from utils.websockets.services.game_service import GameService
 from utils.websockets.services.matchmaking_service import MatchmakingService
 from utils.websockets.services.services import ServiceError
 
+from utils.websockets.services.chat_service import ChatService
+
 
 from asgiref.sync import async_to_sync
 
@@ -27,6 +29,7 @@ class WebSocket(AsyncWebsocketConsumer):
         # ── Services ──────────────────────────────────────────────────────────────────
         self.game_service = GameService()
         self.matchmaking_service = MatchmakingService()
+        self.chat_service = ChatService()  # Assurez-vous que cette ligne est présente
 
     async def connect(self):
         # self.room_group_name = 'chat'
@@ -86,6 +89,9 @@ class WebSocket(AsyncWebsocketConsumer):
     #         'message': message
     #     }))
         try:
+            if not self.client:
+                raise ServiceError("Client is not connected")
+
             data = json.loads(text_data)
             event_type = EventType(data['event'])
 
@@ -98,6 +104,21 @@ class WebSocket(AsyncWebsocketConsumer):
                 player = await PlayerManager.get_player_from_client_db(self.client.id)
                 await self.game_service.process_action(data, player)
 
+            if event_type is EventType.CHAT:
+                player = await PlayerManager.get_player_from_client_db(self.client.id)
+                await self.chat_service.process_action(data, self.client, player)
+
+        except json.JSONDecodeError as e:
+            self._logger.error(f"JSONDecodeError: {e}")
+            await send_group_error(self.client.id, ResponseError.JSON_ERROR)
+
+        except ServiceError as e:
+            self._logger.error(f"ServiceError: {e}")
+            await send_group_error(self.client.id, ResponseError.ACTION_ERROR, content=str(e))
+
+        except Exception as e:
+            self._logger.error(f"Unexpected error: {e}")
+            await send_group_error(self.client.id, ResponseError.INTERNAL_ERROR, content=str(e))
             #Is here to add services
 
         except json.JSONDecodeError as e:
