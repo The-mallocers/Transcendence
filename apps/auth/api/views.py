@@ -110,7 +110,7 @@ class GetClientIDApiView(APIView):
         client = Clients.get_client_by_request(request)
         if client == None:
             return Response({
-                "client_id": client.id,
+                "client_id": None,
                 "message" : "Could not retrieve user ID"
             }, status=status.HTTP_401_UNAUTHORIZED)
         print(f"returning the id {client.id}")

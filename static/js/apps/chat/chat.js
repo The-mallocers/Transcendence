@@ -30,7 +30,7 @@ async function getClientId() {
     // if (client_id !== null) return client_id;
     console.log("Getting client ID")
     try {
-        const response = await fetch("/api/auth/getId", {
+        const response = await fetch("/api/auth/getId/", {
             method: "GET",
             credentials: "include",
         });
