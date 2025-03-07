@@ -97,3 +97,24 @@ class LogoutApiView(APIView):
                 "error": "You are not log"
             }, status=status.HTTP_401_UNAUTHORIZED)
 
+
+import logging
+logger = logging.getLogger(__name__)
+
+
+
+class GetClientIDApiView(APIView):
+    def get(self, request: HttpRequest, *args, **kwargs):
+        logger.debug("Trying to get client")
+        print("Trying to get client")
+        client = Clients.get_client_by_request(request)
+        if client == None:
+            return Response({
+                "client_id": client.id,
+                "message" : "Could not retrieve user ID"
+            }, status=status.HTTP_401_UNAUTHORIZED)
+        print(f"returning the id {client.id}")
+        return Response({
+                "client_id": client.id,
+                "message" : "ID retrieved succesfully"
+            }, status=status.HTTP_200_OK)

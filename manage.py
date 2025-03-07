@@ -8,9 +8,9 @@ import django
 def main():
     """Run administrative tasks."""
     os.environ.setdefault('DJANGO_SETTINGS_MODULE','config.settings')
-    os.environ.setdefault('DAPHNE','TRUE') #Adding this so i dont have to do it everytime
-    #we will ALWAYS want to set up the above
-    if os.environ.get('DAPHNE', default=False) == 'TRUE':
+
+    #since we're always working with daphne, i changed the logic a bit
+    if 'runserver' in sys.argv:
         sys.argv = ['daphne', 'config.asgi:application']
         from daphne.cli import CommandLineInterface
         django.setup()
