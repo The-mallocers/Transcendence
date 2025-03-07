@@ -12,7 +12,7 @@ class GameStatus(str, Enum):
     ERROR: str = 'error'
 
 class EventType(str, Enum):
-    CHAT = "chat"
+    # CHAT = "chat"
     MATCHMAKING: str = 'matchmaking'
     GAME: str = 'game'
     UPDATE: str = 'update'
