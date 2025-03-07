@@ -1,5 +1,39 @@
 {% load static %}
 
+<head>
+    <style>
+        .display-dashboard {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        .dashboard-container {
+            width: 49%; /* Slightly less than 50% to account for spacing */
+            max-width: 49%;
+        }
+
+        .dashboard-iframe {
+            width: 100%;
+            height: 800px;
+            border: none;
+            margin-bottom: 50px;
+        }
+
+        @media (max-width: 1024px) {
+            .display-dashboard {
+                flex-direction: column;
+            }
+
+            .dashboard-container {
+                width: 100%;
+                max-width: 100%;
+                margin-bottom: 50px;
+            }
+        }
+    </style>
+</head>
+
 <div class="container">
     <link rel="stylesheet" href="{% static 'css/auth/login.css' %}">
     <form id="register-form" enctype="multipart/form-data" action="{% url 'login' %}" >
@@ -18,4 +52,20 @@
                 <button type="button" data-route="/auth/register">S'enregistrer</button>
             </p>
         </div>
-</div>
+    </div>
+
+    <div class="display-dashboard">
+        <div class="dashboard-container">
+            <iframe 
+                class="dashboard-iframe"
+                src="http://localhost:3000{{ urlnode }}?refresh=5s&kiosk">
+            </iframe>
+        </div>
+
+        <div class="dashboard-container">
+            <iframe 
+                class="dashboard-iframe"
+                src="http://localhost:3000{{ urlsql }}?refresh=5s&kiosk">
+            </iframe>
+        </div>
+    </div>

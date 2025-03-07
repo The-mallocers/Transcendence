@@ -1,0 +1,106 @@
+.myinformationsPage {
+    padding: 1rem;
+}
+
+.myinformationsPage .content {
+    padding: 2.5rem 0;
+    background-color: #1E2028;
+    border: 1px solid #323642;
+    /* text-align: center; */
+    color: white;
+}
+
+.myinformationsPage .btn {
+
+    background-color: #FFA042;
+    color: white;
+
+}
+
+.myinformationsPage input {
+
+    background-color: #373C48;
+    color: white;
+    border: 1px solid #9198AD;
+
+    border-radius: 5px;
+    
+}
+
+[data-status="on"]{
+    background-color: #FFA042;
+}
+
+[data-status="off"]{
+    background-color: white;
+}
+
+.switch {
+    position: relative;
+    width: 15%;
+
+    height: 2.5rem;
+    border-radius: 100px;
+    transition: all .2s;
+
+}
+
+
+[data-status="off"]::before{
+    content: "";
+    position: absolute;
+    height: 2.3rem;
+    width:  2.3rem;
+    top: 50%;
+    left: 22%;
+    background-color: #FFA042;
+    border-radius: 50%;
+    transform: translate(-50%,-50%);
+    transition: all .2s;
+
+
+}
+
+[data-status="on"]::before{
+    content: "";
+    position: absolute;
+    height: 2.3rem;
+    width:  2.3rem;
+
+    top: 50%;
+    left: 78%;
+    background-color: white;
+    border-radius: 50%;
+    transform: translate(-50%,-50%);
+    transition: all .2s;
+
+}
+
+.switchToggled{
+    content: "";
+    position: absolute;
+    height: 2.3rem;
+    width:  2.3rem;
+    top: 50%;
+    left: 22%;
+    background-color: #FFA042;
+    border-radius: 50%;
+    transform: translate(-50%,-50%);
+}
+
+.shield {
+    height: 15rem;
+    position: relative;
+}
+
+.shield::after{
+    content: "";
+}
+
+.shield path {
+    fill: white;
+}
+
+.fillOrange {
+    fill: #FFA042 !important;
+}

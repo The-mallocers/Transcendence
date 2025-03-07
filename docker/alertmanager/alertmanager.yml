@@ -1,0 +1,12 @@
+route:
+  receiver: 'mail'
+  repeat_interval: 4h
+  group_by: [ alertname ]
+
+receivers:
+  - name: 'mail'
+    email_configs:
+      - smarthost: 'mailhog:1025'
+        from: 'alerts@localhost'
+        to: 'recipient@localhost'
+        require_tls: false

@@ -1,0 +1,41 @@
+.gamemodesPage {
+    padding: 1rem;
+    color: aliceblue;
+}
+
+.gamemodesContainer {
+    background-color: #1E2028;
+    border: 1px solid #323642;
+    padding: 2rem;
+    border-radius: 5px;
+}
+
+
+.gamemodesContainer h1{
+    text-align: center;
+}
+
+.gamemodeCardContainer{
+    padding: 1rem;
+    
+}
+
+.gamemodeCard{
+    background-color: #323642;
+    height: 20rem;
+
+    text-align: center;
+    transition: background-color .2s;
+    border-radius: 5px;
+
+}
+
+.gamemodeCard img {
+    height: 160px;
+    object-fit: cover;
+
+}
+
+.gamemodeCard:hover {
+    background-color: #E5292D;
+}
