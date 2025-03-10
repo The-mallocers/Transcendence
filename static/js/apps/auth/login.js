@@ -1,4 +1,23 @@
 import { navigateTo } from '../../spa/spa.js';
+import { reloadScriptsSPA } from '../../spa/spa.js';
+
+console.log("Login has been loaded")
+
+
+
+document.addEventListener('SpaLoaded',  (e) => {
+    console.log("checking out e");
+    console.log(e);
+    let events = e.detail.events
+    events.forEach(element => {
+        document.getElementById(element.id).addEventListener(element.event_type, element.func)
+    });
+    reloadScriptsSPA();
+    console.log("My own page loaded ! my own event !");
+});
+
+
+
 
 export function login(e) {
     e.preventDefault();

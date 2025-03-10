@@ -4,6 +4,8 @@ import { logout } from '../apps/auth/logout.js';
 import { login } from '../apps/auth/login.js';
 import { register } from '../apps/auth/register.js';
 
+let previous_route = null;
+
 
 class Router {
     constructor(routes) {
@@ -19,7 +21,7 @@ class Router {
 
     async handleLocation() {
         const path = window.location.pathname;
-        // console.log("looking for the path: ", path)
+        console.log("looking for the path: ", path)
         const route = this.routes.find(r => r.path === path);
         if (!route) {
             navigateTo("/error/404/");
@@ -29,8 +31,22 @@ class Router {
                 // console.log("About to try the route template of the route :", route);
                 const content = await route.template();
                 this.rootElement.innerHTML = content;
-                console.log("Reloading Scripts")
-                this.reloadScripts();
+                if (previous_route != null) {
+                    previous_route.events.forEach(element => {
+                        document.getElementById(element.id).removeEventListener(element.event_type, element.func)
+                        console.log("removed my event handler like a boss");
+                        console.log(element.event_type)
+                    });
+                };
+                console.log("Reloading Scripts", this.rootElement);
+                // Dispatch a custom event
+                const pageLoadEvent = new CustomEvent('SpaLoaded', {
+                    detail: { path: path, funct: this.reloadScripts, events: route.events }
+                });
+                console.log("");
+                document.dispatchEvent(pageLoadEvent);
+                previous_route = route; //Updating previous path so that next time it exists
+                // this.reloadScripts();
             } catch (error) {
                 console.error('Route rendering failed:', error);
             }
@@ -39,9 +55,9 @@ class Router {
 
     reloadScripts() {
         // Execute all scripts in the new content
-        // console.log("Je suis reload script")
+        console.log("RELOADED", this.rootElement)
         const scripts = this.rootElement.querySelectorAll('script');
-        // console.log("scripts = ", scripts)
+        console.log("scripts = ", scripts)
         scripts.forEach(oldScript => {
             const newScript = document.createElement('script');
             
@@ -80,9 +96,15 @@ window.onload = async ()=>{
 
 
 // Navigation helper
+export function reloadScriptsSPA() {
+    router.reloadScripts();
+}
+
 export function navigateTo(path) {
     router.navigate(path);
 }
+
+
 
 // Example route definitions
 const header = {
@@ -136,6 +158,11 @@ const routes = [
     },
     {
         path: '/auth/login',
+        events: [{
+            id: 'login-btn',
+            event_type: 'click',
+            func: login
+        },],
         template: async () => {
             return await fetchRoute('/pages/auth/login');
         },
@@ -211,9 +238,9 @@ document.addEventListener('click', async (e) => {
     if (e.target.matches('#logout-btn') || e.target.closest('#logout-btn')) {
         logout();
     }
-    if (e.target.matches('#login-btn') || e.target.closest('#login-btn')) {
-        login(e);
-    }
+    // if (e.target.matches('#login-btn') || e.target.closest('#login-btn')) {
+    //     login(e);
+    // }
     if (e.target.matches('#register-btn') || e.target.closest('#register-btn')) {
         register(e);
     }
