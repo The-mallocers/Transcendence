@@ -75,49 +75,9 @@ class WebSocket(AsyncWebsocketConsumer):
                 await self.game_service.process_action(data, player)
 
             if event_type is EventType.CHAT:
-                try:
-                    self.room_group_name = 'chat'
-                    # Charger le JSON
-                    text_data_json = json.loads(text_data)
-                    
-                    # Debug: Afficher la structure du JSON reçu
-                    print("JSON reçu:", text_data_json)
-                    
-                    # Vérifier si 'data' existe bien dans le JSON
-                    if 'data' in text_data_json and 'message' in text_data_json['data']:
-                        message = text_data_json['data']['message']
-                        # print(f"Received message: {message}")
-                        await self.channel_layer.group_send(
-                            self.room_group_name,
-                            {
-                                'type': 'chat_message',
-                                'message': message
-                            }
-                        )
-                    else:
-                        print("Erreur: Clé 'data' ou 'message' manquante dans le JSON reçu")
-                except json.JSONDecodeError as e:
-                    print("Erreur de parsing JSON:", e)
-
-                async def chat_message(self, event):
-                    message = event['message']
-                    await self.send(text_data=json.dumps({
-                        'message': message
-                    }))
                 player = await PlayerManager.get_player_from_client_db(self.client.id)
                 await self.chat_service.process_action(data, self.client, player)
 
-        except json.JSONDecodeError as e:
-            self._logger.error(f"JSONDecodeError: {e}")
-            await send_group_error(self.client.id, ResponseError.JSON_ERROR)
-
-        except ServiceError as e:
-            self._logger.error(f"ServiceError: {e}")
-            await send_group_error(self.client.id, ResponseError.ACTION_ERROR, content=str(e))
-
-        except Exception as e:
-            self._logger.error(f"Unexpected error: {e}")
-            await send_group_error(self.client.id, ResponseError.INTERNAL_ERROR, content=str(e))
             #Is here to add services
 
         except json.JSONDecodeError as e:
@@ -131,4 +91,4 @@ class WebSocket(AsyncWebsocketConsumer):
     async def send_channel(self, event):
         message = event['message']
         close = event['close']
-        await self.send(text_data=json.dumps(message), close=bool(close))
+        await self.send(text_data=json.dumps(message, ensure_ascii=False), close=bool(close))

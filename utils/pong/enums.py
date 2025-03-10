@@ -64,6 +64,7 @@ class ResponseAction(str, Enum):
     CHAT_STARTED = "chat_started"
     MESSAGE = "message"
     MESSAGE_SENT = "message_sent"
+    SEND_MESSAGE = "send_message"
 
 
     TEST: str = 'test'
