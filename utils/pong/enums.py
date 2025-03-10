@@ -62,9 +62,7 @@ class ResponseAction(str, Enum):
 
     # ── Chat Actions ──────────────────────────────────────────────────────────────────
     CHAT_STARTED = "chat_started"
-    MESSAGE = "message"
-    MESSAGE_SENT = "message_sent"
-    SEND_MESSAGE = "send_message"
+    MESSAGE_RECEIVED = "message_received"
 
 
     TEST: str = 'test'
@@ -82,7 +80,7 @@ class ResponseError(str, Enum):
     JSON_ERROR: str = 'Invalid json'
     EXCEPTION: str = 'Internal server error'
     INTERNAL_ERROR = "Internal server error"
-    ACTION_ERROR: str = 'Action error'
+    SERVICE_ERROR: str = 'Service error'
 
 class Side(str, Enum):
     LEFT: str = 'left'

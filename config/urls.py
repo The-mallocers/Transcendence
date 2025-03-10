@@ -3,7 +3,7 @@ from django.conf.urls.static import static
 from django.urls import path, include, re_path
 from django.views.generic import TemplateView
 
-from utils.websockets.websocket import WebSocket
+from utils.websockets.websocket import ChatWebSocket, GameWebSocket, WebSocket
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ HTTP ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
 urlpatterns = [
@@ -14,7 +14,8 @@ urlpatterns = [
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ WEBSOCKET ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
 websocket_urlpatterns = [
-    path("ws/game/", WebSocket.as_asgi()),
+    path("ws/game/", GameWebSocket.as_asgi()),
+    path("ws/chat/", ChatWebSocket.as_asgi())
 ]
 
 if settings.DEBUG:
