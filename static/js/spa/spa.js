@@ -19,15 +19,21 @@ class Router {
 
     async handleLocation() {
         const path = window.location.pathname;
+
         // console.log("looking for the path: ", path)
+        console.log(window.location.search);
+        // const splitedUrl = path.split("?");
+
+        // console.log(splitedUrl)
         const route = this.routes.find(r => r.path === path);
+
         if (!route) {
             navigateTo("/error/404/");
         }
         else {
             try {
                 // console.log("About to try the route template of the route :", route);
-                const content = await route.template();
+                const content = await route.template(window.location.search);
                 this.rootElement.innerHTML = content;
                 console.log("SCRIPT ARE BEING RELOADED ON THIS PAGE WAHOOOO")
                 this.reloadScripts();
@@ -92,6 +98,7 @@ const header = {
 
 async function fetchRoute(path) {
     // console.log("fetching the path :", path)
+
     const response = await fetch(path, {
         headers: header,
         credentials: 'include'
@@ -130,7 +137,6 @@ const routes = [
     {
         path: '/',
         template: async () => {
-            // console.log("I am fetching a route in spa.js")
             return await fetchRoute('/pages/');
         },
     },
@@ -187,6 +193,20 @@ const routes = [
         path: '/chat/',
         template: async () => {
             return await fetchRoute('/pages/chat/');
+        },
+    },
+    {
+        path: '/profile/settings/',
+        template: async () => {
+            return await fetchRoute('/pages/profile/settings/');
+        },
+    },
+        {
+        path: '/profile/',
+        template: async (query) => {
+
+            console.log(`/pages/profile/${query}`)
+            return await fetchRoute(`/pages/profile/${query}`);
         },
     },
 ];

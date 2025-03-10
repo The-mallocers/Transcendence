@@ -9,4 +9,5 @@ urlpatterns = [
     path('pong/', include('apps.pong.urls')),
     path('error/', include('apps.error.urls')),
     path('chat/', include('apps.chat.urls')),
+    path('profile/', include('apps.profile.urls')),
 ]
