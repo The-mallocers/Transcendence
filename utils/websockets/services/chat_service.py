@@ -24,7 +24,6 @@ class ChatService(BaseServices):
             if 'data' in data and 'message' in data['data']:
                 message = data['data']['message']
                 channel_layer = get_channel_layer()
-                
                 await send_group('chat', EventType.CHAT, ResponseAction.SEND_MESSAGE, message)
             else:
                 print("Erreur: Cle 'data' ou 'message' manquante dans le JSON reçu")
