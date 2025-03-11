@@ -16,6 +16,7 @@ class EventType(str, Enum):
     GAME: str = 'game'
     UPDATE: str = 'update'
     ERROR: str = 'error'
+    CHAT: str = 'chat'
 
 #All the action the client send to server
 class RequestAction(str, Enum):
@@ -33,6 +34,10 @@ class RequestAction(str, Enum):
     BALL_UPDATE: str = 'ball_update'
     PADDLE_MOVE: str = 'paddle_move'
     SCORE_UPDATE: str = 'score_update'
+
+    # ── Chat Actions ──────────────────────────────────────────────────────────────────
+    START_CHAT = "start_chat"
+    SEND_MESSAGE = "send_message"
 
 
 #All the reponse the server send to client
@@ -55,6 +60,11 @@ class ResponseAction(str, Enum):
     SCORE_1_UPDATE: str = 'score_1_update'
     SCORE_2_UPDATE: str = 'score_2_update'
 
+    # ── Chat Actions ──────────────────────────────────────────────────────────────────
+    CHAT_STARTED = "chat_started"
+    MESSAGE = "message"
+    MESSAGE_SENT = "message_sent"
+
 
     TEST: str = 'test'
 
@@ -70,6 +80,7 @@ class ResponseError(str, Enum):
     PLAYER_NOT_FOUND: str = 'Your player id not corresponding to a player'
     JSON_ERROR: str = 'Invalid json'
     EXCEPTION: str = 'Internal server error'
+    INTERNAL_ERROR = "Internal server error"
     ACTION_ERROR: str = 'Action error'
 
 class Side(str, Enum):

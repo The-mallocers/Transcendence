@@ -6,10 +6,9 @@ from django.core.asgi import get_asgi_application
 
 from config.urls import websocket_urlpatterns
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'your_project.settings')
-
 # Initialize Django ASGI application early to ensure the app registry is loaded
 django_asgi_app = get_asgi_application()
+print("Starting server with ASGI")
 
 application = ProtocolTypeRouter({
     "http": django_asgi_app,
