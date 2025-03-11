@@ -36,7 +36,7 @@ class RequestAction(str, Enum):
     SCORE_UPDATE: str = 'score_update'
 
     # ── Chat Actions ──────────────────────────────────────────────────────────────────
-    START_CHAT = "start_chat"
+    CREATE_ROOM = "create_room"
     SEND_MESSAGE = "send_message"
 
 
@@ -61,7 +61,7 @@ class ResponseAction(str, Enum):
     SCORE_2_UPDATE: str = 'score_2_update'
 
     # ── Chat Actions ──────────────────────────────────────────────────────────────────
-    CHAT_STARTED = "chat_started"
+    ROOM_CREATED = "room_created"
     MESSAGE_RECEIVED = "message_received"
 
 

@@ -20,22 +20,35 @@ class ChatService(BaseServices):
         self.channel_name = await self._redis.hget(name="consumers_channels", key=str(client.id))
         # await channel_layer.group_add(str(player.id), channel_name.decode('utf-8'))
 
-    async def _handle_start_chat(self, data, client: Clients):
+    async def _handle_create_room(self, data, admin: Clients):
         try:
-            client_target = await Clients.get_client_by_id_async(data['data']['args']['target'])
+            target = await Clients.get_client_by_id_async(data['data']['args']['target'])
 
-            if client_target is None:
+            if target is None:
                 raise ServiceError('Target not found')
             
-            room = await Rooms.create_room()
+            rooms_admin = await Rooms.get_room_id_by_client_id(admin.id)
+            rooms_target = await Rooms.get_room_id_by_client_id(target.id)
 
-            await room.add_client(client)
-            await room.add_client(client_target)
+            common_rooms = set(rooms_admin).intersection(set(rooms_target))
+            
+            if common_rooms:
+                #if room was common with admin and target, we don't create new room but we set the 'room' to common room we found
+                room = await Rooms.get_room_by_id(next(iter(common_rooms)))
+            else:
+                #here we create new room when no common room was found
+                room = await Rooms.create_room()
+                room.admin = admin
+                await room.asave()
+                await room.add_client(admin)
+                await room.add_client(target)
 
             await self.channel_layer.group_add(str(await Rooms.get_id(room)), self.channel_name.decode('utf-8'))
-            target_channel_name = await self._redis.hget(name="consumers_channels", key=str(client_target.id))
-            await self.channel_layer.group_add(str(await Rooms.get_id(room)), target_channel_name.decode('utf-8'))
-            print("ROOM_ID ", await Rooms.get_id(room))
+            target_channel_name = await self._redis.hget(name="consumers_channels", key=str(target.id))
+            if target_channel_name:
+                await self.channel_layer.group_add(str(await Rooms.get_id(room)), target_channel_name.decode('utf-8'))
+
+            await send_group(admin.id, EventType.CHAT, ResponseAction.ROOM_CREATED)
 
 
         except json.JSONDecodeError as e:
