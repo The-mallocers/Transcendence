@@ -1,6 +1,7 @@
 {% load static %}
 
-<div class="container">
+<div id="testdiv">WAWAWAWAWA</div>
+<div id="login-container" class="container" data-wait-loaded>
     <link rel="stylesheet" href="{% static 'css/auth/login.css' %}">
     <form id="register-form" enctype="multipart/form-data" action="{% url 'login' %}" >
         <div id="error-message" style="color: red;"></div>
@@ -20,3 +21,4 @@
         </div>
 </div>
 <script type="module" src="{% static '/js/apps/auth/login.js' %}"></script>
+<script>console.log("lalalalélalalalala")</script>

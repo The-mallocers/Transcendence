@@ -1,7 +1,7 @@
 // console.log("ALLOO :", window.location.pathname);
 
 import { logout } from '../apps/auth/logout.js';
-import { login } from '../apps/auth/login.js';
+// import { login } from '../apps/auth/login.js';
 import { register } from '../apps/auth/register.js';
 
 let previous_route = null;
@@ -28,28 +28,9 @@ class Router {
         }
         else {
             try {
-                // console.log("About to try the route template of the route :", route);
-                console.log("checking out previous route and events");
-                console.log(previous_route);
-                if (previous_route != null) {
-                    console.log(previous_route.events);
-                    previous_route.events.forEach(element => {
-                        document.getElementById(element.id).removeEventListener(element.event_type, element.func)
-                        console.log("removed my event handler like a boss");
-                        console.log(element.event_type)
-                    });
-                };
                 const content = await route.template();
                 this.rootElement.innerHTML = content;
-                console.log("Reloading Scripts", this.rootElement);
-                // Dispatch a custom event
-                const pageLoadEvent = new CustomEvent('SpaLoaded', {
-                    detail: { path: path, funct: this.reloadScripts, events: route.events }
-                });
-                console.log("");
-                document.dispatchEvent(pageLoadEvent);
-                previous_route = route; //Updating previous path so that next time it exists
-                // this.reloadScripts();
+                this.reloadScripts();
             } catch (error) {
                 console.error('Route rendering failed:', error);
             }
@@ -57,8 +38,11 @@ class Router {
     }
 
     reloadScripts() {
-        // Execute all scripts in the new content
+
+
+        console.log("////////////////////////////////////////////////////////////")
         console.log("RELOADED", this.rootElement)
+
         const scripts = this.rootElement.querySelectorAll('script');
         console.log("scripts = ", scripts)
         scripts.forEach(oldScript => {
@@ -66,13 +50,12 @@ class Router {
             
             // Copy src or inline content
             if (oldScript.src) {
-                newScript.src = oldScript.src;
+                newScript.src = oldScript.src + "?t=" + new Date().getTime();
                 console.log("hello, newscript.src :", newScript.src)
             } else {
                 newScript.textContent = oldScript.textContent;
             }
-            
-            // Copy other attributes
+
             Array.from(oldScript.attributes).forEach(attr => {
                 if (attr.name !== 'src') { // Skip src as we handled it above
                     newScript.setAttribute(attr.name, attr.value);
@@ -80,7 +63,7 @@ class Router {
                 }
             });
             
-            // Replace old script with new one
+            console.log(oldScript)
             oldScript.parentNode.replaceChild(newScript, oldScript);
         });
     }
@@ -161,11 +144,11 @@ const routes = [
     },
     {
         path: '/auth/login',
-        events: [{
-            id: 'login-btn',
-            event_type: 'click',
-            func: login
-        },],
+        // events: [{
+        //     id: 'login-btn',
+        //     event_type: 'click',
+        //     func: login
+        // },],
         template: async () => {
             return await fetchRoute('/pages/auth/login');
         },
