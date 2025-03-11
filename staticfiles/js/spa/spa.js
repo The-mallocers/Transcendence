@@ -2,9 +2,6 @@
 // import { login } from '../apps/auth/login.js';
 // import { register } from '../apps/auth/register.js';
 
-let previous_route = null;
-
-
 class Router {
     constructor(routes) {
         this.routes = routes;
@@ -18,14 +15,18 @@ class Router {
 
     async handleLocation() {
         const path = window.location.pathname;
+
+        console.log(window.location.search);
         console.log("looking for the path: ", path)
         const route = this.routes.find(r => r.path === path);
+
         if (!route) {
             navigateTo("/error/404/");
         }
         else {
             try {
-                const content = await route.template();
+                // console.log("About to try the route template of the route :", route);
+                const content = await route.template(window.location.search);
                 this.rootElement.innerHTML = content;
                 this.reloadScripts();
             } catch (error) {
@@ -35,11 +36,6 @@ class Router {
     }
 
     reloadScripts() {
-
-
-        console.log("////////////////////////////////////////////////////////////")
-        console.log("RELOADED", this.rootElement)
-
         const scripts = this.rootElement.querySelectorAll('script');
         console.log("scripts = ", scripts)
         scripts.forEach(oldScript => {
@@ -48,7 +44,6 @@ class Router {
             // Copy src or inline content
             if (oldScript.src) {
                 newScript.src = oldScript.src + "?t=" + new Date().getTime();
-                console.log("hello, newscript.src :", newScript.src)
             } else {
                 newScript.textContent = oldScript.textContent;
             }
@@ -56,7 +51,6 @@ class Router {
             Array.from(oldScript.attributes).forEach(attr => {
                 if (attr.name !== 'src') { // Skip src as we handled it above
                     newScript.setAttribute(attr.name, attr.value);
-                    console.log("new script attribute = ", attr.name, attr.value)
                 }
             });
             
@@ -193,10 +187,23 @@ const routes = [
         },
     },
     {
-        path: '/auth/2fa',
+        path: '/profile/settings/',
         template: async () => {
-            return await fetchRoute('/pages/auth/2fa');
+            return await fetchRoute('/pages/profile/settings/');
         },
+    },
+    {
+        path: '/profile/',
+        template: async (query) => {
+            console.log(`/pages/profile/${query}`)
+            return await fetchRoute(`/pages/profile/${query}`);
+        }
+    },
+    {
+    path: '/auth/2fa',
+    template: async () => {
+        return await fetchRoute('/pages/auth/2fa');
+    },
     },
 ];
 
@@ -208,14 +215,6 @@ document.addEventListener('click', async (e) => {
         console.log("in data route :", route);
         navigateTo(route);
     }
-    //this may not look like it but this took a very long time to come up with
-    // if (e.target.matches('#logout-btn') || e.target.closest('#logout-btn')) {
-    //     logout();
-    // }
-    // if (e.target.matches('#register-btn') || e.target.closest('#register-btn')) {
-    //     register(e);
-    // }
-
 });
 
 

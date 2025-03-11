@@ -43,6 +43,13 @@ class Clients(models.Model):
             return None
         client = Clients.objects.get(id=id)
         return client
+    
+    @staticmethod
+    def get_client_by_username(username: str):
+        try:
+            return Clients.objects.get(profile__username=username)
+        except :
+            return None  # Or handle the error appropriately
 
     @staticmethod
     @sync_to_async

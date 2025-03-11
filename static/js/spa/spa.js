@@ -15,14 +15,18 @@ class Router {
 
     async handleLocation() {
         const path = window.location.pathname;
+
+        console.log(window.location.search);
         console.log("looking for the path: ", path)
         const route = this.routes.find(r => r.path === path);
+
         if (!route) {
             navigateTo("/error/404/");
         }
         else {
             try {
-                const content = await route.template();
+                // console.log("About to try the route template of the route :", route);
+                const content = await route.template(window.location.search);
                 this.rootElement.innerHTML = content;
                 this.reloadScripts();
             } catch (error) {
@@ -183,10 +187,23 @@ const routes = [
         },
     },
     {
-        path: '/auth/2fa',
+        path: '/profile/settings/',
         template: async () => {
-            return await fetchRoute('/pages/auth/2fa');
+            return await fetchRoute('/pages/profile/settings/');
         },
+    },
+    {
+        path: '/profile/',
+        template: async (query) => {
+            console.log(`/pages/profile/${query}`)
+            return await fetchRoute(`/pages/profile/${query}`);
+        }
+    },
+    {
+    path: '/auth/2fa',
+    template: async () => {
+        return await fetchRoute('/pages/auth/2fa');
+    },
     },
 ];
 
