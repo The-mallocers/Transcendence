@@ -6,8 +6,6 @@
     </div>
 </header>
 
-<div id="testdiv">WAWAWAWAWA</div>
-
 <div class="container">
     <link rel="stylesheet" href="{% static 'css/auth/login.css' %}">
     <form method="POST" id="register-form" action="{% url 'register' %}" enctype="multipart/form-data">
@@ -34,6 +32,6 @@
                 <button type="button" data-route="/auth/login">Se connecter</button>
             </p>
         </div>
-        <div id="testevent"> Coucou je suis un test mais si tu me clique c'est pas moi</div>
 </div>
-<script >alert("ahoy")</script>
+<script type="module" src="{% static 'js/apps/auth/register.js' %}"></script>
+

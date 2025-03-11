@@ -1,8 +1,6 @@
-// console.log("ALLOO :", window.location.pathname);
-
-import { logout } from '../apps/auth/logout.js';
+// import { logout } from '../apps/auth/logout.js';
 // import { login } from '../apps/auth/login.js';
-import { register } from '../apps/auth/register.js';
+// import { register } from '../apps/auth/register.js';
 
 let previous_route = null;
 
@@ -16,7 +14,6 @@ class Router {
     //Claude said the above method is better than : document.querySelector('#app');
     init() {
         window.addEventListener('popstate', () => this.handleLocation());
-        //this.handleLocation();
     }
 
     async handleLocation() {
@@ -138,17 +135,11 @@ const routes = [
     {
         path: '/',
         template: async () => {
-            // console.log("I am fetching a route in spa.js")
             return await fetchRoute('/pages/');
         },
     },
     {
         path: '/auth/login',
-        // events: [{
-        //     id: 'login-btn',
-        //     event_type: 'click',
-        //     func: login
-        // },],
         template: async () => {
             return await fetchRoute('/pages/auth/login');
         },
@@ -156,7 +147,6 @@ const routes = [
     {
         path: '/pong/',
         template: async () => {
-            // console.log("fetching pong")
             return await fetchRoute('/pages/pong/');
         },
     },
@@ -212,8 +202,6 @@ const routes = [
 
 //Need to do this so that the event listerner also listens to the dynamic html
 document.addEventListener('click', async (e) => {
-    // console.log("click !")
-    // console.log(e);
     const routeElement = e.target.closest('[data-route]');
     if (routeElement) {
         const route = routeElement.dataset.route;
@@ -221,15 +209,12 @@ document.addEventListener('click', async (e) => {
         navigateTo(route);
     }
     //this may not look like it but this took a very long time to come up with
-    if (e.target.matches('#logout-btn') || e.target.closest('#logout-btn')) {
-        logout();
-    }
-    // if (e.target.matches('#login-btn') || e.target.closest('#login-btn')) {
-    //     login(e);
+    // if (e.target.matches('#logout-btn') || e.target.closest('#logout-btn')) {
+    //     logout();
     // }
-    if (e.target.matches('#register-btn') || e.target.closest('#register-btn')) {
-        register(e);
-    }
+    // if (e.target.matches('#register-btn') || e.target.closest('#register-btn')) {
+    //     register(e);
+    // }
 
 });
 
