@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.http import JsonResponse
 
 from apps.shared.models import Clients
@@ -6,7 +7,7 @@ from django.middleware.csrf import get_token
 
 import requests, os, json
 
-id = 0
+grafana_id = 0
 
 def get(req):
     csrf_token = get_token(req)
@@ -17,7 +18,7 @@ def get(req):
     #Commenting this because this was causing logout to crash (but for some reason not just getting to the page)
     # urlnode, urlsql = render_dashboard(req, secretKey)
     users = Clients.objects.all()
-    print(id)
+    print(grafana_id)
     # print(urlnode)
     # print(urlsql)
     # Render the HTML template to a string
@@ -35,10 +36,10 @@ def get(req):
     })
 
 def create_api_key():
-    global id
+    global grafana_id
     grafana_url = "http://grafana:3000"
     admin_user = "admin"
-    admin_password = os.environ.get('GRAFANA_PASSWORD')
+    admin_password = settings.GRFANA_ADMIN_PWD
     create_key_url = f"{grafana_url}/api/serviceaccounts"
     
     # API key details
@@ -56,8 +57,11 @@ def create_api_key():
     )
     if response.status_code == 200 or response.status_code == 201:
         print(response.json())
-        id = response.json().get('id')
-        print(id)
+        grafana_id = response.json().get('id')
+        admin_client = Clients.get_client_by_email(settings.ADMIN_EMAIL)
+        admin_client.rights.grafana_id = grafana_id
+        admin_client.rights.save()
+        print(grafana_id)
         return response.json()
     else:
         print(f"Failed to create API key. Status code: {response.status_code}")

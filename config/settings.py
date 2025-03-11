@@ -35,7 +35,6 @@ PROTECTED_PATHS = [
 EXCLUDED_PATHS = [
     '/api/auth/login',
     '/api/*',
-    '/api/admin/grafana_token'
     '/pages/auth/login',
     '/auth/login',
     '/auth/register',
@@ -176,6 +175,12 @@ DATABASES = {
         'PORT': os.environ.get('DATABASE_PORT'),
     }
 }
+
+ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL')
+ADMIN_PWD = os.environ.get('ADMIN_PWD')
+ADMIN_USERNAME = os.environ.get('ADMIN_USERNAME')
+
+GRFANA_ADMIN_PWD = os.environ.get('GRAFANA_PASSWORD')
 
 if 'test' in sys.argv:
     DATABASES['default']['NAME'] = BASE_DIR / 'test_db.sqlite3'
