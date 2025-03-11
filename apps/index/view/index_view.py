@@ -63,7 +63,8 @@ def get(req):
                     "when" : "a day ago"
 
                 }
-            ]
+            ],
+            "csrf_token": get_token(req)
         }
         html_content = render_to_string("apps/profile/profile.html", context)
         return JsonResponse({'html': html_content})

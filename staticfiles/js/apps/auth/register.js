@@ -1,6 +1,6 @@
 import { navigateTo } from '../../spa/spa.js';
 
-export function register (event) {
+function register (event) {
     console.log("I am register.js")
     event.preventDefault();
     const form = document.querySelector("form");
@@ -62,3 +62,8 @@ export function register (event) {
             console.error("There was an error with the fetch operation:", error);
         });
 };
+
+let element = document.querySelector("#register-btn");
+
+
+element.addEventListener("click", (e)=>{register(e)} )
