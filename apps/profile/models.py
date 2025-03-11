@@ -1,6 +1,4 @@
 from django.db import models
-
-
 class Profile(models.Model):
     #Primary key
     email = models.EmailField(primary_key=True, null=False, editable=True)
