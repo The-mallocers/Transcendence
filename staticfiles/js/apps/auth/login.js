@@ -23,6 +23,11 @@ document.addEventListener('SpaLoaded',  (e) => {
 });
 
 
+document.getElementById("testevent").addEventListener('click',  (e) => {
+    console.log("login click !");
+});
+
+
 
 
 
