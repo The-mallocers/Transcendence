@@ -3,9 +3,13 @@ from django.db import models
 class Rights(models.Model):
     #Primary key
     id = models.AutoField(primary_key=True, null=False, editable=False)
-    
+
     #Secondary key
     is_admin = models.BooleanField(default=False, null=False, editable=True)
+
+    # Grafana
+    grafana_token = models.CharField(max_length=100, default=None)
+    grafana_id = models.IntegerField(default=0)
 
     class Meta:
         db_table = 'client_rights'

@@ -35,6 +35,7 @@ PROTECTED_PATHS = [
 EXCLUDED_PATHS = [
     '/api/auth/login',
     '/api/*',
+    '/api/admin/grafana_token'
     '/pages/auth/login',
     '/auth/login',
     '/auth/register',
