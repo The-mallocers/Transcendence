@@ -74,9 +74,10 @@ class WebSocket(AsyncWebsocketConsumer):
                 # print(f"Received message: {message}")
                 await self.channel_layer.group_send(
                     self.room_group_name,
-                    {
+                    {   
                         'type': 'chat_message',
-                        'message': message
+                        'message': message,
+                        'senderId': text_data_json['data']['senderId']
                     }
                 )
             else:
@@ -87,7 +88,8 @@ class WebSocket(AsyncWebsocketConsumer):
     async def chat_message(self, event):
         message = event['message']
         await self.send(text_data=json.dumps({
-            'message': message
+            'message': message,
+            'senderId': event['senderId']
         }))
         # try:
         #     if not self.client:

@@ -44,6 +44,7 @@ EXCLUDED_PATHS = [
     '/pages/error/',
     '/auth/2fa',
     '/pages/auth/2fa',
+    # 'api/chat/AddMsg',
 ]
 ROLE_PROTECTED_PATHS = {
     '/admin/*': ['admin']

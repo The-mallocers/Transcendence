@@ -15,12 +15,13 @@
         </div>
         <div class="col-8 h-100 d-flex chatBox align-items-end justify-content-end flex-column">
         <div class="history container-fluid d-flex chatHistory align-items-end justify-content-end flex-column">
-            <div class="msg me align-self-end">Welcome to the chat !</div>
-            <div class="msg you align-self-start">Other people message will show up on the left</div>
+            {% for msg in conversation %}
+                <div class="msg {% if me == msg.sender %} me align-self-end {% else %} you align-self-start {% endif %}">{{ msg.content }}</div>
+            {% endfor %}
+            <!-- <div class="msg you align-self-start">Other people message will show up on the left</div> -->
         </div>
         <input type="text" id="messageInput" placeholder="message">
         </div>
     </div>
 <div>
-    <button onclick="connectToChat()">Connect to Chat</button>
     <script type = "module" src="{% static 'js/apps/chat/chat.js' %}" defer></script>
