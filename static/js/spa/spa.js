@@ -1,7 +1,7 @@
 // console.log("ALLOO :", window.location.pathname);
 
 import { logout } from '../apps/auth/logout.js';
-import { login } from '../apps/auth/login.js';
+// import { login } from '../apps/auth/login.js';
 import { register } from '../apps/auth/register.js';
 
 let previous_route = null;

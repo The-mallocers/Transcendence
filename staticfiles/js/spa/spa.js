@@ -29,15 +29,18 @@ class Router {
         else {
             try {
                 // console.log("About to try the route template of the route :", route);
-                const content = await route.template();
-                this.rootElement.innerHTML = content;
+                console.log("checking out previous route and events");
+                console.log(previous_route);
                 if (previous_route != null) {
+                    console.log(previous_route.events);
                     previous_route.events.forEach(element => {
                         document.getElementById(element.id).removeEventListener(element.event_type, element.func)
                         console.log("removed my event handler like a boss");
                         console.log(element.event_type)
                     });
                 };
+                const content = await route.template();
+                this.rootElement.innerHTML = content;
                 console.log("Reloading Scripts", this.rootElement);
                 // Dispatch a custom event
                 const pageLoadEvent = new CustomEvent('SpaLoaded', {

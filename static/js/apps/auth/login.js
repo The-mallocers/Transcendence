@@ -17,6 +17,13 @@ document.addEventListener('SpaLoaded',  (e) => {
 });
 
 
+if (document.documentgetElementById("testevent"))
+{
+    document.getElementById("testevent").addEventListener('click',  (e) => {
+        console.log("login click !");
+    });
+}
+
 
 
 export function login(e) {
