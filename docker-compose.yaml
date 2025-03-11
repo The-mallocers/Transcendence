@@ -142,7 +142,7 @@ services:
       prometheus:
         condition: service_started
     # user: "1000"
-    user: "472:472"
+    # user: "102731:102731"
     env_file:
       - .env
     environment:
@@ -152,7 +152,7 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - ./docker/grafana/volumes/grafana-storage:/var/lib/grafana/
+      # - ./docker/grafana/volumes/grafana-storage/grafana.db:/var/lib/grafana/grafana.db
       - ./docker/grafana/volumes/provisioning:/etc/grafana/provisioning
     networks:
       - Tnetwork

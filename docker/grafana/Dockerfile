@@ -10,7 +10,7 @@ FROM grafana/grafana-enterprise
 
 # # Set permissions for the grafana user (UID 472)
 # RUN chown -R bpoyet /var/lib/grafana /etc/grafana /grafana-init
-#     # chmod -R 755 /var/lib/grafana /etc/grafana /grafana-init
+# RUN chmod 777 /var/lib/grafana
 
 # # Switch back to grafana user
 # USER bpoyet
