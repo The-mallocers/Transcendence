@@ -43,7 +43,9 @@ class ChatService(BaseServices):
             if target_channel_name:
                 await self.channel_layer.group_add(str(await Rooms.get_id(room)), target_channel_name.decode('utf-8'))
 
-            await send_group(admin.id, EventType.CHAT, ResponseAction.ROOM_CREATED)
+            await send_group(admin.id, EventType.CHAT, ResponseAction.ROOM_CREATED, {
+                'room_id': str(await Rooms.get_id(room))
+            })
 
         except json.JSONDecodeError as e:
             self._logger.error(f"Erreur parsing JSON: {e}")
@@ -60,6 +62,7 @@ class ChatService(BaseServices):
                     await send_group_error(client.id, ResponseError.ROOM_NOT_FOUND)
                     return  
                 #check if the current client can send a message to the room_id
+
                 await send_group(await Rooms.get_id(room), EventType.CHAT, ResponseAction.MESSAGE_RECEIVED, {
                     'message': message,
                     'sender': str(client.id)
