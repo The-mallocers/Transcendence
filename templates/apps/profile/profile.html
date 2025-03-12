@@ -1,0 +1,85 @@
+{% load static %}
+<div class="informationsContainer">
+    <img class="background" src="{% static 'assets/imgs/fire_coalition.jpg' %}">
+    
+    <h3>{{ client.profile.username }}</h3>
+
+    <div class="avatar">
+        <img  src="{% static 'assets/imgs/matboyer.jpg' %}">
+    </div>
+    <div class="container infos">
+        <div class="row">
+            <div class="col-md-4 winrate box">
+                <div class="p-3 text-center minibox">
+                    <h2>winrate</h2>
+                    <div class="progressBarContainer">
+                        <!-- <div class="progressBar">
+                            <div class="filler"></div>
+                        </div> -->
+                        <div class="progress-circle">
+                            <div class="progress-content">
+                                <div>60%</div>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 currentActivity box">
+                <div class="p-3 text-center minibox">
+                    <h2>Unavailable</h2>
+                </div>
+            </div>
+            <div class="col-md-4 mmr box">
+                <div class="p-3 text-center minibox">
+                    <h2 class="p-3 text-center">Rank</h2>
+                    <img class="trophee" src="{% static "assets/imgs/bronze.png" %}">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid main mt-4">
+    <div class="row g-4 align-items-start justify-content-start">
+        <div class="col-6 col-md-6">
+            <div class="box">
+                <h3>Last players encountered</h3>
+                <div class="lastPlayerContainer mt-4">
+                    {% for player in lastEncountered %}
+                        <div class="lastPlayer container d-flex flex-row align-items-center justify-content-center"  data-route="/profile/?username={{player.nickname}}">
+                            <img src="{% static 'assets/imgs/' %}{{ player.avatar }}" alt="{{player.avatar}}">
+                            <span class="names d-flex flex-row align-items-end justify-content-center">
+                                <h4 class="fullName">{{player.name}}</h4>
+                                <div class="nickname">{{player.nickname}}</div>
+                            </span>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6 col-md-6">
+            <div class="box">
+                <h3>Games history</h3>
+                <div class="lastGamesContainer">
+                    {% for game in gamesHistory %}
+                        <div class="lastGames container d-flex flex-row align-items-center justify-content-between">
+                            <span class="names d-flex flex-row justify-content-center">
+                                <div class="nickname {% if game.won %}win{% else %} loss {% endif %}">{{game.opponent}}</div>
+                                <div class="time">A day ago</div>
+                            </span>
+                            <span class="scores d-flex flex-row justify-content-center align-items-center">
+                                <div class="myScore">{{game.myPoints}}</div>
+                                <div class="dash"></div>
+                                <div class="enemyScore">{{game.enemyPoints}}</div>
+                            </span>
+                        </div>
+                    {% endfor %}
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

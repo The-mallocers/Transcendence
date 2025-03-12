@@ -1,23 +1,35 @@
 from django.core.exceptions import PermissionDenied
 from django.http import JsonResponse, HttpResponseRedirect, HttpRequest
 from django.shortcuts import render
+from django.template.loader import render_to_string
+from django.middleware.csrf import get_token
 
 from apps.profile.models import Profile
 from apps.shared.models import Clients
 
 
-def get(req, client_id=None):
-    if client_id is not None:
-        client = Clients.get_client_by_id(client_id)
-    else:
-        client = Clients.get_client_by_request(req)
-    if client is not None:
-        context = {"client": client}
-        return render(req, "apps/profile/account.html", context)
-    else:
-        return HttpResponseRedirect(
-            '/auth/login')  # todo il faut afficher une erreur sur le html au lieu de rediriger vers login
+def get(req):
+    requestUsername = req.GET.get("username", "minimeow")
+    client = Clients.get_client_by_username(requestUsername)
+    print(requestUsername, client)
+    # do something if client not found
 
+    if client is None : 
+        html_content = render_to_string("apps/error/404.html", {"csrf_token": get_token(req), "error_code": "404"})
+        return JsonResponse({
+            'html': html_content,
+        })
+     
+    html_content = render_to_string("apps/profile/profile.html", {"csrf_token": get_token(req), "client": client})
+    return JsonResponse({
+        'html': html_content,
+    })
+    
+def get_settings(req):
+    html_content = render_to_string("apps/profile/myinformations.html", {"csrf_token": get_token(req)})
+    return JsonResponse({
+        'html': html_content,
+    })
 
 def post(request: HttpRequest, client_id):
     client = Clients.get_client_by_id(client_id)
