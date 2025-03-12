@@ -1,7 +1,3 @@
-// import { logout } from '../apps/auth/logout.js';
-// import { login } from '../apps/auth/login.js';
-// import { register } from '../apps/auth/register.js';
-
 class Router {
     constructor(routes) {
         this.routes = routes;
@@ -67,7 +63,9 @@ class Router {
 
 window.onload = async ()=>{
     console.log(pongRoute.possibleRoutes)
-    // console.log(window.location.pathname)
+    // console.log(window.location.pathname
+
+    //Add the creation of the websocket here
     await router.handleLocation();
 }
 
