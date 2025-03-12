@@ -20,7 +20,7 @@ class Migration(migrations.Migration):
                 ('id', models.IntegerField(default=utils.util.generate_unique_code, editable=False, primary_key=True, serialize=False, unique=True)),
                 ('created_at', models.DateTimeField(default=django.utils.timezone.now)),
                 ('in_tournament', models.BooleanField(default=False, editable=False)),
-                ('status', models.CharField(choices=[('CREATING', 'creating'), ('MATCHMAKING', 'matchmaking'), ('STARTING', 'starting'), ('RUNNING', 'running'), ('ENDING', 'ending'), ('DESTROING', 'destroing'), ('FINISHED', 'finished'), ('ERROR', 'error')], default='creating', max_length=20)),
+                ('status', models.CharField(choices=[('CREATING', 'creating'), ('MATCHMAKING', 'matchmaking'), ('STARTING', 'starting'), ('RUNNING', 'running'), ('ENDING', 'ending'), ('DESTROYING', 'destroying'), ('FINISHED', 'finished'), ('ERROR', 'error')], default='creating', max_length=20)),
                 ('timer', models.DurationField(default=datetime.timedelta(0), editable=False, null=True)),
             ],
             options={

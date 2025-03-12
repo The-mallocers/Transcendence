@@ -124,7 +124,7 @@ class GameManager:
                     GameStatus.STARTING,
                     GameStatus.RUNNING,
                     GameStatus.ENDING,
-                    GameStatus.DESTROING
+                    GameStatus.DESTROYING
                 ]
             ).delete()
 

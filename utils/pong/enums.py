@@ -7,7 +7,7 @@ class GameStatus(str, Enum):
     STARTING: str = 'starting'
     RUNNING: str = 'running'
     ENDING: str = 'ending'
-    DESTROING: str = 'destroing'
+    DESTROYING: str = 'destroying'
     FINISHED: str = 'finished'
     ERROR: str = 'error'
 

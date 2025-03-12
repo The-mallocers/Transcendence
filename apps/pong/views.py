@@ -2,6 +2,7 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.middleware.csrf import get_token
+from apps.shared.models import Clients
 
 # Create your views here.
 
@@ -18,7 +19,8 @@ def gamemodes(request):
     })
 
 def matchmaking(request):
-    html_content = render_to_string("pong/matchmaking.html", {"csrf_token": get_token(request)})
+    client = Clients.get_client_by_request(request)
+    html_content = render_to_string("pong/matchmaking.html", {"csrf_token": get_token(request), "client": client})
     return JsonResponse({
         'html': html_content,
     })
