@@ -58,7 +58,7 @@ class ChatService(BaseServices):
                 print("room_id is:", room)
                 if room is None:
                     await send_group_error(client.id, ResponseError.ROOM_NOT_FOUND)
-                    return
+                    return  
                 #check if the current client can send a message to the room_id
                 await send_group(await Rooms.get_id(room), EventType.CHAT, ResponseAction.MESSAGE_RECEIVED, {
                     'message': message,
