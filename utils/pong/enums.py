@@ -36,8 +36,9 @@ class RequestAction(str, Enum):
     SCORE_UPDATE: str = 'score_update'
 
     # ── Chat Actions ──────────────────────────────────────────────────────────────────
-    START_CHAT = "start_chat"
+    CREATE_ROOM = "create_room"
     SEND_MESSAGE = "send_message"
+    GET_HISTORY = "get_history"
 
 
 #All the reponse the server send to client
@@ -61,9 +62,9 @@ class ResponseAction(str, Enum):
     SCORE_2_UPDATE: str = 'score_2_update'
 
     # ── Chat Actions ──────────────────────────────────────────────────────────────────
-    CHAT_STARTED = "chat_started"
-    MESSAGE = "message"
-    MESSAGE_SENT = "message_sent"
+    ROOM_CREATED = "room_created"
+    MESSAGE_RECEIVED = "message_received"
+    HISTORY_RECEIVED = "history_received"
 
 
     TEST: str = 'test'
@@ -81,7 +82,9 @@ class ResponseError(str, Enum):
     JSON_ERROR: str = 'Invalid json'
     EXCEPTION: str = 'Internal server error'
     INTERNAL_ERROR = "Internal server error"
-    ACTION_ERROR: str = 'Action error'
+    SERVICE_ERROR: str = 'Service error'
+    NO_HISTORY: str = 'There are no messages in this room'
+
 
 class Side(str, Enum):
     LEFT: str = 'left'
