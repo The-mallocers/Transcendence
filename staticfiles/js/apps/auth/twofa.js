@@ -25,6 +25,8 @@ async function validateCode() {
 			console.log(result);
 			if(response.status === 200 && result.success)
 			{
+				const data = await response.json();
+				localStorage.setItem('clientId', data.client_id);
 				navigateTo(result.redirect); //make sure to change to redirect
 			}
 			// alert('Code submitted: ' + code);
