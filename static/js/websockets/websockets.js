@@ -1,37 +1,42 @@
-// websocket-manager.js
+let client_id = null; // Global variable
+
+
 export const WebSocketManager = {
   gameSocket: null,
   chatSocket: null,
   
-  // Initialize a specific socket
-  initGameSocket() {
-    if (this.gameSocket === null || this.gameSocket.readyState === WebSocket.CLOSED) {
-      this.gameSocket = new WebSocket('ws://' + window.location.host + '/ws/game/?id=' + client_id);
-      this.gameSocket.onopen = () => console.log('Game socket connected');
+  async initGameSocket() {
+    if (!client_id) {
+      client_id = await getClientId(); // Ensure client_id is available
+    }
+    if (!this.gameSocket || this.gameSocket.readyState === WebSocket.CLOSED) {
+      this.gameSocket = new WebSocket(`ws://${window.location.host}/ws/game/?id=${client_id}`);
+      this.gameSocket.onopen = () => console.log("Game socket connected");
     }
     return this.gameSocket;
   },
   
-  initchatSocket() {
-    if (this.chatSocket === null || this.chatSocket.readyState === WebSocket.CLOSED) {
-      this.chatSocket = new WebSocket('ws://' + window.location.host + '/ws/notifications/?id=' + client_id);
-      this.chatSocket.onopen = () => console.log('Notification socket connected');
+  async initChatSocket() {
+    if (!client_id) {
+      client_id = await getClientId();
+    }
+    if (!this.chatSocket || this.chatSocket.readyState === WebSocket.CLOSED) {
+      this.chatSocket = new WebSocket(`ws://${window.location.host}/ws/notifications/?id=${client_id}`);
+      this.chatSocket.onopen = () => console.log("Notification socket connected");
     }
     return this.chatSocket;
   },
   
-  // Close all sockets
   closeAllSockets() {
     this.closeGameSocket();
     this.closeChatSocket();
   },
   
-  // Close specific sockets
   closeGameSocket() {
     if (this.gameSocket && this.gameSocket.readyState === WebSocket.OPEN) {
       this.gameSocket.close();
       this.gameSocket = null;
-      console.log('Game socket closed');
+      console.log("Game socket closed");
     }
   },
   
@@ -39,7 +44,31 @@ export const WebSocketManager = {
     if (this.chatSocket && this.chatSocket.readyState === WebSocket.OPEN) {
       this.chatSocket.close();
       this.chatSocket = null;
-      console.log('Notification socket closed');
+      console.log("Notification socket closed");
     }
   }
 };
+
+async function getClientId() {
+  if (client_id !== null) return client_id; // Avoid multiple calls
+
+  console.log("Getting client ID");
+  try {
+    const response = await fetch("/api/auth/getId/", {
+      method: "GET",
+      credentials: "include",
+    });
+    const data = await response.json();
+    console.log(data);
+
+    if (data.client_id) {
+      client_id = data.client_id; // Store globally
+      return client_id;
+    } else {
+      throw new Error(data.error);
+    }
+  } catch (error) {
+    console.error("Error retrieving client ID:", error);
+    return null;
+  }
+}
