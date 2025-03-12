@@ -18,17 +18,16 @@ function login(e) {
             'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
         },
     })
-    .then(response => {
+    .then(async response => {
         if (response.ok) {
             console.log("trying to navigate to index");
             navigateTo('/');
+            const data = await response.json();
+            localStorage.setItem('clientId', data.client_id);
         }
         else if (response.status === 302) {
-            response.json().then(data => {
-                console.log("trying to navigate to 2FA");
-                console.log("redirect is :", data.redirect)
-                navigateTo(data.redirect); //2FA
-            })
+            const data = await response.json();
+            navigateTo(data.redirect); //2FA
         }
         else {
             console.log("Fetch of login failed");
