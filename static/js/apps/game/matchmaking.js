@@ -10,8 +10,12 @@ console.log(element.dataset.clientId)
 let connectToMMPool = async (client_id)=>{
 
     let socket =  new WebSocket('ws://' + window.location.host + '/ws/game/?id=' + client_id);
+    
+    //On  m
 
-
+    socket.onmessage((e)=>{
+        console.log(e)
+    })
     console.log(socket)
 }
 
