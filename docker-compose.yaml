@@ -3,9 +3,10 @@ services:
     image: postgres
     container_name: postgresql
     volumes:
-      - postgres_data:/var/lib/postgresql/data/
+      - postgres-data:/var/lib/postgresql/data/
     ports:
       - "5432:5432"
+    # user: "102731:4223"
     env_file:
       - .env
     networks:
@@ -117,6 +118,8 @@ services:
     ports:
       - 1025:1025  # SMTP server
       - 8025:8025  # Web interface
+    logging:
+      driver: "none"
     networks:
       - Tnetwork
     restart: unless-stopped
@@ -131,6 +134,8 @@ services:
     volumes:
       - "./docker/alertmanager:/config"
     command: --config.file=/config/alertmanager.yml --log.level=debug
+    logging:
+      driver: "none"
     networks:
       - Tnetwork
     restart: unless-stopped
@@ -152,7 +157,7 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      # - ./docker/grafana/volumes/grafana-storage/grafana.db:/var/lib/grafana/grafana.db
+      - grafana-data:/var/lib/grafana
       - ./docker/grafana/volumes/provisioning:/etc/grafana/provisioning
     networks:
       - Tnetwork
@@ -165,5 +170,7 @@ networks:
 volumes:
   prometheus-data:
     driver: local
-  postgres_data:
+  postgres-data:
+    driver: local
+  grafana-data:
     driver: local

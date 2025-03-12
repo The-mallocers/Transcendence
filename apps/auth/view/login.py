@@ -5,22 +5,21 @@ from apps.shared.models import Clients
 from django.template.loader import render_to_string
 from django.middleware.csrf import get_token
 
-import requests, os, json
+import requests, json
 
 grafana_id = 0
 
 def get(req):
     csrf_token = get_token(req)
-    # new_user = create_user()
-    # if new_user:
-    secretKey = create_api_key()
     urlnode, urlsql = None, None
+    grafana_session = authenticate_grafana_user()
+    secretKey = create_api_key(grafana_session)
+    urlnode, urlsql = render_dashboard(req, secretKey, grafana_session)
     #Commenting this because this was causing logout to crash (but for some reason not just getting to the page)
-    # urlnode, urlsql = render_dashboard(req, secretKey)
     users = Clients.objects.all()
     print(grafana_id)
-    # print(urlnode)
-    # print(urlsql)
+    print(urlnode)
+    print(urlsql)
     # Render the HTML template to a string
     html_content = render_to_string("apps/auth/login.html", {
         "users": users, 
@@ -35,68 +34,91 @@ def get(req):
         'users': list(users.values())
     })
 
-def create_api_key():
-    global grafana_id
-    grafana_url = "http://grafana:3000"
+def authenticate_grafana_user():
+    login_url = "http://grafana:3000/login"
+    session = requests.Session()
+    admin = "admin"
+    pwd = settings.GRFANA_ADMIN_PWD
+    # Grafana typically uses a login form
+    response = session.post(
+        login_url,
+        json={"user": admin, "password": pwd},
+        headers={"Content-Type": "application/json"}
+    )
+    print(session)
+    
+    # Check if login was successful
+    if response.status_code == 200:
+        return session
+    else:
+        print(f"Failed to authenticate: {response.status_code}, {response.text}")
+        return None
+
+def create_api_key(session):
+    admin_client = Clients.get_client_by_email(settings.ADMIN_EMAIL)
     admin_user = "admin"
     admin_password = settings.GRFANA_ADMIN_PWD
-    create_key_url = f"{grafana_url}/api/serviceaccounts"
+    url = f"http://grafana:3000/api/serviceaccounts"
     
     # API key details
     key_data = {
         "name": "grafanaDashboard",
-        "role": "Admin"  # Can be "Admin", "Editor", or "Viewer"
+        "role": "Admin" 
     }
-    
-    # Make the API request
-    response = requests.post(
-        create_key_url,
-        headers={"Content-Type": "application/json"},
-        auth=(admin_user, admin_password),
-        data=json.dumps(key_data)
-    )
-    if response.status_code == 200 or response.status_code == 201:
-        print(response.json())
-        grafana_id = response.json().get('id')
-        admin_client = Clients.get_client_by_email(settings.ADMIN_EMAIL)
-        admin_client.rights.grafana_id = grafana_id
-        admin_client.rights.save()
-        print(grafana_id)
-        return response.json()
-    else:
-        print(f"Failed to create API key. Status code: {response.status_code}")
-        url = "http://grafana:3000/api/serviceaccounts/7/tokens"
-        dataJson = {"name":"grafanaToken"}
-        res = requests.post(url,
-                     headers={"Content-Type": "application/json"},
-                     auth=(admin_user, admin_password),
-                     data=json.dumps(dataJson))
-        print("status code: " + str(res))
-        print(res.json().get('key'))
-        return res.json().get('key')
+    if admin_client.rights.grafana_id != 0 and admin_client.rights.grafana_token not in (None, ''):
+        return admin_client.rights.grafana_token
+    else :
+        # Make the API request
+        response = session.post(
+            url,
+            headers={"Content-Type": "application/json"},
+            auth=(admin_user, admin_password),
+            data=json.dumps(key_data)
+        )
+        if response.status_code == 200 or response.status_code == 201:
+            print(response.json())
+            grafana_id = response.json().get('id')
+            admin_client.rights.grafana_id = grafana_id
+            print(grafana_id)
+            url = f"http://grafana:3000/api/serviceaccounts/{grafana_id}/tokens"
+            dataJson = {"name":"grafanaToken"}
+            res = session.post(url,
+                        headers={"Content-Type": "application/json"},
+                        auth=(admin_user, admin_password),
+                        data=json.dumps(dataJson))
+            admin_client.rights.grafana_token = res.json().get('key')
+            admin_client.rights.save()
+            return res.json().get('key')
+        return admin_client.rights.grafana_token
 
 # For an API endpoint that returns JSON directly:
-def render_dashboard(request, secretkey) -> str:
-    # secretkey = os.environ.get('GRAFANA_BEARERKEY')
+def render_dashboard(request, secretkey, session) -> str:
     api_url = "http://grafana:3000/api/search?type=dash-db"
     print(api_url)
-    my_headers = {
-        'Accept': 'application/json',
-        "Content-Type": "application/json",
-    "Authorization": f'Bearer {secretkey}'
-    }
+    # my_headers = {
+    #     'Accept': 'application/json',
+    #     "Content-Type": "application/json",
+    # "Authorization": f'Bearer {secretkey}'
+    # }
     try:
-        response = requests.get(
+        response = session.get(
             api_url,
-            params=request.GET.dict(),  # Pass along all query parameters
-            headers=my_headers
+            params=request.GET.dict()
         )
+        # response = requests.get(
+        #     api_url,
+        #     params=request.GET.dict(),  # Pass along all query parameters
+        #     headers=my_headers
+        # )
+        print(secretkey)
         response.raise_for_status()
-        print(response)
         data = response.json()
         print(data)
-        urlnode = data[0].get('url')
-        urlsql = data[1].get('url')
+        urlnode = f"http://localhost:3000{data[0].get('url')}?orgId=1&from=now-6h&to=now&auth_token={secretkey}"
+        urlsql = f"http://localhost:3000{data[1].get('url')}?orgId=1&from=now-6h&to=now&auth_token={secretkey}"
+        
+        # urlnode = f"http://localhost:3000{data[0].get('url')}?orgId=1&kiosk&apiKey={secretkey}"
+        # urlsql = f"http://localhost:3000{data[1].get('url')}?orgId=1&kiosk&apiKey={secretkey}"
         return urlnode, urlsql
     
     except requests.exceptions.RequestException as e:
