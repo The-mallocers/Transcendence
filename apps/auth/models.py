@@ -40,6 +40,23 @@ class TwoFA(models.Model):
     # Secondary key
     enable = models.BooleanField(default=False, editable=True)
     scanned = models.BooleanField(default=False, editable=True)
-
+    qrcode = models.ImageField(upload_to='2fa_qrcodes/', null=True, blank=True)
+    
+    def update(self, data, value) -> None:
+        match data:
+            case "key":
+                self.key = value
+            case "enable":
+                self.enable = value
+            case "scanned":
+                self.scanned = value
+            case "qrcode":
+                self.qrcode = value
+            case _:
+                return None
+        self.save()
+    
+    
+    
     class Meta:
         db_table = 'client_auth_2fa'

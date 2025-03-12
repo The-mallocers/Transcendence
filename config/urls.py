@@ -9,6 +9,8 @@ from utils.websockets.websocket import ChatWebSocket, GameWebSocket, WebSocket
 urlpatterns = [
     path('pages/', include("apps.pages.urls")),
     path('api/auth/', include('apps.auth.api.urls')),
+    # path('api/chat/', include('apps.auth.chat.urls')),
+    *static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT), #I need this before the catch all so I can correctly serve media files (QRcode for two FA), its not "production ready", too bad !
     re_path(r'^.*$', TemplateView.as_view(template_name='base.html')),
 ]
 

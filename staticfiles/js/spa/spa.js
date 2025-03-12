@@ -1,9 +1,6 @@
-// console.log("ALLOO :", window.location.pathname);
-
-import { logout } from '../apps/auth/logout.js';
-import { login } from '../apps/auth/login.js';
-import { register } from '../apps/auth/register.js';
-
+// import { logout } from '../apps/auth/logout.js';
+// import { login } from '../apps/auth/login.js';
+// import { register } from '../apps/auth/register.js';
 
 class Router {
     constructor(routes) {
@@ -14,22 +11,23 @@ class Router {
     //Claude said the above method is better than : document.querySelector('#app');
     init() {
         window.addEventListener('popstate', () => this.handleLocation());
-        //this.handleLocation();
     }
 
     async handleLocation() {
         const path = window.location.pathname;
-        // console.log("looking for the path: ", path)
+
+        console.log(window.location.search);
+        console.log("looking for the path: ", path)
         const route = this.routes.find(r => r.path === path);
+
         if (!route) {
             navigateTo("/error/404/");
         }
         else {
             try {
                 // console.log("About to try the route template of the route :", route);
-                const content = await route.template();
+                const content = await route.template(window.location.search);
                 this.rootElement.innerHTML = content;
-                console.log("SCRIPT ARE BEING RELOADED ON THIS PAGE WAHOOOO")
                 this.reloadScripts();
             } catch (error) {
                 console.error('Route rendering failed:', error);
@@ -38,8 +36,6 @@ class Router {
     }
 
     reloadScripts() {
-        // Execute all scripts in the new content
-        console.log("Je suis reload script")
         const scripts = this.rootElement.querySelectorAll('script');
         console.log("scripts = ", scripts)
         scripts.forEach(oldScript => {
@@ -47,21 +43,18 @@ class Router {
             
             // Copy src or inline content
             if (oldScript.src) {
-                newScript.src = oldScript.src;
-                console.log("hello, newscript.src :", newScript.src)
+                newScript.src = oldScript.src + "?t=" + new Date().getTime();
             } else {
                 newScript.textContent = oldScript.textContent;
             }
-            
-            // Copy other attributes
+
             Array.from(oldScript.attributes).forEach(attr => {
                 if (attr.name !== 'src') { // Skip src as we handled it above
                     newScript.setAttribute(attr.name, attr.value);
-                    console.log("new script attribute = ", attr.name, attr.value)
                 }
             });
             
-            // Replace old script with new one
+            console.log(oldScript)
             oldScript.parentNode.replaceChild(newScript, oldScript);
         });
     }
@@ -80,9 +73,15 @@ window.onload = async ()=>{
 
 
 // Navigation helper
+export function reloadScriptsSPA() {
+    router.reloadScripts();
+}
+
 export function navigateTo(path) {
     router.navigate(path);
 }
+
+
 
 // Example route definitions
 const header = {
@@ -91,7 +90,7 @@ const header = {
 };
 
 async function fetchRoute(path) {
-    // console.log("fetching the path :", path)
+    console.log("fetching the path :", path)
     const response = await fetch(path, {
         headers: header,
         credentials: 'include'
@@ -130,7 +129,6 @@ const routes = [
     {
         path: '/',
         template: async () => {
-            // console.log("I am fetching a route in spa.js")
             return await fetchRoute('/pages/');
         },
     },
@@ -143,7 +141,6 @@ const routes = [
     {
         path: '/pong/',
         template: async () => {
-            // console.log("fetching pong")
             return await fetchRoute('/pages/pong/');
         },
     },
@@ -189,29 +186,35 @@ const routes = [
             return await fetchRoute('/pages/chat/');
         },
     },
+    {
+        path: '/profile/settings/',
+        template: async () => {
+            return await fetchRoute('/pages/profile/settings/');
+        },
+    },
+    {
+        path: '/profile/',
+        template: async (query) => {
+            console.log(`/pages/profile/${query}`)
+            return await fetchRoute(`/pages/profile/${query}`);
+        }
+    },
+    {
+    path: '/auth/2fa',
+    template: async () => {
+        return await fetchRoute('/pages/auth/2fa');
+    },
+    },
 ];
 
 //Need to do this so that the event listerner also listens to the dynamic html
 document.addEventListener('click', async (e) => {
-    console.log("click !")
-    console.log(e);
     const routeElement = e.target.closest('[data-route]');
     if (routeElement) {
         const route = routeElement.dataset.route;
         console.log("in data route :", route);
         navigateTo(route);
     }
-    //this may not look like it but this took a very long time to come up with
-    if (e.target.matches('#logout-btn') || e.target.closest('#logout-btn')) {
-        logout();
-    }
-    if (e.target.matches('#login-btn') || e.target.closest('#login-btn')) {
-        login(e);
-    }
-    if (e.target.matches('#register-btn') || e.target.closest('#login-btn')) {
-        register(e);
-    }
-
 });
 
 

@@ -19,6 +19,7 @@ websockets = "*"
 django-redis = "*"
 aioredis = "*"
 celery = "*"
+qrcode = "*"
 
 [dev-packages]
 django-extensions = "*"

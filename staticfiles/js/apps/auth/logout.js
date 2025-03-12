@@ -1,7 +1,7 @@
 import { navigateTo } from '../../spa/spa.js';
 
 
-export function logout() {
+function logout() {
     console.log("logout.js online")
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
     fetch('/api/auth/logout/', {
@@ -26,3 +26,8 @@ export function logout() {
             console.error('Error during logout:', error);
     });
 };
+
+let element = document.querySelector("#logout-btn");
+
+
+element.addEventListener("click", (e)=>{logout(e)} )

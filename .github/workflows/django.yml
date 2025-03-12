@@ -52,6 +52,8 @@ jobs:
       - name: Installer les dépendances avec Pipenv
         run: |
           pipenv sync --dev
+          echo "Contents of Pipfile:"
+          cat Pipfile
 
       - name: Installer les migrations
         run: |
