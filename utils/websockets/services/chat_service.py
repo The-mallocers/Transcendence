@@ -49,10 +49,17 @@ class ChatService(BaseServices):
             self._logger.error(f"Erreur parsing JSON: {e}")
 
     async def _handle_send_message(self, data, client: Clients):
+        print("I'm in _handle_send_message")
         try:
             if 'data' in data and 'args' in data['data'] and 'message' in data['data']['args'] and 'room_id' in data['data']['args']:
                 message = data['data']['args']['message']
                 room = await Rooms.get_room_by_id(data['data']['args']['room_id'])
+                #check if the room_id is valid
+                print("room_id is:", room)
+                if room is None:
+                    await send_group_error(client.id, ResponseError.ROOM_NOT_FOUND)
+                    return
+                #check if the current client can send a message to the room_id
                 await send_group(await Rooms.get_id(room), EventType.CHAT, ResponseAction.MESSAGE_RECEIVED, {
                     'message': message,
                     'sender': str(client.id)

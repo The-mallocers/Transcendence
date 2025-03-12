@@ -84,6 +84,7 @@ class ResponseError(str, Enum):
     INTERNAL_ERROR = "Internal server error"
     SERVICE_ERROR: str = 'Service error'
     NO_HISTORY: str = 'There are no messages in this room'
+    ROOM_NOT_FOUND: str = 'Room does not exist'
 
 
 class Side(str, Enum):
