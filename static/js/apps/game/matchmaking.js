@@ -7,17 +7,26 @@ const clientId = element.dataset.clientId
 // const username = element.dataset.username;
 console.log(element.dataset.clientId)
 
-let connectToMMPool = async (client_id)=>{
+let connectToMMPool = (client_id) =>{
 
     let socket =  new WebSocket('ws://' + window.location.host + '/ws/game/?id=' + client_id);
     
-    //On  m
 
-    socket.onmessage((e)=>{
-        console.log(e)
-    })
+    const message = {
+        "event": "matchmaking",
+        "data": {
+            "action": "join_queue"
+        }
+    }
+    socket.onopen = () => {
+        socket.send(JSON.stringify(message));
+    }
+    
+    socket.onmessage = (e)=> {
+        console.log("lalalalalala",e)
+        //We should only get the response that a match was found
+    }
     console.log(socket)
 }
-
 
 connectToMMPool(clientId);

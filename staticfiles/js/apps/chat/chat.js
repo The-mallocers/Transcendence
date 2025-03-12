@@ -9,7 +9,7 @@ const clientId = await getClientId();
 //     return ;
 // }
 console.log("Got client ID :", clientId);
-const chatSocket = new WebSocket('ws://' + window.location.host + '/ws/game/?id=' + clientId);
+const chatSocket = new WebSocket('ws://' + window.location.host + '/ws/chat/?id=' + clientId);
 
 chatSocket.onmessage = (event) => {
     console.log("message received")
@@ -25,7 +25,7 @@ chatSocket.onmessage = (event) => {
     const doc = parser.parseFromString(htmlString, "text/html");
     const msgElement = doc.body.firstChild; // Get the actual <div> element
 
-    chatHistory.appendChild(msgElement);
+    chatHistory.appendChild(msgElement);    
     //Do things to show the new message on the front
 }
 
@@ -39,21 +39,15 @@ document.getElementById("messageInput").addEventListener("keydown", function(eve
         message = {
             "event": "chat",
             "data": {
-                "message"  : message,
-                "senderId" : client_id
+                "action": "send_message",
+                "args": {
+                    "room_id": "6da121108be243cc91c2f52ac4c9f611",
+                    "message": "hello comment ca va ? from chat 1"
+                }
             }
         }
         
         chatSocket.send(JSON.stringify(message));
-
-        // let chatHistory = document.querySelector('.chatHistory');
-
-        // const parser = new DOMParser();
-        // const htmlString = `<div class="msg me align-self-end">${message.data.message}</div>`;
-        // const doc = parser.parseFromString(htmlString, "text/html");
-        // const msgElement = doc.body.firstChild; // Get the actual <div> element
-        // chatHistory.appendChild(msgElement);
-
     }
 });
 

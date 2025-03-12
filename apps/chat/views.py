@@ -3,6 +3,7 @@ from django.template.loader import render_to_string
 from django.middleware.csrf import get_token
 
 from apps.shared.models import Clients
+from apps.chat.models import Rooms
     
 
 
@@ -15,6 +16,8 @@ def chat(request):
     #message_content
     
     client = Clients.get_client_by_request(request)
+    rooms  = Rooms.get_room_id_by_client_id(client.id)
+    
     me = None
     if client:
         me = client.id
@@ -42,6 +45,7 @@ def chat(request):
         'my_range': range(0),
         'conversation': conversation,
         "me" : me,
+        "rooms" : rooms
         }),
         
         

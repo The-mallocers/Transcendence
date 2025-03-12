@@ -9,7 +9,7 @@ const clientId = await getClientId();
 //     return ;
 // }
 console.log("Got client ID :", clientId);
-const chatSocket = new WebSocket('ws://' + window.location.host + '/ws/game/?id=' + clientId);
+const chatSocket = new WebSocket('ws://' + window.location.host + '/ws/chat/?id=' + clientId);
 
 chatSocket.onmessage = (event) => {
     console.log("message received")
@@ -39,8 +39,11 @@ document.getElementById("messageInput").addEventListener("keydown", function(eve
         message = {
             "event": "chat",
             "data": {
-                "message"  : message,
-                "senderId" : client_id
+                "action": "send_message",
+                "args": {
+                    "room_id": "6da121108be243cc91c2f52ac4c9f611",
+                    "message": "hello comment ca va ? from chat 1"
+                }
             }
         }
         

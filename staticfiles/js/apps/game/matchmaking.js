@@ -1,13 +1,39 @@
 console.log("coucou je suis matchmaking")
 
 //Fetch pour dire au serveur qu'on veut join la queue
-const id = document.querySelector("[client-id]")
-console.log(id)
+const element  = document.querySelector("#clientID");
+const clientId = element.dataset.clientId
+// Get individual data attributes
+// const username = element.dataset.username;
+console.log(element.dataset.clientId)
 
-let connectToMMPool = async (client_id)=>{
+let connectToMMPool = (client_id) =>{
 
-    let response =  new WebSocket('ws://' + window.location.host + '/ws/game/matchmaking/?id=' + client_id)
+    let socket =  new WebSocket('ws://' + window.location.host + '/ws/game/?id=' + client_id);
+    
 
-
-    console.log(response)
+    const message = {
+        "event": "matchmaking",
+        "data": {
+            "action": "join_queue"
+        }
+    }
+    
+    socket.send(JSON.stringify(message));
+    
+    socket.onMessage = (e)=>{
+        console.log(e)
+        //We should only get the response that a match was found
+    }
+    console.log(socket)
 }
+
+/*{
+    "event": "matchmaking",
+    "data": {
+        "action": "join_queue"
+    }
+}
+*/
+
+connectToMMPool(clientId);
