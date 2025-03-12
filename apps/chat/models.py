@@ -59,19 +59,35 @@ class Rooms(models.Model):
                 return list(Rooms.objects.filter(clients__id=client_id).values_list('id', flat=True))  
         except Clients.DoesNotExist:
             return []
-        except Exception as e:
-            raise Exception(f"Erreur lors de la récupération de la salle par client_id : {e}")
 
             
 
 class Messages(models.Model):
-    #Primary key
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False,
-                          null=False)
-    rooms = models.ForeignKey(Rooms, on_delete=models.CASCADE, related_name='messages')
+    room = models.ForeignKey(Rooms, on_delete=models.CASCADE, related_name='messages')
     sender = models.ForeignKey(Clients, on_delete=models.SET_NULL, blank=True, null=True)
     content = models.TextField()
     send_at = models.DateTimeField(auto_now_add=True)
     is_read = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f'Messages: {self.content}'
+
+    @staticmethod
+    @sync_to_async
+    def get_message_by_room(room):
+        try:
+            with transaction.atomic():
+                return list(Messages.objects.filter(room__id=room.id))
+        except Rooms.DoesNotExist:
+            return []
+        
+    @sync_to_async
+    def get_sender_id(self):
+        try:
+            with transaction.atomic():
+                return self.sender.id
+        except Exception:
+            return None
+
 
 

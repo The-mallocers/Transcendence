@@ -14,6 +14,7 @@ from utils.websockets.services.game_service import GameService
 from utils.websockets.services.matchmaking_service import MatchmakingService
 from utils.websockets.services.services import ServiceError
 from utils.websockets.services.chat_service import ChatService
+from apps.chat.models import Rooms
 
 class WebSocket(AsyncWebsocketConsumer):
     def __init__(self, *args, **kwargs):
@@ -28,7 +29,6 @@ class WebSocket(AsyncWebsocketConsumer):
         query_params = parse_qs(query_string)
 
         self.client: Clients = await Clients.get_client_by_id_async(query_params.get('id', ['default'])[0])
-        print(str(self.client.id))
 
         await self.accept()
         if self.client is None:
@@ -51,8 +51,6 @@ class WebSocket(AsyncWebsocketConsumer):
 
             data = json.loads(text_data)
             event_type = EventType(data['event'])   
-
-            print(event_type.value)
 
             if not hasattr(self, event_type.value + '_service'):
                 raise ServiceError("Service is not available")
@@ -101,5 +99,10 @@ class ChatWebSocket(WebSocket):
         await super().connect()
         # Additional chat-specific connection logic
         if self.client:
-            self.room_group_name = 'chat'
-            await self.channel_layer.group_add(self.room_group_name, self.channel_name)
+            # self.room_group_name = 'chat'
+            # await self.channel_layer.group_add(self.room_group_name, self.channel_name)
+            rooms = await Rooms.get_room_id_by_client_id(self.client.id)
+            for room in rooms:
+                await self.channel_layer.group_add(str(room), self.channel_name)
+
+
