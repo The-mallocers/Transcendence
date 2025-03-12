@@ -23,7 +23,7 @@ function login(e) {
             console.log("trying to navigate to index");
             navigateTo('/');
             const data = await response.json();
-            localStorage.setItem('clientId', data.client_id);
+            localStorage.setItem('client_id', data.client_id);
         }
         else if (response.status === 302) {
             const data = await response.json();
