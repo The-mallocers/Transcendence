@@ -22,8 +22,6 @@ function login(e) {
         if (response.ok) {
             console.log("trying to navigate to index");
             navigateTo('/');
-            const data = await response.json();
-            localStorage.setItem('client_id', data.client_id);
         }
         else if (response.status === 302) {
             const data = await response.json();
@@ -46,7 +44,6 @@ function login(e) {
 };
 
 let element = document.querySelector("#login-btn");
-
 
 element.addEventListener("click", (e)=>{login(e)} )
 //Add logic to redirect to 2fa screen if needed

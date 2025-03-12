@@ -84,8 +84,7 @@ class LoginApiView(APIView):
                 
             else:
                 response = Response({
-                    'message': 'Login successful',
-                    'client_id': client.id
+                    'message': 'Login successful'
                 }, status=status.HTTP_200_OK)
                 JWTGenerator(client, JWTType.ACCESS).set_cookie(response)
                 JWTGenerator(client, JWTType.REFRESH).set_cookie(response)
@@ -150,18 +149,17 @@ def get_qrcode(user):
         return True
     return False
 
-def formulate_json_response(state,status, message, redirect, client_id):
+def formulate_json_response(state,status, message, redirect):
     return(JsonResponse({
             "success": state,
             "message": message,
-            "redirect":redirect,
-            "client_id": client_id,
+            "redirect":redirect
         }, status=status))
 
 def post_twofa_code(req):
     email = req.COOKIES.get('email')
     client = Clients.get_client_by_email(email)
-    response = formulate_json_response(False, 400, "Error getting the user", "/auth/login", None) 
+    response = formulate_json_response(False, 400, "Error getting the user", "/auth/login") 
     if client is None:
         return response
     if req.method == "POST":
@@ -171,13 +169,13 @@ def post_twofa_code(req):
         if is_valid:
             if not client.twoFa.scanned:
                 client.twoFa.update("scanned", True)
-            response = formulate_json_response(True, 200, "Login Successful", "/", client.id)
+            response = formulate_json_response(True, 200, "Login Successful", "/")
             JWTGenerator(client, JWTType.ACCESS).set_cookie(
                 response=response)
             JWTGenerator(client, JWTType.REFRESH).set_cookie(
                 response=response)
             return response
-    response = formulate_json_response(False, 400, "No email match this request", "/auth/login", None)
+    response = formulate_json_response(False, 400, "No email match this request", "/auth/login")
     return response
 
 
