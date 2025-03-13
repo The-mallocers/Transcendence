@@ -18,45 +18,46 @@ class ChatService(BaseServices):
 
     async def _handle_create_room(self, data, admin: Clients):
         try:
+            # Retrieve the target client
             target = await Clients.get_client_by_id_async(data['data']['args']['target'])
 
+            # Initial checks (target does not exist or same ID)
             if target is None:
-                await send_group_error(admin.id, ResponseError.TARGET_NOT_FOUND)
-                return  
+                return await self._send_error_and_return(admin.id, ResponseError.TARGET_NOT_FOUND)
             
             if admin.id == target.id:
-                await send_group_error(admin.id, ResponseError.SAME_ID)
-                return
-            
+                return await self._send_error_and_return(admin.id, ResponseError.SAME_ID)
+
+            # Check for common rooms between admin and target
             rooms_admin = await Rooms.get_room_id_by_client_id(admin.id)
             rooms_target = await Rooms.get_room_id_by_client_id(target.id)
 
-            # print(rooms_admin)
-            # print(rooms_target)
+            common_rooms = set(rooms_admin) & set(rooms_target)  # Optimized set intersection
 
-            common_rooms = set(rooms_admin).intersection(set(rooms_target))
-            
             if common_rooms:
-                #if room was common with admin and target, we don't create new room but we set the 'room' to common room we found
+                # Use an existing common room
                 room = await Rooms.get_room_by_id(next(iter(common_rooms)))
             else:
-                #here we create new room when no common room was found
+                # Create a new room if no common room is found
                 room = await Rooms.create_room()
                 room.admin = admin
                 await room.asave()
                 await room.add_client(admin)
                 await room.add_client(target)
 
-            await self.channel_layer.group_add(str(await Rooms.get_id(room)), self.channel_name.decode('utf-8'))
+            room_id = str(await Rooms.get_id(room))  # Store the value to avoid redundant async calls
+
+            # Add both admin and target to the chat group
+            await self.channel_layer.group_add(room_id, self.channel_name.decode('utf-8'))
+
             target_channel_name = await self._redis.hget(name="consumers_channels", key=str(target.id))
             if target_channel_name:
-                await self.channel_layer.group_add(str(await Rooms.get_id(room)), target_channel_name.decode('utf-8'))
+                await self.channel_layer.group_add(room_id, target_channel_name.decode('utf-8'))
 
-            await send_group(admin.id, EventType.CHAT, ResponseAction.ROOM_CREATED, {
-                'room_id': str(await Rooms.get_id(room))
-            })
+            # Notify the admin that the room was created
+            await send_group(admin.id, EventType.CHAT, ResponseAction.ROOM_CREATED, {'room_id': room_id})
         except json.JSONDecodeError as e:
-            self._logger.error(f"Erreur parsing JSON: {e}")
+            self._logger.error(f"JSON parsing error: {e}")
 
     async def _handle_send_message(self, data, client: Clients):
         print("I'm in _handle_send_message")
