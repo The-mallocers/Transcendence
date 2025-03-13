@@ -1,17 +1,19 @@
 console.log("coucou je suis matchmaking")
+import { WebSocketManager } from "../../websockets/websockets.js"
 
 //Fetch pour dire au serveur qu'on veut join la queue
 const element  = document.querySelector("#clientID");
 const clientId = element.dataset.clientId
 
 const gameStatusDiv = document.querySelector("#gameStatus")
-// Get individual data attributes
-// const username = element.dataset.username;
+
 console.log(element.dataset.clientId)
 
 let connectToMMPool = (client_id) =>{
-
-    let socket = new WebSocket('ws://' + window.location.host + '/ws/game/?id=' + client_id);
+    
+    WebSocketManager.initGameSocket(client_id);
+    
+    const socket = WebSocketManager.gameSocket;
     
     const message = {
         "event": "matchmaking",
@@ -26,7 +28,7 @@ let connectToMMPool = (client_id) =>{
         console.log("You disconnected your matchmaking socket");
     }
     
-    socket.onmessage =  (e)=> {
+    socket.onmessage =  (e) => {
         const jsonData =  JSON.parse(e.data)
 
         if (jsonData.data.action)

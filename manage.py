@@ -12,8 +12,10 @@ def main():
     
     if "runserver" in sys.argv:
         sys.argv = ['daphne', 'config.asgi:application']
-        from daphne.cli import CommandLineInterface
+        from django.core.management import call_command
         django.setup()
+        call_command('collectstatic', '--noinput')
+        from daphne.cli import CommandLineInterface
         CommandLineInterface.entrypoint()
     else:
         from django.core.management import execute_from_command_line

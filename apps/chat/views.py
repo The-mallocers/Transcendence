@@ -44,7 +44,7 @@ def chat(request):
         "csrf_token": get_token(request), 
         'my_range': range(0),
         'conversation': conversation,
-        "me" : me,
+        "client_id" : me,
         "rooms" : rooms
         }),
         

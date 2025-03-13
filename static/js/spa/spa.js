@@ -1,3 +1,6 @@
+import { WebSocketManager } from "../websockets/websockets.js"
+
+
 class Router {
     constructor(routes) {
         this.routes = routes;
@@ -58,6 +61,7 @@ class Router {
 
     navigate(path) {
         window.history.pushState({}, '', path);
+        WebSocketManager.closeAllSockets(); //Checks if there is any sockets, and close them if there is.
         this.handleLocation();
     }
 }
