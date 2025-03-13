@@ -1,7 +1,7 @@
 DOCKER_COMPOSE_FILE=docker-compose.yaml
 
 up:
-	docker compose -f ./$(DOCKER_COMPOSE_FILE) up  --build --no-attach mailhog
+	docker compose -f ./$(DOCKER_COMPOSE_FILE) up  --build --no-attach mailhog --no-attach alertmanager
 
 down:
 	docker compose -f ./$(DOCKER_COMPOSE_FILE) down -v

@@ -76,10 +76,8 @@ def create_api_key(session):
             data=json.dumps(key_data)
         )
         if response.status_code == 200 or response.status_code == 201:
-            print(response.json())
             grafana_id = response.json().get('id')
             admin_client.rights.grafana_id = grafana_id
-            print(grafana_id)
             url = f"http://grafana:3000/api/serviceaccounts/{grafana_id}/tokens"
             dataJson = {"name":"grafanaToken"}
             res = session.post(url,
@@ -93,33 +91,50 @@ def create_api_key(session):
 
 # For an API endpoint that returns JSON directly:
 def render_dashboard(request, secretkey, session) -> str:
+    print(secretkey )
     api_url = "http://grafana:3000/api/search?type=dash-db"
-    print(api_url)
-    # my_headers = {
-    #     'Accept': 'application/json',
-    #     "Content-Type": "application/json",
-    # "Authorization": f'Bearer {secretkey}'
-    # }
+    my_headers = {
+        # 'Accept': 'application/json',
+        "Content-Type": "application/json",
+        "Authorization": f'Bearer {secretkey}'
+    }
     try:
-        response = session.get(
+
+        response = requests.get(
             api_url,
-            params=request.GET.dict()
+            headers=my_headers
         )
-        # response = requests.get(
-        #     api_url,
-        #     params=request.GET.dict(),  # Pass along all query parameters
-        #     headers=my_headers
-        # )
-        print(secretkey)
         response.raise_for_status()
         data = response.json()
         print(data)
-        urlnode = f"http://localhost:3000{data[0].get('url')}?orgId=1&from=now-6h&to=now&auth_token={secretkey}"
-        urlsql = f"http://localhost:3000{data[1].get('url')}?orgId=1&from=now-6h&to=now&auth_token={secretkey}"
+        print(data[0].get('uid'))
+        print(data[1].get('uid'))
+        uidnode = data[0].get('uid')
+        uidpostgre = data[1].get('uid')
         
-        # urlnode = f"http://localhost:3000{data[0].get('url')}?orgId=1&kiosk&apiKey={secretkey}"
-        # urlsql = f"http://localhost:3000{data[1].get('url')}?orgId=1&kiosk&apiKey={secretkey}"
-        return urlnode, urlsql
+        #get node dahsboard id
+        # url = f"http://grafana:3000/api/dashboards/uid/{uidnode}/public-dashboards/"
+        # response = requests.post(
+        #     url,
+        #     headers=my_headers
+        # )
+        # response.raise_for_status()
+        # data = response.json()
+        # urlnode = f"http://localhost:3000/public-dashboards/{data.get('uid')}"
+        urlnode = "http://localhost:3000/public-dashboards/1776bbfdef914034b6a7eb2635bf9d1b"
+        
+        
+        #get postgres dashboard id
+        # url = f"http://grafana:3000/api/dashboards/uid/{uidpostgre}/public-dashboards/"
+        # response = requests.post(
+        #     url,
+        #     headers=my_headers
+        # )
+        # response.raise_for_status()
+        # data = response.json()
+        # urlpostgre = f"http://localhost:3000/public-dashboards/{data.get('uid')}"
+        urlpostgre = "http://localhost:3000/public-dashboards/1776bbfdef914034b6a7eb2635bf9d1b"
+        return urlnode, urlpostgre
     
     except requests.exceptions.RequestException as e:
         print(str(e))
