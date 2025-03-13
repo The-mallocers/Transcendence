@@ -11,7 +11,7 @@ from utils.pong.objects import paddle
 class PlayerSerializer(serializers.ModelSerializer):
     paddle = serializers.SerializerMethodField()
     side = serializers.SerializerMethodField()
-    # score = serializers.IntegerField(default=0) #THIS WAS CRASHING REGISTER BECAUSE PLAYER MODEL DOESNT HAVE A SCORE
+    score = serializers.IntegerField(default=0)
 
     nickname = serializers.CharField(validators=[
         MinLengthValidator(3),
@@ -24,7 +24,7 @@ class PlayerSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Player
-        fields = ['id', 'nickname', 'side', 'paddle'] #'score', #SEE ABOVE
+        fields = ['id', 'nickname', 'score', 'side', 'paddle'] #'score', #SEE ABOVE
         read_only_fields = ['id']
 
     def get_paddle(self, obj):

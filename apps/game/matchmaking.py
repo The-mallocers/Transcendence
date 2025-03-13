@@ -27,11 +27,9 @@ class MatchmakingThread(Threads):
 
                     await game_manager.p1.join_game(game_manager)
                     await game_manager.p2.join_game(game_manager)
-
                     await game_manager.rset_status(GameStatus.STARTING)
                     await self.redis.hset(name="player_game", key=str(game_manager.p1.id), value=str(game_id))
                     await self.redis.hset(name="player_game", key=str(game_manager.p2.id), value=str(game_id))
-
                     GameThread(manager=game_manager, game_id=game_id).start()
 
                 await asyncio.sleep(1)

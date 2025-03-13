@@ -26,7 +26,7 @@ class Router {
         else {
             try {
                 // console.log("About to try the route template of the route :", route);
-                const content = await route.template(window.location.search);
+                const content = await route.template(window.location.search ? window.location.search : "");
                 this.rootElement.innerHTML = content;
                 this.reloadScripts();
             } catch (error) {
@@ -60,8 +60,20 @@ class Router {
     }
 
     navigate(path) {
+        
+        let splitedPath = path.split("/")
+        console.log(splitedPath)
+        if( splitedPath.includes("pong")) {
+            WebSocketManager.closeChatSocket()
+        }
+        else {
+            WebSocketManager.closeAllSockets(); //for now we close all
+        }
+
+        //In the future, we will have to do some better logics with the path to decide if we want to close
+        //a websocket or not.
+        
         window.history.pushState({}, '', path);
-        WebSocketManager.closeAllSockets(); //Checks if there is any sockets, and close them if there is.
         this.handleLocation();
     }
 }
