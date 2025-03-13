@@ -85,6 +85,7 @@ class ResponseError(str, Enum):
     SERVICE_ERROR: str = 'Service error'
     NO_HISTORY: str = 'There are no messages in this room'
     ROOM_NOT_FOUND: str = 'Room does not exist'
+    NOT_ALLOWED: str = 'You are not allowed to send message'
 
 
 class Side(str, Enum):

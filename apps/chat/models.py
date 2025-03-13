@@ -1,10 +1,13 @@
-from django.db import models, IntegrityError, transaction
+import django.core.exceptions
+from django.db import models, transaction
 import uuid
+from django.forms import ValidationError
 from django.utils import timezone
 from django.db import models
 from asgiref.sync import sync_to_async
 
 from apps.shared.models import Clients
+from apps.error.views import error
 
 class Rooms(models.Model):
     #Primary key
@@ -40,6 +43,8 @@ class Rooms(models.Model):
             with transaction.atomic():
                 return Rooms.objects.get(id=id)
         except Rooms.DoesNotExist:
+            return None
+        except ValidationError:
             return None
 
     @staticmethod
