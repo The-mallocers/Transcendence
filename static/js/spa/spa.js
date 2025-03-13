@@ -10,6 +10,7 @@ class Router {
     }
 
     async handleLocation() {
+        
         const path = window.location.pathname;
 
         console.log(window.location.search);
