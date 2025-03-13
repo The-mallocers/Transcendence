@@ -31,6 +31,8 @@ class ChatService(BaseServices):
             rooms_admin = await Rooms.get_room_id_by_client_id(admin.id)
             rooms_target = await Rooms.get_room_id_by_client_id(target.id)
 
+            # print(rooms_admin)
+            # print(rooms_target)
 
             common_rooms = set(rooms_admin).intersection(set(rooms_target))
             
