@@ -1,4 +1,5 @@
 import json
+from uuid import UUID
 from channels.layers import get_channel_layer
 from apps.shared.models import Clients
 from utils.pong.enums import EventType, ResponseAction, ResponseError  
@@ -8,6 +9,7 @@ from utils.websockets.channel_send import send_group, send_group_error
 from asgiref.sync import sync_to_async
 from apps.chat.models import Messages, Rooms
 from apps.auth.api.views import logger
+
 
 
 
@@ -23,10 +25,10 @@ class ChatService(BaseServices):
 
             # Initial checks (target does not exist or same ID)
             if target is None:
-                return await self._send_error_and_return(admin.id, ResponseError.TARGET_NOT_FOUND)
+                return await send_group_error(admin.id, ResponseError.TARGET_NOT_FOUND)
             
             if admin.id == target.id:
-                return await self._send_error_and_return(admin.id, ResponseError.SAME_ID)
+                return await send_group_error(admin.id, ResponseError.SAME_ID)
 
             # Check for common rooms between admin and target
             rooms_admin = await Rooms.get_room_id_by_client_id(admin.id)
@@ -60,26 +62,41 @@ class ChatService(BaseServices):
             self._logger.error(f"JSON parsing error: {e}")
 
     async def _handle_send_message(self, data, client: Clients):
-        print("I'm in _handle_send_message")
         try:
-            if 'data' in data and 'args' in data['data'] and 'message' in data['data']['args'] and 'room_id' in data['data']['args']:
-                message = data['data']['args']['message']
-                room = await Rooms.get_room_by_id(data['data']['args']['room_id'])
-                if room is None:
-                    await send_group_error(client.id, ResponseError.ROOM_NOT_FOUND)
-                    return  
-                if room not in await Rooms.get_room_id_by_client_id(client.id):
-                    await send_group_error(client.id, ResponseError.NOT_ALLOWED)
-                    return
-                await Messages.objects.acreate(sender=client, content=message, room=room)
-                await send_group(await Rooms.get_id(room), EventType.CHAT, ResponseAction.MESSAGE_RECEIVED, {
-                    'message': message,
-                    'sender': str(client.id)
-                })
-            else:
-                raise ServiceError("Invalid format JSON")
+            # Validate request structure
+            args = data.get('data', {}).get('args', {})
+            message, room_id = args.get('message'), args.get('room_id')
+
+            if not message or not room_id:
+                raise ServiceError("Invalid JSON format: Missing 'message' or 'room_id'")
+
+            # Retrieve room
+            room = await Rooms.get_room_by_id(room_id)
+            if room is None:
+                return await send_group_error(client.id, ResponseError.ROOM_NOT_FOUND)
+
+            # Check if client is a member of the room
+            room_uuid = UUID(room_id)
+            if room_uuid not in await Rooms.get_room_id_by_client_id(client.id):
+                return await send_group_error(client.id, ResponseError.NOT_ALLOWED)
+
+
+            # Store the message
+            await Messages.objects.acreate(sender=client, content=message, room=room)
+
+            # Send the message to the group
+            room_group = str(await Rooms.get_id(room))
+            await send_group(room_group, EventType.CHAT, ResponseAction.MESSAGE_RECEIVED, {
+                'message': message,
+                'sender': str(client.id)
+            })
+
+        except ServiceError as e:
+            self._logger.error(f"Service error: {e}")
+            await send_group_error(client.id, ResponseError.JSON_ERROR)
         except json.JSONDecodeError as e:
-            self._logger.error(f"Erreur parsing JSON: {e}")
+            self._logger.error(f"JSON parsing error: {e}")
+            await send_group_error(client.id, ResponseError.JSON_ERROR)
 
     async def _handle_get_history(self, data, client: Clients):
         try:

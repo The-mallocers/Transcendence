@@ -87,7 +87,7 @@ class ResponseError(str, Enum):
     ROOM_NOT_FOUND: str = 'Room does not exist'
     NOT_ALLOWED: str = 'You are not allowed to send message'
     TARGET_NOT_FOUND: str = 'Target not found'
-    SAME_ID: str = 'You can\'t send message to yourself'
+    SAME_ID: str = 'You can\'t create room with yourself'
 
 
 class Side(str, Enum):
