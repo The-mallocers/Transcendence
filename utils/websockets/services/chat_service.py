@@ -7,6 +7,7 @@ from utils.websockets.channel_send import send_group, send_group_error
 
 from asgiref.sync import sync_to_async
 from apps.chat.models import Messages, Rooms
+from apps.auth.api.views import logger
 
 
 
@@ -20,10 +21,16 @@ class ChatService(BaseServices):
             target = await Clients.get_client_by_id_async(data['data']['args']['target'])
 
             if target is None:
-                raise ServiceError('Target not found')
+                await send_group_error(admin.id, ResponseError.TARGET_NOT_FOUND)
+                return  
+            
+            if admin.id == target.id:
+                await send_group_error(admin.id, ResponseError.SAME_ID)
+                return
             
             rooms_admin = await Rooms.get_room_id_by_client_id(admin.id)
             rooms_target = await Rooms.get_room_id_by_client_id(target.id)
+
 
             common_rooms = set(rooms_admin).intersection(set(rooms_target))
             
@@ -46,7 +53,6 @@ class ChatService(BaseServices):
             await send_group(admin.id, EventType.CHAT, ResponseAction.ROOM_CREATED, {
                 'room_id': str(await Rooms.get_id(room))
             })
-
         except json.JSONDecodeError as e:
             self._logger.error(f"Erreur parsing JSON: {e}")
 
