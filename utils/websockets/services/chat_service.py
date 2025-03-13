@@ -80,7 +80,6 @@ class ChatService(BaseServices):
             if room_uuid not in await Rooms.get_room_id_by_client_id(client.id):
                 return await send_group_error(client.id, ResponseError.NOT_ALLOWED)
 
-
             # Store the message
             await Messages.objects.acreate(sender=client, content=message, room=room)
 
@@ -100,20 +99,36 @@ class ChatService(BaseServices):
 
     async def _handle_get_history(self, data, client: Clients):
         try:
-            if 'data' in data and 'args' in data['data'] and 'room_id' in data['data']['args']:
-                room = await Rooms.get_room_by_id(data['data']['args']['room_id'])
-                messages = await Messages.get_message_by_room(room)
-                if messages is None:
-                    await send_group_error(client.id, ResponseError.NO_HISTORY)
-                for message in messages:
-                    await send_group(client.id, EventType.CHAT, ResponseAction.HISTORY_RECEIVED, {
-                        'message': message.content,
-                        'sender': str(await message.get_sender_id())
-                    })
-            else:
-                raise ServiceError("Invalid format JSON")
+            # Extracting data in a cleaner way
+            args = data.get("data", {}).get("args", {})
+            room_id = args.get("room_id")
+
+            if not room_id:
+                raise ServiceError("Invalid format JSON: room_id missing")
+
+            # Fetching the room and its messages
+            room = await Rooms.get_room_by_id(room_id)
+            if not room:
+                await send_group_error(client.id, ResponseError.ROOM_NOT_FOUND)
+                return
+
+            messages = await Messages.get_message_by_room(room)
+            if not messages:
+                await send_group_error(client.id, ResponseError.NO_HISTORY)
+                return
+
+            # Sending messages in a single batch instead of multiple requests
+            formatted_messages = [
+                {"message": msg.content, "sender": str(await msg.get_sender_id())}
+                for msg in messages
+            ]
+            await send_group(client.id, EventType.CHAT, ResponseAction.HISTORY_RECEIVED, {"messages": formatted_messages})
+
         except json.JSONDecodeError as e:
-            self._logger.error(f"Erreur parsing JSON: {e}")
+            self._logger.error(f"JSON parsing error: {e}")
+        except ServiceError as e:
+            self._logger.error(f"Service error: {e}")
+            await send_group_error(client.id, str(e))
 
     async def _handle_disconnect(self):
         pass
