@@ -1,5 +1,6 @@
 from channels.layers import get_channel_layer
 
+from apps.player.manager import PlayerManager
 from apps.player.models import Player
 from apps.shared.models import Clients
 from utils.pong.enums import EventType, ResponseAction
@@ -21,5 +22,7 @@ class MatchmakingService(BaseServices):
         await self._redis.hdel("matchmaking_queue", str(player.id))
         await send_group(client.id, EventType.MATCHMAKING, ResponseAction.LEFT_QUEUE)
 
-    async def _handle_disconnect(self):
-        pass
+    async def handle_disconnect(self, client):
+        player = await PlayerManager.get_player_from_client_db(client.id)
+        await self._redis.hdel("matchmaking_queue", str(player.id))
+        await send_group(client.id, EventType.MATCHMAKING, ResponseAction.LEFT_QUEUE)

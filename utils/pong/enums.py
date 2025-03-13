@@ -29,11 +29,8 @@ class RequestAction(str, Enum):
     START_GAME: str = 'start_game'
     STOP_GAME: str = 'stop_game'
 
-    IS_READY: str = 'is_ready'
     # ── Update ────────────────────────────────────────────────────────────────────────
-    BALL_UPDATE: str = 'ball_update'
     PADDLE_MOVE: str = 'paddle_move'
-    SCORE_UPDATE: str = 'score_update'
 
     # ── Chat Actions ──────────────────────────────────────────────────────────────────
     CREATE_ROOM = "create_room"
@@ -84,6 +81,7 @@ class ResponseError(str, Enum):
     INTERNAL_ERROR = "Internal server error"
     SERVICE_ERROR: str = 'Service error'
     NO_HISTORY: str = 'There are no messages in this room'
+    OPPONENT_LEAVE: str = 'Your opponent leave the game'
 
 
 class Side(str, Enum):

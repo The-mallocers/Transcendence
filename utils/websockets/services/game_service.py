@@ -1,10 +1,8 @@
-from typing import Dict
-
 from apps.game.manager import GameManager
 from apps.player.models import Player
-from apps.pong.utils import GameState
 from apps.shared.models import Clients
-from utils.pong.enums import GameStatus, RequestAction
+from utils.pong.enums import GameStatus, ResponseError
+from utils.websockets.channel_send import send_group_error
 from utils.websockets.services.services import BaseServices
 
 
@@ -32,29 +30,21 @@ class GameService(BaseServices):
 
     async def _handle_paddle_move(self, data, player: Player):
         if str(player.id) == str(self.game_manager.p1.id):
-            self._logger.info('p1')
             if data['data']['args'] == 'up':
                 await self.game_manager.p1.paddle.increase_y()
             if data['data']['args'] == 'down':
                 await self.game_manager.p1.paddle.decrease_y()
         if str(player.id) == str(self.game_manager.p2.id):
-            self._logger.info('p2')
             if data['data']['args'] == 'up':
                 await self.game_manager.p2.paddle.increase_y()
             if data['data']['args'] == 'down':
                 await self.game_manager.p2.paddle.decrease_y()
 
-    async def _handle_is_ready(self, data: Dict, game: GameState, player: Player):
-        if player == game.player_1 or player == game.player_2:
-            player.is_ready = True
-            return {
-                'type': RequestAction.IS_READY,
-                'player_id': player.id,
-                'is_ready': player.is_ready
-            }
-
-    async def _handle_disconnect(self):
-        pass
-        # if room in self.game_states and player_id in \
-        #         self.game_states[room]['players']:
-        #     self.game_states[room]['players'][player_id].is_active = False
+    async def handle_disconnect(self, client):
+        p1_id = await self.game_manager.rget_player1_id()
+        p2_id = await self.game_manager.rget_player2_id()
+        opponent_id = p1_id if client.id is not p1_id else p2_id
+        opponent_client: Clients = await Clients.get_client_by_player_id_async(opponent_id)
+        if opponent_client:
+            await send_group_error(opponent_id, ResponseError.OPPONENT_LEAVE, close=True)
+            await self.game_manager.rset_status(GameStatus.ENDING)

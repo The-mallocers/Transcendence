@@ -1,13 +1,12 @@
 import json
+
 from channels.layers import get_channel_layer
-from apps.shared.models import Clients
-from utils.pong.enums import EventType, ResponseAction, ResponseError  
-from utils.websockets.services.services import BaseServices, ServiceError  
-from utils.websockets.channel_send import send_group, send_group_error  
 
-from asgiref.sync import sync_to_async
 from apps.chat.models import Messages, Rooms
-
+from apps.shared.models import Clients
+from utils.pong.enums import EventType, ResponseAction, ResponseError
+from utils.websockets.channel_send import send_group, send_group_error
+from utils.websockets.services.services import BaseServices, ServiceError
 
 
 class ChatService(BaseServices):
@@ -80,5 +79,5 @@ class ChatService(BaseServices):
         except json.JSONDecodeError as e:
             self._logger.error(f"Erreur parsing JSON: {e}")
 
-    async def _handle_disconnect(self):
+    async def handle_disconnect(self, client):
         pass

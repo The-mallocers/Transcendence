@@ -1,4 +1,3 @@
-import logging
 from dataclasses import dataclass
 
 from redis.asyncio import Redis
@@ -41,7 +40,6 @@ class Paddle:
         return await self._redis.json().get(self.game_key, Path('players[?(@.id=="{}")].paddle.x'.format(self.player_id)))
 
     async def get_y(self):
-        logging.info(f'id: {self.player_id}')
         return await self._redis.json().get(self.game_key, Path('players[?(@.id=="{}")].paddle.y'.format(self.player_id)))
 
     async def get_speed(self):

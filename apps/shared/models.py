@@ -61,6 +61,15 @@ class Clients(models.Model):
             return None
 
     @staticmethod
+    @sync_to_async
+    def get_client_by_player_id_async(player_id):
+        try:
+            with transaction.atomic():
+                return Clients.objects.get(player_id=player_id)
+        except Clients.DoesNotExist:
+            return None
+
+    @staticmethod
     def get_client_by_email(email: Profile.email):
         profile = Profile.get_profile_by_email(email)
         if profile is None:
