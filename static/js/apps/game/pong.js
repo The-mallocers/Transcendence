@@ -132,11 +132,11 @@ socket.onmessage = (e) => {
     // console.log(jsonData)
     if (jsonData.event == "UPDATE") {
 
-        if (jsonData.data.action == "PADDLE_1_UPDATE"){
+        if (jsonData.data.action == "PADDLE_LEFT_UPDATE"){
             console.log(jsonData.data.content.y)
             GameState.leftPaddleY = paddleDefaultPos + jsonData.data.content.y
         }
-        else if (jsonData.data.action == "PADDLE_2_UPDATE"){
+        else if (jsonData.data.action == "PADDLE_RIGHT_UPDATE"){
             GameState.rightPaddleY =  paddleDefaultPos + jsonData.data.content.y
         }
         else if (jsonData.data.action == "BALL_UPDATE") {

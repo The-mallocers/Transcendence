@@ -6,12 +6,12 @@ from utils.pong.objects.score import Score
 class GameState:
     """Class to store the current state of the game"""
 
-    def __init__(self, ball, paddle_pL, paddle_pR, score_pL, score_pR):
+    def __init__(self, ball, paddle_p1, paddle_p2, score_p1, score_p2):
         self.ball = ball
-        self.paddle_pL = paddle_pL
-        self.paddle_pR = paddle_pR
-        self.score_pL = score_pL
-        self.score_pR = score_pR
+        self.paddle_p1 = paddle_p1
+        self.paddle_p2 = paddle_p2
+        self.score_p1 = score_p1
+        self.score_p2 = score_p2
 
     @classmethod
     def create_copy(cls, game):
@@ -23,27 +23,27 @@ class GameState:
         ball_copy.dx = game.ball.dx
         ball_copy.dy = game.ball.dy
 
-        paddle_pL_copy = Paddle()
-        paddle_pL_copy.width = game.paddle_pL.width
-        paddle_pL_copy.height = game.paddle_pL.height
-        paddle_pL_copy.x = game.paddle_pL.x
-        paddle_pL_copy.y = game.paddle_pL.y
-        paddle_pL_copy.speed = game.paddle_pL.speed
+        paddle_p1_copy = Paddle()
+        paddle_p1_copy.width = game.paddle_p1.width
+        paddle_p1_copy.height = game.paddle_p1.height
+        paddle_p1_copy.x = game.paddle_p1.x
+        paddle_p1_copy.y = game.paddle_p1.y
+        paddle_p1_copy.speed = game.paddle_p1.speed
 
-        paddle_pR_copy = Paddle()
-        paddle_pR_copy.width = game.paddle_pR.width
-        paddle_pR_copy.height = game.paddle_pR.height
-        paddle_pR_copy.x = game.paddle_pR.x
-        paddle_pR_copy.y = game.paddle_pR.y
-        paddle_pR_copy.speed = game.paddle_pR.speed
+        paddle_p2_copy = Paddle()
+        paddle_p2_copy.width = game.paddle_p2.width
+        paddle_p2_copy.height = game.paddle_p2.height
+        paddle_p2_copy.x = game.paddle_p2.x
+        paddle_p2_copy.y = game.paddle_p2.y
+        paddle_p2_copy.speed = game.paddle_p2.speed
 
-        score_pL_copy = Score()
-        score_pL_copy.score = game.score_pL.score
+        score_p1_copy = Score()
+        score_p1_copy.score = game.score_p1.score
 
-        score_pR_copy = Score()
-        score_pR_copy.score = game.score_pR.score
+        score_p2_copy = Score()
+        score_p2_copy.score = game.score_p2.score
 
-        return cls(ball_copy, paddle_pL_copy, paddle_pR_copy, score_pL_copy, score_pR_copy)
+        return cls(ball_copy, paddle_p1_copy, paddle_p2_copy, score_p1_copy, score_p2_copy)
 
     @staticmethod
     def get_differences(current_state, previous_state):
@@ -59,10 +59,10 @@ class GameState:
         """
         differences = {
             'ball': {},
-            'paddle_pL': {},
-            'paddle_pR': {},
-            'score_pL': {},
-            'score_pR': {}
+            'paddle_p1': {},
+            'paddle_p2': {},
+            'score_p1': {},
+            'score_p2': {}
         }
 
         # Compare Ball properties
@@ -71,56 +71,36 @@ class GameState:
                 curr_val = getattr(current_state.ball, attr)
                 prev_val = getattr(previous_state.ball, attr)
                 if curr_val != prev_val:
-                    differences['ball'][attr] = {
-                        'previous': prev_val,
-                        'current': curr_val,
-                        'diff': curr_val - prev_val
-                    }
+                    differences['ball'][attr] = True
 
         # Compare Paddle 1 properties
-        if current_state.paddle_pL and previous_state.paddle_pL:
+        if current_state.paddle_p1 and previous_state.paddle_p1:
             for attr in ['x', 'y', 'width', 'height', 'speed']:
-                curr_val = getattr(current_state.paddle_pL, attr)
-                prev_val = getattr(previous_state.paddle_pL, attr)
+                curr_val = getattr(current_state.paddle_p1, attr)
+                prev_val = getattr(previous_state.paddle_p1, attr)
                 if curr_val != prev_val:
-                    differences['paddle_pL'][attr] = {
-                        'previous': prev_val,
-                        'current': curr_val,
-                        'diff': curr_val - prev_val
-                    }
+                    differences['paddle_p1'][attr] = True
 
         # Compare Paddle 2 properties
-        if current_state.paddle_pR and previous_state.paddle_pR:
+        if current_state.paddle_p2 and previous_state.paddle_p2:
             for attr in ['x', 'y', 'width', 'height', 'speed']:
-                curr_val = getattr(current_state.paddle_pR, attr)
-                prev_val = getattr(previous_state.paddle_pR, attr)
+                curr_val = getattr(current_state.paddle_p2, attr)
+                prev_val = getattr(previous_state.paddle_p2, attr)
                 if curr_val != prev_val:
-                    differences['paddle_pR'][attr] = {
-                        'previous': prev_val,
-                        'current': curr_val,
-                        'diff': curr_val - prev_val
-                    }
+                    differences['paddle_p2'][attr] = True
 
         # Compare Score 1
-        if current_state.score_pL and previous_state.score_pL:
-            curr_score = current_state.score_pL.score
-            prev_score = previous_state.score_pL.score
+        if current_state.score_p1 and previous_state.score_p1:
+            curr_score = current_state.score_p1.score
+            prev_score = previous_state.score_p1.score
             if curr_score != prev_score:
-                differences['score_pL']['score'] = {
-                    'previous': prev_score,
-                    'current': curr_score,
-                    'diff': curr_score - prev_score
-                }
+                differences['score_p1']['score'] = True
 
         # Compare Score 2
-        if current_state.score_pR and previous_state.score_pR:
-            curr_score = current_state.score_pR.score
-            prev_score = previous_state.score_pR.score
+        if current_state.score_p2 and previous_state.score_p2:
+            curr_score = current_state.score_p2.score
+            prev_score = previous_state.score_p2.score
             if curr_score != prev_score:
-                differences['score_pR']['score'] = {
-                    'previous': prev_score,
-                    'current': curr_score,
-                    'diff': curr_score - prev_score
-                }
+                differences['score_p2']['score'] = True
 
         return differences
