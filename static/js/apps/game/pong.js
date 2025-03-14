@@ -143,69 +143,84 @@ const render = () => {
     }
 };
 
+
 // Track WebSocket message patterns
-socket.onmessage = (e) => {
-    const receiveTime = performance.now();
-    const jsonData = JSON.parse(e.data);
+// socket.onmessage = (e) => {
+//     // const receiveTime = performance.now();
+//     const jsonData = JSON.parse(e.data);
     
-    // Track message timing
-    messageCount++;
+//     // // Track message timing
+//     // messageCount++;
     
-    // Calculate time since last message
-    const timeSinceLastMessage = lastMessageTimestamp > 0 ? receiveTime - lastMessageTimestamp : 0;
-    if (lastMessageTimestamp > 0) {
-        messageGaps.push(timeSinceLastMessage);
+//     // // Calculate time since last message
+//     // const timeSinceLastMessage = lastMessageTimestamp > 0 ? receiveTime - lastMessageTimestamp : 0;
+//     // if (lastMessageTimestamp > 0) {
+//     //     messageGaps.push(timeSinceLastMessage);
         
-        // Batch detection
-        if (timeSinceLastMessage < batchThreshold) {
-            // Part of a batch
-            currentBatchSize++;
-        } else if (currentBatchSize > 0) {
-            // End of a batch
-            batchSizes.push(currentBatchSize);
-            batchCount++;
-            currentBatchSize = 1; // This message starts a new potential batch
-        } else {
-            // Isolated message
-            currentBatchSize = 1;
-        }
-    } else {
-        currentBatchSize = 1;
-    }
+//     //     // Batch detection
+//     //     if (timeSinceLastMessage < batchThreshold) {
+//     //         // Part of a batch
+//     //         currentBatchSize++;
+//     //     } else if (currentBatchSize > 0) {
+//     //         // End of a batch
+//     //         batchSizes.push(currentBatchSize);
+//     //         batchCount++;
+//     //         currentBatchSize = 1; // This message starts a new potential batch
+//     //     } else {
+//     //         // Isolated message
+//     //         currentBatchSize = 1;
+//     //     }
+//     // } else {
+//     //     currentBatchSize = 1;
+//     // }
     
-    lastMessageTimestamp = receiveTime;
+//     // lastMessageTimestamp = receiveTime;
     
-    // Store message timing data
-    debugData.messageTimes.push({
-        time: receiveTime,
-        gap: timeSinceLastMessage
-    });
+//     // // Store message timing data
+//     // debugData.messageTimes.push({
+//     //     time: receiveTime,
+//     //     gap: timeSinceLastMessage
+//     // });
     
-    // Update message rate counter
-    const now = performance.now();
-    if (now - lastMessageTime >= 1000) {
-        messagesPerSecond = messageCount * 1000 / (now - lastMessageTime);
-        messageCount = 0;
-        lastMessageTime = now;
-    } else {
-        lastMessageTime = now; // Update last message time
-    }
+//     // // Update message rate counter
+//     // const now = performance.now();
+//     // if (now - lastMessageTime >= 1000) {
+//     //     messagesPerSecond = messageCount * 1000 / (now - lastMessageTime);
+//     //     messageCount = 0;
+//     //     lastMessageTime = now;
+//     // } else {
+//     //     lastMessageTime = now; // Update last message time
+//     // }
     
+//     if (jsonData.event == "UPDATE") {
+//         if (jsonData.data.action == "BALL_UPDATE") {
+//             GameState.ballX = jsonData.data.content.x;
+//             GameState.ballY = jsonData.data.content.y;
+//             console.table(jsonData.data.content.x, jsonData.data.content.y)
+//             // Store ball position data
+//             // debugData.ballPositions.push({
+//             //     time: receiveTime,
+//             //     x: GameState.ballX,
+//             //     y: GameState.ballY
+//             // });
+//         }
+//     }
+
+//     // render()
+// };
+socket.onmessage = (e) => {
+    // queueMicrotask(() => {
+    const jsonData = JSON.parse(e.data);
     if (jsonData.event == "UPDATE") {
         if (jsonData.data.action == "BALL_UPDATE") {
             GameState.ballX = jsonData.data.content.x;
             GameState.ballY = jsonData.data.content.y;
-            
-            // Store ball position data
-            debugData.ballPositions.push({
-                time: receiveTime,
-                x: GameState.ballX,
-                y: GameState.ballY
-            });
+            // console.table(jsonData.data.content.x, jsonData.data.content.y)
         }
     }
+        // return render()
+    // })s
 };
-
 // Print detailed batch analysis to console every 5 seconds
 setInterval(() => {
     console.log(`--- WebSocket Message Analysis ---`);
@@ -250,5 +265,8 @@ function animationLoop() {
     requestAnimationFrame(animationLoop);
 }
 
-// Start the animation loop
+// // Start the animation loop
 requestAnimationFrame(animationLoop);
+
+// setInterval(render, 1);  // 60 fps
+

@@ -31,18 +31,18 @@ class GameService(BaseServices):
         await self.game_manager.rset_status(GameStatus.ENDING)
 
     async def _handle_paddle_move(self, data, player: Player):
-        if str(player.id) == str(self.game_manager.p1.id):
+        if str(player.id) == str(self.game_manager.pL.id):
             self._logger.info('p1')
             if data['data']['args'] == 'up':
-                await self.game_manager.p1.paddle.increase_y()
+                await self.game_manager.pL.paddle.increase_y()
             if data['data']['args'] == 'down':
-                await self.game_manager.p1.paddle.decrease_y()
-        if str(player.id) == str(self.game_manager.p2.id):
+                await self.game_manager.pL.paddle.decrease_y()
+        if str(player.id) == str(self.game_manager.pR.id):
             self._logger.info('p2')
             if data['data']['args'] == 'up':
-                await self.game_manager.p2.paddle.increase_y()
+                await self.game_manager.pR.paddle.increase_y()
             if data['data']['args'] == 'down':
-                await self.game_manager.p2.paddle.decrease_y()
+                await self.game_manager.pR.paddle.decrease_y()
 
     async def _handle_is_ready(self, data: Dict, game: GameState, player: Player):
         if player == game.player_1 or player == game.player_2:

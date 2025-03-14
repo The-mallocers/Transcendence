@@ -34,6 +34,7 @@ let connectToMMPool = (client_id) => {
         }
     }
     socket.onopen = () => {
+        
         socket.send(JSON.stringify(message));
     }
     socket.onclose = () => {

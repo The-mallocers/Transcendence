@@ -16,8 +16,8 @@ class GameManager:
         from apps.player.manager import PlayerManager
         self._redis = Redis(host=settings.REDIS_HOST, port=settings.REDIS_PORT, db=0)
         self._game: Game = None
-        self.p1: PlayerManager = PlayerManager()
-        self.p2: PlayerManager = PlayerManager()
+        self.pL: PlayerManager = PlayerManager()
+        self.pR: PlayerManager = PlayerManager()
         self._game_key = None
 
         if game_id:
@@ -27,8 +27,8 @@ class GameManager:
         from apps.game.models import Game
         self._game = await Game.objects.aget(id=game_id)
         self._game_key = f"game:{game_id}"
-        await self.p1.init_player(await self.rget_player1_id(), game_id)
-        await self.p2.init_player(await self.rget_player2_id(), game_id)
+        await self.pL.init_player(await self.rget_pL_id(), game_id)
+        await self.pR.init_player(await self.rget_pR_id(), game_id)
 
     async def create_game(self):
         """Create a new game and store it in Redis."""
@@ -77,10 +77,10 @@ class GameManager:
             await self._game.asave()
         await self._redis.json().set(self._game_key, Path('status'), status.value)
 
-    async def rget_player1_id(self):
+    async def rget_pL_id(self):
         return await self._redis.json().get(self._game_key, Path('players[0].id'))
 
-    async def rget_player2_id(self):
+    async def rget_pR_id(self):
         return await self._redis.json().get(self._game_key, Path('players[1].id'))
 
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ DATABASE OPERATIONS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #

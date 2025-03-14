@@ -55,6 +55,7 @@ class ResponseAction(str, Enum):
     ENDING: str = 'Game end'
 
     # ── Update ────────────────────────────────────────────────────────────────────────
+    PLAYER_INFOS: str = 'player_informations'
     BALL_UPDATE: str = 'ball_update'
     PADDLE_1_UPDATE: str = 'paddle_1_update'
     PADDLE_2_UPDATE: str = 'paddle_2_update'
