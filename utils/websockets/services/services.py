@@ -1,14 +1,13 @@
 import logging
+import traceback
 from abc import ABC, abstractmethod
 from typing import Dict, Any
 
-from redis.asyncio import Redis
-from channels.layers import get_channel_layer
 from django.conf import settings
+from redis.asyncio import Redis
 
-from apps.player.models import Player
-from apps.shared.models import Clients
-from utils.pong.enums import RequestAction, EventType
+from utils.pong.enums import RequestAction
+
 
 class ServiceError(Exception):
     def __init__(self, message='An error occured', code=400):
@@ -27,7 +26,7 @@ class BaseServices(ABC):
         pass
 
     @abstractmethod
-    async def _handle_disconnect(self):
+    async def handle_disconnect(self, client):
         pass
 
     async def process_action(self, data: Dict[str, Any], *args):
@@ -43,7 +42,8 @@ class BaseServices(ABC):
                 return await handler_method(data, *args)
 
         except ValueError:
-            raise ServiceError(f"This action is not valide: {data['data']['action']}")
+            traceback.print_exc()
+            raise ServiceError(f"This action is not valid: {data['data']['action']}")
 
         except ServiceError as e:
             raise e

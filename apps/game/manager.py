@@ -1,6 +1,7 @@
 from asgiref.sync import sync_to_async
 from django.conf import settings
 from django.db import transaction, DatabaseError
+from redis import DataError
 from redis.asyncio import Redis
 from redis.commands.json.path import Path
 
@@ -65,10 +66,13 @@ class GameManager:
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ REDIS OPERATION ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
 
     async def rget_status(self) -> GameStatus | None:
-        status = await self._redis.json().get(self._game_key, Path('status'))
-        if status:
-            return GameStatus(status)
-        else:
+        try:
+            status = await self._redis.json().get(self._game_key, Path('status'))
+            if status:
+                return GameStatus(status)
+            else:
+                return None
+        except DataError:
             return None
 
     async def rset_status(self, status: GameStatus):
@@ -78,11 +82,16 @@ class GameManager:
         await self._redis.json().set(self._game_key, Path('status'), status.value)
 
     async def rget_pL_id(self):
-        return await self._redis.json().get(self._game_key, Path('players[0].id'))
+        try:
+            return await self._redis.json().get(self._game_key, Path('players[0].id'))
+        except DataError:
+            return None
 
     async def rget_pR_id(self):
-        return await self._redis.json().get(self._game_key, Path('players[1].id'))
-
+        try:
+            return await self._redis.json().get(self._game_key, Path('players[1].id'))
+        except DataError:
+            return None
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ DATABASE OPERATIONS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
 
     @sync_to_async

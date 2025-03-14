@@ -24,14 +24,14 @@ class PlayerManager:
         self._logger = logging.getLogger(self.__class__.__name__)
 
         self._player_game: PlayerGame = None
-        self._player: Player = None
+        self.player: Player = None
         self.id = None
         self.paddle: Paddle = None
 
     async def init_player(self, player_id, game_id=None):
         player = await self.get_player_db(player_id)
         if player:
-            self._player = player
+            self.player = player
             self.paddle = Paddle(self._redis, player_id=player.id, game_id=game_id)
             self.id = player_id
             return self
@@ -40,15 +40,16 @@ class PlayerManager:
 
     async def join_game(self, game_manager: GameManager):
         try:
-            await game_manager.add_player_db(self._player)
-            self._player_game: PlayerGame = await self.get_player_game_id_db(self._player.id, await game_manager.get_id())
+            await game_manager.add_player_db(self.player)
+            self._player_game: PlayerGame = await self.get_player_game_id_db(self.player.id,
+                                                                             await game_manager.get_id())
 
             game_key = f'game:{await game_manager.get_id()}'
             players = await self._redis.json().get(game_key, Path("players"))
             player_ids = [player["id"] for player in players]
 
-            if self._player.id in player_ids:
-                return await send_group_error(self._player.id, ResponseError.ALREADY_JOIN)
+            if self.player.id in player_ids:
+                return await send_group_error(self.player.id, ResponseError.ALREADY_JOINED)
             else:
                 if len(player_ids) == 0:
                     rand_side = random.choice(list(Side))
@@ -60,33 +61,34 @@ class PlayerManager:
                     if first_player.side == Side.LEFT.value:
                         self._player_game.side = Side.RIGHT
                 elif len(player_ids) == 2:
-                    return await send_group_error(self._player.id, ResponseError.GAME_FULL)
+                    return await send_group_error(self.player.id, ResponseError.GAME_FULL)
                 await sync_to_async(self._player_game.save)()
 
             # ── Send Reponse To Player ────────────────────────────────────────────────
 
             self.paddle.game_key = game_key
-            serializer = PlayerSerializer(self._player, context={'paddle': self.paddle, 'side': self._player_game.side})
+            serializer = PlayerSerializer(self.player,
+                                          context={'paddle': self.paddle, 'side': self._player_game.side, 'score': 0})
             player_data = await sync_to_async(lambda: serializer.data)()
 
             await self._redis.json().arrappend(game_key, Path("players"), player_data)
 
             channel_layer = get_channel_layer()
-            client = await Clients.get_client_by_player(self._player.id)
+            client = await Clients.get_client_by_player_id_async(self.player.id)
             channel_name = await self._redis.hget(name="consumers_channels", key=str(client.id))
             await channel_layer.group_add(str(await game_manager.get_id()), channel_name.decode('utf-8'))
 
-            await send_group(self._player.id, EventType.GAME, ResponseAction.JOIN_GAME)
+            await send_group(self.player.id, EventType.GAME, ResponseAction.JOIN_GAME)
             await self.leave_mm()
 
         except Exception as e:
-            await send_group_error(self._player.id, ResponseError.JOINING_ERROR)
+            await send_group_error(self.player.id, ResponseError.JOINING_ERROR)
             await self.leave_mm()
             raise RuntimeError(str(e))
 
 
     def __str__(self):
-        return f"{self._player}"
+        return f"{self.player}"
 
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ DATABASE OPERATIONS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
 
@@ -121,4 +123,4 @@ class PlayerManager:
             return None
 
     async def leave_mm(self):
-        await self._redis.hdel('matchmaking_queue', str(self._player.id))
+        await self._redis.hdel('matchmaking_queue', str(self.player.id))

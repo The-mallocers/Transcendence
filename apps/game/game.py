@@ -1,16 +1,18 @@
 import asyncio
 import traceback
 
+from asgiref.sync import sync_to_async
 from django.conf import settings
 from redis import Redis
 
 from apps.game.manager import GameManager
+from apps.player.api.serializers import PlayerInformationSerializer
+from apps.pong.pong import PongLogic
+from utils.pong.enums import GameStatus, EventType, ResponseAction, ResponseError
 from utils.pong.objects.ball import Ball
 from utils.pong.objects.paddle import Paddle
 from utils.pong.objects.score import Score
 from utils.threads import Threads
-from apps.pong.pong import PongLogic
-from utils.pong.enums import GameStatus, EventType, ResponseAction, ResponseError
 from utils.websockets.channel_send import send_group, send_group_error
 
 
@@ -25,7 +27,9 @@ class GameThread(Threads):
         try:
             initialized = await self.init_game()
             while not self._stop_event.is_set() and initialized and await self.game_manager.rget_status() is not GameStatus.ERROR:
-                await self._starting()
+                if await self._starting():
+                    break
+            while not self._stop_event.is_set() and initialized and await self.game_manager.rget_status() is not GameStatus.ERROR:
                 await self._running()
                 await self._ending()
 
@@ -67,7 +71,19 @@ class GameThread(Threads):
     async def _starting(self):
         if await self.game_manager.rget_status() is GameStatus.STARTING:
             await send_group(self.game_id, EventType.GAME, ResponseAction.STARTING)
-            await asyncio.sleep(1) #changed it to 1 for now
+            pL_serializer = PlayerInformationSerializer(self.game_manager.pL.player,
+                                                        context={'id': self.game_manager.pL.id})
+            pR_serializer = PlayerInformationSerializer(self.game_manager.pR.player,
+                                                        context={'id': self.game_manager.pR.id})
+            pL_data = await sync_to_async(lambda: pL_serializer.data)()
+            pR_data = await sync_to_async(lambda: pR_serializer.data)()
+            await send_group(self.game_id, EventType.GAME, ResponseAction.PLAYER_INFOS, {
+                'left': pL_data,
+                'right': pR_data
+            })
+            await asyncio.sleep(5)
+            return True
+        return False
 
     async def _running(self):
         if await self.game_manager.rget_status() is GameStatus.RUNNING:
@@ -77,10 +93,11 @@ class GameThread(Threads):
     async def _ending(self):
         if await self.game_manager.rget_status() is GameStatus.ENDING:
             await send_group(self.game_id, EventType.GAME, ResponseAction.ENDING)
-            await self.game_manager.rset_status(GameStatus.FINISHED)
             self._stop_event.set()
-            await asyncio.sleep(1) #changed it to 1 for now
-            self.stop()
+            await self._stoping()
 
-
-
+    async def _stoping(self):
+        await self.game_manager.rset_status(GameStatus.FINISHED)
+        await self.redis.hdel('player_game', self.game_manager.pL.id, self.game_manager.pR.id)
+        await asyncio.sleep(5)
+        self.stop()

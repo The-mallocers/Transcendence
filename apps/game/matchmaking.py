@@ -6,9 +6,9 @@ from redis import Redis
 
 from apps.game.game import GameThread
 from apps.game.manager import GameManager
-from utils.threads import Threads
 from apps.player.manager import PlayerManager
 from utils.pong.enums import GameStatus, ResponseError
+from utils.threads import Threads
 from utils.websockets.channel_send import send_group_error
 
 
