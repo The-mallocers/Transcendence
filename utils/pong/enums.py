@@ -11,6 +11,9 @@ class GameStatus(str, Enum):
     FINISHED: str = 'finished'
     ERROR: str = 'error'
 
+
+status_order = list(GameStatus)
+
 class EventType(str, Enum):
     MATCHMAKING: str = 'matchmaking'
     GAME: str = 'game'
@@ -18,7 +21,8 @@ class EventType(str, Enum):
     ERROR: str = 'error'
     CHAT: str = 'chat'
 
-#All the action the client send to server
+
+# All the actions the client sends to the server
 class RequestAction(str, Enum):
     # ── Matchmaking Actions ───────────────────────────────────────────────────────────
     JOIN_QUEUE: str = 'join_queue'
@@ -38,18 +42,18 @@ class RequestAction(str, Enum):
     GET_HISTORY = "get_history"
 
 
-#All the reponse the server send to client
+# All the responses the server sends to the client
 class ResponseAction(str, Enum):
     # ── Matchmaking Actions ───────────────────────────────────────────────────────────
-    JOIN_QUEUE: str = 'Successfuly join queue'
-    LEFT_QUEUE: str = 'Successfuly left queue'
+    JOIN_QUEUE: str = 'You have successfully joined the queue'
+    LEFT_QUEUE: str = 'You have successfully left the queue'
 
     # ── Game Actions ──────────────────────────────────────────────────────────────────
-    JOIN_GAME: str = 'Successfuly join game'
-    LEFT_GAME: str = 'Successfuly left game'
-    STARTING: str = 'Waiting to game start'
-    STARTED: str = 'Game will start'
-    ENDING: str = 'Game end'
+    JOIN_GAME: str = 'You have successfully joined the game'
+    LEFT_GAME: str = 'You have successfully left the game'
+    STARTING: str = 'The game is about to start'
+    STARTED: str = 'The game has started'
+    ENDING: str = 'The game has ended'
 
     # ── Update ────────────────────────────────────────────────────────────────────────
     BALL_UPDATE: str = 'ball_update'
@@ -59,39 +63,54 @@ class ResponseAction(str, Enum):
     SCORE_2_UPDATE: str = 'score_2_update'
 
     # ── Chat Actions ──────────────────────────────────────────────────────────────────
-    ROOM_CREATED = "room_created"
-    MESSAGE_RECEIVED = "message_received"
+    ROOM_CREATED = "You have successfully created a chat room"
+    MESSAGE_RECEIVED = "New message received"
     HISTORY_RECEIVED = "history_received"
-
 
     TEST: str = 'test'
 
-#All the error msg send to client
+
+# All the error messages sent to the client
 class ResponseError(str, Enum):
-    GAME_FULL: str = 'Game full'
-    ALREADY_JOIN: str = "Player has already join"
-    NOT_IN_GAME: str = 'Player not int game'
-    NOT_READY: str = 'Players is not ready'
-    JOINING_ERROR: str = 'Error when you try to join'
-    INVALID_ID: str = 'Player does not exist'
-    MATCHMAKING_ERROR: str = 'Leaving matchmaking because there is an error'
-    PLAYER_NOT_FOUND: str = 'Your player id not corresponding to a player'
-    JSON_ERROR: str = 'Invalid json'
-    EXCEPTION: str = 'Internal server error'
-    INTERNAL_ERROR = "Internal server error"
-    SERVICE_ERROR: str = 'Service error'
-    NO_HISTORY: str = 'There are no messages in this room'
-    OPPONENT_LEAVE: str = 'Your opponent leave the game'
+    # ── Matchmaking ───────────────────────────────────────────────────────────────────
+    ALREADY_IN_QUEUE: str = 'You are already in the queue.'
+    ALREAY_IN_GAME: str = 'You are already in game.'
+    NOT_IN_QUEUE: str = 'You are not currently in the queue.'
+    MATCHMAKING_ERROR: str = 'Leaving matchmaking due to an error.'
+
+    # ── Game ──────────────────────────────────────────────────────────────────────────
+    GAME_FULL: str = 'The game is currently full.'
+    ALREADY_JOINED: str = "You have already joined the game."
+    ALREADY_START: str = 'The game has already started.'
+    JOINING_ERROR: str = 'Error occurred while trying to join.'
+    OPPONENT_LEFT: str = 'Your opponent has left the game.'
+    NOT_READY_TO_START: str = 'The game is not ready to start yet.'
+    NO_GAME: str = 'There is no active game'
+
+    # ── Chat ──────────────────────────────────────────────────────────────────────────
+    NO_HISTORY: str = 'There are no messages in this room.'
+
+    # ── Errors ────────────────────────────────────────────────────────────────────────
+    PLAYER_NOT_FOUND: str = 'Your player ID does not correspond to a player.'
+    JSON_ERROR: str = 'There is an error in JSON decoding.'
+    EXCEPTION: str = 'An error has occurred.'
+    SERVICE_ERROR: str = 'An error occurred in the service.'
+
+    # INTERNAL_ERROR = "Internal server error"
+    # INVALID_ID: str = 'Player does not exist'
+    # NOT_READY: str = 'Players are not ready'
+    # NOT_IN_GAME: str = 'Player is not in the game'
 
 
 class Side(str, Enum):
     LEFT: str = 'left'
     RIGHT: str = 'right'
 
+
 class Ranks(str, Enum):
     BRONZE: str = 'bronze'
     SILVER: str = 'silver'
     GOLD: str = 'gold'
-    PLATINE: str = 'platine'
+    PLATINUM: str = 'platinum'
     DIAMOND: str = 'diamond'
     CHAMPION: str = 'champion'

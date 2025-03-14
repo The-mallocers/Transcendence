@@ -82,5 +82,6 @@ class GameThread(Threads):
 
     async def _stoping(self):
         await self.game_manager.rset_status(GameStatus.FINISHED)
+        await self.redis.hdel('player_game', self.game_manager.p1.id, self.game_manager.p2.id)
         await asyncio.sleep(5)
         self.stop()

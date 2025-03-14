@@ -64,7 +64,6 @@ class WebSocket(AsyncWebsocketConsumer):
                 await self.game_service.process_action(data, player)
 
             if event_type is EventType.CHAT:
-                player = await PlayerManager.get_player_from_client_db(self.client.id)
                 await self.chat_service.process_action(data, self.client)
 
         except json.JSONDecodeError as e:
