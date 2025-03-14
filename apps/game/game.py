@@ -41,8 +41,8 @@ class GameThread(Threads):
 
         redis_sync = Redis(host=settings.REDIS_HOST, port=settings.REDIS_PORT, db=0)
         redis_sync.delete(f'game:{self.game_id}')
-        redis_sync.hdel('player_game', str(self.game_manager.p1.id))
-        redis_sync.hdel('player_game', str(self.game_manager.p2.id))
+        redis_sync.hdel('player_game', str(self.game_manager.pL.id))
+        redis_sync.hdel('player_game', str(self.game_manager.pR.id))
 
         self._logger.info("Cleanup of game complete")
 
@@ -54,10 +54,10 @@ class GameThread(Threads):
         self.logic: PongLogic = PongLogic(
             self.game_id,
             Ball(self.redis, self.game_id),
-            Paddle(self.redis, self.game_id, self.game_manager.p1.id),
-            Paddle(self.redis, self.game_id, self.game_manager.p2.id),
-            Score(self.redis, self.game_id, self.game_manager.p1.id),
-            Score(self.redis, self.game_id, self.game_manager.p2.id),
+            Paddle(self.redis, self.game_id, self.game_manager.pL.id),
+            Paddle(self.redis, self.game_id, self.game_manager.pR.id),
+            Score(self.redis, self.game_id, self.game_manager.pL.id),
+            Score(self.redis, self.game_id, self.game_manager.pR.id),
         )
 
         return True

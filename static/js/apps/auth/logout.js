@@ -20,6 +20,7 @@ function logout() {
         })
         .then(data => {
             console.log('Logout successful:', data);
+            localStorage.removeItem('client_id'); //Recent addition since our client id is stored in localstorage, we need to remove it.
             navigateTo('/auth/login')
         })
         .catch(error => {

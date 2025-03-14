@@ -7,7 +7,7 @@ class GameStatus(str, Enum):
     STARTING: str = 'starting'
     RUNNING: str = 'running'
     ENDING: str = 'ending'
-    DESTROING: str = 'destroing'
+    DESTROYING: str = 'destroying'
     FINISHED: str = 'finished'
     ERROR: str = 'error'
 
@@ -56,6 +56,7 @@ class ResponseAction(str, Enum):
     ENDING: str = 'The game has ended'
 
     # ── Update ────────────────────────────────────────────────────────────────────────
+    PLAYER_INFOS: str = 'player_informations'
     BALL_UPDATE: str = 'ball_update'
     PADDLE_1_UPDATE: str = 'paddle_1_update'
     PADDLE_2_UPDATE: str = 'paddle_2_update'

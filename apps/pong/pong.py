@@ -28,15 +28,13 @@ class PongLogic:
 
     async def game_task(self):
         try:
+            # Regular game update logic
             previous_state = GameState.create_copy(self)
             await self._game_loop()
             current_state = GameState.create_copy(self)
-
             changes = GameState.get_differences(current_state, previous_state)
-
             await self._game_update(changes)
-            # await asyncio.sleep(1 / FPS)
-            await asyncio.sleep(1)
+            await asyncio.sleep(1 / FPS) #Toy with this variable.
         except asyncio.CancelledError:
             pass
 
@@ -47,8 +45,8 @@ class PongLogic:
         await self.ball.multiply_dx(1.001)
         await self.ball.multiply_dy(1.001)
 
-        await self.ball.increase_x(await self.ball.get_dx() * delta_time * FPS)
-        await self.ball.increase_y(await self.ball.get_dy() * delta_time * FPS)
+        await self.ball.increase_x(await self.ball.get_dx() * delta_time * FPS) # FPS
+        await self.ball.increase_y(await self.ball.get_dy() * delta_time * FPS) # FPS
 
         # Ball collision with top and bottom walls
         if await self.ball.get_y() <= await self.ball.get_radius() or await self.ball.get_y() >= CANVAS_HEIGHT - await self.ball.get_radius():

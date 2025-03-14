@@ -137,7 +137,14 @@ CACHES = {
 
 CHANNEL_LAYERS = {
     "default": {
-        "BACKEND": "channels.layers.InMemoryChannelLayer",
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],
+            "capacity": 1500,  # Default is 100
+            "expiry": 10,  # Message expiry time in seconds (default: 60)
+            "group_expiry": 86400,  # Group expiry time (default: 86400)
+            "prefix": "channels:",  # Redis key prefix
+        },
     },
 }
 

@@ -1,72 +1,4 @@
-const room = "58d755a781fa4e9cb8e3e3c21fe90714"
-
-
-let player_id = null;
-let game_id   = null; 
-
-let client_id = null;
-
-const startButton = document.getElementById("ready-start-btn");
-
-const match = async ()=>{
-    const clientId = await getClientId()
-    console.log(clientId)
-    const matchSocket = new WebSocket('ws://' + window.location.host + '/ws/game/matchmaking/?id=' + clientId);
-
-    matchSocket.onopen = ()=>{
-        console.log('lalalala')
-    }
-    matchSocket.onmessage = (e)=>{
-        data = JSON.parse(e.data)
-        console.log(data)
-
-        const type = "joined"
-        data = { ... data, type}
-        
-        // if (data.type === "matchmaking_info") {
-        //     matchSocket.send(data);
-        // }
-    }
-    matchSocket.onclose = ()=>{
-        console.log('lololololo')
-    }
-
-}
-
-startButton.addEventListener('click', ()=>{match()});
-
-
-async function getClientId() {
-    if (client_id !== null) return client_id; // Si déjà récupéré, retourne-le
-
-    try {
-        const response = await fetch("/api/client/get-id", {
-            method: "GET",
-            credentials: "include",
-        });
-        const data = await response.json();
-
-        if (data.client_id) {
-            client_id = data.client_id;
-            return client_id;
-        } else {
-            throw new Error(data.error);
-        }
-    } catch (error) {
-        console.error("Erreur lors de la récupération de l'ID :", error);
-        return null;
-    }
-}
-
-// Exemple d'utilisation
-// getPlayerId().then(id => {
-//     console.log("L'ID du joueur est :", id);
-// });
-
-// Create WebSocket connection
-// console.log("ID du joueur :", player_id);
-
-// socket = new WebSocket('ws://' + window.location.host + '/ws/game/' + room +'/?id=' + player_id);
+import { WebSocketManager } from "../../websockets/websockets.js"
 
 let paddle_p1 = JSON.parse({"y": 0});
 let paddle_p2 = JSON.parse({"y": 0});
@@ -79,16 +11,9 @@ let is_active = 0;
 const canvas = document.getElementById('myCanvas');
 const ctx = canvas.getContext('2d');
 
-function startGame() {
-    socket.send(JSON.stringify({
-        type: 'start_game',
-    }));
-}
-
-document.getElementById('start_game').addEventListener('click', startGame);
-
 // Handle messages from server
-if (is_active === 0) {
+const PongGame = () => {
+    
     socket.onmessage = function (event) {
         const data = JSON.parse(event.data);
         console.log(data)
@@ -119,14 +44,7 @@ if (is_active === 0) {
     };
 }
 
-socket.onopen = function() {
-    console.log('WebSocket connection established!');
-};
-
-// Gérer la fermeture de la connexion
-socket.onclose = function(event) {
-    console.log('WebSocket connection closed', event);
-};
+PongGame(clientId);
 
 function drawGame() {
     // Clear canvas
