@@ -14,17 +14,17 @@ from utils.websockets.channel_send import send_group
 
 
 class PongLogic:
-    def __init__(self, game_id, ball, paddle_p1, paddle_p2, score_p1, score_p2):
+    def __init__(self, game_id, ball, paddle_pL, paddle_pR, score_pL, score_pR):
         self._logger = logging.getLogger(self.__class__.__name__)
         self.last_update: float = time.time()
         self.game_id = game_id
 
         # ── Objects ───────────────────────────────────────────────────────────────────
         self.ball: Ball = ball
-        self.paddle_p1: Paddle = paddle_p1
-        self.paddle_p2: Paddle = paddle_p2
-        self.score_p1: Score = score_p1
-        self.score_p2: Score = score_p2
+        self.paddle_pL: Paddle = paddle_pL
+        self.paddle_pR: Paddle = paddle_pR
+        self.score_pL: Score = score_pL
+        self.score_pR: Score = score_pR
 
     async def game_task(self):
         try:
@@ -59,35 +59,35 @@ class PongLogic:
 
         # Left paddle collision
         if (
-                await self.ball.get_x() - await self.ball.get_radius() <= await self.paddle_p1.get_x() + await self.paddle_p1.get_width() and
-                await self.ball.get_x() >= await self.paddle_p1.get_x() and
-                await self.ball.get_y() >= await self.paddle_p1.get_y() and
-                await self.ball.get_y() <= await self.paddle_p1.get_y() + await self.paddle_p1.get_height()):
+                await self.ball.get_x() - await self.ball.get_radius() <= await self.paddle_pL.get_x() + await self.paddle_pL.get_width() and
+                await self.ball.get_x() >= await self.paddle_pL.get_x() and
+                await self.ball.get_y() >= await self.paddle_pL.get_y() and
+                await self.ball.get_y() <= await self.paddle_pL.get_y() + await self.paddle_pL.get_height()):
             await self.ball.set_dx(abs(await self.ball.get_dx()))  # Ensure ball moves right
             await self.ball.set_x(
-                await self.paddle_p1.get_x() + await self.paddle_p1.get_width() + await self.ball.get_radius())
+                await self.paddle_pL.get_x() + await self.paddle_pL.get_width() + await self.ball.get_radius())
 
         # Right paddle collision
-        if (await self.ball.get_x() + await self.ball.get_radius() >= await self.paddle_p2.get_x() and
-                await self.ball.get_x() <= await self.paddle_p2.get_x() + await self.paddle_p2.get_width() and
-                await self.ball.get_y() >= await self.paddle_p2.get_y() and
-                await self.ball.get_y() <= await self.paddle_p2.get_y() + await self.paddle_p2.get_height()):
+        if (await self.ball.get_x() + await self.ball.get_radius() >= await self.paddle_pR.get_x() and
+                await self.ball.get_x() <= await self.paddle_pR.get_x() + await self.paddle_pR.get_width() and
+                await self.ball.get_y() >= await self.paddle_pR.get_y() and
+                await self.ball.get_y() <= await self.paddle_pR.get_y() + await self.paddle_pR.get_height()):
             await self.ball.set_dx(-abs(await self.ball.get_dx()))  # Ensure ball moves left
-            await self.ball.set_x(await self.paddle_p2.get_x() - await self.ball.get_radius())
+            await self.ball.set_x(await self.paddle_pR.get_x() - await self.ball.get_radius())
 
         # Scoring
         if await self.ball.get_x() <= 0:
-            await self.score_p1.add_score()
+            await self.score_pL.add_score()
             await self._reset_ball(self.ball)
         elif await self.ball.get_x() >= CANVAS_WIDTH:
-            await self.score_p2.add_score()
+            await self.score_pR.add_score()
             await self._reset_ball(self.ball)
 
         await self.ball.update()
-        await self.paddle_p1.update()
-        await self.paddle_p2.update()
-        await self.score_p1.update()
-        await self.score_p2.update()
+        await self.paddle_pL.update()
+        await self.paddle_pR.update()
+        await self.score_pL.update()
+        await self.score_pR.update()
 
         self.last_update = current_time
 
@@ -96,21 +96,25 @@ class PongLogic:
             await self.ball.update()
             await send_group(self.game_id, EventType.UPDATE, ResponseAction.BALL_UPDATE, BallSerializer(self.ball).data)
 
-        if changes['paddle_p1']:
-            await self.paddle_p1.update()
-            await send_group(self.game_id, EventType.UPDATE, ResponseAction.PADDLE_1_UPDATE, PaddleSerializer(self.paddle_p1).data)
+        if changes['paddle_pL']:
+            await self.paddle_pL.update()
+            await send_group(self.game_id, EventType.UPDATE, ResponseAction.PADDLE_LEFT_UPDATE,
+                             PaddleSerializer(self.paddle_pL).data)
 
-        if changes['paddle_p2']:
-            await self.paddle_p2.update()
-            await send_group(self.game_id, EventType.UPDATE, ResponseAction.PADDLE_2_UPDATE, PaddleSerializer(self.paddle_p2).data)
+        if changes['paddle_pR']:
+            await self.paddle_pR.update()
+            await send_group(self.game_id, EventType.UPDATE, ResponseAction.PADDLE_RIGHT_UPDATE,
+                             PaddleSerializer(self.paddle_pR).data)
 
-        if changes['score_p1']:
-            await self.score_p1.update()
-            await send_group(self.game_id, EventType.UPDATE, ResponseAction.SCORE_1_UPDATE, await self.score_p1.get_score())
+        if changes['score_pL']:
+            await self.score_pL.update()
+            await send_group(self.game_id, EventType.UPDATE, ResponseAction.SCORE_LEFT_UPDATE,
+                             await self.score_pL.get_score())
 
-        if changes['score_p2']:
-            await self.score_p2.update()
-            await send_group(self.game_id, EventType.UPDATE, ResponseAction.SCORE_2_UPDATE, await self.score_p2.get_score())
+        if changes['score_pR']:
+            await self.score_pR.update()
+            await send_group(self.game_id, EventType.UPDATE, ResponseAction.SCORE_RIGHT_UPDATE,
+                             await self.score_pR.get_score())
 
     async def _reset_ball(self, ball):
         await ball.set_x(CANVAS_WIDTH / 2)

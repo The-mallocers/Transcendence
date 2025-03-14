@@ -58,10 +58,10 @@ class ResponseAction(str, Enum):
     # ── Update ────────────────────────────────────────────────────────────────────────
     PLAYER_INFOS: str = 'player_informations'
     BALL_UPDATE: str = 'ball_update'
-    PADDLE_1_UPDATE: str = 'paddle_1_update'
-    PADDLE_2_UPDATE: str = 'paddle_2_update'
-    SCORE_1_UPDATE: str = 'score_1_update'
-    SCORE_2_UPDATE: str = 'score_2_update'
+    PADDLE_LEFT_UPDATE: str = 'paddle_left_update'
+    PADDLE_RIGHT_UPDATE: str = 'paddle_right_update'
+    SCORE_LEFT_UPDATE: str = 'score_left_update'
+    SCORE_RIGHT_UPDATE: str = 'score_right_update'
 
     # ── Chat Actions ──────────────────────────────────────────────────────────────────
     ROOM_CREATED = "You have successfully created a chat room"

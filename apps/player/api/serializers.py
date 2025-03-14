@@ -4,13 +4,14 @@ from rest_framework import serializers
 
 from apps.player.models import Player
 from apps.pong.api.serializers import PaddleSerializer
+from apps.shared.models import Clients
 from utils.pong.enums import Side
 
 
 class PlayerSerializer(serializers.ModelSerializer):
     paddle = serializers.SerializerMethodField()
     side = serializers.SerializerMethodField()
-    score = serializers.IntegerField(default=0)
+    score = serializers.SerializerMethodField()
 
     nickname = serializers.CharField(validators=[
         MinLengthValidator(3),
@@ -32,5 +33,25 @@ class PlayerSerializer(serializers.ModelSerializer):
 
     def get_side(self, obj):
         side = self.context.get('side', Side.LEFT) #
-        #THIS WILL PROBABLY MAKE ALL YOUR PADDLES BE ON THE LEFT BUT THIS CRASHES THE TERMINAL EVERYTIME SOMEONE REGISTERS IF SIDE BY ITSELF
         return side
+
+    def get_score(self, obj):
+        score = self.context.get('score', 0)
+        return score
+
+
+class PlayerInformationSerializer(serializers.ModelSerializer):
+    client_id = serializers.SerializerMethodField()
+    player_profile = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Player
+        fields = ['client_id', 'nickname', 'player_profile']
+
+    def get_client_id(self, obj):
+        client = Clients.get_client_by_player(self.context.get('id'))
+        return str(client.id) if client else None
+
+    def get_player_profile(self, obj):
+        client = Clients.get_client_by_player(self.context.get('id'))
+        return str(client.profile.profile_picture) if client and client.profile else None

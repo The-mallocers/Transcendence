@@ -91,9 +91,9 @@ class Clients(models.Model):
         return None
 
     @staticmethod
-    async def get_client_by_player(player_id):
+    def get_client_by_player(player_id):
         try:
-            return await Clients.objects.aget(player__id=player_id)
+            return Clients.objects.get(player__id=player_id)
         except Clients.DoesNotExist:
             return None
 
