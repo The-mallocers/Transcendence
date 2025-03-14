@@ -67,7 +67,7 @@ class GameThread(Threads):
     async def _starting(self):
         if await self.game_manager.rget_status() is GameStatus.STARTING:
             await send_group(self.game_id, EventType.GAME, ResponseAction.STARTING)
-            await asyncio.sleep(5)
+            await asyncio.sleep(1) #changed it to 1 for now
 
     async def _running(self):
         if await self.game_manager.rget_status() is GameStatus.RUNNING:
@@ -79,7 +79,7 @@ class GameThread(Threads):
             await send_group(self.game_id, EventType.GAME, ResponseAction.ENDING)
             await self.game_manager.rset_status(GameStatus.FINISHED)
             self._stop_event.set()
-            await asyncio.sleep(5)
+            await asyncio.sleep(1) #changed it to 1 for now
             self.stop()
 
 

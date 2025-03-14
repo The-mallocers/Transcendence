@@ -45,7 +45,9 @@ class PongLogic:
         await self.ball.multiply_dx(1.001)
         await self.ball.multiply_dy(1.001)
 
-        await self.ball.increase_x(await self.ball.get_dx() * delta_time * FPS) # FPS
+        await self.ball.increase_x(await self.ball.get_dx(
+            
+        ) * delta_time * FPS) # FPS
         await self.ball.increase_y(await self.ball.get_dy() * delta_time * FPS) # FPS
 
         # Ball collision with top and bottom walls
