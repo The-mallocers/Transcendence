@@ -15,7 +15,6 @@ class GameState:
 
     @classmethod
     def create_copy(cls, game):
-        """Create a deep copy of the current game state"""
         ball_copy = Ball()
         ball_copy.radius = game.ball.radius
         ball_copy.x = game.ball.x
