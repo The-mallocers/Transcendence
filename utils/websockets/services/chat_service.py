@@ -1,5 +1,5 @@
 import json
-from uuid import UUID
+import uuid
 from channels.layers import get_channel_layer
 from apps.shared.models import Clients
 from utils.pong.enums import EventType, ResponseAction, ResponseError  
@@ -10,14 +10,19 @@ from asgiref.sync import sync_to_async
 from apps.chat.models import Messages, Rooms
 from apps.auth.api.views import logger
 
-
+uuid_global_room = uuid.UUID('00000000-0000-0000-0000-000000000000')
 
 
 class ChatService(BaseServices):
     async def init(self, client: Clients):
         self.channel_layer = get_channel_layer()
         self.channel_name = await self._redis.hget(name="consumers_channels", key=str(client.id))
-
+        
+    async def process_action(self, data, *args):
+        if 'room_id' in data['data']['args'] and data['data']['args']['room_id'] == 'global':
+            data['data']['args']['room_id'] = uuid_global_room
+        return await super().process_action(data, *args)
+    
     async def _handle_create_room(self, data, admin: Clients):
         try:
             # Retrieve the target client
@@ -35,6 +40,7 @@ class ChatService(BaseServices):
             rooms_target = await Rooms.get_room_id_by_client_id(target.id)
 
             common_rooms = set(rooms_admin) & set(rooms_target)  # Optimized set intersection
+            common_rooms.remove(uuid_global_room)
 
             if common_rooms:
                 # Use an existing common room
@@ -76,8 +82,10 @@ class ChatService(BaseServices):
                 return await send_group_error(client.id, ResponseError.ROOM_NOT_FOUND)
 
             # Check if client is a member of the room
-            room_uuid = UUID(room_id)
-            if room_uuid not in await Rooms.get_room_id_by_client_id(client.id):
+            print(room)
+            print(await Rooms.get_room_id_by_client_id(client.id))
+
+            if room.id not in await Rooms.get_room_id_by_client_id(client.id):
                 return await send_group_error(client.id, ResponseError.NOT_ALLOWED)
 
             # Store the message
@@ -87,7 +95,8 @@ class ChatService(BaseServices):
             room_group = str(await Rooms.get_id(room))
             await send_group(room_group, EventType.CHAT, ResponseAction.MESSAGE_RECEIVED, {
                 'message': message,
-                'sender': str(client.id)
+                'sender': str(client.id),
+                'room_id': str(room_group)
             })
 
         except ServiceError as e:

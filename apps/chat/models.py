@@ -30,9 +30,9 @@ class Rooms(models.Model):
             raise Exception(f"Erreur lors de l'ajout du client : {e}")
 
     @staticmethod
-    async def create_room():
+    async def create_room(id=None):
         try:
-            return await sync_to_async(Rooms.objects.create)()
+            return await sync_to_async(Rooms.objects.create)(id=id)
         except Exception as e:
             raise Exception(f"Erreur lors de la création de la salle : {e}")
         
