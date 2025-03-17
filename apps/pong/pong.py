@@ -40,11 +40,13 @@ class PongLogic:
             pass
 
     async def paddle_wall_collision(self, paddle):
-        y = self.paddle.get_y()
+        y = await paddle.get_y()
+        height = await paddle.get_height()
         if y <= 0:
-          await self.paddle.set_y(0)      
-        elif y + await paddle.get_height() >= CANVAS_HEIGHT:
-          await self.paddle.set_y(CANVAS_HEIGHT)
+            await paddle.set_y(0)      
+        elif y + height >= CANVAS_HEIGHT:
+            print("allo")
+            await paddle.set_y(y)
         
 
 
@@ -59,8 +61,8 @@ class PongLogic:
         await self.ball.increase_y(await self.ball.get_dy() * delta_time * FPS) # FPS
 
 
-        self.paddle_wall_collision(self.paddle_pL)
-        self.paddle_wall_collision(self.paddle_pR)
+        await self.paddle_wall_collision(self.paddle_pL)
+        await self.paddle_wall_collision(self.paddle_pR)
     
         # Ball collision with top and bottom walls
         if await self.ball.get_y() <= await self.ball.get_radius() or await self.ball.get_y() >= CANVAS_HEIGHT - await self.ball.get_radius():

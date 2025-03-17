@@ -50,18 +50,23 @@ class Paddle:
 
     async def set_width(self, width):
         await self._redis.json().set(self.game_key, Path('players[?(@.id=="{}")].paddle.width'.format(self.player_id)), width)
+        self.width = width
 
     async def set_height(self, height):
         await self._redis.json().set(self.game_key, Path('players[?(@.id=="{}")].paddle.height'.format(self.player_id)), height)
+        self.height = height
 
     async def set_x(self, x):
         await self._redis.json().set(self.game_key, Path('players[?(@.id=="{}")].paddle.x'.format(self.player_id)), x)
+        self.x = x
 
     async def set_y(self, y):
         await self._redis.json().set(self.game_key, Path('players[?(@.id=="{}")].paddle.y'.format(self.player_id)), y)
+        self.y = y
 
     async def set_speed(self, speed):
         await self._redis.json().set(self.game_key, Path('players[?(@.id=="{}")].paddle.speed'.format(self.player_id)), speed)
+        self.speed = speed
 
     # ── Helper Methods for Incrementing/Decrementing ─────────────────────────────────
 
