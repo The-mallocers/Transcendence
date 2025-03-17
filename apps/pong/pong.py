@@ -39,17 +39,6 @@ class PongLogic:
         except asyncio.CancelledError:
             pass
 
-    async def paddle_wall_collision(self, paddle):
-        y = await paddle.get_y()
-        height = await paddle.get_height()
-        if y <= 0:
-            await paddle.set_y(0)      
-        elif y + height >= CANVAS_HEIGHT:
-            print("allo")
-            await paddle.set_y(y)
-        
-
-
     async def _game_loop(self):
         current_time = time.time()
         delta_time = current_time - self.last_update
@@ -57,12 +46,12 @@ class PongLogic:
         await self.ball.multiply_dx(1.001)
         await self.ball.multiply_dy(1.001)
 
-        await self.ball.increase_x(await self.ball.get_dx() * delta_time * FPS) # FPS
-        await self.ball.increase_y(await self.ball.get_dy() * delta_time * FPS) # FPS
+        await self.ball.increase_x(await self.ball.get_dx() * delta_time)
+        await self.ball.increase_y(await self.ball.get_dy() * delta_time)
 
 
-        await self.paddle_wall_collision(self.paddle_pL)
-        await self.paddle_wall_collision(self.paddle_pR)
+        # await self.paddle_wall_collision(self.paddle_pL)
+        # await self.paddle_wall_collision(self.paddle_pR)
     
         # Ball collision with top and bottom walls
         if await self.ball.get_y() <= await self.ball.get_radius() or await self.ball.get_y() >= CANVAS_HEIGHT - await self.ball.get_radius():

@@ -2,8 +2,8 @@
 {% load static %}
 <div class="arenaPage">
 
-<div class="nickname">ez2c</div>
-<div class="nickname">tfreydie</div>
+<div id="lnick" class="nickname">ez2c</div>
+<div id="rnick" class="nickname">tfreydie</div>
 <canvas id="pongCanvas" width="1000" height="500">
 
 </canvas>
@@ -20,19 +20,19 @@
     .nickname {
         position: fixed;
         font-size: 6rem;
-        color: white;
+        color: #1d212b;
 
     }
     .nickname:first-of-type {
-        top: 50%;
-        left: 35%;
+        top: 52%;
+        left: 33%;
         transform: translate(-50%, -50%);
 
     }
     .nickname:last-of-type {
-        top: 50%;
-        left: 70%;
-        transform: translate(-50%, -40%);
+        top: 52%;
+        right: 33%;
+        transform: translate(50%, -50%);
     }
 </style>
 

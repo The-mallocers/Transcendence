@@ -18,6 +18,7 @@ class Paddle:
         self.game_key = f'game:{game_id}'
         self.player_id = player_id
 
+    
     async def update(self):
         # print(self)
         self.width = await self.get_width()
@@ -78,13 +79,26 @@ class Paddle:
         current_x = await self.get_x()
         await self.set_x(current_x - await self.get_speed())
 
+    #
+    async def handle_wall_collision(self, y) -> float:
+        height = await self.get_height()
+        if y <= 0:
+            return 0    
+        elif y + height >= CANVAS_HEIGHT:
+            return CANVAS_HEIGHT - height
+        else:
+            return y
+
+    #I changed both function below so it doesnt even move the paddle if its gonna be out of bound
     async def increase_y(self):
-        current_y = await self.get_y()
-        await self.set_y(current_y + await self.get_speed())
+        current_y = await self.get_y() + await self.get_speed()
+        current_y = await self.handle_wall_collision(current_y)
+        await self.set_y(current_y)
 
     async def decrease_y(self):
-        current_y = await self.get_y()
-        await self.set_y(current_y - await self.get_speed())
+        current_y = await self.get_y() - await self.get_speed()
+        current_y = await self.handle_wall_collision(current_y)
+        await self.set_y(current_y)
 
     async def increase_speed(self):
         current_speed = await self.get_speed()

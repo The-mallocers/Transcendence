@@ -20,8 +20,25 @@ let paddleDefaultPos = 250 - (paddleHeight / 2)
 window.GameState  = {
     ballY: height / 2,
     ballX: width / 2,
-    leftPaddleY: paddleDefaultPos,
-    rightPaddleY: paddleDefaultPos
+
+    left: {
+        x : paddleDefaultPos,
+        y: paddleDefaultPos,
+        nick : "",
+        id: ""
+    },
+    right : {
+        x : paddleDefaultPos,
+        y: paddleDefaultPos,
+        nick : "",
+        id: ""
+    }
+}
+
+window.GameInfos  = {
+    left : {
+        
+    }
 }
 
 const startGameMessage = {
@@ -63,16 +80,30 @@ let connectToMMPool = (client_id) => {
 
         //On message on regarde si c'est que la game a commencer
         //on renvois le json approprie
+        if (jsonData.data.action == "PLAYER_INFOS"){
+            window.GameState = {  
+                ballY: height / 2,
+                ballX: width / 2,
+            
+                left: {
+                    x : jsonData.data.content.left.x,
+                    y: jsonData.data.content.left.y,
+                    nick : jsonData.data.content.left.nickname,
+                    id: ""
+                },
+                right : {
+                    x : jsonData.data.content.right.x,
+                    y: jsonData.data.content.right.y,
+                    nick : jsonData.data.content.right.nickname,
+                    id: ""
+                }
+            }
+        }
         if (jsonData.data.action == "STARTING"){
             navigateTo("/pong/arena/")
+            console.log()
 
-            // window.GameState = {
-            //     ballX: width / 2,
-            //     ballY: height / 2,
-            //     leftPaddleY: paddleDefaultPos,
-            //     rightPaddleY: paddleDefaultPos
-            // };
-            socket.send(JSON.stringify(startGameMessage));
+            socket.send(JSON.stringify(startGameMessage))
         }
         ////// navigate to arena and then startGame would be better
         // if ()
