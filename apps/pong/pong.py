@@ -5,7 +5,7 @@ import time
 
 from apps.pong.api.serializers import PaddleSerializer, BallSerializer
 from utils.pong.enums import EventType, ResponseAction
-from utils.pong.objects import FPS, CANVAS_HEIGHT, CANVAS_WIDTH, BALL_SPEED
+from utils.pong.objects import FPS, CANVAS_HEIGHT, CANVAS_WIDTH, BALL_SPEED, OFFSET_PADDLE, PADDLE_HEIGHT, PADDLE_WIDTH
 from utils.pong.objects.ball import Ball
 from utils.pong.objects.objects_state import GameState
 from utils.pong.objects.paddle import Paddle
@@ -26,6 +26,7 @@ class PongLogic:
         self.score_pL: Score = score_pL
         self.score_pR: Score = score_pR
 
+
     async def game_task(self):
         try:
             # Regular game update logic
@@ -38,6 +39,15 @@ class PongLogic:
         except asyncio.CancelledError:
             pass
 
+    async def paddle_wall_collision(self, paddle):
+        y = self.paddle.get_y()
+        if y <= 0:
+          await self.paddle.set_y(0)      
+        elif y + await paddle.get_height() >= CANVAS_HEIGHT:
+          await self.paddle.set_y(CANVAS_HEIGHT)
+        
+
+
     async def _game_loop(self):
         current_time = time.time()
         delta_time = current_time - self.last_update
@@ -48,6 +58,10 @@ class PongLogic:
         await self.ball.increase_x(await self.ball.get_dx() * delta_time * FPS) # FPS
         await self.ball.increase_y(await self.ball.get_dy() * delta_time * FPS) # FPS
 
+
+        self.paddle_wall_collision(self.paddle_pL)
+        self.paddle_wall_collision(self.paddle_pR)
+    
         # Ball collision with top and bottom walls
         if await self.ball.get_y() <= await self.ball.get_radius() or await self.ball.get_y() >= CANVAS_HEIGHT - await self.ball.get_radius():
             if await self.ball.get_y() < await self.ball.get_radius():
@@ -92,7 +106,7 @@ class PongLogic:
         self.last_update = current_time
 
     async def _game_update(self, changes):
-        self._logger.info(changes)
+        # self._logger.info(changes)
         if changes['ball']:
             await self.ball.update()
             await send_group(self.game_id, EventType.UPDATE, ResponseAction.BALL_UPDATE, BallSerializer(self.ball).data)

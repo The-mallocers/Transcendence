@@ -10,6 +10,7 @@ from apps.player.manager import PlayerManager
 from utils.pong.enums import GameStatus, ResponseError
 from utils.threads import Threads
 from utils.websockets.channel_send import send_group_error
+from utils.pong.objects import PADDLE_WIDTH, OFFSET_PADDLE, CANVAS_WIDTH
 
 
 class MatchmakingThread(Threads):
@@ -26,7 +27,9 @@ class MatchmakingThread(Threads):
                     await game_manager.rset_status(GameStatus.MATCHMAKING)
 
                     await game_manager.pL.join_game(game_manager)
+                    await game_manager.pL.paddle.set_x(0 + OFFSET_PADDLE)
                     await game_manager.pR.join_game(game_manager)
+                    await game_manager.pR.paddle.set_x(CANVAS_WIDTH - OFFSET_PADDLE - PADDLE_WIDTH)
                     await game_manager.rset_status(GameStatus.STARTING)
                     await self.redis.hset(name="player_game", key=str(game_manager.pL.id), value=str(game_id))
                     await self.redis.hset(name="player_game", key=str(game_manager.pR.id), value=str(game_id))

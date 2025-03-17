@@ -55,6 +55,7 @@ class GameThread(Threads):
     async def init_game(self):
         self.game_manager._redis = self.redis
 
+        
         self.logic: PongLogic = PongLogic(
             self.game_id,
             Ball(self.redis, self.game_id),
@@ -63,7 +64,7 @@ class GameThread(Threads):
             Score(self.redis, self.game_id, self.game_manager.pL.id),
             Score(self.redis, self.game_id, self.game_manager.pR.id),
         )
-
+        
         return True
 
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ EVENT ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
@@ -72,9 +73,9 @@ class GameThread(Threads):
         if await self.game_manager.rget_status() is GameStatus.STARTING:
             await send_group(self.game_id, EventType.GAME, ResponseAction.STARTING)
             pL_serializer = PlayerInformationSerializer(self.game_manager.pL.player,
-                                                        context={'id': self.game_manager.pL.id})
+                                                        context={'id': self.game_manager.pL.id, 'game_id': self.game_id})
             pR_serializer = PlayerInformationSerializer(self.game_manager.pR.player,
-                                                        context={'id': self.game_manager.pR.id})
+                                                        context={'id': self.game_manager.pR.id, 'game_id': self.game_id})
             pL_data = await sync_to_async(lambda: pL_serializer.data)()
             pR_data = await sync_to_async(lambda: pR_serializer.data)()
             await send_group(self.game_id, EventType.GAME, ResponseAction.PLAYER_INFOS, {

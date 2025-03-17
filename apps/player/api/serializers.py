@@ -43,10 +43,18 @@ class PlayerSerializer(serializers.ModelSerializer):
 class PlayerInformationSerializer(serializers.ModelSerializer):
     client_id = serializers.SerializerMethodField()
     player_profile = serializers.SerializerMethodField()
+    paddle = serializers.SerializerMethodField()
 
     class Meta:
         model = Player
-        fields = ['client_id', 'nickname', 'player_profile']
+        fields = ['client_id', 'nickname', 'player_profile', 'paddle']
+
+    def get_paddle(self, obj):
+        from apps.player.manager import PlayerManager
+        client = Clients.get_client_by_player(self.context.get('id'))
+        game_id = self.context.get('game_id')
+        player_game = PlayerManager.get_player_game_id_db(client.player.id, game_id)
+        return PaddleSerializer(player_game.paddle).data
 
     def get_client_id(self, obj):
         client = Clients.get_client_by_player(self.context.get('id'))

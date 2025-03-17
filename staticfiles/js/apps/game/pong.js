@@ -1,7 +1,6 @@
 import { WebSocketManager } from "../../websockets/websockets.js";
 
 const socket = WebSocketManager.gameSocket;
-
 let canvas = document.getElementById("pongCanvas");
 let ctx = canvas.getContext("2d");
 
@@ -10,21 +9,18 @@ const width = 1000;
 
 const ballSize = 10;
 const paddleThickness = 10;
-const paddleHeight = 100;
+let paddleHeight = 100;
 
 canvas.width = width;
 canvas.height = height;
+let paddleDefaultPos = 250 - (paddleHeight / 2)
 
-const paddleDefaultPos = 250
-
-let GameState = {
+window.GameState = {
     ballX: width / 2,
     ballY: height / 2,
     leftPaddleY: paddleDefaultPos,
     rightPaddleY: paddleDefaultPos
 };
-
-
 const keys = {
     'a': false,
     'd': false,
@@ -104,9 +100,9 @@ const render = () => {
     ///////////////
     // updatePaddles()
     ///////////////
-    drawPaddle(10, GameState.leftPaddleY);
-    drawPaddle(width - paddleThickness - 10, GameState.rightPaddleY);
-    drawBall(GameState.ballX, GameState.ballY);
+    drawPaddle(10, window.GameState.leftPaddleY);
+    drawPaddle(width - paddleThickness - 10, window.GameState.rightPaddleY);
+    drawBall(window.GameState.ballX, window.GameState.ballY);
 };
 
 
@@ -129,19 +125,31 @@ socket.onmessage = (e) => {
     // queueMicrotask(() => {
     const jsonData = JSON.parse(e.data);
     
-    // console.log(jsonData)
+    console.log(jsonData)
+
+    if (jsonData.data.action == "PLAYER_INFOS") {
+            // window.GameState = {
+            //     ballX: width / 2,
+            //     ballY: height / 2,
+            //     leftPaddleY: paddleDefaultPos,
+            //     rightPaddleY: paddleDefaultPos
+            // };
+
+            console.log("lalalalalalalalalalalalalalalalalalalalalal")
+    }
+
     if (jsonData.event == "UPDATE") {
 
         if (jsonData.data.action == "PADDLE_LEFT_UPDATE"){
             console.log(jsonData.data.content.y)
-            GameState.leftPaddleY = paddleDefaultPos + jsonData.data.content.y
+            window.GameState.leftPaddleY  = jsonData.data.content.y
         }
         else if (jsonData.data.action == "PADDLE_RIGHT_UPDATE"){
-            GameState.rightPaddleY =  paddleDefaultPos + jsonData.data.content.y
+            window.GameState.rightPaddleY =  jsonData.data.content.y
         }
         else if (jsonData.data.action == "BALL_UPDATE") {
-            GameState.ballX = jsonData.data.content.x;
-            GameState.ballY = jsonData.data.content.y;
+            window.GameState.ballX = jsonData.data.content.x;
+            window.GameState.ballY = jsonData.data.content.y;
             // console.table(jsonData.data.content.x, jsonData.data.content.y)
         }
     }

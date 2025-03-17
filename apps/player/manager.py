@@ -38,10 +38,11 @@ class PlayerManager:
         else:
             return None
 
+
     async def join_game(self, game_manager: GameManager):
         try:
             await game_manager.add_player_db(self.player)
-            self._player_game: PlayerGame = await self.get_player_game_id_db(self.player.id,
+            self._player_game: PlayerGame = await self.get_player_game_id_db_async(self.player.id,
                                                                              await game_manager.get_id())
 
             game_key = f'game:{await game_manager.get_id()}'
@@ -55,7 +56,7 @@ class PlayerManager:
                     rand_side = random.choice(list(Side))
                     self._player_game.side = rand_side
                 elif len(player_ids) == 1:
-                    first_player: PlayerGame = await self.get_player_game_id_db(str(player_ids[0]), await game_manager.get_id())
+                    first_player: PlayerGame = await self.get_player_game_id_db_async(str(player_ids[0]), await game_manager.get_id())
                     if first_player.side == Side.RIGHT.value:
                         self._player_game.side = Side.LEFT
                     if first_player.side == Side.LEFT.value:
@@ -103,8 +104,18 @@ class PlayerManager:
         except Player.DoesNotExist:
             return None
 
+    @staticmethod
     @sync_to_async
-    def get_player_game_id_db(self, player_id, game_id) -> PlayerGame | None:
+    def get_player_game_id_db_async(player_id, game_id) -> PlayerGame | None:
+        """Get player game with player_id from data base"""
+        try:
+            with transaction.atomic():
+                return PlayerGame.objects.get(player__id=player_id, game__id=game_id)
+        except PlayerGame.DoesNotExist:
+            return None
+        
+    @staticmethod
+    def get_player_game_id_db(player_id, game_id) -> PlayerGame | None:
         """Get player game with player_id from data base"""
         try:
             with transaction.atomic():

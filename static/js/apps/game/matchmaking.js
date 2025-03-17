@@ -9,9 +9,20 @@ const clientId = element.dataset.clientId
 const gameStatusDiv = document.querySelector("#gameStatus")
 
 console.log(element.dataset.clientId)
+let height = 500;
+const width = 1000;
+
+const paddleHeight = 100;
+
+let paddleDefaultPos = 250 - (paddleHeight / 2)
 
 
-
+window.GameState  = {
+    ballY: height / 2,
+    ballX: width / 2,
+    leftPaddleY: paddleDefaultPos,
+    rightPaddleY: paddleDefaultPos
+}
 
 const startGameMessage = {
     "event": "game",
@@ -54,6 +65,13 @@ let connectToMMPool = (client_id) => {
         //on renvois le json approprie
         if (jsonData.data.action == "STARTING"){
             navigateTo("/pong/arena/")
+
+            // window.GameState = {
+            //     ballX: width / 2,
+            //     ballY: height / 2,
+            //     leftPaddleY: paddleDefaultPos,
+            //     rightPaddleY: paddleDefaultPos
+            // };
             socket.send(JSON.stringify(startGameMessage));
         }
         ////// navigate to arena and then startGame would be better

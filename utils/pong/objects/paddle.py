@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from redis.asyncio import Redis
 from redis.commands.json.path import Path
 
-from utils.pong.objects import PADDLE_WIDTH, PADDLE_HEIGHT, PADDLE_SPEED
+from utils.pong.objects import PADDLE_WIDTH, PADDLE_HEIGHT, PADDLE_SPEED, CANVAS_HEIGHT
 
 
 @dataclass
@@ -12,13 +12,14 @@ class Paddle:
         self.width: float = PADDLE_WIDTH
         self.height: float = PADDLE_HEIGHT
         self.x: float = 0
-        self.y: float = 0
+        self.y: float = (CANVAS_HEIGHT / 2) - (PADDLE_HEIGHT / 2)
         self.speed: float = PADDLE_SPEED
         self._redis: Redis = redis
         self.game_key = f'game:{game_id}'
         self.player_id = player_id
 
     async def update(self):
+        # print(self)
         self.width = await self.get_width()
         self.height = await self.get_height()
         self.x = await self.get_x()
@@ -64,29 +65,29 @@ class Paddle:
 
     # ── Helper Methods for Incrementing/Decrementing ─────────────────────────────────
 
-    async def increase_x(self, delta: float = 1):
+    async def increase_x(self):
         current_x = await self.get_x()
-        await self.set_x(current_x + delta)
+        await self.set_x(current_x + await self.get_speed())
 
-    async def decrease_x(self, delta: float = 1):
+    async def decrease_x(self):
         current_x = await self.get_x()
-        await self.set_x(current_x - delta)
+        await self.set_x(current_x - await self.get_speed())
 
-    async def increase_y(self, delta: float = 1):
+    async def increase_y(self):
         current_y = await self.get_y()
-        await self.set_y(current_y + delta)
+        await self.set_y(current_y + await self.get_speed())
 
-    async def decrease_y(self, delta: float = 1):
+    async def decrease_y(self):
         current_y = await self.get_y()
-        await self.set_y(current_y - delta)
+        await self.set_y(current_y - await self.get_speed())
 
-    async def increase_speed(self, delta: float = 1):
+    async def increase_speed(self):
         current_speed = await self.get_speed()
-        await self.set_speed(current_speed + delta)
+        await self.set_speed(current_speed + 0) #Later 
 
-    async def decrease_speed(self, delta: float = 1):
+    async def decrease_speed(self):
         current_speed = await self.get_speed()
-        await self.set_speed(current_speed - delta)
+        await self.set_speed(current_speed - 0) #later
 
     # ── Helper Methods for Multiplication/Division ─────────────────────────────────
 
