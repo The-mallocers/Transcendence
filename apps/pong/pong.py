@@ -68,6 +68,11 @@ class PongLogic:
             await self.paddle_pR.increase_y(delta_time)
         elif (await self.paddle_pR.get_move() == PaddleMove.DOWN):
             await self.paddle_pR.decrease_y(delta_time)
+
+        if (await self.paddle_pR.get_move() == PaddleMove.IDLE):
+            pass
+        elif (await self.paddle_pR.get_move() == PaddleMove.IDLE):
+            pass
         
 
         # Ball collision with top and bottom walls

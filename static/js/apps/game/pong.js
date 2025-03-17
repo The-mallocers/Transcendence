@@ -102,8 +102,11 @@ function updatePaddles() {
     else if (keys.d) {
         direction = 'down'
     }
-    console.log("direction is :", direction)
+    else {
+        direction = 'idle'
+    }
     if (direction) {
+        console.log("direction is :", direction)
         const message = {
             "event": "game",
             "data": {
