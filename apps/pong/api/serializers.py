@@ -9,6 +9,7 @@ class PaddleSerializer(serializers.Serializer):
     x = serializers.FloatField()
     y = serializers.FloatField()
     speed = serializers.FloatField()
+    move = serializers.CharField()
 
     def create(self, validated_data):
         return paddle(**validated_data)

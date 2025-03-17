@@ -81,19 +81,20 @@ let connectToMMPool = (client_id) => {
         //On message on regarde si c'est que la game a commencer
         //on renvois le json approprie
         if (jsonData.data.action == "PLAYER_INFOS"){
+            console.log(jsonData.data.content)
             window.GameState = {  
                 ballY: height / 2,
                 ballX: width / 2,
             
                 left: {
-                    x : jsonData.data.content.left.x,
-                    y: jsonData.data.content.left.y,
+                    x : jsonData.data.content.left.paddle.x,
+                    y: jsonData.data.content.left.paddle.y,
                     nick : jsonData.data.content.left.nickname,
                     id: ""
                 },
                 right : {
-                    x : jsonData.data.content.right.x,
-                    y: jsonData.data.content.right.y,
+                    x : jsonData.data.content.right.paddle.x,
+                    y: jsonData.data.content.right.paddle.y,
                     nick : jsonData.data.content.right.nickname,
                     id: ""
                 }

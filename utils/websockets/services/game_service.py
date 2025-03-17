@@ -6,6 +6,7 @@ from apps.shared.models import Clients
 from utils.pong.enums import GameStatus, ResponseError, status_order
 from utils.websockets.channel_send import send_group_error
 from utils.websockets.services.services import BaseServices
+from utils.pong.enums import PaddleMove
 
 
 class GameService(BaseServices):
@@ -47,15 +48,17 @@ class GameService(BaseServices):
 
     async def _handle_paddle_move(self, data, player: Player):
         if str(player.id) == str(self.game_manager.pL.id):
-            if data['data']['args'] == 'up':
-                await self.game_manager.pL.paddle.increase_y()
-            if data['data']['args'] == 'down':
-                await self.game_manager.pL.paddle.decrease_y()
+            await self.game_manager.pL.paddle.set_move(data['data']['args'])
+            # if data['data']['args'] == 'up':
+                # await self.game_manager.pL.paddle.increase_y()
+            # if data['data']['args'] == 'down':
+                # await self.game_manager.pL.paddle.decrease_y()
         if str(player.id) == str(self.game_manager.pR.id):
-            if data['data']['args'] == 'up':
-                await self.game_manager.pR.paddle.increase_y()
-            if data['data']['args'] == 'down':
-                await self.game_manager.pR.paddle.decrease_y()
+            await self.game_manager.pR.paddle.set_move(data['data']['args'])
+            # if data['data']['args'] == 'up':
+                # await self.game_manager.pR.paddle.increase_y()
+            # if data['data']['args'] == 'down':
+                # await self.game_manager.pR.paddle.decrease_y()
 
     async def handle_disconnect(self, client):
         p1_id = await self.game_manager.rget_pL_id()

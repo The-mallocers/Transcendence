@@ -107,6 +107,11 @@ class Side(str, Enum):
     LEFT: str = 'left'
     RIGHT: str = 'right'
 
+class PaddleMove(str, Enum):
+    UP: str = 'up'
+    DOWN: str = 'down'
+    IDLE: str = 'idle'
+
 
 class Ranks(str, Enum):
     BRONZE: str = 'bronze'

@@ -11,6 +11,7 @@ from utils.pong.objects.objects_state import GameState
 from utils.pong.objects.paddle import Paddle
 from utils.pong.objects.score import Score
 from utils.websockets.channel_send import send_group
+from utils.pong.enums import PaddleMove
 
 
 class PongLogic:
@@ -38,6 +39,15 @@ class PongLogic:
             await asyncio.sleep(1 / FPS) #Toy with this variable.
         except asyncio.CancelledError:
             pass
+    async def handle_wall_collision(self, y) -> float:
+        height = await self.get_height()
+        if y <= 0:
+            return 0    
+        elif y + height >= CANVAS_HEIGHT:
+            return CANVAS_HEIGHT - height
+        else:
+            return y
+
 
     async def _game_loop(self):
         current_time = time.time()
@@ -49,10 +59,17 @@ class PongLogic:
         await self.ball.increase_x(await self.ball.get_dx() * delta_time)
         await self.ball.increase_y(await self.ball.get_dy() * delta_time)
 
+        if (await self.paddle_pL.get_move() == PaddleMove.UP):
+            await self.paddle_pL.increase_y(delta_time)
+        elif (await self.paddle_pL.get_move() == PaddleMove.DOWN):
+            await self.paddle_pL.decrease_y(delta_time)
 
-        # await self.paddle_wall_collision(self.paddle_pL)
-        # await self.paddle_wall_collision(self.paddle_pR)
-    
+        if (await self.paddle_pR.get_move() == PaddleMove.UP):
+            await self.paddle_pR.increase_y(delta_time)
+        elif (await self.paddle_pR.get_move() == PaddleMove.DOWN):
+            await self.paddle_pR.decrease_y(delta_time)
+        
+
         # Ball collision with top and bottom walls
         if await self.ball.get_y() <= await self.ball.get_radius() or await self.ball.get_y() >= CANVAS_HEIGHT - await self.ball.get_radius():
             if await self.ball.get_y() < await self.ball.get_radius():

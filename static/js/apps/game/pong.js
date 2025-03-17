@@ -26,11 +26,17 @@ let paddleDefaultPos = 250 - (paddleHeight / 2)
 
 lnick.innerHTML = window.GameState.left.nick
 rnick.innerHTML = window.GameState.right.nick
+console.log('meowmeowmeow', window.GameState)
 
 const keys = {
     'a': false,
     'd': false,
 };
+
+const previous_keys = {
+    'a': false,
+    'd': false,
+}
 
 
 socket.onmessage = (e) => {
@@ -81,13 +87,22 @@ document.addEventListener('keyup', (event) => {
 function updatePaddles() {
     // gauche
     let direction = null;
+    // if (keys.a && keys.d) {
+    //     //I want to check the old key combination, and have the direction be
+    //     //what the "new" direction is
+    //     if (previous_keys.a) {
+    //         direction = 
+    //     }
+    // }
+
+
     if (keys.a) {
         direction = 'up'
     }
     else if (keys.d) {
         direction = 'down'
     }
-    
+    console.log("direction is :", direction)
     if (direction) {
         const message = {
             "event": "game",
@@ -171,6 +186,7 @@ const render = () => {
 // setInterval(render, 1);  // 60 fps
 
 
+render()
 
 function gameLoop() {
     updatePaddles();

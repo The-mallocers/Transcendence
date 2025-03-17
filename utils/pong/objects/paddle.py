@@ -2,6 +2,7 @@ from dataclasses import dataclass
 
 from redis.asyncio import Redis
 from redis.commands.json.path import Path
+from utils.pong.enums import PaddleMove
 
 from utils.pong.objects import PADDLE_WIDTH, PADDLE_HEIGHT, PADDLE_SPEED, CANVAS_HEIGHT
 
@@ -14,6 +15,7 @@ class Paddle:
         self.x: float = 0
         self.y: float = (CANVAS_HEIGHT / 2) - (PADDLE_HEIGHT / 2)
         self.speed: float = PADDLE_SPEED
+        self.move: PaddleMove = PaddleMove.IDLE
         self._redis: Redis = redis
         self.game_key = f'game:{game_id}'
         self.player_id = player_id
@@ -47,6 +49,9 @@ class Paddle:
     async def get_speed(self):
         return await self._redis.json().get(self.game_key, Path('players[?(@.id=="{}")].paddle.speed'.format(self.player_id)))
 
+    async def get_move(self):
+        return await self._redis.json().get(self.game_key, Path('players[?(@.id=="{}")].paddle.move'.format(self.player_id)))
+
     # ── Setter ────────────────────────────────────────────────────────────────────────
 
     async def set_width(self, width):
@@ -69,6 +74,10 @@ class Paddle:
         await self._redis.json().set(self.game_key, Path('players[?(@.id=="{}")].paddle.speed'.format(self.player_id)), speed)
         self.speed = speed
 
+    async def set_move(self, move):
+        await self._redis.json().set(self.game_key, Path('players[?(@.id=="{}")].paddle.move'.format(self.player_id)), move)
+        self.move = move
+
     # ── Helper Methods for Incrementing/Decrementing ─────────────────────────────────
 
     async def increase_x(self):
@@ -90,13 +99,13 @@ class Paddle:
             return y
 
     #I changed both function below so it doesnt even move the paddle if its gonna be out of bound
-    async def increase_y(self):
-        current_y = await self.get_y() + await self.get_speed()
+    async def increase_y(self, delta_time):
+        current_y = await self.get_y() + (await self.get_speed() * delta_time)
         current_y = await self.handle_wall_collision(current_y)
         await self.set_y(current_y)
 
-    async def decrease_y(self):
-        current_y = await self.get_y() - await self.get_speed()
+    async def decrease_y(self, delta_time):
+        current_y = await self.get_y() - (await self.get_speed() * delta_time)
         current_y = await self.handle_wall_collision(current_y)
         await self.set_y(current_y)
 
