@@ -11,8 +11,9 @@ from utils.websockets.services.services import BaseServices, ServiceError
 
 class ChatService(BaseServices):
     async def init(self, client: Clients):
+        await super().init()
         self.channel_layer = get_channel_layer()
-        self.channel_name = await self._redis.hget(name="consumers_channels", key=str(client.id))
+        self.channel_name = await self.redis.hget(name="consumers_channels", key=str(client.id))
 
     async def _handle_create_room(self, data, admin: Clients):
         try:
@@ -38,7 +39,7 @@ class ChatService(BaseServices):
                 await room.add_client(target)
 
             await self.channel_layer.group_add(str(await Rooms.get_id(room)), self.channel_name.decode('utf-8'))
-            target_channel_name = await self._redis.hget(name="consumers_channels", key=str(target.id))
+            target_channel_name = await self.redis.hget(name="consumers_channels", key=str(target.id))
             if target_channel_name:
                 await self.channel_layer.group_add(str(await Rooms.get_id(room)), target_channel_name.decode('utf-8'))
 

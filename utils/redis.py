@@ -1,20 +1,21 @@
-import os
-from typing import Optional, Dict, Any, Union
+import asyncio
 import logging
+import os
+import threading
 from contextlib import contextmanager
+from typing import Dict, Any
 
 import redis
-from redis.exceptions import RedisError
-import aioredis
-import django
+import redis.asyncio as aioredis
 from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
 
 class RedisConnectionPool:
-    _sync_pools: Dict[str, redis.ConnectionPool] = {}
-    _async_pools: Dict[str, aioredis.Redis] = {}
+    _pools: Dict[str, Dict[int, aioredis.Redis]] = {}
+    _sync_pools: Dict[str, Dict[int, redis.Redis]] = {}
+    _lock = threading.RLock()
 
     @classmethod
     def get_connection_params(cls, alias: str = 'default') -> Dict[str, Any]:
@@ -28,146 +29,143 @@ class RedisConnectionPool:
             'retry_on_timeout': True,
             'decode_responses': False,
         }
-        
+
         try:
             if hasattr(settings, 'REDIS_CONNECTIONS'):
                 redis_settings = settings.REDIS_CONNECTIONS.get(alias, {})
                 default_params.update(redis_settings)
-            elif hasattr(settings, 'CACHES') and 'redis' in settings.CACHES:
-                cache_settings = settings.CACHES.get('redis', {}).get('OPTIONS', {})
-                if 'CLIENT_CLASS' in cache_settings and 'redis' in cache_settings['CLIENT_CLASS'].lower():
-                    default_params.update(cache_settings)
-            
+
             if 'REDIS_URL' in os.environ:
                 default_params['url'] = os.environ['REDIS_URL']
         except (AttributeError, ImportError):
             logger.warning("Could not load Redis configuration from Django settings")
-        
+
         return default_params
-    
+
+    @classmethod
+    def _get_identifier(cls) -> int:
+        try:
+            task = asyncio.current_task()
+            if task:
+                return id(task)
+        except (RuntimeError, AttributeError):
+            pass
+
+        return threading.get_ident()
+
+    @classmethod
+    async def get_connection(cls, alias: str = 'default') -> aioredis.Redis:
+        identifier = cls._get_identifier()
+
+        with cls._lock:
+            if alias not in cls._pools:
+                cls._pools[alias] = {}
+
+            if identifier not in cls._pools[alias]:
+                params = cls.get_connection_params(alias)
+
+                if 'url' in params:
+                    url = params.pop('url')
+                    connection = await aioredis.from_url(url, **params)
+                else:
+                    host = params.pop('host', 'localhost')
+                    port = params.pop('port', 6379)
+                    db = params.pop('db', 0)
+                    password = params.pop('password', None)
+
+                    url = f"redis://{host}:{port}/{db}"
+                    connection = await aioredis.from_url(
+                        url,
+                        password=password,
+                        **params
+                    )
+
+                cls._pools[alias][identifier] = connection
+                logger.debug(f"Created new Redis connection for alias: {alias}, context: {identifier}")
+
+        return cls._pools[alias][identifier]
+
     @classmethod
     def get_sync_connection(cls, alias: str = 'default') -> redis.Redis:
-        if alias not in cls._sync_pools:
-            params = cls.get_connection_params(alias)
-            
-            # If URL is provided, use from_url method
-            if 'url' in params:
-                url = params.pop('url')
-                cls._sync_pools[alias] = redis.ConnectionPool.from_url(
-                    url,
-                    **{k: v for k, v in params.items() if k not in {'host', 'port', 'db', 'password'}}
-                )
-            else:
-                cls._sync_pools[alias] = redis.ConnectionPool(**params)
-                
-            logger.debug(f"Created new Redis sync connection pool for alias: {alias}")
-            
-        return redis.Redis(connection_pool=cls._sync_pools[alias])
-    
-    @classmethod
-    async def get_async_connection(cls, alias: str = 'default') -> aioredis.Redis:
         """
-        Get an asynchronous Redis connection.
-        
-        Args:
-            alias: The Redis connection alias defined in Django settings
-            
-        Returns:
-            Asynchronous Redis client instance
+        Get a synchronous Redis connection.
         """
-        if alias not in cls._async_pools:
-            params = cls.get_connection_params(alias)
-            
-            # Create the appropriate connection URL for aioredis
-            if 'url' in params:
-                url = params.pop('url')
-                cls._async_pools[alias] = await aioredis.from_url(
-                    url,
-                    **{k: v for k, v in params.items() if k not in {'host', 'port', 'db', 'password'}}
-                )
-            else:
-                # Convert params to aioredis format
-                host = params.pop('host')
-                port = params.pop('port')
-                db = params.pop('db')
-                password = params.pop('password')
-                
-                url = f"redis://{host}:{port}/{db}"
-                cls._async_pools[alias] = await aioredis.from_url(
-                    url,
-                    password=password,
-                    **params
-                )
-                
-            logger.debug(f"Created new Redis async connection pool for alias: {alias}")
-        
-        return cls._async_pools[alias]
-    
+        identifier = cls._get_identifier()
+
+        with cls._lock:
+            if alias not in cls._sync_pools:
+                cls._sync_pools[alias] = {}
+
+            if identifier not in cls._sync_pools[alias]:
+                params = cls.get_connection_params(alias)
+
+                # Use the synchronous redis client, not the async one
+                if 'url' in params:
+                    url = params.pop('url')
+                    connection = redis.from_url(url, **params)
+                else:
+                    host = params.pop('host', 'localhost')
+                    port = params.pop('port', 6379)
+                    db = params.pop('db', 0)
+                    password = params.pop('password', None)
+
+                    url = f"redis://{host}:{port}/{db}"
+                    connection = redis.from_url(
+                        url,
+                        password=password,
+                        **params
+                    )
+
+                cls._sync_pools[alias][identifier] = connection
+                logger.debug(f"Created new synchronous Redis connection for alias: {alias}, context: {identifier}")
+
+        return cls._sync_pools[alias][identifier]
+
     @classmethod
     @contextmanager
     def sync_client(cls, alias: str = 'default'):
         """
-        Context manager for synchronous Redis connection.
-        
-        Args:
-            alias: The Redis connection alias defined in Django settings
-            
-        Yields:
-            Synchronous Redis client instance
+        Synchronous context manager for Redis connections.
+
+        Usage:
+            with RedisConnectionPool.sync_client() as redis:
+                redis.json().get('key', '$.path')
         """
-        client = None
+        connection = cls.get_sync_connection(alias)
         try:
-            client = cls.get_sync_connection(alias)
-            yield client
-        except RedisError as e:
+            yield connection
+        except Exception as e:
             logger.error(f"Redis error: {str(e)}")
             raise
         finally:
-            # We don't close the connection here since it's managed by the pool
+            # No need to explicitly close synchronous Redis connections
+            # They will be closed when the connection object is garbage collected
             pass
-    
+
     @classmethod
-    async def execute_async(cls, alias: str, coroutine_func, *args, **kwargs):
-        """
-        Execute an asynchronous Redis operation.
-        
-        Args:
-            alias: The Redis connection alias defined in Django settings
-            coroutine_func: Async function to call with the Redis client
-            args: Arguments to pass to the coroutine function
-            kwargs: Keyword arguments to pass to the coroutine function
-            
-        Returns:
-            Result of the coroutine function
-        """
-        client = await cls.get_async_connection(alias)
-        try:
-            result = await coroutine_func(client, *args, **kwargs)
-            return result
-        except (RedisError, aioredis.RedisError) as e:
-            logger.error(f"Redis async error: {str(e)}")
-            raise
-        # We don't close the connection here since it's managed by the pool
-    
+    async def close_connection(cls, alias: str = 'default'):
+        identifier = cls._get_identifier()
+
+        with cls._lock:
+            if alias in cls._pools and identifier in cls._pools[alias]:
+                try:
+                    await cls._pools[alias][identifier].close()
+                    logger.debug(f"Closed Redis connection for alias: {alias}, context: {identifier}")
+                except Exception as e:
+                    logger.error(f"Error closing Redis connection: {str(e)}")
+                finally:
+                    del cls._pools[alias][identifier]
+
     @classmethod
-    def close_all_connections(cls):
-        """Close all Redis connections and clear the pools."""
-        # Close sync connections
-        for alias, pool in cls._sync_pools.items():
-            try:
-                pool.disconnect()
-                logger.debug(f"Closed Redis sync connection pool for alias: {alias}")
-            except Exception as e:
-                logger.error(f"Error closing Redis sync connection pool for {alias}: {str(e)}")
-        
-        # Close async connections - this has to be done in an async context
-        # This method should be called from an async context if async pools are used
-        for alias, pool in cls._async_pools.items():
-            try:
-                pool.close()
-                logger.debug(f"Closed Redis async connection pool for alias: {alias}")
-            except Exception as e:
-                logger.error(f"Error closing Redis async connection pool for {alias}: {str(e)}")
-        
-        cls._sync_pools = {}
-        cls._async_pools = {}
+    async def close_all_connections(cls):
+        with cls._lock:
+            for alias, connections in cls._pools.items():
+                for identifier, connection in list(connections.items()):
+                    try:
+                        await connection.close()
+                        logger.debug(f"Closed Redis connection for alias: {alias}, context: {identifier}")
+                    except Exception as e:
+                        logger.error(f"Error closing Redis connection: {str(e)}")
+                    finally:
+                        del connections[identifier]
+            cls._pools.clear()

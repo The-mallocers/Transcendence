@@ -3,10 +3,8 @@ import traceback
 from abc import ABC, abstractmethod
 from typing import Dict, Any
 
-from django.conf import settings
-from redis.asyncio import Redis
-
 from utils.pong.enums import RequestAction
+from utils.redis import RedisConnectionPool
 
 
 class ServiceError(Exception):
@@ -17,13 +15,15 @@ class ServiceError(Exception):
 
 class BaseServices(ABC):
     def __init__(self):
-        self._redis = Redis(host=settings.REDIS_HOST, port=settings.REDIS_PORT, db=0)
         self._logger = logging.getLogger(self.__class__.__name__)
         self._initialized: bool = False
 
+        self.redis = None
+
     @abstractmethod
-    async def init(self, *args):
-        pass
+    async def init(self, *args) -> bool:
+        self.redis = await RedisConnectionPool.get_connection(self.__class__.__name__)
+        return True
 
     @abstractmethod
     async def handle_disconnect(self, client):
@@ -32,8 +32,7 @@ class BaseServices(ABC):
     async def process_action(self, data: Dict[str, Any], *args):
         try:
             if not self._initialized:
-                await self.init(*args)
-                self._initialized = True
+                self._initialized = await self.init(*args)
             request_action = RequestAction(data['data']['action'])
             handler_method = getattr(self, f"_handle_{request_action.value}", None)
 

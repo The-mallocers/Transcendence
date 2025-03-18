@@ -125,6 +125,28 @@ REST_FRAMEWORK = {
     ],
 }
 
+# ─────────────────────────────────────── Redis ──────────────────────────────────────── #
+
+REDIS_CONNECTIONS = {
+    'default': {
+        'host': 'localhost',
+        'port': 6379,
+        'db': 0,
+        'password': None,  # Set to None if no password required
+        'socket_timeout': 5,
+        'socket_connect_timeout': 5,
+        'retry_on_timeout': True,
+        'decode_responses': False,
+    },
+    'cache': {
+        'host': 'localhost',
+        'port': 6379,
+        'db': 1,
+        'password': None,
+        'decode_responses': True,  # Automatically decode responses to Python types
+    }
+}
+
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
@@ -257,6 +279,12 @@ LOGGING = {
             'encoding': 'utf-8',
             'mode': 'w',  # Overwrites the file each time
         },
+        'redis_file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR / 'logs' / 'redis.log',
+            'formatter': 'verbose',
+        },
         'console': {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler',
@@ -301,6 +329,11 @@ LOGGING = {
         },
         'apps.game': {  # Django request logging
             'handlers': ['console', 'file', 'latest_file'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'utils.redis': {  # Update this to match your actual module path
+            'handlers': ['console', 'redis_file'],
             'level': 'DEBUG',
             'propagate': False,
         },

@@ -82,7 +82,6 @@ class WebSocket(AsyncWebsocketConsumer):
 class GameWebSocket(WebSocket):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        print("lalalalalalalalalalalalalalaalalalala")
         self.game_service = GameService()
         self.matchmaking_service = MatchmakingService()
 

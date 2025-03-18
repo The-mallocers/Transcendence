@@ -6,7 +6,6 @@ from apps.player.models import Player
 from apps.pong.api.serializers import PaddleSerializer
 from apps.shared.models import Clients
 from utils.pong.enums import Side
-from apps.game.game import GameManager
 
 
 class PlayerSerializer(serializers.ModelSerializer):
@@ -72,5 +71,6 @@ class GameFinishSerializer(serializers.ModelSerializer):
         fields = ['winner', 'loser', 'pL_score', 'pR_score']
 
     def get_winner(self, obj):
+        from apps.game.game import GameManager
         game = GameManager.get_game_db(self.context.get('id'))
 

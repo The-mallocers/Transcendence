@@ -20,18 +20,18 @@ from utils.websockets.channel_send import send_group_error, send_group
 
 
 class PlayerManager:
-    def __init__(self):
+    def __init__(self, player_id, game_id=None):
         self._redis = Redis(host=settings.REDIS_HOST, port=settings.REDIS_PORT, db=0)
         self._logger = logging.getLogger(self.__class__.__name__)
-
         self._player_game: PlayerGame = None
-        self.player: Player = None
-        self.id = None
-        self.paddle: Paddle = None
-        self.score: Score = None
 
-    async def init_player(self, player_id, game_id=None):
-        player = await self.get_player_db(player_id)
+        self.player: Player = self.get_player_db(player_id)
+        self.id = player_id
+        self.paddle: Paddle = Paddle(self._redis, player_id=self.id, game_id=game_id)
+        self.score: Score = Score(self._redis, player_id=self.id, game_id=game_id)
+
+    def init_player(self, player_id, game_id=None):
+        player = self.get_player_db(player_id)
         if player:
             self.player = player
             self.paddle = Paddle(self._redis, player_id=player.id, game_id=game_id)
@@ -97,8 +97,16 @@ class PlayerManager:
 
     # ── Getter ────────────────────────────────────────────────────────────────────────
 
+    @staticmethod
+    def get_player_db(player_id):
+        """Get player from data base"""
+        try:
+            return Player.objects.get(id=player_id)
+        except Player.DoesNotExist:
+            return None
+
     @sync_to_async
-    def get_player_db(self, player_id):
+    def get_player_db_async(self, player_id):
         """Get player from data base"""
         try:
             with transaction.atomic():

@@ -3,17 +3,17 @@ import logging
 import random
 import time
 
+from apps.game.manager import GameManager
 from apps.pong.api.serializers import PaddleSerializer, BallSerializer
 from utils.pong.enums import EventType, ResponseAction
-from utils.pong.objects import FPS, CANVAS_HEIGHT, CANVAS_WIDTH, BALL_SPEED, OFFSET_PADDLE, PADDLE_HEIGHT, PADDLE_WIDTH
+from utils.pong.enums import GameStatus
+from utils.pong.enums import PaddleMove
+from utils.pong.objects import FPS, CANVAS_HEIGHT, CANVAS_WIDTH, BALL_SPEED
 from utils.pong.objects.ball import Ball
 from utils.pong.objects.objects_state import GameState
 from utils.pong.objects.paddle import Paddle
 from utils.pong.objects.score import Score
 from utils.websockets.channel_send import send_group
-from utils.pong.enums import PaddleMove
-from apps.game.manager import GameManager
-from utils.pong.enums import GameStatus
 
 
 class PongLogic:
@@ -46,11 +46,11 @@ class PongLogic:
     
     async def handle_paddle_direction(self, paddle, delta_time):
         move = await paddle.get_move()
-        if (move == PaddleMove.UP):
+        if move == PaddleMove.UP:
             await paddle.increase_y(delta_time)
-        elif (move == PaddleMove.DOWN):
+        elif move == PaddleMove.DOWN:
             await paddle.decrease_y(delta_time)
-        elif (move == PaddleMove.IDLE):
+        elif move == PaddleMove.IDLE:
             #Maybe we'll do things when its idle later !
             pass
 
@@ -105,13 +105,8 @@ class PongLogic:
 
         #Check win
         if await self.score_pL.get_score() > 2:
-            await self.game_manager.set_result()
-            await send_group(self.game_id, EventType.GAME, ResponseAction.RESULTS, content={
-                
-            })
             await self.game_manager.rset_status(GameStatus.ENDING)
         if await self.score_pR.get_score() > 2:
-            await self.game_manager.set_result()
             await self.game_manager.rset_status(GameStatus.ENDING)
 
         await self.ball.update()

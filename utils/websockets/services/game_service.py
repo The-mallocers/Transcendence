@@ -6,34 +6,33 @@ from apps.shared.models import Clients
 from utils.pong.enums import GameStatus, ResponseError, status_order
 from utils.websockets.channel_send import send_group_error
 from utils.websockets.services.services import BaseServices
-from utils.pong.enums import PaddleMove
 
 
 class GameService(BaseServices):
     def __init__(self):
         super().__init__()
-        self.game_manager = GameManager()
+        self.game_manager: GameManager = None
 
     async def init(self, player: Player):
-        game_id_bytes = await self._redis.hget(name="player_game", key=str(player.id))
+        await super().init()
+        game_id_bytes = await self.redis.hget(name="player_game", key=str(player.id))
 
         if game_id_bytes:
             game_id = game_id_bytes.decode('utf-8')
 
-            self.game_manager = GameManager()
-            print("wowowooooooooooooo")
-            await self.game_manager.load_by_id(game_id)
+            self.game_manager = GameManager(game_id)
         else:
             client = await Clients.get_client_by_player_id_async(player.id)
             await send_group_error(client.id, ResponseError.NO_GAME)
             self._logger.error(f"No active game found for player {player.id}")
+        return True
 
     async def process_action(self, data: Dict[str, Any], *args):
-        if await self._redis.hget(name='player_game', key=str(args[0].id)) is None:
-            client = await Clients.get_client_by_player_id_async(args[0].id)
-            await send_group_error(client.id, ResponseError.NO_GAME)
-        else:
-            return await super().process_action(data, *args)
+        # if await self.redis.hget(name='player_game', key=str(args[0].id)) is None:
+        #     client = await Clients.get_client_by_player_id_async(args[0].id)
+        #     await send_group_error(client.id, ResponseError.NO_GAME)
+        # else:
+        return await super().process_action(data, *args)
 
     async def _handle_start_game(self, data, player: Player):
         status = await self.game_manager.rget_status()

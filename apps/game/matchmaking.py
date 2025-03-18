@@ -8,9 +8,9 @@ from apps.game.game import GameThread
 from apps.game.manager import GameManager
 from apps.player.manager import PlayerManager
 from utils.pong.enums import GameStatus, ResponseError
+from utils.pong.objects import PADDLE_WIDTH, OFFSET_PADDLE, CANVAS_WIDTH
 from utils.threads import Threads
 from utils.websockets.channel_send import send_group_error
-from utils.pong.objects import PADDLE_WIDTH, OFFSET_PADDLE, CANVAS_WIDTH
 
 
 class MatchmakingThread(Threads):
@@ -26,7 +26,6 @@ class MatchmakingThread(Threads):
                 if matched:
                     self._logger.info(f"Found match: {game_manager.pL} vs {game_manager.pR}")
                     await game_manager.create_game()
-                    game_id = game_manager.get_id()
                     await game_manager.rset_status(GameStatus.MATCHMAKING)
 
                     await game_manager.pL.join_game(game_manager)
@@ -34,9 +33,11 @@ class MatchmakingThread(Threads):
                     await game_manager.pR.join_game(game_manager)
                     await game_manager.pR.paddle.set_x(CANVAS_WIDTH - OFFSET_PADDLE - PADDLE_WIDTH)
                     await game_manager.rset_status(GameStatus.STARTING)
-                    await self.redis.hset(name="player_game", key=str(game_manager.pL.id), value=str(game_id))
-                    await self.redis.hset(name="player_game", key=str(game_manager.pR.id), value=str(game_id))
-                    GameThread(manager=game_manager, game_id=game_id).start()
+                    await self.redis.hset(name="player_game", key=str(game_manager.pL.id),
+                                          value=str(game_manager.get_id()))
+                    await self.redis.hset(name="player_game", key=str(game_manager.pR.id),
+                                          value=str(game_manager.get_id()))
+                    GameThread(manager=game_manager, game_id=game_manager.get_id()).start()
                     game_manager = None
 
                 await asyncio.sleep(1)
@@ -75,8 +76,8 @@ class MatchmakingThread(Threads):
         players_queue = await self.redis.hgetall('matchmaking_queue')
         players = [player.decode('utf-8') for player in players_queue]
         if len(players) >= 2:  #il faudra ce base sur les mmr
-            game_manager.pL = await PlayerManager().init_player(player_id=players[0])
-            game_manager.pR = await PlayerManager().init_player(player_id=players[1])
+            game_manager.pL = PlayerManager(player_id=players[0])
+            game_manager.pR = PlayerManager(player_id=players[1])
             if game_manager.pL is not None and game_manager.pR is not None:
                 return True
         return False
