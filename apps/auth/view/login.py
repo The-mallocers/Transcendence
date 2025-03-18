@@ -15,7 +15,7 @@ def get(req):
     grafana_session = authenticate_grafana_user()
     secretKey = create_api_key(grafana_session)
     urlnode, urlsql = render_dashboard(req, secretKey, grafana_session)
-    #Commenting this because this was causing logout to crash (but for some reason not just getting to the page)
+    # #Commenting this because this was causing logout to crash (but for some reason not just getting to the page)
     users = Clients.objects.all()
     print(grafana_id)
     print(urlnode)
@@ -121,7 +121,7 @@ def render_dashboard(request, secretkey, session) -> str:
         # response.raise_for_status()
         # data = response.json()
         # urlnode = f"http://localhost:3000/public-dashboards/{data.get('uid')}"
-        urlnode = "http://localhost:3000/public-dashboards/1776bbfdef914034b6a7eb2635bf9d1b"
+        urlnode = "http://localhost:3000/d/rYdddlPWk/node-exporter-full"
         
         
         #get postgres dashboard id
@@ -133,7 +133,7 @@ def render_dashboard(request, secretkey, session) -> str:
         # response.raise_for_status()
         # data = response.json()
         # urlpostgre = f"http://localhost:3000/public-dashboards/{data.get('uid')}"
-        urlpostgre = "http://localhost:3000/public-dashboards/1776bbfdef914034b6a7eb2635bf9d1b"
+        urlpostgre = "http://localhost:3000/public-dashboards/92001fadcb3b4a74ab15e272e729d10e"
         return urlnode, urlpostgre
     
     except requests.exceptions.RequestException as e:

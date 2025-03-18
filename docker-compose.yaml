@@ -141,13 +141,11 @@ services:
     restart: unless-stopped
       
   grafana:
-    build: ./docker/grafana
+    image: grafana/grafana-enterprise
     container_name: grafana
     depends_on:
       prometheus:
         condition: service_started
-    # user: "1000"
-    # user: "102731:102731"
     env_file:
       - .env
     environment:
@@ -156,8 +154,6 @@ services:
     - GF_SECURITY_ALLOW_EMBEDDING=true
     - GF_PUBLIC_DASHBOARD_ENABLED=true
     - GF_FEATURE_TOGGLES_ENABLE=publicDashboards
-    - GF_FEATURE
-    # - GF_SECURITY_COOKIE_SAMESITE=none
     ports:
       - "3000:3000"
     volumes:
