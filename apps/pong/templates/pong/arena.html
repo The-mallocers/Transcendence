@@ -11,43 +11,6 @@
     position: relative;
 }
 
-.endState span {
-    display: inline-block;
-    font-size: 8rem;
-    margin: 0;
-    padding: 0;
-    opacity: 0; 
-    transform: translateY(200px);
-    animation: fadeInUp 0.5s cubic-bezier(1,.12,.55,1.15) forwards;
-}
-
-@keyframes fadeInUp {
-    0% {
-        opacity: 0;
-        transform: translateY(-200px);
-    }
-    100% {
-        opacity: 1;
-        transform: translateY(0px);
-    }
-}
-
-/* Delay each child element based on its index */ 
-.endState > span:nth-child(1) { animation-delay: calc(0.1s * 1); }
-.endState > span:nth-child(2) { animation-delay: calc(0.1s * 2); }
-.endState > span:nth-child(3) { animation-delay: calc(0.1s * 3); }
-.endState > span:nth-child(4) { animation-delay: calc(0.1s * 4); }
-.endState > span:nth-child(5) { animation-delay: calc(0.1s * 5); }
-.endState > span:nth-child(6) { animation-delay: calc(0.1s * 6); }
-.endState > span:nth-child(7) { animation-delay: calc(0.1s * 7); }
-.endState > span:nth-child(8) { animation-delay: calc(0.1s * 8); }
-.endState > span:nth-child(9) { animation-delay: calc(0.1s * 9); }
-.endState > span:nth-child(10) { animation-delay: calc(0.1s * 10);}
-
-.arenaPage .wordEnd{
-    margin-right: 2rem;
-}
-
 #pongCanvas {
     border: 1px white solid;
 }
@@ -91,14 +54,7 @@
 
 <div class="arenaPage">
 
-    <div class="endState">
-        <span>Y</span>
-        <span>o</span>
-        <span class="wordEnd">u</span>
-        <span>w</span>
-        <span>o</span>
-        <span>n</span>
-    </div>
+
     <div id="scoreLeft" class="score">0</div>
     <div id="scoreRight" class="score">0</div>
 

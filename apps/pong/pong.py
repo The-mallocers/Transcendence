@@ -19,7 +19,7 @@ from utils.websockets.channel_send import send_group
 class PongLogic:
     def __init__(self, game_manager, ball, paddle_pL, paddle_pR, score_pL, score_pR):
         self._logger = logging.getLogger(self.__class__.__name__)
-        self.last_update: float = time.time()
+        self.last_update: float = -1 #This hack is sponsored by tfreydie and prevents the random +1 score at the start
         self.game_id = game_manager.get_id()
         print(self.game_id)
 
@@ -57,7 +57,11 @@ class PongLogic:
 
     async def _game_loop(self):
         current_time = time.time()
-        delta_time = current_time - self.last_update
+        #ugly as shit fix but doing properly would require changing the way we are initializing a game.
+        if self.last_update == -1:
+            delta_time = 0
+        else:
+            delta_time = current_time - self.last_update
 
         await self.ball.multiply_dx(1.001)
         await self.ball.multiply_dy(1.001)
@@ -100,6 +104,7 @@ class PongLogic:
             await self.score_pR.add_score()
             await self._reset_ball(self.ball)
         elif await self.ball.get_x() >= CANVAS_WIDTH:
+            print(await self.ball.get_x())
             await self.score_pL.add_score()
             await self._reset_ball(self.ball)
 

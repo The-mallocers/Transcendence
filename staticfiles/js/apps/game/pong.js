@@ -30,16 +30,6 @@ lnick.innerHTML = window.GameState.left.nick
 rnick.innerHTML = window.GameState.right.nick
 console.log('meowmeowmeow', window.GameState)
 
-const keys = {
-    'a': false,
-    'd': false,
-};
-
-const previous_keys = {
-    'a': false,
-    'd': false,
-}
-
 
 socket.onmessage = (e) => {
     // queueMicrotask(() => {
@@ -76,18 +66,39 @@ socket.onmessage = (e) => {
     // })s
 };
 
+
+const keys = {
+    'a': false,
+    'd': false,
+};
+
+const previous_keys = {
+    'a': false,
+    'd': false,
+}
+
+//A -> D
+// A true D false -> D -> EN BAS
+
+//0 - 0
+//A - 0
+//Update old keys
+// A = true - D = false
+
+//if A == true D == True
+
 document.addEventListener('keydown', (event) => {
-    switch(event.key.toLowerCase()) {
-        case 'a': keys.a = true; break;
-        case 'd': keys.d = true; break;
+    switch(event.key) {
+        case 'ArrowUp': keys.up = true; break;
+        case 'ArrowDown': keys.down = true; break;
     }
     // updatePaddles()
 });
 
 document.addEventListener('keyup', (event) => {
-    switch(event.key.toLowerCase()) {
-        case 'a': keys.a = false; break;
-        case 'd': keys.d = false; break;
+    switch(event.key) {
+        case 'ArrowUp': keys.up = false; break;
+        case 'ArrowDown': keys.down = false; break;
     }
     // updatePaddles()
 });
@@ -95,20 +106,25 @@ document.addEventListener('keyup', (event) => {
 function updatePaddles() {
     // gauche
     let direction = null;
-    // if (keys.a && keys.d) {
-    //     //I want to check the old key combination, and have the direction be
-    //     //what the "new" direction is
-    //     if (previous_keys.a) {
-    //         direction = 
-    //     }
-    // }
-
-
-    if (keys.a) {
-        direction = 'up'
+    if (keys.up && keys.down) {
+        //I want to check the old key combination, and have the direction be
+        //what the "new" direction is
+        if (previous_keys.up) {
+            direction = 'down'
+        }
+        else if (previous_keys.down) {
+            direction = 'up'
+        }
     }
-    else if (keys.d) {
+    else if (keys.up) {
+        direction = 'up'
+        previous_keys.up = true;
+        previous_keys.down = false;
+    }
+    else if (keys.down) {
         direction = 'down'
+        previous_keys.down = true;
+        previous_keys.up = false;
     }
     else {
         direction = 'idle'
