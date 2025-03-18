@@ -15,6 +15,7 @@ from apps.player.models import PlayerGame
 from apps.shared.models import Clients
 from utils.pong.enums import EventType, ResponseError, ResponseAction, Side
 from utils.pong.objects.paddle import Paddle
+from utils.pong.objects.score import Score
 from utils.websockets.channel_send import send_group_error, send_group
 
 
@@ -27,12 +28,14 @@ class PlayerManager:
         self.player: Player = None
         self.id = None
         self.paddle: Paddle = None
+        self.score: Score = None
 
     async def init_player(self, player_id, game_id=None):
         player = await self.get_player_db(player_id)
         if player:
             self.player = player
             self.paddle = Paddle(self._redis, player_id=player.id, game_id=game_id)
+            self.score = Score(self._redis, game_id=game_id, player_id=player.id)
             self.id = player_id
             return self
         else:
@@ -42,10 +45,9 @@ class PlayerManager:
     async def join_game(self, game_manager: GameManager):
         try:
             await game_manager.add_player_db(self.player)
-            self._player_game: PlayerGame = await self.get_player_game_id_db_async(self.player.id,
-                                                                             await game_manager.get_id())
+            self._player_game: PlayerGame = await self.get_player_game_id_db_async(self.player.id, game_manager.get_id())
 
-            game_key = f'game:{await game_manager.get_id()}'
+            game_key = f'game:{game_manager.get_id()}'
             players = await self._redis.json().get(game_key, Path("players"))
             player_ids = [player["id"] for player in players]
 
@@ -56,7 +58,7 @@ class PlayerManager:
                     rand_side = random.choice(list(Side))
                     self._player_game.side = rand_side
                 elif len(player_ids) == 1:
-                    first_player: PlayerGame = await self.get_player_game_id_db_async(str(player_ids[0]), await game_manager.get_id())
+                    first_player: PlayerGame = await self.get_player_game_id_db_async(str(player_ids[0]), game_manager.get_id())
                     if first_player.side == Side.RIGHT.value:
                         self._player_game.side = Side.LEFT
                     if first_player.side == Side.LEFT.value:
@@ -69,7 +71,7 @@ class PlayerManager:
 
             self.paddle.game_key = game_key
             serializer = PlayerSerializer(self.player,
-                                          context={'paddle': self.paddle, 'side': self._player_game.side, 'score': 0})
+                                          context={'paddle': self.paddle, 'side': self._player_game.side, 'score': self.score.score})
             player_data = await sync_to_async(lambda: serializer.data)()
 
             await self._redis.json().arrappend(game_key, Path("players"), player_data)
@@ -77,7 +79,7 @@ class PlayerManager:
             channel_layer = get_channel_layer()
             client = await Clients.get_client_by_player_id_async(self.player.id)
             channel_name = await self._redis.hget(name="consumers_channels", key=str(client.id))
-            await channel_layer.group_add(str(await game_manager.get_id()), channel_name.decode('utf-8'))
+            await channel_layer.group_add(str(game_manager.get_id()), channel_name.decode('utf-8'))
 
             await send_group(self.player.id, EventType.GAME, ResponseAction.JOIN_GAME)
             await self.leave_mm()
@@ -113,7 +115,7 @@ class PlayerManager:
                 return PlayerGame.objects.get(player__id=player_id, game__id=game_id)
         except PlayerGame.DoesNotExist:
             return None
-        
+                
     @staticmethod
     def get_player_game_id_db(player_id, game_id) -> PlayerGame | None:
         """Get player game with player_id from data base"""

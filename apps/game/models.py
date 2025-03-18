@@ -23,6 +23,7 @@ class Game(models.Model):
     created_at = DateTimeField(default=timezone.now)
     in_tournament = BooleanField(editable=False, default=False, null=False)
     winner = ForeignKey(Player, on_delete=models.SET_NULL, null=True, related_name='winner', editable=False, blank=True)
+    loser = ForeignKey(Player, on_delete=models.SET_NULL, null=True, related_name='loser', editable=False, blank=True)
 
     # ── Game Settings ───────────────────────────────────────────────────────────── #
     status = CharField(max_length=20, choices=[(status.name, status.value) for status in GameStatus], default=GameStatus.CREATING.value)

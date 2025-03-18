@@ -5,6 +5,8 @@ let canvas = document.getElementById("pongCanvas");
 let ctx = canvas.getContext("2d");
 let lnick = document.getElementById("lnick");
 let rnick = document.getElementById("rnick");
+let lscore = document.getElementById("scoreLeft");
+let rscore = document.getElementById("scoreRight");
 
 let height = 500;
 const width = 1000;
@@ -62,6 +64,12 @@ socket.onmessage = (e) => {
             window.GameState.ballX = jsonData.data.content.x;
             window.GameState.ballY = jsonData.data.content.y;
             // console.table(jsonData.data.content.x, jsonData.data.content.y)
+        }
+        else if (jsonData.data.action == "SCORE_LEFT_UPDATE"){
+            lscore.innerHTML = jsonData.data.content
+        }
+        else if (jsonData.data.action == "SCORE_RIGHT_UPDATE"){
+            rscore.innerHTML = jsonData.data.content
         }
     }
         // return render()

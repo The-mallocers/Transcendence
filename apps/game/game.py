@@ -14,6 +14,7 @@ from utils.pong.objects.paddle import Paddle
 from utils.pong.objects.score import Score
 from utils.threads import Threads
 from utils.websockets.channel_send import send_group, send_group_error
+from redis.commands.json.path import Path
 
 
 class GameThread(Threads):
@@ -47,6 +48,7 @@ class GameThread(Threads):
         redis_sync.delete(f'game:{self.game_id}')
         redis_sync.hdel('player_game', str(self.game_manager.pL.id))
         redis_sync.hdel('player_game', str(self.game_manager.pR.id))
+        redis_sync.close()
 
         self._logger.info("Cleanup of game complete")
 
@@ -57,7 +59,7 @@ class GameThread(Threads):
 
         
         self.logic: PongLogic = PongLogic(
-            self.game_id,
+            self.game_manager,
             Ball(self.redis, self.game_id),
             Paddle(self.redis, self.game_id, self.game_manager.pL.id),
             Paddle(self.redis, self.game_id, self.game_manager.pR.id),
@@ -93,7 +95,7 @@ class GameThread(Threads):
 
     async def _ending(self):
         if await self.game_manager.rget_status() is GameStatus.ENDING:
-            await send_group(self.game_id, EventType.GAME, ResponseAction.ENDING)
+            # await send_group(self.game_id, EventType.GAME, )
             self._stop_event.set()
             await self._stoping()
 

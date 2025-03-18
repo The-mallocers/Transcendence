@@ -15,15 +15,18 @@ from utils.pong.objects import PADDLE_WIDTH, OFFSET_PADDLE, CANVAS_WIDTH
 
 class MatchmakingThread(Threads):
     async def main(self):
+        game_manager: GameManager = None
         while not self._stop_event.is_set():
-            game_manager: GameManager = GameManager()
             try:
+                if game_manager is None:
+                    game_manager = GameManager()
+
                 matched = await self.select_players(game_manager)
 
                 if matched:
                     self._logger.info(f"Found match: {game_manager.pL} vs {game_manager.pR}")
                     await game_manager.create_game()
-                    game_id = await game_manager.get_id()
+                    game_id = game_manager.get_id()
                     await game_manager.rset_status(GameStatus.MATCHMAKING)
 
                     await game_manager.pL.join_game(game_manager)
@@ -34,6 +37,7 @@ class MatchmakingThread(Threads):
                     await self.redis.hset(name="player_game", key=str(game_manager.pL.id), value=str(game_id))
                     await self.redis.hset(name="player_game", key=str(game_manager.pR.id), value=str(game_id))
                     GameThread(manager=game_manager, game_id=game_id).start()
+                    game_manager = None
 
                 await asyncio.sleep(1)
 

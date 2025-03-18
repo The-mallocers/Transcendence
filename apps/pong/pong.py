@@ -12,13 +12,16 @@ from utils.pong.objects.paddle import Paddle
 from utils.pong.objects.score import Score
 from utils.websockets.channel_send import send_group
 from utils.pong.enums import PaddleMove
+from apps.game.manager import GameManager
+from utils.pong.enums import GameStatus
 
 
 class PongLogic:
-    def __init__(self, game_id, ball, paddle_pL, paddle_pR, score_pL, score_pR):
+    def __init__(self, game_manager, ball, paddle_pL, paddle_pR, score_pL, score_pR):
         self._logger = logging.getLogger(self.__class__.__name__)
         self.last_update: float = time.time()
-        self.game_id = game_id
+        self.game_id = game_manager.get_id()
+        print(self.game_id)
 
         # ── Objects ───────────────────────────────────────────────────────────────────
         self.ball: Ball = ball
@@ -26,6 +29,7 @@ class PongLogic:
         self.paddle_pR: Paddle = paddle_pR
         self.score_pL: Score = score_pL
         self.score_pR: Score = score_pR
+        self.game_manager: GameManager = game_manager
 
 
     async def game_task(self):
@@ -42,11 +46,11 @@ class PongLogic:
     
     async def handle_paddle_direction(self, paddle, delta_time):
         move = await paddle.get_move()
-        if (await move == PaddleMove.UP):
+        if (move == PaddleMove.UP):
             await paddle.increase_y(delta_time)
-        elif (await move == PaddleMove.DOWN):
+        elif (move == PaddleMove.DOWN):
             await paddle.decrease_y(delta_time)
-        elif (await move == PaddleMove.IDLE):
+        elif (move == PaddleMove.IDLE):
             #Maybe we'll do things when its idle later !
             pass
 
@@ -61,25 +65,9 @@ class PongLogic:
         await self.ball.increase_x(await self.ball.get_dx() * delta_time)
         await self.ball.increase_y(await self.ball.get_dy() * delta_time)
 
-        #the two lines below should work, but i cant test it, will taste next time i can
-        # self.handle_paddle_direction(self, self.paddle_pL, delta_time)
-        # self.handle_paddle_direction(self, self.paddle_pR, delta_time)
+        await self.handle_paddle_direction(self.paddle_pL, delta_time)
+        await self.handle_paddle_direction(self.paddle_pR, delta_time)
         
-        if (await self.paddle_pL.get_move() == PaddleMove.UP):
-            await self.paddle_pL.increase_y(delta_time)
-        elif (await self.paddle_pL.get_move() == PaddleMove.DOWN):
-            await self.paddle_pL.decrease_y(delta_time)
-        if (await self.paddle_pR.get_move() == PaddleMove.UP):
-            await self.paddle_pR.increase_y(delta_time)
-        elif (await self.paddle_pR.get_move() == PaddleMove.DOWN):
-            await self.paddle_pR.decrease_y(delta_time)
-        if (await self.paddle_pR.get_move() == PaddleMove.IDLE):
-            pass
-        elif (await self.paddle_pL.get_move() == PaddleMove.IDLE):
-            pass
-        
-
-
         # Ball collision with top and bottom walls
         if await self.ball.get_y() <= await self.ball.get_radius() or await self.ball.get_y() >= CANVAS_HEIGHT - await self.ball.get_radius():
             if await self.ball.get_y() < await self.ball.get_radius():
@@ -109,11 +97,22 @@ class PongLogic:
 
         # Scoring
         if await self.ball.get_x() <= 0:
-            await self.score_pL.add_score()
-            await self._reset_ball(self.ball)
-        elif await self.ball.get_x() >= CANVAS_WIDTH:
             await self.score_pR.add_score()
             await self._reset_ball(self.ball)
+        elif await self.ball.get_x() >= CANVAS_WIDTH:
+            await self.score_pL.add_score()
+            await self._reset_ball(self.ball)
+
+        #Check win
+        if await self.score_pL.get_score() > 2:
+            await self.game_manager.set_result()
+            await send_group(self.game_id, EventType.GAME, ResponseAction.RESULTS, content={
+                
+            })
+            await self.game_manager.rset_status(GameStatus.ENDING)
+        if await self.score_pR.get_score() > 2:
+            await self.game_manager.set_result()
+            await self.game_manager.rset_status(GameStatus.ENDING)
 
         await self.ball.update()
         await self.paddle_pL.update()

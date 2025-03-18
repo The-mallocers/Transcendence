@@ -21,6 +21,7 @@ class GameService(BaseServices):
             game_id = game_id_bytes.decode('utf-8')
 
             self.game_manager = GameManager()
+            print("wowowooooooooooooo")
             await self.game_manager.load_by_id(game_id)
         else:
             client = await Clients.get_client_by_player_id_async(player.id)

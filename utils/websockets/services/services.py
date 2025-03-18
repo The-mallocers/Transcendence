@@ -19,7 +19,7 @@ class BaseServices(ABC):
     def __init__(self):
         self._redis = Redis(host=settings.REDIS_HOST, port=settings.REDIS_PORT, db=0)
         self._logger = logging.getLogger(self.__class__.__name__)
-        self._initilized: bool = False
+        self._initialized: bool = False
 
     @abstractmethod
     async def init(self, *args):
@@ -31,8 +31,9 @@ class BaseServices(ABC):
 
     async def process_action(self, data: Dict[str, Any], *args):
         try:
-            if not self._initilized:
+            if not self._initialized:
                 await self.init(*args)
+                self._initialized = True
             request_action = RequestAction(data['data']['action'])
             handler_method = getattr(self, f"_handle_{request_action.value}", None)
 
