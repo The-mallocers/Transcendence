@@ -19,7 +19,7 @@ from utils.pong.enums import GameStatus
 class PongLogic:
     def __init__(self, game_manager, ball, paddle_pL, paddle_pR, score_pL, score_pR):
         self._logger = logging.getLogger(self.__class__.__name__)
-        self.last_update: float = time.time()
+        self.last_update: float = -1 #This hack is sponsored by tfreydie and prevents the random +1 score at the start
         self.game_id = game_manager.get_id()
         print(self.game_id)
 
@@ -47,9 +47,9 @@ class PongLogic:
     async def handle_paddle_direction(self, paddle, delta_time):
         move = await paddle.get_move()
         if (move == PaddleMove.UP):
-            await paddle.increase_y(delta_time)
-        elif (move == PaddleMove.DOWN):
             await paddle.decrease_y(delta_time)
+        elif (move == PaddleMove.DOWN):
+            await paddle.increase_y(delta_time)
         elif (move == PaddleMove.IDLE):
             #Maybe we'll do things when its idle later !
             pass
@@ -57,7 +57,11 @@ class PongLogic:
 
     async def _game_loop(self):
         current_time = time.time()
-        delta_time = current_time - self.last_update
+        #ugly as shit fix but doing properly would require changing the way we are initializing a game.
+        if self.last_update == -1:
+            delta_time = 0
+        else:
+            delta_time = current_time - self.last_update
 
         await self.ball.multiply_dx(1.001)
         await self.ball.multiply_dy(1.001)
@@ -95,22 +99,22 @@ class PongLogic:
             await self.ball.set_dx(-abs(await self.ball.get_dx()))  # Ensure ball moves left
             await self.ball.set_x(await self.paddle_pR.get_x() - await self.ball.get_radius())
 
-        # Scoring
         if await self.ball.get_x() <= 0:
             await self.score_pR.add_score()
             await self._reset_ball(self.ball)
         elif await self.ball.get_x() >= CANVAS_WIDTH:
+            print(await self.ball.get_x())
             await self.score_pL.add_score()
             await self._reset_ball(self.ball)
 
         #Check win
-        if await self.score_pL.get_score() > 2:
+        if await self.score_pL.get_score() > 30:
             await self.game_manager.set_result()
             await send_group(self.game_id, EventType.GAME, ResponseAction.RESULTS, content={
                 
             })
             await self.game_manager.rset_status(GameStatus.ENDING)
-        if await self.score_pR.get_score() > 2:
+        if await self.score_pR.get_score() > 30:
             await self.game_manager.set_result()
             await self.game_manager.rset_status(GameStatus.ENDING)
 

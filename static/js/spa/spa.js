@@ -215,10 +215,17 @@ const routes = [
         }
     },
     {
-    path: '/auth/2fa',
-    template: async () => {
-        return await fetchRoute('/pages/auth/2fa');
-    },
+        path: '/auth/2fa',
+        template: async () => {
+            return await fetchRoute('/pages/auth/2fa');
+        },
+    
+    },    
+    {
+        path: '/pong/gameover',
+        template: async () => {
+            return await fetchRoute('/pages/pong/gameover/');
+        },
     },
 ];
 
