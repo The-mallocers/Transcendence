@@ -94,12 +94,11 @@ def render_dashboard(request, secretkey, session) -> str:
     print(secretkey )
     api_url = "http://grafana:3000/api/search?type=dash-db"
     my_headers = {
-        # 'Accept': 'application/json',
+        'Accept': 'application/json',
         "Content-Type": "application/json",
         "Authorization": f'Bearer {secretkey}'
     }
     try:
-
         response = requests.get(
             api_url,
             headers=my_headers
@@ -109,6 +108,13 @@ def render_dashboard(request, secretkey, session) -> str:
         print(data)
         print(data[0].get('uid'))
         print(data[1].get('uid'))
+        payload = {
+            "timeSelectionEnabled": True,
+            "isEnabled": True,  # This is the key setting
+            "annotationsEnabled": True,
+            "share": "public",
+            "uid" : data[0].get('uid')
+        }
         uidnode = data[0].get('uid')
         uidpostgre = data[1].get('uid')
         
@@ -116,12 +122,13 @@ def render_dashboard(request, secretkey, session) -> str:
         # url = f"http://grafana:3000/api/dashboards/uid/{uidnode}/public-dashboards/"
         # response = requests.post(
         #     url,
+        #     json=payload,
         #     headers=my_headers
         # )
         # response.raise_for_status()
         # data = response.json()
         # urlnode = f"http://localhost:3000/public-dashboards/{data.get('uid')}"
-        urlnode = "http://localhost:3000/public-dashboards/1776bbfdef914034b6a7eb2635bf9d1b"
+        urlnode = "http://localhost:3000/public-dashboards/11f80ad04df4457c8882b7ddfad4112d"
         
         
         #get postgres dashboard id
@@ -133,7 +140,7 @@ def render_dashboard(request, secretkey, session) -> str:
         # response.raise_for_status()
         # data = response.json()
         # urlpostgre = f"http://localhost:3000/public-dashboards/{data.get('uid')}"
-        urlpostgre = "http://localhost:3000/public-dashboards/1776bbfdef914034b6a7eb2635bf9d1b"
+        urlpostgre = "http://localhost:3000/public-dashboards/1d6e1e67149642dfa6d0ebb7bb9a5c76"
         return urlnode, urlpostgre
     
     except requests.exceptions.RequestException as e:
