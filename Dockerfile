@@ -31,4 +31,4 @@ ENV PYTHONUNBUFFERED=1
 
 RUN chmod +x /app/entrypoint.prod.sh
 
-CMD [ "/app/entrypoint.prod.sh" ]
+ENTRYPOINT [ "/app/entrypoint.prod.sh" ]

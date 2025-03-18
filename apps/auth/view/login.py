@@ -94,12 +94,11 @@ def render_dashboard(request, secretkey, session) -> str:
     print(secretkey )
     api_url = "http://grafana:3000/api/search?type=dash-db"
     my_headers = {
-        # 'Accept': 'application/json',
+        'Accept': 'application/json',
         "Content-Type": "application/json",
         "Authorization": f'Bearer {secretkey}'
     }
     try:
-
         response = requests.get(
             api_url,
             headers=my_headers
@@ -109,6 +108,13 @@ def render_dashboard(request, secretkey, session) -> str:
         print(data)
         print(data[0].get('uid'))
         print(data[1].get('uid'))
+        payload = {
+            "timeSelectionEnabled": True,
+            "isEnabled": True,  # This is the key setting
+            "annotationsEnabled": True,
+            "share": "public",
+            "uid" : data[0].get('uid')
+        }
         uidnode = data[0].get('uid')
         uidpostgre = data[1].get('uid')
         
@@ -116,6 +122,7 @@ def render_dashboard(request, secretkey, session) -> str:
         # url = f"http://grafana:3000/api/dashboards/uid/{uidnode}/public-dashboards/"
         # response = requests.post(
         #     url,
+        #     json=payload,
         #     headers=my_headers
         # )
         # response.raise_for_status()
