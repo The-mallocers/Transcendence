@@ -9,19 +9,19 @@ const clientId = await getClientId();
 //     return ;
 // }
 console.log("Got client ID :", clientId);
-const chatSocket = new WebSocket('ws://' + window.location.host + '/ws/game/?id=' + clientId);
+const chatSocket = new WebSocket('ws://' + window.location.host + '/ws/chat/?id=' + clientId);
 
 chatSocket.onmessage = (event) => {
     console.log("message received")
     const message = JSON.parse(event.data);
 
-    console.log(message);
+    console.log(message.data.content);
 
 
     let chatHistory = document.querySelector('.chatHistory');
 
     const parser = new DOMParser();
-    const htmlString = `<div class="msg ${clientId == message.senderId ? "me align-self-end" : "you align-self-start"}">${message.message}</div>`;
+    const htmlString = `<div class="msg ${clientId == message.data.content.sender ? "me align-self-end" : "you align-self-start"}">${message.data.content.message}</div>`;
     const doc = parser.parseFromString(htmlString, "text/html");
     const msgElement = doc.body.firstChild; // Get the actual <div> element
 
@@ -39,8 +39,11 @@ document.getElementById("messageInput").addEventListener("keydown", function(eve
         message = {
             "event": "chat",
             "data": {
-                "message"  : message,
-                "senderId" : client_id
+                "action": "send_message",
+                "args": {
+                    "room_id": "global",
+                    "message": message
+                }
             }
         }
         
