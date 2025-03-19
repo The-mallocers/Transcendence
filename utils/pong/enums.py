@@ -20,7 +20,7 @@ class EventType(str, Enum):
     UPDATE: str = 'update'
     ERROR: str = 'error'
     CHAT: str = 'chat'
-    ENDGAME: str = 'endgame'
+    # ENDGAME: str = 'endgame'
 
 
 # All the actions the client sends to the server
@@ -55,7 +55,7 @@ class ResponseAction(str, Enum):
     STARTING: str = 'The game is about to start'
     STARTED: str = 'The game has started'
     RESULTS: str = 'Result informations'
-    ENDGAME: str = 'Sending postgame informations'
+    # ENDGAME: str = 'Sending postgame informations'
     ENDING: str = 'The game has ended'
 
     # ── Update ────────────────────────────────────────────────────────────────────────

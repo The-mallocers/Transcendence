@@ -67,7 +67,8 @@ class WebSocket(AsyncWebsocketConsumer):
                 await self.chat_service.process_action(data, self.client)
             
             #tfreydie own game ender
-            if event_type is EventType.ENDG
+            # if event_type is EventType.ENDGAME:
+            #     pass
 
         except json.JSONDecodeError as e:
             self._logger.error(e)
