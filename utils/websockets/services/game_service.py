@@ -69,3 +69,12 @@ class GameService(BaseServices):
         if opponent_client:
             await send_group_error(opponent_id, ResponseError.OPPONENT_LEFT, close=True)
             await self.game_manager.rset_status(GameStatus.ENDING)
+
+
+        #Le code si dessous a pour but de checker si un joueur se deconnecte pendant une game
+        #On veut register ca comme une defaite pour lui
+        #Je ne sais pas vraiment comment check si la deco arrive dans une des autres phases d'une game
+
+        #Alexandre a l'aide
+        # await self.game_manager.update_disconnect_result(client, opponent_client)
+

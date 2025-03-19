@@ -74,25 +74,18 @@
             justify-content: center;
             position: relative;
         } */
-        .progress-circle {
+          .progress-circle {
             width: 100px;
             height: 100px;
             border-radius: 50%;
-            background: conic-gradient(#FFA042 0deg, #e9ecef 0deg);  /* Default state */
-            transition: background 1s ease;  /* Apply a smooth transition on background */
+            background: conic-gradient(#FFA042 var(--angle, 0deg), #e9ecef 0deg);
+            /* transition: background 1s ease;  Smooth transition for background */
         }
-        /* .progress-circle {
-            animation: progressAnimation 2s ease-in-out;
-        } */
-        
-        /* @keyframes progressAnimation {
-        from {
-            background: conic-gradient(#FFA042 0deg, #e9ecef 0deg);
-        }
-        to {
-            background: conic-gradient(#FFA042 216deg, #e9ecef 0deg);
+
+/* Optional: Add the animation for repeating the animation */
+          .progress-circle.animated {
+              animation: progressAnimation 1s ease forwards; /* Apply animation */
           }
-        } */
         .progress-content {
             width: 80%;
             height: 80%;

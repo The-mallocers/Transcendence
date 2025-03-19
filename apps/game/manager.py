@@ -92,6 +92,25 @@ class GameManager:
         except DataError:
             return None
 
+    async def update_disconnect_result(self, disconnected_client, alive_client):
+        self._game.winner = alive_client
+        self._game.loser = disconnected_client
+        self._game.winner_score = 3
+        self._game.loser_score = 0
+        disconnected_player = disconnected_client.player
+        alive_player = alive_client.player
+        disconnected_game: PlayerGame = await disconnected_player.get_player_game_id_db_async(player_id=disconnected_player.id, game_id=self.get_id())
+        alive_game: PlayerGame = await alive_player.get_player_game_id_db_async(player_id=alive_player.id, game_id=self.get_id())
+
+        disconnected_game.score = 0
+        alive_game.score = 3
+        await disconnected_game.asave()
+        await alive_game.asave()
+        await self._game.asave()
+
+
+
+
     async def set_result(self):
         score_pL = await self.rget_pL_score()
         score_pR = await self.rget_pR_score()
