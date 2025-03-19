@@ -128,7 +128,7 @@ class ChatService(BaseServices):
 
             # Sending messages in a single batch instead of multiple requests
             formatted_messages = [
-                {"message": msg.content, "sender": str(await msg.get_sender_id())}
+                {"message": msg.content, "sender": str(await msg.get_sender_id()), "room_id": str(room_id)}
                 for msg in messages
             ]
             await send_group(client.id, EventType.CHAT, ResponseAction.HISTORY_RECEIVED, {"messages": formatted_messages})

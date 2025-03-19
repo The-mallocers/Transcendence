@@ -1,6 +1,6 @@
 .chatContainer {
     height: calc(100vh - 70px);
-
+    overflow: hidden;
 }
 
 .friends {
@@ -56,6 +56,8 @@
 
 .chatHistory {
     padding: 2rem;
+    overflow: scroll;
+    max-height: calc(100vh - 90px);
 }
 
 .chatBox .me {

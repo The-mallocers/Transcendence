@@ -15,18 +15,23 @@ chatSocket.onmessage = (event) => {
     console.log("message received")
     const message = JSON.parse(event.data);
 
-    console.log(message.data.content);
+    // console.log(message.data.content.messages.length);
 
-
-    let chatHistory = document.querySelector('.chatHistory');
-
-    const parser = new DOMParser();
-    const htmlString = `<div class="msg ${clientId == message.data.content.sender ? "me align-self-end" : "you align-self-start"}">${message.data.content.message}</div>`;
-    const doc = parser.parseFromString(htmlString, "text/html");
-    const msgElement = doc.body.firstChild; // Get the actual <div> element
-
-    chatHistory.appendChild(msgElement);    
-    //Do things to show the new message on the front
+    if(message.data.action == "HISTORY_RECEIVED") {
+        console.log("cool un history received");
+        displayHistory(message.data.content.messages);
+    }
+    else {
+        let chatHistory = document.querySelector('.chatHistory');
+    
+        const parser = new DOMParser();
+        const htmlString = `<div class="msg ${clientId == message.data.content.sender ? "me align-self-end" : "you align-self-start"}">${message.data.content.message}</div>`;
+        const doc = parser.parseFromString(htmlString, "text/html");
+        const msgElement = doc.body.firstChild; // Get the actual <div> element
+    
+        chatHistory.appendChild(msgElement);
+        //Do things to show the new message on the front
+    }
 }
 
 document.getElementById("messageInput").addEventListener("keydown", function(event) {
@@ -46,12 +51,24 @@ document.getElementById("messageInput").addEventListener("keydown", function(eve
                 }
             }
         }
-        
         chatSocket.send(JSON.stringify(message));
     }
 });
 
 
+document.getElementById("bouton-chat").addEventListener("click", function(event){
+    console.log("Bouton cliqué");
+    const message = {
+        "event": "chat",
+        "data": {
+            "action": "get_history",
+            "args": {
+                "room_id": "global",
+            }
+        }
+    }
+    chatSocket.send(JSON.stringify(message));
+})
 
 async function getClientId() {
     // if (client_id !== null) return client_id;
@@ -73,5 +90,19 @@ async function getClientId() {
     } catch (error) {
         console.error("Erreur lors de la récupération de l'ID :", error);
         return null;
+    }
+}
+
+async function displayHistory(message){
+    console.log("Displaying history");
+    let chatHistory = document.querySelector('.chatHistory');
+    chatHistory.innerHTML = "";
+    for (let i = 0; i < message.length; i++) {
+        const parser = new DOMParser();
+        const htmlString = `<div class="msg ${clientId == message[i].sender ? "me align-self-end" : "you align-self-start"}">${message[i].message}</div>`;
+        const doc = parser.parseFromString(htmlString, "text/html");
+        const msgElement = doc.body.firstChild; // Get the actual <div> element
+
+        chatHistory.appendChild(msgElement);
     }
 }

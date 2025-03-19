@@ -3,6 +3,7 @@
 <div class="container-fluid chatContainer p-0">
     {% csrf_token %}
     <div class="row h-100 g-0">
+        <button id="bouton-chat"> Send</button>
         <div class="col-4 h-100 friends">
             <button onclick="event.preventDefault(); validateCode();">
         {% for i in my_range %}
@@ -24,4 +25,5 @@
         </div>
     </div>
 <div>
+
     <script type = "module" src="{% static 'js/apps/chat/chat.js' %}" defer></script>
