@@ -39,6 +39,7 @@ class RequestAction(str, Enum):
     CREATE_ROOM = "create_room"
     SEND_MESSAGE = "send_message"
     GET_HISTORY = "get_history"
+    GET_ALL_ROOM_BY_CLIENT ="get_all_room_by_client"
 
 
 #All the reponse the server send to client
@@ -65,6 +66,7 @@ class ResponseAction(str, Enum):
     ROOM_CREATED = "room_created"
     MESSAGE_RECEIVED = "message_received"
     HISTORY_RECEIVED = "history_received"
+    ALL_ROOM_RECEIVED = "all_room_received"
 
 
     TEST: str = 'test'

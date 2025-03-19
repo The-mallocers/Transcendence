@@ -6,6 +6,7 @@ from django.utils import timezone
 from django.db import models
 from asgiref.sync import sync_to_async
 
+from apps.player.models import Player
 from apps.shared.models import Clients
 from apps.error.views import error
 
@@ -64,6 +65,27 @@ class Rooms(models.Model):
                 return list(Rooms.objects.filter(clients__id=client_id).values_list('id', flat=True))  
         except Clients.DoesNotExist:
             return []
+        
+    @staticmethod
+    @sync_to_async
+    def get_clients_id_by_room_id(room_id):
+        try:
+            with transaction.atomic():
+                # return list(Clients.objects.filter(rooms__id=room_id).values_list('id', flat=True))
+                uuid_list = list(Clients.objects.filter(rooms__id=room_id).values_list('id', flat=True))
+                return [str(uuid) for uuid in uuid_list]
+        except Rooms.DoesNotExist:
+            return []
+    
+    @staticmethod
+    @sync_to_async  
+    def get_player_from_client_db(client_id) -> Player | None:
+        """Get player with client id from data base"""
+        try:
+            with transaction.atomic():
+                return Clients.objects.select_related('player__stats').get(id=client_id).player
+        except Clients.DoesNotExist:
+            return None
 
             
 

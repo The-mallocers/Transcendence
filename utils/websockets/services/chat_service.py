@@ -126,6 +126,7 @@ class ChatService(BaseServices):
                 await send_group_error(client.id, ResponseError.NO_HISTORY)
                 return
 
+            print(messages)
             # Sending messages in a single batch instead of multiple requests
             formatted_messages = [
                 {"message": msg.content, "sender": str(await msg.get_sender_id()), "room_id": str(room_id)}
@@ -138,6 +139,20 @@ class ChatService(BaseServices):
         except ServiceError as e:
             self._logger.error(f"Service error: {e}")
             await send_group_error(client.id, str(e))
+
+    async def _handle_get_all_room_by_client(self, data, client: Clients):
+        rooms = await Rooms.get_room_id_by_client_id(client.id)
+        formatted_messages = []
+        for room in rooms:
+            clients = await Rooms.get_clients_id_by_room_id(room)
+            print(clients)
+            players = []
+            for Client in clients:
+                player = await Rooms.get_player_from_client_db(Client)
+                if client.player_id != player.id:
+                    players.append(player.nickname) 
+            formatted_messages.append({"room": str(room), "player": players})
+        await send_group(client.id, EventType.CHAT, ResponseAction.ALL_ROOM_RECEIVED, {"rooms": formatted_messages})
 
     async def _handle_disconnect(self):
         pass

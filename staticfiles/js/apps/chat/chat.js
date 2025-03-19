@@ -3,6 +3,7 @@
 
 let client_id = null;
 
+let room_id = null; 
 
 const clientId = await getClientId();
 // if (clientId == null) {
@@ -11,17 +12,30 @@ const clientId = await getClientId();
 console.log("Got client ID :", clientId);
 const chatSocket = new WebSocket('ws://' + window.location.host + '/ws/chat/?id=' + clientId);
 
+chatSocket.onopen = function () {
+    console.log("WebSocket is open now.");
+    
+    const message = {
+        "event": "chat",
+        "data": {
+            "action": "get_all_room_by_client",
+            "args": {}
+        }
+    };
+    
+    chatSocket.send(JSON.stringify(message));
+};
+
 chatSocket.onmessage = (event) => {
-    console.log("message received")
     const message = JSON.parse(event.data);
 
-    // console.log(message.data.content.messages.length);
-
     if(message.data.action == "HISTORY_RECEIVED") {
-        console.log("cool un history received");
         displayHistory(message.data.content.messages);
     }
-    else {
+    else if(message.data.action == "ALL_ROOM_RECEIVED") {
+        displayRooms(message.data.content.rooms);
+    }
+    else if(message.data.action == "MESSAGE_RECEIVED") {
         let chatHistory = document.querySelector('.chatHistory');
     
         const parser = new DOMParser();
@@ -46,7 +60,8 @@ document.getElementById("messageInput").addEventListener("keydown", function(eve
             "data": {
                 "action": "send_message",
                 "args": {
-                    "room_id": "global",
+                    // "room_id": "global",
+                    "room_id": room_id,
                     "message": message
                 }
             }
@@ -55,20 +70,25 @@ document.getElementById("messageInput").addEventListener("keydown", function(eve
     }
 });
 
-
-document.getElementById("bouton-chat").addEventListener("click", function(event){
-    console.log("Bouton cliqué");
-    const message = {
-        "event": "chat",
-        "data": {
-            "action": "get_history",
-            "args": {
-                "room_id": "global",
+// Attach event listener to a parent that exists before buttons are created
+document.addEventListener("click", function(event) {
+    if (event.target.classList.contains("roomroom")) { 
+        const id = event.target.id;
+        room_id = id;
+        console.log("Clicked on room", id);
+        
+        const message = {
+            "event": "chat",
+            "data": {
+                "action": "get_history",
+                "args": {
+                    "room_id": id,
+                }
             }
-        }
+        };
+        chatSocket.send(JSON.stringify(message));
     }
-    chatSocket.send(JSON.stringify(message));
-})
+});
 
 async function getClientId() {
     // if (client_id !== null) return client_id;
@@ -79,7 +99,6 @@ async function getClientId() {
             credentials: "include",
         });
         const data = await response.json();
-        console.log(data);
 
         if (data.client_id) {
             client_id = data.client_id;
@@ -104,5 +123,23 @@ async function displayHistory(message){
         const msgElement = doc.body.firstChild; // Get the actual <div> element
 
         chatHistory.appendChild(msgElement);
+    }
+}
+
+async function displayRooms(rooms){
+    console.log("Displaying rooms");
+    let chatRooms = document.querySelector('.chatRooms');
+    chatRooms.innerHTML = "";
+    for (let i = 0; i < rooms.length; i++) {
+        let htmlString;
+        const parser = new DOMParser();
+        if(rooms[i].player.length > 1)
+            htmlString = `<button class="roomroom" id="${rooms[i].room}">chat global</button>`;
+        else
+            htmlString = `<button class="roomroom" id="${rooms[i].room}">${rooms[i].player[0]}</button>`;
+        const doc = parser.parseFromString(htmlString, "text/html");
+        const roomElement = doc.body.firstChild; // Get the actual <div> element
+
+        chatRooms.appendChild(roomElement);
     }
 }
