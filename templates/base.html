@@ -16,25 +16,25 @@
           width: 150px;
           height: 150px;
           border-radius: 50%;
-          /* background: conic-gradient(#FFA042 216deg, #e9ecef 0deg); */
+        
           display: flex;
           align-items: center;
           justify-content: center;
           position: relative;
       }
   
-      .progress-circle {
+      /* .progress-circle {
           animation: progressAnimation 2s ease-in-out forwards;
-      }
+      } */
       
-      @keyframes progressAnimation {
+      /* @keyframes progressAnimation {
       from {
           background: conic-gradient(#FFA042 0deg, #e9ecef 0deg);
       }
       to {
           background: conic-gradient(#FFA042 216deg, #e9ecef 0deg);
       }
-      }
+      } */
       .progress-content {
           width: 80%;
           height: 80%;
@@ -64,29 +64,35 @@
         }
     </style>
     <style>
-      .progress-circle {
+      /* .progress-circle {
         width: 150px;
         height: 150px;
         border-radius: 50%;
-        /* background: conic-gradient(#FFA042 216deg, #e9ecef 0deg); */
+
         display: flex;
             align-items: center;
             justify-content: center;
             position: relative;
-        }
-        
+        } */
         .progress-circle {
-            animation: progressAnimation 2s ease-in-out forwards;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: conic-gradient(#FFA042 0deg, #e9ecef 0deg);  /* Default state */
+            transition: background 1s ease;  /* Apply a smooth transition on background */
         }
+        /* .progress-circle {
+            animation: progressAnimation 2s ease-in-out;
+        } */
         
-        @keyframes progressAnimation {
+        /* @keyframes progressAnimation {
         from {
             background: conic-gradient(#FFA042 0deg, #e9ecef 0deg);
         }
         to {
             background: conic-gradient(#FFA042 216deg, #e9ecef 0deg);
           }
-        }
+        } */
         .progress-content {
             width: 80%;
             height: 80%;

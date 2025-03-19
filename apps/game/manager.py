@@ -95,6 +95,11 @@ class GameManager:
     async def set_result(self):
         score_pL = await self.rget_pL_score()
         score_pR = await self.rget_pR_score()
+
+        print("I AM SETTING THE RESULT")
+
+        print("PLAYER LEFT:", score_pL)
+        print("PLAYER RIGHT:", score_pR)
         if score_pL > score_pR:
             self._game.winner = self.pL.player
             self._game.loser = self.pR.player
@@ -108,7 +113,9 @@ class GameManager:
         pL_game: PlayerGame = await self.pL.get_player_game_id_db_async(player_id=self.pL.id, game_id=self.get_id())
         pR_game: PlayerGame = await self.pR.get_player_game_id_db_async(player_id=self.pR.id, game_id=self.get_id())
         pL_game.score = score_pL
+        print(f"pL_game.score ({pL_game.score}) = score_pL ({score_pL})")
         pR_game.score = score_pR
+        print(f"pL_game.score ({pR_game.score}) = score_pL ({score_pR})")
         await pL_game.asave()
         await pR_game.asave()
         await self._game.asave()

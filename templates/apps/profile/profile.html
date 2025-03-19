@@ -1,9 +1,19 @@
 {% load static %}
+<style>
+        @keyframes progressAnimation {
+            from {
+                background: conic-gradient(#FFA042 0deg, #e9ecef 0deg);
+            }
+            to {
+                background: conic-gradient(#FFA042 {{winrate_angle}}deg, #e9ecef 0deg);
+            }
+        }
+</style>
 <div class="informationsContainer">
     <img class="background" src="{% static 'assets/imgs/fire_coalition.jpg' %}">
     
     <h3>{{ client.profile.username }}</h3>
-
+    
     <div class="avatar">
         <img  src="{% static 'assets/imgs/matboyer.jpg' %}">
     </div>
@@ -16,9 +26,9 @@
                         <!-- <div class="progressBar">
                             <div class="filler"></div>
                         </div> -->
-                        <div class="progress-circle">
+                        <div class="progress-circle" style="transition: background 1s ease;animation: progressAnimation 1s ease; background: conic-gradient(#FFA042 {{ winrate_angle }}deg, #e9ecef 0deg);">
                             <div class="progress-content">
-                                <div>60%</div>
+                                <div>{{winrate}}%</div>
                             </div>
                         </div>
                         

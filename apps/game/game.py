@@ -95,12 +95,17 @@ class GameThread(Threads):
     async def _ending(self):
         if await self.game_manager.rget_status() is GameStatus.ENDING:
             await self.game_manager.set_result()
-
+            
             self._stop_event.set()
             await self._stoping()
 
     async def _stoping(self):
         await self.game_manager.rset_status(GameStatus.FINISHED)
         await self.redis.hdel('player_game', self.game_manager.pL.id, self.game_manager.pR.id)
-        await asyncio.sleep(5)
+        await asyncio.sleep(1)
+        #Sending the return message before stopping, maybe bad maybe good idk
+        await send_group(self.game_id, EventType.ENDGAME, ResponseAction.ENDGAME, {
+                # 'left': pL_data,
+                # 'right': pR_data
+            })
         self.stop()
