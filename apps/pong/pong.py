@@ -46,9 +46,9 @@ class PongLogic:
     async def handle_paddle_direction(self, paddle, delta_time):
         move = await paddle.get_move()
         if move == PaddleMove.UP:
-            await paddle.increase_y(delta_time)
-        elif move == PaddleMove.DOWN:
             await paddle.decrease_y(delta_time)
+        elif move == PaddleMove.DOWN:
+            await paddle.increase_y(delta_time)
         elif move == PaddleMove.IDLE:
             #Maybe we'll do things when its idle later !
             pass

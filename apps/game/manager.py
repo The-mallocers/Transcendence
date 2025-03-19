@@ -98,11 +98,15 @@ class GameManager:
         if score_pL > score_pR:
             self._game.winner = self.pL.player
             self._game.loser = self.pR.player
+            self._game.winner_score = score_pL
+            self._game.loser_score = score_pR
         elif score_pL < score_pR:
             self._game.winner = self.pR.player
             self._game.loser = self.pL.player
-        pL_game: PlayerGame = await self.pL.get_player_game_id_db(player_id=self.pL.id, game_id=self.get_id())
-        pR_game: PlayerGame = await self.pR.get_player_game_id_db(player_id=self.pR.id, game_id=self.get_id())
+            self._game.winner_score = score_pR
+            self._game.loser_score = score_pL
+        pL_game: PlayerGame = await self.pL.get_player_game_id_db_async(player_id=self.pL.id, game_id=self.get_id())
+        pR_game: PlayerGame = await self.pR.get_player_game_id_db_async(player_id=self.pR.id, game_id=self.get_id())
         pL_game.score = score_pL
         pR_game.score = score_pR
         await pL_game.asave()
@@ -127,6 +131,16 @@ class GameManager:
         from apps.game.models import Game
         try:
             return Game.objects.get(id=game_id)
+        except Game.DoesNotExist:
+            return None
+        
+    #Freshly added function to get all games a player played (from our database of ALL games)
+    @staticmethod
+    def get_games_of_player(player_id):
+        """Load an existing game from the database."""
+        from apps.game.models import Game
+        try:
+            return list(Game.objects.filter(players__id=player_id))
         except Game.DoesNotExist:
             return None
 

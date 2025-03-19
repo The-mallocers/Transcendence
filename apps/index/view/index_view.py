@@ -2,12 +2,18 @@ from django.http import JsonResponse
 from django.middleware.csrf import get_token
 from django.template.loader import render_to_string
 
+
+
+from apps.game.manager import GameManager
+
 from apps.shared.models import Clients
 
 
 def get(req):
     client = Clients.get_client_by_request(req)
     if client is not None:
+        Games_played = GameManager.get_games_of_player(client.player.id)
+        print("aaaaaaaaaaa ", Games_played)
         context = {
             "client": client,
             "clients": Clients.objects.all(),

@@ -54,10 +54,11 @@ class GameService(BaseServices):
         await self.game_manager.rset_status(GameStatus.ENDING)
 
     async def _handle_paddle_move(self, data, player: Player):
-        if str(player.id) == str(self.game_manager.pL.id):
-            await self.game_manager.pL.paddle.set_move(data['data']['args'])
-        if str(player.id) == str(self.game_manager.pR.id):
-            await self.game_manager.pR.paddle.set_move(data['data']['args'])
+        if await self.game_manager.rget_status() is GameStatus.RUNNING:
+            if str(player.id) == str(self.game_manager.pL.id):
+                await self.game_manager.pL.paddle.set_move(data['data']['args'])
+            if str(player.id) == str(self.game_manager.pR.id):
+                await self.game_manager.pR.paddle.set_move(data['data']['args'])
 
     async def handle_disconnect(self, client):
         p1_id = await self.game_manager.rget_pL_id()
