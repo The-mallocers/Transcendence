@@ -17,12 +17,14 @@ def get(req):
         
         winrate = get_winrate(client, Games_played)
         ghistory = get_last_matches(client, Games_played)
+        rivals = get_rivals(client, Games_played)
         context = {
             "client": client,
             "clients": Clients.objects.all(),
             "gamesHistory" : ghistory,
             "winrate" : winrate,
             "winrate_angle" : int((winrate / 100) * 360),
+            "rivals": rivals,
             "csrf_token": get_token(req)
         }
 
@@ -80,11 +82,64 @@ def get_last_matches(client, games_played) -> list:
         i += 1
     return ghistory
 
-# def get_rivals(client, games_played) -> list:
-#     opponents = []
-#     for game in games_played:
-#         if games_played
-#     pass
+#Eventually this will return a dictionnary with all the
+#rivals and their associated winrates in series.
+def get_rivals(client, games_played) -> dict:
+    opponents = []
+    
+    #getting all opponents
+    for game in games_played:
+        currOpponent = None
+        if game.winner.id == client.player.id:
+            currOpponent = game.loser.id
+        else:
+            currOpponent = game.winner.id
+        if currOpponent not in opponents:
+            opponents.append(currOpponent)
+
+    rivals = {}
+    for opponent in opponents:
+        rivals[opponent] = {
+            "games_won": 0,
+            "games_lost":0
+        }
+
+    for game in games_played:
+        if game.winner.id == client.player.id:
+            rivals[game.loser.id]["games_won"] += 1
+        elif game.loser.id == client.player.id:
+            rivals[game.winner.id]["games_lost"] += 1
+    
+    print("rivals after adding the maps")
+    print(rivals)
+
+
+    #I want my dictionnary to be like
+    # rivals = {
+    #     'opponent_id' = [
+    #         games_won = number
+    #         games_lost = number
+    #     ],
+    #     'opponent_id' = [
+    #         games_won = number
+    #         games_lost = number
+    #     ]
+    # }
+    return opponents
+
+
+
+
+
+
+# if (client.player.id == game.winner.id):
+        #     myPoints = game.winner_score
+        #     enemyPoints =  game.loser_score
+        #     oponnent = game.loser.nickname
+        # else :
+        #     myPoints = game.loser_score
+        #     enemyPoints =  game.winner_score
+        #     oponnent = game.winner.nickname
 
 
 

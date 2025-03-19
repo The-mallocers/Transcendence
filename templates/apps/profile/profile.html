@@ -45,9 +45,9 @@
     <div class="row g-4 align-items-start justify-content-start">
         <div class="col-6 col-md-6">
             <div class="box">
-                <h3>Last players encountered</h3>
+                <h3>Biggest rivals</h3>
                 <div class="lastPlayerContainer mt-4">
-                    {% for player in lastEncountered %}
+                    {% for player in rivals %}
                         <div class="lastPlayer container d-flex flex-row align-items-center justify-content-center"  data-route="/profile/?username={{player.nickname}}">
                             <img src="{% static 'assets/imgs/' %}{{ player.avatar }}" alt="{{player.avatar}}">
                             <span class="names d-flex flex-row align-items-end justify-content-center">
