@@ -3,9 +3,7 @@ import random
 
 from asgiref.sync import sync_to_async
 from channels.layers import get_channel_layer
-from django.conf import settings
 from django.db import transaction
-from redis.asyncio import Redis
 from redis.commands.json.path import Path
 
 from apps.game.manager import GameManager
@@ -16,34 +14,27 @@ from apps.shared.models import Clients
 from utils.pong.enums import EventType, ResponseError, ResponseAction, Side
 from utils.pong.objects.paddle import Paddle
 from utils.pong.objects.score import Score
+from utils.redis import RedisConnectionPool
 from utils.websockets.channel_send import send_group_error, send_group
 
 
 class PlayerManager:
     def __init__(self, player_id, game_id=None):
-        self._redis = Redis(host=settings.REDIS_HOST, port=settings.REDIS_PORT, db=0)
+        self._redis = None
         self._logger = logging.getLogger(self.__class__.__name__)
         self._player_game: PlayerGame = None
 
-        self.player: Player = self.get_player_db(player_id)
+        self.player = None  # asyncio.create_task(self.get_player_db(player_id))
         self.id = player_id
         self.paddle: Paddle = Paddle(self._redis, player_id=self.id, game_id=game_id)
         self.score: Score = Score(self._redis, player_id=self.id, game_id=game_id)
 
-    def init_player(self, player_id, game_id=None):
-        player = self.get_player_db(player_id)
-        if player:
-            self.player = player
-            self.paddle = Paddle(self._redis, player_id=player.id, game_id=game_id)
-            self.score = Score(self._redis, game_id=game_id, player_id=player.id)
-            self.id = player_id
-            return self
-        else:
-            return None
-
-
     async def join_game(self, game_manager: GameManager):
         try:
+            self._redis = await RedisConnectionPool.get_connection(self.__class__.__name__)
+            self.paddle._redis = self._redis
+            self.score._redis = self._redis
+            self.player = await self.get_player_db(self.id)
             await game_manager.add_player_db(self.player)
             self._player_game: PlayerGame = await self.get_player_game_id_db_async(self.player.id, game_manager.get_id())
 
@@ -98,6 +89,7 @@ class PlayerManager:
     # ── Getter ────────────────────────────────────────────────────────────────────────
 
     @staticmethod
+    @sync_to_async
     def get_player_db(player_id):
         """Get player from data base"""
         try:

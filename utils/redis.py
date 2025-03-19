@@ -18,7 +18,7 @@ class RedisConnectionPool:
     _lock = threading.RLock()
 
     @classmethod
-    def get_connection_params(cls, alias: str = 'default') -> Dict[str, Any]:
+    def _get_connection_params(cls, alias: str = 'default') -> Dict[str, Any]:
         default_params = {
             'host': 'localhost',
             'port': 6379,
@@ -57,67 +57,62 @@ class RedisConnectionPool:
     async def get_connection(cls, alias: str = 'default') -> aioredis.Redis:
         identifier = cls._get_identifier()
 
-        with cls._lock:
-            if alias not in cls._pools:
-                cls._pools[alias] = {}
+        if alias not in cls._pools:
+            cls._pools[alias] = {}
 
-            if identifier not in cls._pools[alias]:
-                params = cls.get_connection_params(alias)
+        if identifier not in cls._pools[alias]:
+            params = cls._get_connection_params(alias)
 
-                if 'url' in params:
-                    url = params.pop('url')
-                    connection = await aioredis.from_url(url, **params)
-                else:
-                    host = params.pop('host', 'localhost')
-                    port = params.pop('port', 6379)
-                    db = params.pop('db', 0)
-                    password = params.pop('password', None)
+            if 'url' in params:
+                url = params.pop('url')
+                connection = await aioredis.from_url(url, **params)
+            else:
+                host = params.pop('host', 'localhost')
+                port = params.pop('port', 6379)
+                db = params.pop('db', 0)
+                password = params.pop('password', None)
 
-                    url = f"redis://{host}:{port}/{db}"
-                    connection = await aioredis.from_url(
-                        url,
-                        password=password,
-                        **params
-                    )
+                url = f"redis://{host}:{port}/{db}"
+                connection = await aioredis.from_url(
+                    url,
+                    password=password,
+                    **params
+                )
 
-                cls._pools[alias][identifier] = connection
-                logger.debug(f"Created new Redis connection for alias: {alias}, context: {identifier}")
+            cls._pools[alias][identifier] = connection
+            logger.debug(f"Created new Redis connection for alias: {alias}, context: {identifier}")
 
         return cls._pools[alias][identifier]
 
     @classmethod
     def get_sync_connection(cls, alias: str = 'default') -> redis.Redis:
-        """
-        Get a synchronous Redis connection.
-        """
         identifier = cls._get_identifier()
 
-        with cls._lock:
-            if alias not in cls._sync_pools:
-                cls._sync_pools[alias] = {}
+        if alias not in cls._sync_pools:
+            cls._sync_pools[alias] = {}
 
-            if identifier not in cls._sync_pools[alias]:
-                params = cls.get_connection_params(alias)
+        if identifier not in cls._sync_pools[alias]:
+            params = cls._get_connection_params(alias)
 
-                # Use the synchronous redis client, not the async one
-                if 'url' in params:
-                    url = params.pop('url')
-                    connection = redis.from_url(url, **params)
-                else:
-                    host = params.pop('host', 'localhost')
-                    port = params.pop('port', 6379)
-                    db = params.pop('db', 0)
-                    password = params.pop('password', None)
+            # Use the synchronous redis client, not the async one
+            if 'url' in params:
+                url = params.pop('url')
+                connection = redis.from_url(url, **params)
+            else:
+                host = params.pop('host', 'localhost')
+                port = params.pop('port', 6379)
+                db = params.pop('db', 0)
+                password = params.pop('password', None)
 
-                    url = f"redis://{host}:{port}/{db}"
-                    connection = redis.from_url(
-                        url,
-                        password=password,
-                        **params
-                    )
+                url = f"redis://{host}:{port}/{db}"
+                connection = redis.from_url(
+                    url,
+                    password=password,
+                    **params
+                )
 
-                cls._sync_pools[alias][identifier] = connection
-                logger.debug(f"Created new synchronous Redis connection for alias: {alias}, context: {identifier}")
+            cls._sync_pools[alias][identifier] = connection
+            logger.debug(f"Created new synchronous Redis connection for alias: {alias}, context: {identifier}")
 
         return cls._sync_pools[alias][identifier]
 

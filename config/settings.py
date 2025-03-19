@@ -136,24 +136,7 @@ REDIS_CONNECTIONS = {
         'socket_timeout': 5,
         'socket_connect_timeout': 5,
         'retry_on_timeout': True,
-        'decode_responses': False,
-    },
-    'cache': {
-        'host': 'localhost',
-        'port': 6379,
-        'db': 1,
-        'password': None,
-        'decode_responses': True,  # Automatically decode responses to Python types
-    }
-}
-
-CACHES = {
-    "default": {
-        "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://127.0.0.1:6379/1",  # Base Redis 1
-        "OPTIONS": {
-            "CLIENT_CLASS": "django_redis.client.DefaultClient",
-        }
+        'decode_responses': True,
     }
 }
 

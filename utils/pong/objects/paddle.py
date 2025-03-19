@@ -2,25 +2,24 @@ from dataclasses import dataclass
 
 from redis.asyncio import Redis
 from redis.commands.json.path import Path
-from utils.pong.enums import PaddleMove
 
+from utils.pong.enums import PaddleMove
 from utils.pong.objects import PADDLE_WIDTH, PADDLE_HEIGHT, PADDLE_SPEED, CANVAS_HEIGHT
 
 
 @dataclass
 class Paddle:
     def __init__(self, redis=None, game_id=None, player_id=None):
+        self._redis: Redis = redis
         self.width: float = PADDLE_WIDTH
         self.height: float = PADDLE_HEIGHT
         self.x: float = 0
         self.y: float = (CANVAS_HEIGHT / 2) - (PADDLE_HEIGHT / 2)
         self.speed: float = PADDLE_SPEED
         self.move: PaddleMove = PaddleMove.IDLE
-        self._redis: Redis = redis
         self.game_key = f'game:{game_id}'
         self.player_id = player_id
 
-    
     async def update(self):
         # print(self)
         self.width = await self.get_width()

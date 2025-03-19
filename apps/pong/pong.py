@@ -21,7 +21,6 @@ class PongLogic:
         self._logger = logging.getLogger(self.__class__.__name__)
         self.last_update: float = -1 #This hack is sponsored by tfreydie and prevents the random +1 score at the start
         self.game_id = game_manager.get_id()
-        print(self.game_id)
 
         # ── Objects ───────────────────────────────────────────────────────────────────
         self.ball: Ball = ball

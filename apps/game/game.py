@@ -17,10 +17,11 @@ from utils.websockets.channel_send import send_group, send_group_error
 
 
 class GameThread(Threads):
-    def __init__(self, manager: GameManager, game_id):
-        super().__init__(f"Game_{game_id}")
+    def __init__(self, manager: GameManager):
+        super().__init__(f"Game_{manager.get_id()}")
         self.game_manager = manager
-        self.game_id = game_id
+        self.game_manager._redis = self.redis
+        self.game_id = manager.get_id()
         self.logic: PongLogic = None
 
     async def main(self):

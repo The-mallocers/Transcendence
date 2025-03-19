@@ -24,8 +24,8 @@ class MatchmakingThread(Threads):
                 matched = await self.select_players(game_manager)
 
                 if matched:
-                    self._logger.info(f"Found match: {game_manager.pL} vs {game_manager.pR}")
                     await game_manager.create_game()
+                    self._logger.info(f"Found match: {game_manager.pL} vs {game_manager.pR}")
                     await game_manager.rset_status(GameStatus.MATCHMAKING)
 
                     await game_manager.pL.join_game(game_manager)
@@ -37,7 +37,7 @@ class MatchmakingThread(Threads):
                                           value=str(game_manager.get_id()))
                     await self.redis.hset(name="player_game", key=str(game_manager.pR.id),
                                           value=str(game_manager.get_id()))
-                    GameThread(manager=game_manager, game_id=game_manager.get_id()).start()
+                    GameThread(manager=game_manager).start()
                     game_manager = None
 
                 await asyncio.sleep(1)

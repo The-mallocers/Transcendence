@@ -1,6 +1,7 @@
 from typing import Dict, Any
 
 from apps.game.manager import GameManager
+from apps.player.manager import PlayerManager
 from apps.player.models import Player
 from apps.shared.models import Clients
 from utils.pong.enums import GameStatus, ResponseError, status_order
@@ -18,9 +19,10 @@ class GameService(BaseServices):
         game_id_bytes = await self.redis.hget(name="player_game", key=str(player.id))
 
         if game_id_bytes:
-            game_id = game_id_bytes.decode('utf-8')
-
-            self.game_manager = GameManager(game_id)
+            game = await GameManager.get_game_db_async(game_id_bytes.decode('utf-8'))
+            self.game_manager = GameManager(game, self.redis)
+            self.game_manager.pL = await PlayerManager.get_player_db(await self.game_manager.rget_pL_id())
+            self.game_manager.pR = await PlayerManager.get_player_db(await self.game_manager.rget_pR_id())
         else:
             client = await Clients.get_client_by_player_id_async(player.id)
             await send_group_error(client.id, ResponseError.NO_GAME)
@@ -35,7 +37,9 @@ class GameService(BaseServices):
         return await super().process_action(data, *args)
 
     async def _handle_start_game(self, data, player: Player):
+        print(self.game_manager.game_key)
         status = await self.game_manager.rget_status()
+        print(status)
         if status_order.index(status) < status_order.index(GameStatus.STARTING):
             await send_group_error(player.id, ResponseError.NOT_READY_TO_START)
         elif status_order.index(status) > status_order.index(GameStatus.STARTING):
@@ -47,18 +51,13 @@ class GameService(BaseServices):
         await self.game_manager.rset_status(GameStatus.ENDING)
 
     async def _handle_paddle_move(self, data, player: Player):
+        print(player.id, self.game_manager.pL.id)
         if str(player.id) == str(self.game_manager.pL.id):
+            print('left')
             await self.game_manager.pL.paddle.set_move(data['data']['args'])
-            # if data['data']['args'] == 'up':
-                # await self.game_manager.pL.paddle.increase_y()
-            # if data['data']['args'] == 'down':
-                # await self.game_manager.pL.paddle.decrease_y()
         if str(player.id) == str(self.game_manager.pR.id):
+            print('right')
             await self.game_manager.pR.paddle.set_move(data['data']['args'])
-            # if data['data']['args'] == 'up':
-                # await self.game_manager.pR.paddle.increase_y()
-            # if data['data']['args'] == 'down':
-                # await self.game_manager.pR.paddle.decrease_y()
 
     async def handle_disconnect(self, client):
         p1_id = await self.game_manager.rget_pL_id()

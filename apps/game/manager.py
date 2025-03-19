@@ -1,4 +1,5 @@
 import asyncio
+import traceback
 
 from asgiref.sync import sync_to_async
 from django.db import transaction, DatabaseError
@@ -13,20 +14,21 @@ from utils.redis import RedisConnectionPool
 
 
 class GameManager:
-    def __init__(self, game_id = None):
+    def __init__(self, game=None, redis=None):
         from apps.game.models import Game
         from apps.player.manager import PlayerManager
 
-        self._game: Game = None if game_id is None else self.get_game_db(game_id)
-        self._redis = RedisConnectionPool.get_sync_connection(self.__class__.__name__)
+        self._game: Game = game
+        self._redis = RedisConnectionPool.get_sync_connection() if redis is not None else redis
 
-        self.game_key = None
+        self.game_key = None if game is None else f'game:{game.id}'
         self.loop = asyncio.get_running_loop()
-        self.pL: PlayerManager = PlayerManager(self.rget_pL_id())
-        self.pR: PlayerManager = PlayerManager(self.rget_pR_id())
+        self.pL: PlayerManager = None  # PlayerManager(self.rget_pL_id())
+        self.pR: PlayerManager = None  # PlayerManager(self.rget_pR_id())
 
     async def create_game(self):
         from apps.game.api.serializers import GameSerializer
+        self._redis = await RedisConnectionPool.get_connection(self.__class__.__name__)
 
         self._game = await self._create_game()
         self.game_key = f'game:{self._game.id}'
@@ -57,6 +59,7 @@ class GameManager:
             else:
                 return None
         except DataError:
+            traceback.print_exc()
             return None
 
     async def rset_status(self, status: GameStatus):
@@ -65,15 +68,15 @@ class GameManager:
             await self._game.asave()
         await self._redis.json().set(self.game_key, Path('status'), status.value)
 
-    def rget_pL_id(self):
+    async def rget_pL_id(self):
         try:
-            return self._redis.json().get(self.game_key, Path('players[0].id'))
+            return await self._redis.json().get(self.game_key, Path('players[0].id'))
         except DataError:
             return None
 
-    def rget_pR_id(self):
+    async def rget_pR_id(self):
         try:
-            return self._redis.json().get(self.game_key, Path('players[1].id'))
+            return await self._redis.json().get(self.game_key, Path('players[1].id'))
         except DataError:
             return None
 
@@ -110,6 +113,16 @@ class GameManager:
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ DATABASE OPERATIONS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
 
     def get_game_db(self, game_id):
+        """Load an existing game from the database."""
+        from apps.game.models import Game
+        try:
+            return Game.objects.get(id=game_id)
+        except Game.DoesNotExist:
+            return None
+
+    @staticmethod
+    @sync_to_async
+    def get_game_db_async(game_id):
         """Load an existing game from the database."""
         from apps.game.models import Game
         try:
