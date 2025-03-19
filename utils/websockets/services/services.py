@@ -22,7 +22,7 @@ class BaseServices(ABC):
 
     @abstractmethod
     async def init(self, *args) -> bool:
-        self.redis = await RedisConnectionPool.get_connection(self.__class__.__name__)
+        self.redis = await RedisConnectionPool.get_async_connection(self.__class__.__name__)
         return True
 
     @abstractmethod

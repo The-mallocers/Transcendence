@@ -54,7 +54,7 @@ class RedisConnectionPool:
         return threading.get_ident()
 
     @classmethod
-    async def get_connection(cls, alias: str = 'default') -> aioredis.Redis:
+    async def get_async_connection(cls, alias: str = 'default') -> aioredis.Redis:
         identifier = cls._get_identifier()
 
         if alias not in cls._pools:

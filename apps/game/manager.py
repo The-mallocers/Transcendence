@@ -28,7 +28,7 @@ class GameManager:
 
     async def create_game(self):
         from apps.game.api.serializers import GameSerializer
-        self._redis = await RedisConnectionPool.get_connection(self.__class__.__name__)
+        self._redis = await RedisConnectionPool.get_async_connection(self.__class__.__name__)
 
         self._game = await self._create_game()
         self.game_key = f'game:{self._game.id}'

@@ -19,8 +19,8 @@ from utils.websockets.channel_send import send_group_error, send_group
 
 
 class PlayerManager:
-    def __init__(self, player_id, game_id=None):
-        self._redis = None
+    def __init__(self, player_id, game_id=None, redis=None):
+        self._redis = redis
         self._logger = logging.getLogger(self.__class__.__name__)
         self._player_game: PlayerGame = None
 
@@ -31,7 +31,7 @@ class PlayerManager:
 
     async def join_game(self, game_manager: GameManager):
         try:
-            self._redis = await RedisConnectionPool.get_connection(self.__class__.__name__)
+            self._redis = await RedisConnectionPool.get_async_connection(self.__class__.__name__)
             self.paddle._redis = self._redis
             self.score._redis = self._redis
             self.player = await self.get_player_db(self.id)

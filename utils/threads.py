@@ -50,7 +50,7 @@ class Threads(threading.Thread, ABC):
         return False
 
     async def exec(self):
-        self.redis = await RedisConnectionPool.get_connection(self.name)
+        self.redis = await RedisConnectionPool.get_async_connection(self.name)
         await self.main()
         await RedisConnectionPool.close_connection(self.name)
 
