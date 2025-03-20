@@ -1,8 +1,7 @@
 from django.core.exceptions import PermissionDenied
-from django.http import JsonResponse, HttpResponseRedirect, HttpRequest
-from django.shortcuts import render
-from django.template.loader import render_to_string
+from django.http import JsonResponse, HttpRequest
 from django.middleware.csrf import get_token
+from django.template.loader import render_to_string
 
 from apps.profile.models import Profile
 from apps.shared.models import Clients
@@ -11,7 +10,6 @@ from apps.shared.models import Clients
 def get(req):
     requestUsername = req.GET.get("username", "minimeow")
     client = Clients.get_client_by_username(requestUsername)
-    print(requestUsername, client)
     # do something if client not found
 
     if client is None : 

@@ -6,15 +6,16 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from django.conf import settings
 from redis.asyncio import Redis
 
+from apps.chat.models import Rooms
 from apps.player.manager import PlayerManager
 from apps.shared.models import Clients
 from utils.pong.enums import EventType, ResponseError
 from utils.websockets.channel_send import send_group_error
+from utils.websockets.services.chat_service import ChatService
 from utils.websockets.services.game_service import GameService
 from utils.websockets.services.matchmaking_service import MatchmakingService
 from utils.websockets.services.services import ServiceError
-from utils.websockets.services.chat_service import ChatService
-from apps.chat.models import Rooms
+
 
 class WebSocket(AsyncWebsocketConsumer):
     def __init__(self, *args, **kwargs):
@@ -41,8 +42,7 @@ class WebSocket(AsyncWebsocketConsumer):
 
     async def disconnect(self, close_code):
         logging.getLogger('websocket.client').info(f'WebSocket disconnected with code {close_code}')
-        if self.client is not None:
-            await self.channel_layer.group_discard(str(self.client.id), self.channel_name)
+        await self._redis.hdel('consumers_channels', str(self.client.id))
 
     async def receive(self, text_data=None, bytes_data=None):
         try:
@@ -56,16 +56,19 @@ class WebSocket(AsyncWebsocketConsumer):
                 raise ServiceError("Service is not available")
 
             if event_type is EventType.MATCHMAKING:
-                player = await PlayerManager.get_player_from_client_db(self.client.id)
+                player = await PlayerManager.get_player_from_client_db_async(self.client.id)
                 await self.matchmaking_service.process_action(data, self.client, player)
 
             if event_type is EventType.GAME:
-                player = await PlayerManager.get_player_from_client_db(self.client.id)
+                player = await PlayerManager.get_player_from_client_db_async(self.client.id)
                 await self.game_service.process_action(data, player)
 
             if event_type is EventType.CHAT:
-                player = await PlayerManager.get_player_from_client_db(self.client.id)
                 await self.chat_service.process_action(data, self.client)
+            
+            #tfreydie own game ender
+            # # if event_type is EventType.ENAMEDGAME:
+            #     pass
 
         except json.JSONDecodeError as e:
             self._logger.error(e)
@@ -88,7 +91,12 @@ class GameWebSocket(WebSocket):
 
     async def connect(self):
         await super().connect()
-        # Additional game-specific connection logic can go here
+
+    async def disconnect(self, close_code):
+        await self.matchmaking_service.handle_disconnect(self.client)
+        if self.game_service.game_manager is not None:
+            await self.game_service.handle_disconnect(self.client)
+        await super().disconnect(close_code)
 
 class ChatWebSocket(WebSocket):
     def __init__(self, *args, **kwargs):

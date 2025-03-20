@@ -1,19 +1,19 @@
 import json
+
 from channels.layers import get_channel_layer
-from apps.shared.models import Clients
-from utils.pong.enums import EventType, ResponseAction, ResponseError  
-from utils.websockets.services.services import BaseServices, ServiceError  
-from utils.websockets.channel_send import send_group, send_group_error  
 
-from asgiref.sync import sync_to_async
 from apps.chat.models import Messages, Rooms
-
+from apps.shared.models import Clients
+from utils.pong.enums import EventType, ResponseAction, ResponseError
+from utils.websockets.channel_send import send_group, send_group_error
+from utils.websockets.services.services import BaseServices, ServiceError
 
 
 class ChatService(BaseServices):
     async def init(self, client: Clients):
+        await super().init()
         self.channel_layer = get_channel_layer()
-        self.channel_name = await self._redis.hget(name="consumers_channels", key=str(client.id))
+        self.channel_name = await self.redis.hget(name="consumers_channels", key=str(client.id))
 
     async def _handle_create_room(self, data, admin: Clients):
         try:
@@ -39,7 +39,7 @@ class ChatService(BaseServices):
                 await room.add_client(target)
 
             await self.channel_layer.group_add(str(await Rooms.get_id(room)), self.channel_name.decode('utf-8'))
-            target_channel_name = await self._redis.hget(name="consumers_channels", key=str(target.id))
+            target_channel_name = await self.redis.hget(name="consumers_channels", key=str(target.id))
             if target_channel_name:
                 await self.channel_layer.group_add(str(await Rooms.get_id(room)), target_channel_name.decode('utf-8'))
 
@@ -80,5 +80,5 @@ class ChatService(BaseServices):
         except json.JSONDecodeError as e:
             self._logger.error(f"Erreur parsing JSON: {e}")
 
-    async def _handle_disconnect(self):
+    async def handle_disconnect(self, client):
         pass

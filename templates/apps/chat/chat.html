@@ -1,22 +1,24 @@
 {% load static %}
 
+<div id="clientID" data-client-id="{{ client_id }}"></div>
 <div class="container-fluid chatContainer p-0">
     {% csrf_token %}
     <div class="row h-100 g-0">
         <div class="col-4 h-100 friends">
             <button onclick="event.preventDefault(); validateCode();">
-        {% for i in my_range %}
-            <div class="friend d-flex align-items-center">
-                <img class="pic" src="{% static 'assets/imgs/matboyer.jpg' %}">
-                <div class="nickname">EZ2C</div>
-            </div>
-        {% endfor %}
+            {% for i in my_range %}
+                <div class="friend d-flex align-items-center">
+                    <img class="pic" src="{% static 'assets/imgs/matboyer.jpg' %}">
+                    <div class="nickname">EZ2C</div>
+                </div>
+            {% endfor %}
         
         </div>
+
         <div class="col-8 h-100 d-flex chatBox align-items-end justify-content-end flex-column">
         <div class="history container-fluid d-flex chatHistory align-items-end justify-content-end flex-column">
             {% for msg in conversation %}
-                <div class="msg {% if me == msg.sender %} me align-self-end {% else %} you align-self-start {% endif %}">{{ msg.content }}</div>
+                <div class="msg {% if client_id == msg.sender %} me align-self-end {% else %} you align-self-start {% endif %}">{{ msg.content }}</div>
             {% endfor %}
             <!-- <div class="msg you align-self-start">Other people message will show up on the left</div> -->
         </div>

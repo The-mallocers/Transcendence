@@ -22,7 +22,9 @@ class Score:
     async def add_score(self):
         current = await self.get_score()
         await self._redis.json().set(self.game_key, Path('players[?(@.id=="{}")].score'.format(self.player_id)), current + 1)
+        self.score += 1
 
     async def del_score(self):
         current = await self.get_score()
         await self._redis.json().set(self.game_key, Path('players[?(@.id=="{}")].score'.format(self.player_id)), current - 1)
+        self.score -= 1

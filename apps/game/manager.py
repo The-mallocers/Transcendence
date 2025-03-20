@@ -1,55 +1,42 @@
+import asyncio
+import traceback
+
 from asgiref.sync import sync_to_async
-from django.conf import settings
 from django.db import transaction, DatabaseError
-from redis.asyncio import Redis
+from redis import DataError
 from redis.commands.json.path import Path
 
 from apps.game.models import Game
 from apps.player.models import PlayerGame
 from utils.pong.enums import GameStatus
 from utils.pong.objects.ball import Ball
+from utils.redis import RedisConnectionPool
 
 
 class GameManager:
-    def __init__(self, game_id = None):
+    def __init__(self, game=None, redis=None):
         from apps.game.models import Game
         from apps.player.manager import PlayerManager
-        self._redis = Redis(host=settings.REDIS_HOST, port=settings.REDIS_PORT, db=0)
-        self._game: Game = None
-        self.p1: PlayerManager = PlayerManager()
-        self.p2: PlayerManager = PlayerManager()
-        self._game_key = None
 
-        if game_id:
-            self.load_by_id(game_id)
+        self._game: Game = game
+        self._redis = RedisConnectionPool.get_sync_connection() if redis is not None else redis
 
-    async def load_by_id(self, game_id):
-        from apps.game.models import Game
-        self._game = await Game.objects.aget(id=game_id)
-        self._game_key = f"game:{game_id}"
-        await self.p1.init_player(await self.rget_player1_id(), game_id)
-        await self.p2.init_player(await self.rget_player2_id(), game_id)
+        self.game_key = None if game is None else f'game:{game.id}'
+        self.loop = asyncio.get_running_loop()
+        self.pL: PlayerManager = None  # PlayerManager(self.rget_pL_id())
+        self.pR: PlayerManager = None  # PlayerManager(self.rget_pR_id())
 
     async def create_game(self):
-        """Create a new game and store it in Redis."""
         from apps.game.api.serializers import GameSerializer
+        self._redis = await RedisConnectionPool.get_async_connection(self.__class__.__name__)
 
         self._game = await self._create_game()
+        self.game_key = f'game:{self._game.id}'
 
         serializer = GameSerializer(self._game, context={'ball': Ball()})
-        self._game_key = f'game:{self._game.id}'
         value = await sync_to_async(lambda: serializer.data)()
 
-        await self._redis.json().set(self._game_key, Path.root_path(), value)
-
-    async def init_game_manager(self, game_id, redis):
-        self._game = await self.get_game_db(game_id)
-        if self._game:
-            self._redis = redis
-            self._game_key = f'game:{self._game.id}'
-            return
-        else:
-            raise ValueError(f'This game does not exist: {game_id}')
+        await self._redis.json().set(self.game_key, Path.root_path(), value)
 
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ Functions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
 
@@ -57,7 +44,7 @@ class GameManager:
         await self.rset_status(GameStatus.ERROR)
         await self._redis.delete(f'game:{str(self._game.id)}')
 
-    async def get_id(self):
+    def get_id(self):
         if self._game:
             return self._game.id
         return None
@@ -65,33 +52,124 @@ class GameManager:
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ REDIS OPERATION ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
 
     async def rget_status(self) -> GameStatus | None:
-        status = await self._redis.json().get(self._game_key, Path('status'))
-        if status:
-            return GameStatus(status)
-        else:
+        try:
+            status = await self._redis.json().get(self.game_key, Path('status'))
+            if status:
+                return GameStatus(status)
+            else:
+                return None
+        except DataError:
+            traceback.print_exc()
             return None
 
     async def rset_status(self, status: GameStatus):
         if self.rget_status() != status:
             self._game.status = status
             await self._game.asave()
-        await self._redis.json().set(self._game_key, Path('status'), status.value)
+        await self._redis.json().set(self.game_key, Path('status'), status.value)
 
-    async def rget_player1_id(self):
-        return await self._redis.json().get(self._game_key, Path('players[0].id'))
+    async def rget_pL_id(self):
+        try:
+            return await self._redis.json().get(self.game_key, Path('players[0].id'))
+        except DataError:
+            return None
 
-    async def rget_player2_id(self):
-        return await self._redis.json().get(self._game_key, Path('players[1].id'))
+    async def rget_pR_id(self):
+        try:
+            return await self._redis.json().get(self.game_key, Path('players[1].id'))
+        except DataError:
+            return None
+
+    async def rget_pL_score(self):
+        try:
+            return await self._redis.json().get(self.game_key, Path('players[0].score'))
+        except DataError:
+            return None
+
+    async def rget_pR_score(self):
+        try:
+            return await self._redis.json().get(self.game_key, Path('players[1].score'))
+        except DataError:
+            return None
+
+    async def update_disconnect_result(self, disconnected_client, alive_client):
+        self._game.winner = alive_client
+        self._game.loser = disconnected_client
+        self._game.winner_score = 3
+        self._game.loser_score = 0
+        disconnected_player = disconnected_client.player
+        alive_player = alive_client.player
+        disconnected_game: PlayerGame = await disconnected_player.get_player_game_id_db_async(player_id=disconnected_player.id, game_id=self.get_id())
+        alive_game: PlayerGame = await alive_player.get_player_game_id_db_async(player_id=alive_player.id, game_id=self.get_id())
+
+        disconnected_game.score = 0
+        alive_game.score = 3
+        await disconnected_game.asave()
+        await alive_game.asave()
+        await self._game.asave()
+
+
+
+
+    async def set_result(self):
+        score_pL = await self.rget_pL_score()
+        score_pR = await self.rget_pR_score()
+
+        print("I AM SETTING THE RESULT")
+
+        print("PLAYER LEFT:", score_pL)
+        print("PLAYER RIGHT:", score_pR)
+        if score_pL > score_pR:
+            self._game.winner = self.pL.player
+            self._game.loser = self.pR.player
+            self._game.winner_score = score_pL
+            self._game.loser_score = score_pR
+        elif score_pL < score_pR:
+            self._game.winner = self.pR.player
+            self._game.loser = self.pL.player
+            self._game.winner_score = score_pR
+            self._game.loser_score = score_pL
+        pL_game: PlayerGame = await self.pL.get_player_game_id_db_async(player_id=self.pL.id, game_id=self.get_id())
+        pR_game: PlayerGame = await self.pR.get_player_game_id_db_async(player_id=self.pR.id, game_id=self.get_id())
+        pL_game.score = score_pL
+        print(f"pL_game.score ({pL_game.score}) = score_pL ({score_pL})")
+        pR_game.score = score_pR
+        print(f"pL_game.score ({pR_game.score}) = score_pL ({score_pR})")
+        await pL_game.asave()
+        await pR_game.asave()
+        await self._game.asave()
+
 
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ DATABASE OPERATIONS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
 
-    @sync_to_async
-    def get_game_db(self, game_id):
+    @staticmethod
+    def get_game_db(game_id):
         """Load an existing game from the database."""
         from apps.game.models import Game
         try:
-            with transaction.atomic():
-                return Game.objects.get(id=game_id)
+            return Game.objects.get(id=game_id)
+        except Game.DoesNotExist:
+            return None
+        except ValueError:
+            return None
+
+    @staticmethod
+    @sync_to_async
+    def get_game_db_async(game_id):
+        """Load an existing game from the database."""
+        from apps.game.models import Game
+        try:
+            return Game.objects.get(id=game_id)
+        except Game.DoesNotExist:
+            return None
+        
+    #Freshly added function to get all games a player played (from our database of ALL games)
+    @staticmethod
+    def get_games_of_player(player_id):
+        """Load an existing game from the database."""
+        from apps.game.models import Game
+        try:
+            return list(Game.objects.filter(players__id=player_id))
         except Game.DoesNotExist:
             return None
 
@@ -124,7 +202,7 @@ class GameManager:
                     GameStatus.STARTING,
                     GameStatus.RUNNING,
                     GameStatus.ENDING,
-                    GameStatus.DESTROING
+                    GameStatus.DESTROYING
                 ]
             ).delete()
 

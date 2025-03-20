@@ -1,6 +1,4 @@
 from django.http import HttpRequest
-from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_exempt
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -186,8 +184,6 @@ logger = logging.getLogger(__name__)
 
 class GetClientIDApiView(APIView):
     def get(self, request: HttpRequest, *args, **kwargs):
-        logger.debug("Trying to get client")
-        print("Trying to get client")
         client = Clients.get_client_by_request(request)
         if client == None:
             return Response({
