@@ -16,6 +16,8 @@ const ballSize = 10;
 const paddleThickness = 10;
 let paddleHeight = 100;
 
+let game_is_over = false;
+
 canvas.width = width;
 canvas.height = height;
 let paddleDefaultPos = 250 - (paddleHeight / 2)
@@ -41,7 +43,7 @@ socket.onmessage = (e) => {
     if (jsonData.data) {
         console.log(jsonData.data.action)
     }
-
+    console.log("LACTION EST: ", jsonData.data.action);
     if (jsonData.event == "UPDATE") {
 
         if (jsonData.data.action == "PADDLE_LEFT_UPDATE"){
@@ -62,9 +64,19 @@ socket.onmessage = (e) => {
         else if (jsonData.data.action == "SCORE_RIGHT_UPDATE"){
             rscore.innerHTML = jsonData.data.content
         }
-        else if (jsonData.data.action == "ENDING"){
-            navigateTo("/pong/gameover/");
-        }
+    }
+    
+    if (jsonData.data.action == "GAME_ENDING"){
+        //Close socket here as well
+        const game_id = jsonData.data.content
+        console.log("game id is ", game_id);
+        console.log("ALLO C FINI LA GAME");
+        //We will want to navigate to a specific game
+        console.log("Navigating to /pong/gameover/");
+        navigateTo(`/pong/gameover/?game=${game_id}`);
+        game_is_over = true;
+        socket.closeGameSocket();
+
     }
         // return render()
     // })s
@@ -220,6 +232,9 @@ const render = () => {
 render()
 
 function gameLoop() {
+    if(game_is_over === true) {
+        return ;
+    }
     updatePaddles();
     render();
     requestAnimationFrame(gameLoop);

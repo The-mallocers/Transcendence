@@ -222,9 +222,10 @@ const routes = [
     
     },    
     {
-        path: '/pong/gameover',
-        template: async () => {
-            return await fetchRoute('/pages/pong/gameover/');
+        path: '/pong/gameover/',
+        template: async (query) => {
+            console.log(`/pages/profile/${query}`)
+            return await fetchRoute(`/pages/pong/gameover/${query}`);
         },
     },
 ];

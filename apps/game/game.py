@@ -94,18 +94,10 @@ class GameThread(Threads):
 
     async def _ending(self):
         if await self.game_manager.rget_status() is GameStatus.ENDING:
-            if self.game_manager.rget_pL_score == self.game_manager._game.points_to_win or self.game_manager.rget_pR_score == self.game_manager._game.points_to_win:
+            if await self.game_manager.rget_pL_score() == self.game_manager._game.points_to_win or await self.game_manager.rget_pR_score() == self.game_manager._game.points_to_win:
                 await self.game_manager.set_result()
-                await send_group(self.game_manager._game.winner.id, EventType.GAME, ResponseAction.ENDING, content={
-                    'score': self.game_manager._game.winner_score,
-                    'opponent_score': self.game_manager._game.loser_score,
-                    'message': 'You won !'
-                })
-                await send_group(self.game_manager._game.loser.id, EventType.GAME, ResponseAction.ENDING, content={
-                    'score': self.game_manager._game.loser_score,
-                    'opponent_score': self.game_manager._game.winner_score,
-                    'message': 'You Lost ...'
-                })
+                await send_group(self.game_id, EventType.GAME, ResponseAction.GAME_ENDING, self.game_id)
+                print("sending to group that game is over")
             else: #ya eu une erreur, genre client deco ou erreur sur le server
                 pass
             

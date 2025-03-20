@@ -33,6 +33,6 @@ class MatchmakingService(BaseServices):
             await send_group_error(client.id, ResponseError.NOT_IN_QUEUE)
 
     async def handle_disconnect(self, client):
-        player = await PlayerManager.get_player_from_client_db(client.id)
+        player = await PlayerManager.get_player_from_client_db_async(client.id)
         await self.redis.hdel("matchmaking_queue", str(player.id))
         await send_group(client.id, EventType.MATCHMAKING, ResponseAction.LEFT_QUEUE)

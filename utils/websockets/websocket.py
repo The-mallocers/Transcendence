@@ -56,11 +56,11 @@ class WebSocket(AsyncWebsocketConsumer):
                 raise ServiceError("Service is not available")
 
             if event_type is EventType.MATCHMAKING:
-                player = await PlayerManager.get_player_from_client_db(self.client.id)
+                player = await PlayerManager.get_player_from_client_db_async(self.client.id)
                 await self.matchmaking_service.process_action(data, self.client, player)
 
             if event_type is EventType.GAME:
-                player = await PlayerManager.get_player_from_client_db(self.client.id)
+                player = await PlayerManager.get_player_from_client_db_async(self.client.id)
                 await self.game_service.process_action(data, player)
 
             if event_type is EventType.CHAT:
@@ -94,7 +94,8 @@ class GameWebSocket(WebSocket):
 
     async def disconnect(self, close_code):
         await self.matchmaking_service.handle_disconnect(self.client)
-        await self.game_service.handle_disconnect(self.client)
+        if self.game_service.game_manager is not None:
+            await self.game_service.handle_disconnect(self.client)
         await super().disconnect(close_code)
 
 class ChatWebSocket(WebSocket):

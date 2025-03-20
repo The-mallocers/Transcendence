@@ -54,9 +54,7 @@ class ResponseAction(str, Enum):
     LEFT_GAME: str = 'You have successfully left the game'
     STARTING: str = 'The game is about to start'
     STARTED: str = 'The game has started'
-    RESULTS: str = 'Result informations'
-    SCORING: str = 'Sending postgame informations'
-    ENDING: str = 'The game has ended'
+    GAME_ENDING: str = 'The game has ended'
 
     # ── Update ────────────────────────────────────────────────────────────────────────
     PLAYER_INFOS: str = 'player_informations'

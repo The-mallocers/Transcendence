@@ -142,12 +142,15 @@ class GameManager:
 
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ DATABASE OPERATIONS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
 
-    def get_game_db(self, game_id):
+    @staticmethod
+    def get_game_db(game_id):
         """Load an existing game from the database."""
         from apps.game.models import Game
         try:
             return Game.objects.get(id=game_id)
         except Game.DoesNotExist:
+            return None
+        except ValueError:
             return None
 
     @staticmethod

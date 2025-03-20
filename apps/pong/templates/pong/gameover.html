@@ -138,20 +138,20 @@
     height: 10px;
     background-color: aliceblue;
 }
-
-
-</style>
-<div class="gameoverPage">
-    <div class="endState">
-        <span>Y</span>
+        /* <span>Y</span>
         <span>o</span>
         <span class="wordEnd">u</span>
         <span>w</span>
         <span>o</span>
-        <span>n</span>
+        <span>n</span> */
+
+</style>
+<div class="gameoverPage">
+    <div class="endState">
+        {{message}}
     </div>
 
-    <div class="vs">tfreydie vs matboyer</div>
+    <div class="vs">{{ client }} vs {{ opponnent }}</div>
 <!-- 
     <div class="container mt-5">
         <div class="row">
@@ -163,9 +163,9 @@
     </div> -->
 
     <div class="scores">
-        <div id="myScore"    class="score">5</div>
+        <div id="myScore"    class="score">{{client_score}}</div>
         <div class="dash"></div>
-        <div id="enemyScore" class="score">3</div>
+        <div id="enemyScore" class="score">{{opponent_score}}</div>
     </div>
 
 

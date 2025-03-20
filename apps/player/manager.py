@@ -126,12 +126,20 @@ class PlayerManager:
             return None
 
     @sync_to_async
-    def get_player_from_client_db(self, client_id) -> Player | None:
+    def get_player_from_client_db_async(self, client_id) -> Player | None:
         """Get player with client id from data base"""
         try:
             with transaction.atomic():
                 return Clients.objects.select_related('player__stats').get(
                     id=client_id).player
+        except Clients.DoesNotExist:
+            return None
+        
+    @staticmethod
+    def get_player_from_client_db(client_id) -> Player | None:
+        """Get player with client id from data base"""
+        try:
+            return Clients.objects.get(id=client_id).player
         except Clients.DoesNotExist:
             return None
 
