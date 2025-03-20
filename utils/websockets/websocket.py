@@ -15,7 +15,8 @@ from utils.websockets.services.chat_service import ChatService
 from utils.websockets.services.game_service import GameService
 from utils.websockets.services.matchmaking_service import MatchmakingService
 from utils.websockets.services.services import ServiceError
-
+from utils.websockets.services.chat_service import ChatService, uuid_global_room
+from apps.chat.models import Rooms
 
 class WebSocket(AsyncWebsocketConsumer):
     def __init__(self, *args, **kwargs):
@@ -108,8 +109,8 @@ class ChatWebSocket(WebSocket):
         # Additional chat-specific connection logic
         if self.client:
             # self.room_group_name = 'chat'
-            # await self.channel_layer.group_add(self.room_group_name, self.channel_name)
-            rooms = await Rooms.get_room_id_by_client_id(self.client.id)
+            await self.channel_layer.group_add(str(uuid_global_room), self.channel_name)
+            rooms = await Rooms.ASget_room_id_by_client_id(self.client.id)
             for room in rooms:
                 await self.channel_layer.group_add(str(room), self.channel_name)
 

@@ -1,10 +1,14 @@
-from django.db import models, IntegrityError, transaction
+import django.core.exceptions
+from django.db import models, transaction
 import uuid
+from django.forms import ValidationError
 from django.utils import timezone
 from django.db import models
 from asgiref.sync import sync_to_async
 
+from apps.player.models import Player
 from apps.shared.models import Clients
+from apps.error.views import error
 
 class Rooms(models.Model):
     #Primary key
@@ -27,9 +31,9 @@ class Rooms(models.Model):
             raise Exception(f"Erreur lors de l'ajout du client : {e}")
 
     @staticmethod
-    async def create_room():
+    async def create_room(id=None):
         try:
-            return await sync_to_async(Rooms.objects.create)()
+            return await sync_to_async(Rooms.objects.create)(id=id)
         except Exception as e:
             raise Exception(f"Erreur lors de la création de la salle : {e}")
         
@@ -40,6 +44,8 @@ class Rooms(models.Model):
             with transaction.atomic():
                 return Rooms.objects.get(id=id)
         except Rooms.DoesNotExist:
+            return None
+        except ValidationError:
             return None
 
     @staticmethod
@@ -53,12 +59,39 @@ class Rooms(models.Model):
         
     @staticmethod
     @sync_to_async
-    def get_room_id_by_client_id(client_id):
+    def ASget_room_id_by_client_id(client_id):
         try:
             with transaction.atomic():
                 return list(Rooms.objects.filter(clients__id=client_id).values_list('id', flat=True))  
         except Clients.DoesNotExist:
             return []
+        
+    @staticmethod
+    def get_room_id_by_client_id(client_id):
+        try:
+            return list(Rooms.objects.filter(clients__id=client_id).values_list('id', flat=True))  
+        except Clients.DoesNotExist:
+            return []
+        
+    @staticmethod
+    @sync_to_async
+    def get_usernames_by_room_id(room_id):
+        try:
+            with transaction.atomic():
+                username_list = list(Clients.objects.filter(rooms__id=room_id).values_list('profile__username', flat=True))
+                return username_list
+        except Rooms.DoesNotExist:
+            return []
+
+    @staticmethod
+    @sync_to_async
+    def get_client_id_by_username(username):
+        try:
+            with transaction.atomic():
+                client = Clients.objects.get(profile__username=username)
+                return str(client.id)  # Retourne l'ID sous forme de chaîne
+        except Clients.DoesNotExist:
+            return None
 
             
 

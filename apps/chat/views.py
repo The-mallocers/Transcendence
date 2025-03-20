@@ -21,24 +21,24 @@ def chat(request):
     me = None
     if client:
         me = client.id
-    conversation = [
-    {
-        "sender": me,
-        "timestamp" : 345678567,
-        "content" : "yo la team"
-    },
-    {
-        "sender": "UUIDRDyrfhtyi!",
-        "timestamp" : 345678567,
-        "content" : "hellowwww"
-    },
-    {
-        "sender": "UUIDRDyrfhtyi!",
-        "timestamp" : 345678567,
-        "content" : "go faire une game"
-    }
-]
-    
+#     conversation = [
+#     {
+#         "sender": me,
+#         "timestamp" : 345678567,
+#         "content" : "yo la team"
+#     },
+#     {
+#         "sender": "UUIDRDyrfhtyi!",
+#         "timestamp" : 345678567,
+#         "content" : "hellowwww"
+#     },
+#     {
+#         "sender": "UUIDRDyrfhtyi!",
+#         "timestamp" : 345678567,
+#         "content" : "go faire une game"
+#     }
+# ]
+    conversation = [] 
     
     html_content = render_to_string("apps/chat/chat.html", {
         "csrf_token": get_token(request), 

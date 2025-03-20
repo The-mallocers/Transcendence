@@ -3,27 +3,33 @@
 <div id="clientID" data-client-id="{{ client_id }}"></div>
 <div class="container-fluid chatContainer p-0">
     {% csrf_token %}
-    <div class="row h-100 g-0">
-        <div class="col-4 h-100 friends">
-            <button onclick="event.preventDefault(); validateCode();">
+    <div class="row g-0">
+        <div class="col-4 friends">
             {% for i in my_range %}
                 <div class="friend d-flex align-items-center">
                     <img class="pic" src="{% static 'assets/imgs/matboyer.jpg' %}">
                     <div class="nickname">EZ2C</div>
                 </div>
             {% endfor %}
-        
+            <div class="chatRooms">
+                {% for room in rooms %}
+                    <div class="room">
+                        <div class="roomName">{{ room }}</div>
+                    </div>
+                {% endfor %}
+            </div>
         </div>
-
-        <div class="col-8 h-100 d-flex chatBox align-items-end justify-content-end flex-column">
-        <div class="history container-fluid d-flex chatHistory align-items-end justify-content-end flex-column">
-            {% for msg in conversation %}
-                <div class="msg {% if client_id == msg.sender %} me align-self-end {% else %} you align-self-start {% endif %}">{{ msg.content }}</div>
-            {% endfor %}
-            <!-- <div class="msg you align-self-start">Other people message will show up on the left</div> -->
-        </div>
-        <input type="text" id="messageInput" placeholder="message">
+        <div class="col-8 chatBox">
+            <div class="chatHistory">
+                {% for msg in conversation %}
+                    <div class="msg {% if me == msg.sender %} me {% else %} you {% endif %}">
+                        {{ msg.content }}
+                    </div>
+                {% endfor %}
+            </div>
+            <input type="text" id="messageInput" placeholder="message">
         </div>
     </div>
-<div>
-    <script type = "module" src="{% static 'js/apps/chat/chat.js' %}" defer></script>
+</div>
+
+<script type="module" src="{% static 'js/apps/chat/chat.js' %}" defer></script>

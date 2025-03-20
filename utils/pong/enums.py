@@ -41,6 +41,7 @@ class RequestAction(str, Enum):
     CREATE_ROOM = "create_room"
     SEND_MESSAGE = "send_message"
     GET_HISTORY = "get_history"
+    GET_ALL_ROOM_BY_CLIENT ="get_all_room_by_client"
 
 
 # All the responses the server sends to the client
@@ -68,6 +69,8 @@ class ResponseAction(str, Enum):
     ROOM_CREATED = "You have successfully created a chat room"
     MESSAGE_RECEIVED = "New message received"
     HISTORY_RECEIVED = "history_received"
+    ALL_ROOM_RECEIVED = "all_room_received"
+
 
     TEST: str = 'test'
 
@@ -102,6 +105,10 @@ class ResponseError(str, Enum):
     # INVALID_ID: str = 'Player does not exist'
     # NOT_READY: str = 'Players are not ready'
     # NOT_IN_GAME: str = 'Player is not in the game'
+    ROOM_NOT_FOUND: str = 'Room does not exist'
+    NOT_ALLOWED: str = 'You are not allowed to send message'
+    TARGET_NOT_FOUND: str = 'Target not found'
+    SAME_ID: str = 'You can\'t create room with yourself'
 
 
 class Side(str, Enum):

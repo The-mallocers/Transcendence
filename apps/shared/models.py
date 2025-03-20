@@ -59,6 +59,8 @@ class Clients(models.Model):
                 return Clients.objects.get(id=id)
         except Clients.DoesNotExist:
             return None
+        except ValidationError:
+            return None
 
     @staticmethod
     @sync_to_async

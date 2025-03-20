@@ -184,13 +184,13 @@ logger = logging.getLogger(__name__)
 
 class GetClientIDApiView(APIView):
     def get(self, request: HttpRequest, *args, **kwargs):
+        logger.debug("Trying to get client")
         client = Clients.get_client_by_request(request)
         if client == None:
             return Response({
                 "client_id": None,
                 "message" : "Could not retrieve user ID"
             }, status=status.HTTP_401_UNAUTHORIZED)
-        print(f"returning the id {client.id}")
         return Response({
                 "client_id": client.id,
                 "message" : "ID retrieved succesfully"
