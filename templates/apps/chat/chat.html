@@ -1,33 +1,35 @@
 {% load static %}
 
+<div id="clientID" data-client-id="{{ client_id }}"></div>
 <div class="container-fluid chatContainer p-0">
-    <div class="row h-100 g-0">
-        <div class="col-4 h-100 friends">
-
-        {% for i in my_range %}
-            <div class="friend d-flex align-items-center">
-                <img class="pic" src="{% static 'assets/imgs/matboyer.jpg' %}">
-                <div class="nickname">EZ2C</div>
+    {% csrf_token %}
+    <div class="row g-0">
+        <div class="col-4 friends">
+            {% for i in my_range %}
+                <div class="friend d-flex align-items-center">
+                    <img class="pic" src="{% static 'assets/imgs/matboyer.jpg' %}">
+                    <div class="nickname">EZ2C</div>
+                </div>
+            {% endfor %}
+            <div class="chatRooms">
+                {% for room in rooms %}
+                    <div class="room">
+                        <div class="roomName">{{ room }}</div>
+                    </div>
+                {% endfor %}
             </div>
-        {% endfor %}
-        
         </div>
-        <div class="col-8 h-100 d-flex chatBox align-items-end justify-content-end flex-column">
-        <div class="history container-fluid d-flex chatHistory align-items-end justify-content-end flex-column">
-            <div class="msg me align-self-end">lalala</div>
-            <div class="msg you align-self-start">lololo</div>
-            <div class="msg me align-self-end">lalala</div>
-            <div class="msg you align-self-start">lololo</div>
-            <div class="msg me align-self-end">lalala</div>
-            <div class="msg you align-self-start">lololo</div>
-            <div class="msg me align-self-end">lalala</div>
-            <div class="msg you align-self-start">lololo</div>
-            <div class="msg me align-self-end">lalala</div>
-            <div class="msg you align-self-start">lololo</div>
-        </div>
-        <input type="text" placeholder="message">
+        <div class="col-8 chatBox">
+            <div class="chatHistory">
+                {% for msg in conversation %}
+                    <div class="msg {% if me == msg.sender %} me {% else %} you {% endif %}">
+                        {{ msg.content }}
+                    </div>
+                {% endfor %}
+            </div>
+            <input type="text" id="messageInput" placeholder="message">
         </div>
     </div>
-<div>
+</div>
 
-
+<script type="module" src="{% static 'js/apps/chat/chat.js' %}" defer></script>

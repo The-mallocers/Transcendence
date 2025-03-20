@@ -43,7 +43,14 @@ class Clients(models.Model):
             return None
         client = Clients.objects.get(id=id)
         return client
-    
+        
+    @staticmethod
+    def get_client_by_username(username: str):
+        try:
+            return Clients.objects.get(profile__username=username)
+        except :
+            return None  # Or handle the error appropriately
+
     @staticmethod
     def get_client_by_request(request: HttpRequest):
         from utils.jwt.TokenGenerator import TokenGenerator, TokenType
@@ -58,6 +65,17 @@ class Clients(models.Model):
         try:
             with transaction.atomic():
                 return Clients.objects.get(id=id)
+        except Clients.DoesNotExist:
+            return None
+        except ValidationError:
+            return None
+
+    @staticmethod
+    @sync_to_async
+    def get_client_by_player_id_async(player_id):
+        try:
+            with transaction.atomic():
+                return Clients.objects.get(player_id=player_id)
         except Clients.DoesNotExist:
             return None
 
@@ -83,9 +101,9 @@ class Clients(models.Model):
         return None
 
     @staticmethod
-    async def get_client_by_player(player_id):
+    def get_client_by_player(player_id):
         try:
-            return await Clients.objects.aget(player__id=player_id)
+            return Clients.objects.get(player__id=player_id)
         except Clients.DoesNotExist:
             return None
 

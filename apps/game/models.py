@@ -22,11 +22,16 @@ class Game(models.Model):
     # ── Game Informations ───────────────────────────────────────────────────────────── #
     created_at = DateTimeField(default=timezone.now)
     in_tournament = BooleanField(editable=False, default=False, null=False)
+    points_to_win = IntegerField(default=3)
     winner = ForeignKey(Player, on_delete=models.SET_NULL, null=True, related_name='winner', editable=False, blank=True)
-
+    loser = ForeignKey(Player, on_delete=models.SET_NULL, null=True, related_name='loser', editable=False, blank=True)
+    
+    winner_score = IntegerField(default=0)
+    loser_score = IntegerField(default=0)
+    
     # ── Game Settings ───────────────────────────────────────────────────────────── #
     status = CharField(max_length=20, choices=[(status.name, status.value) for status in GameStatus], default=GameStatus.CREATING.value)
     players = ManyToManyField(Player, through='player.PlayerGame')
     timer = DurationField(default=timedelta(minutes=0), editable=False, null=True) #In default there is no timer
 
-
+    

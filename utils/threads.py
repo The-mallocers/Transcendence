@@ -5,8 +5,9 @@ import logging
 import threading
 from abc import ABC, abstractmethod
 
-from django.conf import settings
-from redis.asyncio import Redis
+import redis.asyncio as aioredis
+
+from utils.redis import RedisConnectionPool
 
 
 class Threads(threading.Thread, ABC):
@@ -14,16 +15,17 @@ class Threads(threading.Thread, ABC):
 
     def __init__(self, name):
         super().__init__(daemon=True, name=name)
-        self.redis = Redis(host=settings.REDIS_HOST, port=settings.REDIS_PORT, db=0)
+        self.redis: aioredis.Redis = None
+        self.loop = asyncio.new_event_loop()
+
         self._logger = logging.getLogger(self.__class__.__name__)
         self._stop_event = threading.Event()
-        self.loop = asyncio.new_event_loop()
         self._completed_actions = set()
 
     def run(self):
         self._logger.info(f"Starting thread [{self.name}]")
         asyncio.set_event_loop(self.loop)
-        self.loop.run_until_complete(self.main())
+        self.loop.run_until_complete(self.exec())
 
     def stop(self):
         self._logger.info(f"Stopping thread [{self.name}]")
@@ -46,6 +48,11 @@ class Threads(threading.Thread, ABC):
             self._logger.debug(f"Action '{action_id}' executed")
             return True
         return False
+
+    async def exec(self):
+        self.redis = await RedisConnectionPool.get_async_connection(self.name)
+        await self.main()
+        await RedisConnectionPool.close_connection(self.name)
 
     @abstractmethod
     async def main(self):

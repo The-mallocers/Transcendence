@@ -1,6 +1,4 @@
 from django.http import HttpRequest
-from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_exempt
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -178,3 +176,22 @@ def post_twofa_code(req):
     response = formulate_json_response(False, 400, "No email match this request", "/auth/login")
     return response
 
+
+import logging
+logger = logging.getLogger(__name__)
+
+
+
+class GetClientIDApiView(APIView):
+    def get(self, request: HttpRequest, *args, **kwargs):
+        logger.debug("Trying to get client")
+        client = Clients.get_client_by_request(request)
+        if client == None:
+            return Response({
+                "client_id": None,
+                "message" : "Could not retrieve user ID"
+            }, status=status.HTTP_401_UNAUTHORIZED)
+        return Response({
+                "client_id": client.id,
+                "message" : "ID retrieved succesfully"
+            }, status=status.HTTP_200_OK)
