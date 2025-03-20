@@ -54,8 +54,9 @@ services:
       - Tnetwork
     restart: always
 
-  redis-cache:
+  redis:
     image: redis/redis-stack:latest
+    container_name: redis
     healthcheck:
         test: [ "CMD-SHELL", "redis-cli", "--raw", "INCR", "ping" ]
         interval: 5s

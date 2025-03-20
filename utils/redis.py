@@ -20,8 +20,8 @@ class RedisConnectionPool:
     @classmethod
     def _get_connection_params(cls, alias: str = 'default') -> Dict[str, Any]:
         default_params = {
-            'host': 'localhost',
-            'port': 6379,
+            'host': settings.REDIS_HOST,
+            'port': settings.REDIS_PORT,
             'db': 0,
             'password': None,
             'socket_timeout': 5,
@@ -68,7 +68,7 @@ class RedisConnectionPool:
                 connection = await aioredis.from_url(url, **params)
             else:
                 host = params.pop('host', 'localhost')
-                port = params.pop('port', 6379)
+                port = params.pop('port', 6380)
                 db = params.pop('db', 0)
                 password = params.pop('password', None)
 
@@ -100,7 +100,7 @@ class RedisConnectionPool:
                 connection = redis.from_url(url, **params)
             else:
                 host = params.pop('host', 'localhost')
-                port = params.pop('port', 6379)
+                port = params.pop('port',6380)
                 db = params.pop('db', 0)
                 password = params.pop('password', None)
 

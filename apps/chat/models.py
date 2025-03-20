@@ -96,6 +96,7 @@ class Rooms(models.Model):
             
 
 class Messages(models.Model):
+    id = models.BigAutoField(primary_key=True)
     room = models.ForeignKey(Rooms, on_delete=models.CASCADE, related_name='messages')
     sender = models.ForeignKey(Clients, on_delete=models.SET_NULL, blank=True, null=True)
     content = models.TextField()

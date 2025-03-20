@@ -130,10 +130,14 @@ REST_FRAMEWORK = {
 
 # ─────────────────────────────────────── Redis ──────────────────────────────────────── #
 
+# REDIS_HOST = 'localhost'
+REDIS_HOST = 'redis'
+REDIS_PORT = 6379
+
 REDIS_CONNECTIONS = {
     'default': {
-        'host': 'localhost',
-        'port': 6379,
+        'host': REDIS_HOST,
+        'port': REDIS_PORT,
         'db': 0,
         'password': None,  # Set to None if no password required
         'socket_timeout': 5,
@@ -147,7 +151,7 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [("127.0.0.1", 6379)],
+            "hosts": [(REDIS_HOST, REDIS_PORT)],
             "capacity": 1500,  # Default is 100
             "expiry": 10,  # Message expiry time in seconds (default: 60)
             "group_expiry": 86400,  # Group expiry time (default: 86400)
@@ -159,8 +163,6 @@ CHANNEL_LAYERS = {
 SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
 SESSION_CACHE_ALIAS = 'default'
 
-REDIS_HOST = 'localhost'
-REDIS_PORT = 6379
 
 WSGI_APPLICATION = 'config.wsgi.application'
 ASGI_APPLICATION = 'config.asgi.application'
