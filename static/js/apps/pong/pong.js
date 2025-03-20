@@ -40,6 +40,10 @@ const PongGame = () => {
             p2_score = data.score
             drawGame()
         }
+        if (data.action === 'The game has ended') {
+            p2_score = data.score
+            drawGame()
+        }
 
     };
 }

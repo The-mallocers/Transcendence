@@ -94,12 +94,25 @@ class GameThread(Threads):
 
     async def _ending(self):
         if await self.game_manager.rget_status() is GameStatus.ENDING:
-            await self.game_manager.set_result()
+            if self.game_manager.rget_pL_score == self.game_manager._game.points_to_win or self.game_manager.rget_pR_score == self.game_manager._game.points_to_win:
+                await self.game_manager.set_result()
+                await send_group(self.game_manager._game.winner.id, EventType.GAME, ResponseAction.ENDING, content={
+                    'score': self.game_manager._game.winner_score,
+                    'opponent_score': self.game_manager._game.loser_score,
+                    'message': 'You won !'
+                })
+                await send_group(self.game_manager._game.loser.id, EventType.GAME, ResponseAction.ENDING, content={
+                    'score': self.game_manager._game.loser_score,
+                    'opponent_score': self.game_manager._game.winner_score,
+                    'message': 'You Lost ...'
+                })
+            else: #ya eu une erreur, genre client deco ou erreur sur le server
+                pass
             
             self._stop_event.set()
-            await self._stoping()
+            await self._stopping()
 
-    async def _stoping(self):
+    async def _stopping(self):
         await self.game_manager.rset_status(GameStatus.FINISHED)
         await self.redis.hdel('player_game', self.game_manager.pL.id, self.game_manager.pR.id)
         await asyncio.sleep(1)

@@ -75,6 +75,7 @@ class GameService(BaseServices):
         #On veut register ca comme une defaite pour lui
         #Je ne sais pas vraiment comment check si la deco arrive dans une des autres phases d'une game
 
+        
         #Alexandre a l'aide
         # await self.game_manager.update_disconnect_result(client, opponent_client)
 

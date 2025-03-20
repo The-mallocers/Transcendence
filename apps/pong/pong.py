@@ -29,6 +29,7 @@ class PongLogic:
         self.score_pL: Score = score_pL
         self.score_pR: Score = score_pR
         self.game_manager: GameManager = game_manager
+        self.points_to_win = self.game_manager._game.points_to_win
 
 
     async def game_task(self):
@@ -108,9 +109,9 @@ class PongLogic:
             await self._reset_ball(self.ball)
 
         #Check win
-        if await self.score_pL.get_score() > 2:
+        if await self.score_pL.get_score() >= self.points_to_win:
             await self.game_manager.rset_status(GameStatus.ENDING)
-        if await self.score_pR.get_score() > 2:
+        if await self.score_pR.get_score() >= self.points_to_win:
             await self.game_manager.rset_status(GameStatus.ENDING)
 
         await self.ball.update()

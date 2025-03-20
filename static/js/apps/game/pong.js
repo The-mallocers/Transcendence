@@ -1,4 +1,5 @@
 import { WebSocketManager } from "../../websockets/websockets.js";
+import { navigateTo } from '../../spa/spa.js';
 
 const socket = WebSocketManager.gameSocket;
 let canvas = document.getElementById("pongCanvas");
@@ -60,6 +61,9 @@ socket.onmessage = (e) => {
         }
         else if (jsonData.data.action == "SCORE_RIGHT_UPDATE"){
             rscore.innerHTML = jsonData.data.content
+        }
+        else if (jsonData.data.action == "ENDING"){
+            navigateTo("/pong/gameover/");
         }
     }
         // return render()

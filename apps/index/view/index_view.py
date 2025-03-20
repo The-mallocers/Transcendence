@@ -14,10 +14,11 @@ def get(req):
     if client is not None:
         Games_played = GameManager.get_games_of_player(client.player.id)
         Games_played = sorted(Games_played, key=lambda g: g.created_at, reverse=True)     
-        
-        winrate = get_winrate(client, Games_played)
-        ghistory = get_last_matches(client, Games_played)
-        rivals = get_rivals(client, Games_played)
+                
+        if client is not None:
+            winrate = get_winrate(client, Games_played)
+            ghistory = get_last_matches(client, Games_played)
+            rivals = get_rivals(client, Games_played)
         context = {
             "client": client,
             "clients": Clients.objects.all(),
@@ -44,6 +45,8 @@ def get(req):
 
 def get_winrate(client, games_played) -> int:
     total_games = len(games_played)
+    if total_games == 0:
+        return 0
     print(total_games)
     won_games = 0
 
