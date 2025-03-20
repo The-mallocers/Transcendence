@@ -55,12 +55,14 @@ services:
     restart: always
 
   redis-cache:
-    image: redis:7.2.4-bookworm
+    image: redis/redis-stack:latest
     healthcheck:
         test: [ "CMD-SHELL", "redis-cli", "--raw", "INCR", "ping" ]
         interval: 5s
         timeout: 5s
         retries: 60
+    ports:
+      - "6380:6380"
     networks:
         - Tnetwork
     restart: unless-stopped

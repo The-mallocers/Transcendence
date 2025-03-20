@@ -1,7 +1,7 @@
 {% load static %}
 
 <head>
-    <style>
+    {% comment %} <style>
         .display-dashboard {
             display: flex;
             justify-content: space-between;
@@ -31,7 +31,7 @@
                 margin-bottom: 50px;
             }
         }
-    </style>
+    </style> {% endcomment %}
 </head>
 
 <div class="container">
@@ -58,14 +58,10 @@
         <div class="dashboard-container">
             <iframe 
                 class="dashboard-iframe"
-                src= "{{urlnode}}">
-            </iframe>
-        </div>
-
-        <div class="dashboard-container">
-            <iframe 
-                class="dashboard-iframe"
-                src= "{{urlsql}}">
+                src= "{{urlpostgres}}"
+                width="800"
+                height="600"
+                frameborder="0">
             </iframe>
         </div>
     </div>

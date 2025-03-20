@@ -10,6 +10,7 @@ class Rights(models.Model):
     # Grafana
     grafana_token = models.CharField(max_length=100, null=True, blank=True)
     grafana_id = models.IntegerField(default=0)
+    grafana_dashboard = models.URLField(max_length=255, null=True, blank=True)
 
     class Meta:
         db_table = 'client_rights'

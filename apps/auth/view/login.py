@@ -11,24 +11,18 @@ grafana_id = 0
 
 def get(req):
     csrf_token = get_token(req)
-    urlnode, urlsql = None, None
+    urlpostgres = None
     grafana_session = authenticate_grafana_user()
     secretKey = create_api_key(grafana_session)
-    urlnode, urlsql = render_dashboard(req, secretKey, grafana_session)
-    # #Commenting this because this was causing logout to crash (but for some reason not just getting to the page)
+    urlpostgres = render_dashboard(req, secretKey, grafana_session)
     users = Clients.objects.all()
-    print(grafana_id)
-    print(urlnode)
-    print(urlsql)
-    # Render the HTML template to a string
+    print(urlpostgres)
     html_content = render_to_string("apps/auth/login.html", {
         "users": users, 
         "csrf_token": csrf_token,
-        "urlnode" :urlnode,
-        "urlsql" : urlsql
+        "urlpostgres" :urlpostgres,
         })
 
-    # Return both the HTML and any additional data
     return JsonResponse({
         'html': html_content,
         'users': list(users.values())
@@ -39,15 +33,11 @@ def authenticate_grafana_user():
     session = requests.Session()
     admin = "admin"
     pwd = settings.GRFANA_ADMIN_PWD
-    # Grafana typically uses a login form
     response = session.post(
         login_url,
         json={"user": admin, "password": pwd},
         headers={"Content-Type": "application/json"}
     )
-    print(session)
-    
-    # Check if login was successful
     if response.status_code == 200:
         return session
     else:
@@ -91,7 +81,7 @@ def create_api_key(session):
 
 # For an API endpoint that returns JSON directly:
 def render_dashboard(request, secretkey, session) -> str:
-    print(secretkey )
+    admin_client = Clients.get_client_by_email(settings.ADMIN_EMAIL)
     api_url = "http://grafana:3000/api/search?type=dash-db"
     my_headers = {
         'Accept': 'application/json',
@@ -99,49 +89,36 @@ def render_dashboard(request, secretkey, session) -> str:
         "Authorization": f'Bearer {secretkey}'
     }
     try:
-        response = requests.get(
-            api_url,
-            headers=my_headers
-        )
-        response.raise_for_status()
-        data = response.json()
-        print(data)
-        print(data[0].get('uid'))
-        print(data[1].get('uid'))
-        payload = {
-            "timeSelectionEnabled": True,
-            "isEnabled": True,  # This is the key setting
-            "annotationsEnabled": True,
-            "share": "public",
-            "uid" : data[0].get('uid')
-        }
-        uidnode = data[0].get('uid')
-        uidpostgre = data[1].get('uid')
-        
-        #get node dahsboard id
-        # url = f"http://grafana:3000/api/dashboards/uid/{uidnode}/public-dashboards/"
-        # response = requests.post(
-        #     url,
-        #     json=payload,
-        #     headers=my_headers
-        # )
-        # response.raise_for_status()
-        # data = response.json()
-        # urlnode = f"http://localhost:3000/public-dashboards/{data.get('uid')}"
-        urlnode = "http://localhost:3000/d/rYdddlPWk/node-exporter-full"
-        
-        
-        #get postgres dashboard id
-        # url = f"http://grafana:3000/api/dashboards/uid/{uidpostgre}/public-dashboards/"
-        # response = requests.post(
-        #     url,
-        #     headers=my_headers
-        # )
-        # response.raise_for_status()
-        # data = response.json()
-        # urlpostgre = f"http://localhost:3000/public-dashboards/{data.get('uid')}"
-        urlpostgre = "http://localhost:3000/public-dashboards/92001fadcb3b4a74ab15e272e729d10e"
-        return urlnode, urlpostgre
+        if admin_client.rights.grafana_dashboard == None:
+            response = session.get(
+                api_url,
+                headers=my_headers
+            )
+            response.raise_for_status()
+            data = response.json()
+            print(data)
+            payload = {
+                "timeSelectionEnabled": True,
+                "isEnabled": True,
+                "annotationsEnabled": True,
+                "share": "public",
+                "uid" : data[0].get('uid')
+            }
+            uidpostgres = data[0].get('uid')
+            url = f"http://grafana:3000/api/dashboards/uid/{uidpostgres}/public-dashboards/"
+            response = session.post(
+                url,
+                json=payload,
+                headers=my_headers
+            )
+            response.raise_for_status()
+            data = response.json()
+            print(data)
+            urlpostgres = f"http://localhost:3000/public-dashboards/{data.get('accessToken')}"
+            admin_client.rights.grafana_dashboard = urlpostgres
+            admin_client.rights.save()
+            return urlpostgres
+        return admin_client.rights.grafana_dashboard
     
     except requests.exceptions.RequestException as e:
         print(str(e))
