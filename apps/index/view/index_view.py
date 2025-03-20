@@ -102,9 +102,11 @@ def get_rivals(client, games_played) -> dict:
 
     rivals = {}
     for opponent in opponents:
+        currentClient = Clients.get_client_by_player(opponent)
         rivals[opponent] = {
             "games_won": 0,
-            "games_lost":0
+            "games_lost":0,
+            "profile_pic" : currentClient.profile.profile_picture
         }
 
     for game in games_played:
