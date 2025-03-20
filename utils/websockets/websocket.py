@@ -110,7 +110,7 @@ class ChatWebSocket(WebSocket):
         if self.client:
             # self.room_group_name = 'chat'
             await self.channel_layer.group_add(str(uuid_global_room), self.channel_name)
-            rooms = await Rooms.get_room_id_by_client_id(self.client.id)
+            rooms = await Rooms.ASget_room_id_by_client_id(self.client.id)
             for room in rooms:
                 await self.channel_layer.group_add(str(room), self.channel_name)
 

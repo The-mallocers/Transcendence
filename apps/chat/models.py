@@ -59,10 +59,17 @@ class Rooms(models.Model):
         
     @staticmethod
     @sync_to_async
-    def get_room_id_by_client_id(client_id):
+    def ASget_room_id_by_client_id(client_id):
         try:
             with transaction.atomic():
                 return list(Rooms.objects.filter(clients__id=client_id).values_list('id', flat=True))  
+        except Clients.DoesNotExist:
+            return []
+        
+    @staticmethod
+    def get_room_id_by_client_id(client_id):
+        try:
+            return list(Rooms.objects.filter(clients__id=client_id).values_list('id', flat=True))  
         except Clients.DoesNotExist:
             return []
         

@@ -39,8 +39,8 @@ class ChatService(BaseServices):
                 return await send_group_error(admin.id, ResponseError.SAME_ID)
 
             # Check for common rooms between admin and target
-            rooms_admin = await Rooms.get_room_id_by_client_id(admin.id)
-            rooms_target = await Rooms.get_room_id_by_client_id(target.id)
+            rooms_admin = await Rooms.ASget_room_id_by_client_id(admin.id)
+            rooms_target = await Rooms.ASget_room_id_by_client_id(target.id)
 
             common_rooms = set(rooms_admin) & set(rooms_target)  # Optimized set intersection
             common_rooms.remove(uuid_global_room)
@@ -85,7 +85,7 @@ class ChatService(BaseServices):
                 return await send_group_error(client.id, ResponseError.ROOM_NOT_FOUND)
 
             # Check if client is a member of the room
-            if room.id not in await Rooms.get_room_id_by_client_id(client.id):
+            if room.id not in await Rooms.ASget_room_id_by_client_id(client.id):
                 return await send_group_error(client.id, ResponseError.NOT_ALLOWED)
 
             # Store the message
@@ -140,7 +140,7 @@ class ChatService(BaseServices):
             await send_group_error(client.id, str(e))
 
     async def _handle_get_all_room_by_client(self, data, client: Clients):
-        rooms = await Rooms.get_room_id_by_client_id(client.id)
+        rooms = await Rooms.ASget_room_id_by_client_id(client.id)
         formatted_messages = []
         for room in rooms:
             clients = await Rooms.get_usernames_by_room_id(room)
