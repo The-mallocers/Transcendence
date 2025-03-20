@@ -60,7 +60,6 @@ document.getElementById("messageInput").addEventListener("keydown", function(eve
             "data": {
                 "action": "send_message",
                 "args": {
-                    // "room_id": "global",
                     "room_id": room_id,
                     "message": message
                 }

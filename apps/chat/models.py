@@ -68,22 +68,21 @@ class Rooms(models.Model):
         
     @staticmethod
     @sync_to_async
-    def get_clients_id_by_room_id(room_id):
+    def get_usernames_by_room_id(room_id):
         try:
             with transaction.atomic():
-                # return list(Clients.objects.filter(rooms__id=room_id).values_list('id', flat=True))
-                uuid_list = list(Clients.objects.filter(rooms__id=room_id).values_list('id', flat=True))
-                return [str(uuid) for uuid in uuid_list]
+                username_list = list(Clients.objects.filter(rooms__id=room_id).values_list('profile__username', flat=True))
+                return username_list
         except Rooms.DoesNotExist:
             return []
-    
+
     @staticmethod
-    @sync_to_async  
-    def get_player_from_client_db(client_id) -> Player | None:
-        """Get player with client id from data base"""
+    @sync_to_async
+    def get_client_id_by_username(username):
         try:
             with transaction.atomic():
-                return Clients.objects.select_related('player__stats').get(id=client_id).player
+                client = Clients.objects.get(profile__username=username)
+                return str(client.id)  # Retourne l'ID sous forme de chaîne
         except Clients.DoesNotExist:
             return None
 

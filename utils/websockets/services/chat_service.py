@@ -82,9 +82,6 @@ class ChatService(BaseServices):
                 return await send_group_error(client.id, ResponseError.ROOM_NOT_FOUND)
 
             # Check if client is a member of the room
-            print(room)
-            print(await Rooms.get_room_id_by_client_id(client.id))
-
             if room.id not in await Rooms.get_room_id_by_client_id(client.id):
                 return await send_group_error(client.id, ResponseError.NOT_ALLOWED)
 
@@ -126,7 +123,6 @@ class ChatService(BaseServices):
                 await send_group_error(client.id, ResponseError.NO_HISTORY)
                 return
 
-            print(messages)
             # Sending messages in a single batch instead of multiple requests
             formatted_messages = [
                 {"message": msg.content, "sender": str(await msg.get_sender_id()), "room_id": str(room_id)}
@@ -144,13 +140,12 @@ class ChatService(BaseServices):
         rooms = await Rooms.get_room_id_by_client_id(client.id)
         formatted_messages = []
         for room in rooms:
-            clients = await Rooms.get_clients_id_by_room_id(room)
-            print(clients)
+            clients = await Rooms.get_usernames_by_room_id(room)
             players = []
             for Client in clients:
-                player = await Rooms.get_player_from_client_db(Client)
-                if client.player_id != player.id:
-                    players.append(player.nickname) 
+                player = Client
+                if str(client.id) != await Rooms.get_client_id_by_username(Client):
+                    players.append(player)
             formatted_messages.append({"room": str(room), "player": players})
         await send_group(client.id, EventType.CHAT, ResponseAction.ALL_ROOM_RECEIVED, {"rooms": formatted_messages})
 
