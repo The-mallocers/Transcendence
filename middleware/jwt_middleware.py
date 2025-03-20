@@ -7,10 +7,6 @@ from django.http import JsonResponse, HttpRequest, HttpResponseRedirect
 from apps.shared.models import Clients
 from utils.jwt.JWTGenerator import JWTType, JWT, JWTGenerator
 
-from django.middleware.csrf import get_token
-from django.template.loader import render_to_string
-
-
 
 class JWTMiddleware:
     def __init__(self, get_response):
@@ -95,7 +91,6 @@ class JWTMiddleware:
             if required_roles:
                 if not any(role in token.ROLES for role in required_roles):
                     return HttpResponseRedirect('/')
-            print("hello :", self.get_response(request))
             return self.get_response(request)
         except jwt.ExpiredSignatureError:
             try:

@@ -1,6 +1,8 @@
 import json
 import uuid
 from channels.layers import get_channel_layer
+
+from apps.chat.models import Messages, Rooms
 from apps.shared.models import Clients
 from utils.pong.enums import EventType, ResponseAction, ResponseError  
 from utils.websockets.services.services import BaseServices, ServiceError  
@@ -15,8 +17,9 @@ uuid_global_room = uuid.UUID('00000000-0000-0000-0000-000000000000')
 
 class ChatService(BaseServices):
     async def init(self, client: Clients):
+        await super().init()
         self.channel_layer = get_channel_layer()
-        self.channel_name = await self._redis.hget(name="consumers_channels", key=str(client.id))
+        self.channel_name = await self.redis.hget(name="consumers_channels", key=str(client.id))
         
     async def process_action(self, data, *args):
         if 'room_id' in data['data']['args'] and data['data']['args']['room_id'] == 'global':
@@ -58,7 +61,7 @@ class ChatService(BaseServices):
             # Add both admin and target to the chat group
             await self.channel_layer.group_add(room_id, self.channel_name.decode('utf-8'))
 
-            target_channel_name = await self._redis.hget(name="consumers_channels", key=str(target.id))
+            target_channel_name = await self.redis.hget(name="consumers_channels", key=str(target.id))
             if target_channel_name:
                 await self.channel_layer.group_add(room_id, target_channel_name.decode('utf-8'))
 
@@ -149,5 +152,5 @@ class ChatService(BaseServices):
             formatted_messages.append({"room": str(room), "player": players})
         await send_group(client.id, EventType.CHAT, ResponseAction.ALL_ROOM_RECEIVED, {"rooms": formatted_messages})
 
-    async def _handle_disconnect(self):
+    async def handle_disconnect(self, client):
         pass

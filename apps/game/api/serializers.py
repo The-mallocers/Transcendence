@@ -13,6 +13,7 @@ class GameSerializer(serializers.ModelSerializer):
     class Meta:
         model = Game
         fields = ['id', 'players', 'ball', 'status', 'timer']
+        # fields = ['id', 'players', 'ball', 'status', 'timer']
 
     def get_ball(self, obj):
         ball = self.context.get('ball')

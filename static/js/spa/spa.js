@@ -1,6 +1,5 @@
-// import { logout } from '../apps/auth/logout.js';
-// import { login } from '../apps/auth/login.js';
-// import { register } from '../apps/auth/register.js';
+import { WebSocketManager } from "../websockets/websockets.js"
+
 
 class Router {
     constructor(routes) {
@@ -14,6 +13,7 @@ class Router {
     }
 
     async handleLocation() {
+        
         const path = window.location.pathname;
 
         console.log(window.location.search);
@@ -26,7 +26,7 @@ class Router {
         else {
             try {
                 // console.log("About to try the route template of the route :", route);
-                const content = await route.template(window.location.search);
+                const content = await route.template(window.location.search ? window.location.search : "");
                 this.rootElement.innerHTML = content;
                 this.reloadScripts();
             } catch (error) {
@@ -60,6 +60,19 @@ class Router {
     }
 
     navigate(path) {
+        
+        let splitedPath = path.split("/")
+        console.log(splitedPath)
+        if( splitedPath.includes("pong")) {
+            WebSocketManager.closeChatSocket()
+        }
+        else {
+            WebSocketManager.closeAllSockets(); //for now we close all
+        }
+
+        //In the future, we will have to do some better logics with the path to decide if we want to close
+        //a websocket or not.
+        
         window.history.pushState({}, '', path);
         this.handleLocation();
     }
@@ -67,7 +80,9 @@ class Router {
 
 window.onload = async ()=>{
     console.log(pongRoute.possibleRoutes)
-    // console.log(window.location.pathname)
+    // console.log(window.location.pathname
+
+    //Add the creation of the websocket here
     await router.handleLocation();
 }
 
@@ -200,10 +215,18 @@ const routes = [
         }
     },
     {
-    path: '/auth/2fa',
-    template: async () => {
-        return await fetchRoute('/pages/auth/2fa');
-    },
+        path: '/auth/2fa',
+        template: async () => {
+            return await fetchRoute('/pages/auth/2fa');
+        },
+    
+    },    
+    {
+        path: '/pong/gameover/',
+        template: async (query) => {
+            console.log(`/pages/profile/${query}`)
+            return await fetchRoute(`/pages/pong/gameover/${query}`);
+        },
     },
 ];
 

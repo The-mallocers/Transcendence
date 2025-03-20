@@ -1,7 +1,11 @@
 // window.addEventListener('load', onPageLoad);
+import { WebSocketManager } from "../../websockets/websockets.js"
 
 
-let client_id = null;
+const element  = document.querySelector("#clientID");
+const clientId = element.dataset.clientId
+
+// console.log(clientId)
 
 let room_id = null; 
 
@@ -47,6 +51,13 @@ chatSocket.onmessage = (event) => {
         //Do things to show the new message on the front
     }
 }
+
+connectGeneralChat(clientId);
+
+
+
+
+
 
 document.getElementById("messageInput").addEventListener("keydown", function(event) {
     if (event.key === "Enter") {

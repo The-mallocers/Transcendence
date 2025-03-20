@@ -125,19 +125,31 @@ REST_FRAMEWORK = {
     ],
 }
 
-CACHES = {
-    "default": {
-        "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://127.0.0.1:6379/1",  # Base Redis 1
-        "OPTIONS": {
-            "CLIENT_CLASS": "django_redis.client.DefaultClient",
-        }
+# ─────────────────────────────────────── Redis ──────────────────────────────────────── #
+
+REDIS_CONNECTIONS = {
+    'default': {
+        'host': 'localhost',
+        'port': 6379,
+        'db': 0,
+        'password': None,  # Set to None if no password required
+        'socket_timeout': 5,
+        'socket_connect_timeout': 5,
+        'retry_on_timeout': True,
+        'decode_responses': True,
     }
 }
 
 CHANNEL_LAYERS = {
     "default": {
-        "BACKEND": "channels.layers.InMemoryChannelLayer",
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],
+            "capacity": 1500,  # Default is 100
+            "expiry": 10,  # Message expiry time in seconds (default: 60)
+            "group_expiry": 86400,  # Group expiry time (default: 86400)
+            "prefix": "channels:",  # Redis key prefix
+        },
     },
 }
 
@@ -250,6 +262,12 @@ LOGGING = {
             'encoding': 'utf-8',
             'mode': 'w',  # Overwrites the file each time
         },
+        'redis_file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR / 'logs' / 'redis.log',
+            'formatter': 'verbose',
+        },
         'console': {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler',
@@ -294,6 +312,11 @@ LOGGING = {
         },
         'apps.game': {  # Django request logging
             'handlers': ['console', 'file', 'latest_file'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'utils.redis': {  # Update this to match your actual module path
+            'handlers': ['console', 'redis_file'],
             'level': 'DEBUG',
             'propagate': False,
         },

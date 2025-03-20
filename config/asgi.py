@@ -1,4 +1,4 @@
-import os
+import logging
 
 from channels.auth import AuthMiddlewareStack
 from channels.routing import ProtocolTypeRouter, URLRouter
@@ -8,7 +8,7 @@ from config.urls import websocket_urlpatterns
 
 # Initialize Django ASGI application early to ensure the app registry is loaded
 django_asgi_app = get_asgi_application()
-print("Starting server with ASGI")
+logging.getLogger('daphne.cli').info("Starting server with ASGI")
 
 application = ProtocolTypeRouter({
     "http": django_asgi_app,
