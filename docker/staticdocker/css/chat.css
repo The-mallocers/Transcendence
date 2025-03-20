@@ -1,0 +1,73 @@
+.chatContainer {
+    height: calc(100vh - 70px);
+
+}
+
+.friends {
+    border-right:#2e313d solid 1px ;
+}
+
+.friend {
+    /* background-color: ; */
+
+    padding: 1rem 2rem;
+    color: aliceblue;
+
+    background-color: #181a22;
+    border-bottom:#2e313d solid 1px ;
+
+    transition: background-color .2s;
+}
+
+
+
+.friend:hover{
+    background-color: #242832;
+
+} 
+
+.friend img{
+    height: 60px;
+    width: 60px;
+
+    object-fit: cover;
+
+    border-radius: 50%;
+}
+
+.friend .nickname {
+    margin-left: 2rem;
+}
+
+
+.chatBox{
+
+}
+
+.chatBox input{
+    width: 100%;
+}
+
+
+.chatBox .msg {
+    padding: .5rem 1rem;
+    border-radius: 5px;
+}
+
+.chatHistory {
+    padding: 2rem;
+}
+
+.chatBox .me {
+    color: #141517;
+    background-color: aliceblue;
+
+    /* margin-right: 2rem; */
+}
+
+.chatBox .you {
+    color:aliceblue ;
+    background-color: #292c33;
+    /* margin-left: 2rem; */
+}
+

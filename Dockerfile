@@ -1,38 +1,34 @@
-FROM python:3.11-slim-bullseye
+# pull official base image
+FROM python:3.11.4-slim-buster
 
-# Set environment variables
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
-ENV PIP_NO_CACHE_DIR 1
-
-# Set work directory
+# set work directory
+RUN mkdir /app
 WORKDIR /app
 
-# Install system dependencies
+# Install system dependencies including SQLite and PostgreSQL client
 RUN apt-get update && apt-get install -y \
-    postgresql-client \
     build-essential \
+    sqlite3 \
+    libsqlite3-dev \
+    libpq-dev \
+    gcc \
+	netcat \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy and install requirements
-COPY requirements /app/requirements
-RUN pip install -r requirements/production.txt
+# install dependencies
+RUN pip install --upgrade pip
+COPY ./requirements.txt .
+RUN pip install --no-cache-dir -r ./requirements.txt
+# RUN pip install djangorestframework
+# RUN pip install django-extensions
+RUN pip install psycopg2 gunicorn
 
-# Copy project files
+# copy project
 COPY . .
 
-# Set up entrypoint
-COPY scripts/entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 
-# Create static and media directories
-RUN mkdir -p /app/staticfiles /app/media
+RUN chmod +x /app/entrypoint.prod.sh
 
-# Collect static files
-RUN python manage.py collectstatic --noinput
-
-# Expose port
-EXPOSE 8000
-
-# Use entrypoint
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT [ "/app/entrypoint.prod.sh" ]

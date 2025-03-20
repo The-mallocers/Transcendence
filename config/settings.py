@@ -30,7 +30,7 @@ JWT_ALGORITH = 'HS256'
 
 #Middlware protected paths
 PROTECTED_PATHS = [
-    '/*'
+    # '/*'
 ]
 EXCLUDED_PATHS = [
     '/api/auth/login',
@@ -38,6 +38,7 @@ EXCLUDED_PATHS = [
     '/pages/auth/login',
     '/auth/login',
     '/auth/register',
+    '/auth/grafana'
     '/pages/auth/register',
     '/',
     '/pages/',
@@ -57,6 +58,8 @@ ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
 ]
+
+CSRF_TRUSTED_ORIGINS = os.getenv("DJANGO_CSRF_TRUSTED_ORIGINS","https://127.0.0.1").split(",")
 
 # Application definition
 # had to add django.contrib.auth, not sure why
@@ -165,15 +168,32 @@ ASGI_APPLICATION = 'config.asgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'transcendence.sqlite3',
+#         'TEST': {
+#             'NAME': BASE_DIR / 'test_db.sqlite3',
+#         },
+#     }
+# }
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'transcendence.sqlite3',
-        'TEST': {
-            'NAME': BASE_DIR / 'test_db.sqlite3',
-        },
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': os.environ.get('DATABASE_NAME'),
+        'USER': os.environ.get('DATABASE_USERNAME'),
+        'PASSWORD': os.environ.get('DATABASE_PASSWORD'),
+        'HOST': os.environ.get('DATABASE_HOST'),  # Match your service name in docker-compose
+        'PORT': os.environ.get('DATABASE_PORT'),
     }
 }
+
+ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL')
+ADMIN_PWD = os.environ.get('ADMIN_PWD')
+ADMIN_USERNAME = os.environ.get('ADMIN_USERNAME')
+
+GRFANA_ADMIN_PWD = os.environ.get('GRAFANA_PASSWORD')
 
 if 'test' in sys.argv:
     DATABASES['default']['NAME'] = BASE_DIR / 'test_db.sqlite3'

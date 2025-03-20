@@ -7,6 +7,11 @@ class Rights(models.Model):
     #Secondary key
     is_admin = models.BooleanField(default=False, null=False, editable=True)
 
+    # Grafana
+    grafana_token = models.CharField(max_length=100, null=True, blank=True)
+    grafana_id = models.IntegerField(default=0)
+    grafana_dashboard = models.URLField(max_length=255, null=True, blank=True)
+
     class Meta:
         db_table = 'client_rights'
 

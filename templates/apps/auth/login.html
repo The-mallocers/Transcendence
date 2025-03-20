@@ -1,5 +1,39 @@
 {% load static %}
 
+<head>
+    {% comment %} <style>
+        .display-dashboard {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        .dashboard-container {
+            width: 49%; /* Slightly less than 50% to account for spacing */
+            max-width: 49%;
+        }
+
+        .dashboard-iframe {
+            width: 100%;
+            height: 800px;
+            border: none;
+            margin-bottom: 50px;
+        }
+
+        @media (max-width: 1024px) {
+            .display-dashboard {
+                flex-direction: column;
+            }
+
+            .dashboard-container {
+                width: 100%;
+                max-width: 100%;
+                margin-bottom: 50px;
+            }
+        }
+    </style> {% endcomment %}
+</head>
+
 
 <style>
     .loginPage {
