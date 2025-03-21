@@ -56,16 +56,19 @@ jobs:
       - name: Start application using Makefile
         run: make up &> output.log &
 
-      - name: Wait for application to start
-        run: |
-          sleep 20  # Give services time to start
-          cat output.log
-
       - name: Verify startup messages
         run: |
-          if grep -q "Application startup complete" output.log && grep -q "Established new database connection" output.log; then
-            echo "✅ Application and database started successfully"
-          else
-            echo "❌ Startup check failed"
-            exit 1
-          fi
+          echo "Waiting for application to start..."
+          timeout=240  # Set a max wait time of 60 seconds
+          elapsed=0
+          while ! (grep -q "Application startup complete" output.log && grep -q "Established new database connection" output.log); do
+            sleep 2
+            elapsed=$((elapsed + 2))
+            echo "Waiting... ($elapsed seconds elapsed)"
+            if [ "$elapsed" -ge "$timeout" ]; then
+              echo "❌ Timeout reached. Application failed to start."
+              cat output.log  # Show logs for debugging
+              exit 1
+            fi
+          done
+          echo "✅ Application and database started successfully!"
