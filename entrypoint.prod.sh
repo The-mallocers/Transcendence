@@ -16,7 +16,8 @@ python manage.py migrate --noinput
 exec gunicorn config.asgi:application \
     --bind 0.0.0.0:8000 \
     --workers 3 \
-    --worker-class uvicorn.workers.UvicornWorker
+    --worker-class uvicorn.workers.UvicornWorker \
+    --reload
 # python -m gunicorn \
 #     --bind 0.0.0.0:8000 \
 #     --workers 3 \
