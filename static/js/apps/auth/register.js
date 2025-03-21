@@ -1,5 +1,7 @@
 import { navigateTo } from '../../spa/spa.js';
 
+
+
 function register (event) {
     console.log("I am register.js")
     event.preventDefault();
