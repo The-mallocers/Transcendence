@@ -58,7 +58,7 @@ jobs:
 
       - name: Wait for application to start
         run: |
-          sleep 10  # Give services time to start
+          sleep 20  # Give services time to start
           cat output.log
 
       - name: Verify startup messages
