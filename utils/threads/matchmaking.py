@@ -4,12 +4,12 @@ import traceback
 from django.conf import settings
 from redis import Redis
 
-from apps.game.game import GameThread
 from apps.game.manager import GameManager
 from apps.player.manager import PlayerManager
 from utils.pong.enums import GameStatus, ResponseError
 from utils.pong.objects import PADDLE_WIDTH, OFFSET_PADDLE, CANVAS_WIDTH
 from utils.threads import Threads
+from utils.threads.game import GameThread
 from utils.websockets.channel_send import send_group_error
 
 

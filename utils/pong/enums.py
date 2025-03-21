@@ -12,6 +12,16 @@ class GameStatus(str, Enum):
     ERROR: str = 'error'
 
 
+class TournamentStatus(str, Enum):
+    CREATING: str = 'creating'
+    MATCHMAKING: str = 'matchmaking'
+    STARTING: str = 'starting'
+    RUNNING: str = 'running'
+    ENDING: str = 'ending'
+    DESTROYING: str = 'destroying'
+    FINISHED: str = 'finished'
+    ERROR: str = 'error'
+
 status_order = list(GameStatus)
 
 class EventType(str, Enum):

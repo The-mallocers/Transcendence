@@ -88,6 +88,7 @@ INSTALLED_APPS = [
     'apps.pages.apps.PagesConfig',
     'apps.error.apps.ErrorConfig',
     'apps.chat.apps.ChatConfig',
+    'apps.tournaments.apps.TournamentsConfig'
 ]
 
 MIDDLEWARE = [

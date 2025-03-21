@@ -71,6 +71,6 @@ class GameFinishSerializer(serializers.ModelSerializer):
         fields = ['winner', 'loser', 'pL_score', 'pR_score']
 
     def get_winner(self, obj):
-        from apps.game.game import GameManager
+        from utils.threads.game import GameManager
         game = GameManager.get_game_db(self.context.get('id'))
 
