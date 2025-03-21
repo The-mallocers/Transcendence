@@ -1,4 +1,5 @@
 import atexit
+import os
 import sys
 import types
 
@@ -20,7 +21,6 @@ class GameConfig(AppConfig):
         from apps.game.matchmaking import MatchmakingThread
         self.thread = MatchmakingThread("MatchmakingThread")
         self.thread.start()
-
         atexit.register(self.stop_thread)
 
     def stop_thread(self):
@@ -29,4 +29,6 @@ class GameConfig(AppConfig):
             self.thread.join()
 
     def is_running_server(self):
-        return any(arg in sys.argv for arg in ('runserver', 'daphne', 'uvicorn', 'gunicorn'))
+        base_names = [os.path.basename(arg) for arg in sys.argv]
+        return any(arg in base_names for arg in
+                   ('runserver', 'daphne', 'uvicorn', 'gunicorn'))

@@ -26,8 +26,8 @@ class GameService(BaseServices):
                                                  self.redis)
             self.game_manager.pR = PlayerManager(await self.game_manager.rget_pR_id(), self.game_manager.get_id(),
                                                  self.redis)
-            self.game_manager.pL.paddle.update()
-            self.game_manager.pR.paddle.update()
+            await self.game_manager.pL.paddle.update()
+            await self.game_manager.pR.paddle.update()
         else:
             client = await Clients.get_client_by_player_id_async(player.id)
             await send_group_error(client.id, ResponseError.NO_GAME)
