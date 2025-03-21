@@ -59,7 +59,7 @@ jobs:
       - name: Verify startup messages
         run: |
           echo "Waiting for application to start..."
-          timeout=2400  # Set a max wait time of 60 seconds
+          timeout=2400  # Set a max wait time
           elapsed=0
           while ! (grep -q "Application startup complete" output.log && grep -q "Established new database connection" output.log); do
             sleep 2
