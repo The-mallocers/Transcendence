@@ -1,4 +1,3 @@
-
 {% load static %}
 <style>
     .gameoverPage {
@@ -66,7 +65,7 @@
     .endState > span:nth-child(9) { animation-delay: calc(0.1s * 9); }
     .endState > span:nth-child(10) { animation-delay: calc(0.1s * 10);}
 
-    .gameoverPage .wordEnd{
+    .gameoverPage .wordEnd:not(:last-child){
         margin-right: 2rem;
     }
 
@@ -177,3 +176,17 @@
     </div>
 
 </div>
+
+
+<script>
+    let msg = document.querySelector(".endState");
+    let words = msg.innerHTML.trim().split(" ");
+    let newContent = words.map(word => 
+        word.split("").map((letter, letterIndex, arr) => 
+            `<span class="${letterIndex === arr.length - 1 ? "wordEnd" : ""}">${letter}</span>`
+        ).join("")
+    ).join(" ");    
+
+    msg.innerHTML = newContent;
+    console.log(newContent)
+</script>
