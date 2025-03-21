@@ -11,5 +11,4 @@ function endStateThingy(event) {
         console.log(newContent)
 }
 
-
 endStateThingy();
