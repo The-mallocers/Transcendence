@@ -132,7 +132,7 @@ REST_FRAMEWORK = {
 
 # REDIS_HOST = 'localhost'
 REDIS_HOST = 'redis'
-REDIS_PORT = 6379
+REDIS_PORT = 6380
 
 REDIS_CONNECTIONS = {
     'default': {

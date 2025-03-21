@@ -1,0 +1,82 @@
+{
+    "id": 5,
+    "type": "stat",
+    "title": "Version",
+    "gridPos": {
+      "x": 0,
+      "y": 0,
+      "h": 4,
+      "w": 3
+    },
+    "fieldConfig": {
+      "defaults": {
+        "mappings": [
+          {
+            "type": "value",
+            "options": {
+              "null": {
+                "text": "N/A",
+                "index": 0
+              }
+            }
+          }
+        ],
+        "thresholds": {
+          "mode": "absolute",
+          "steps": [
+            {
+              "value": null,
+              "color": "green"
+            },
+            {
+              "value": 80,
+              "color": "red"
+            }
+          ]
+        },
+        "color": {
+          "mode": "thresholds"
+        },
+        "unit": "none",
+        "fieldMinMax": false
+      },
+      "overrides": []
+    },
+    "pluginVersion": "11.5.1",
+    "targets": [
+      {
+        "refId": "A",
+        "editorMode": "code",
+        "expr": "pg_static{instance=\"postgresql-exporter:9187\"}",
+        "legendFormat": "{{short_version}}",
+        "range": false,
+        "useBackend": false,
+        "disableTextWrap": false,
+        "fullMetaSearch": false,
+        "includeNullMetadata": true,
+        "instant": true,
+        "exemplar": false
+      }
+    ],
+    "datasource": {
+      "uid": "PBFA97CFB590B2093",
+      "type": "prometheus"
+    },
+    "options": {
+      "reduceOptions": {
+        "values": false,
+        "calcs": [
+          "mean"
+        ],
+        "fields": ""
+      },
+      "orientation": "auto",
+      "textMode": "auto",
+      "wideLayout": true,
+      "colorMode": "value",
+      "graphMode": "none",
+      "justifyMode": "auto",
+      "showPercentChange": false,
+      "percentChangeColorMode": "standard"
+    }
+  }
