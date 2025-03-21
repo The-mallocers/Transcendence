@@ -18,39 +18,39 @@ jobs:
         run: |
           cat <<EOF > .env
           ENVIRONMENT='DEVELOPMENT'
-
+          
           # Django settings
-          DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}
-          DJANGO_DEBUG=${{ secrets.DJANGO_DEBUG }}
-          DJANGO_ALLOWED_HOST=${{ secrets.DJANGO_ALLOWED_HOST }}
-          DJANGO_CSRF_TRUSTED_ORIGINS=${{ secrets.DJANGO_CSRF_TRUSTED_ORIGINS }}
-
+          DJANGO_SECRET_KEY="${{ secrets.DJANGO_SECRET_KEY }}"
+          DJANGO_DEBUG="${{ secrets.DJANGO_DEBUG }}"
+          DJANGO_ALLOWED_HOST="${{ secrets.DJANGO_ALLOWED_HOST }}"
+          DJANGO_CSRF_TRUSTED_ORIGINS="${{ secrets.DJANGO_CSRF_TRUSTED_ORIGINS }}"
+          
           # JWT Settings
-          JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}
-          JWT_EXP_ACCESS_TOKEN=${{ secrets.JWT_EXP_ACCESS_TOKEN }}
-          JWT_EXP_REFRSH_TOKEN=${{ secrets.JWT_EXP_REFRSH_TOKEN }}
-          SECRET_FA_KEY=${{ secrets.SECRET_FA_KEY }}
-
+          JWT_SECRET_KEY="${{ secrets.JWT_SECRET_KEY }}"
+          JWT_EXP_ACCESS_TOKEN="${{ secrets.JWT_EXP_ACCESS_TOKEN }}"
+          JWT_EXP_REFRSH_TOKEN="${{ secrets.JWT_EXP_REFRSH_TOKEN }}"
+          SECRET_FA_KEY="${{ secrets.SECRET_FA_KEY }}"
+          
           # Profile model settings
-          USERNAME_LENGHT=${{ secrets.USERNAME_LENGHT }}
-          FIRSTNAME_LENGHT=${{ secrets.FIRSTNAME_LENGHT }}
-          LASTNAME_LENGHT=${{ secrets.LASTNAME_LENGHT }}
-
+          USERNAME_LENGHT="${{ secrets.USERNAME_LENGHT }}"
+          FIRSTNAME_LENGHT="${{ secrets.FIRSTNAME_LENGHT }}"
+          LASTNAME_LENGHT="${{ secrets.LASTNAME_LENGHT }}"
+          
           # Database settings
-          DATABASE_ENGINE=${{ secrets.DATABASE_ENGINE }}
-          DATABASE_NAME=${{ secrets.DATABASE_NAME }}
-          DATABASE_USERNAME=${{ secrets.DATABASE_USERNAME }}
-          DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}
-          DATABASE_HOST=${{ secrets.DATABASE_HOST }}
-          DATABASE_PORT=${{ secrets.DATABASE_PORT }}
-
+          DATABASE_ENGINE="${{ secrets.DATABASE_ENGINE }}"
+          DATABASE_NAME="${{ secrets.DATABASE_NAME }}"
+          DATABASE_USERNAME="${{ secrets.DATABASE_USERNAME }}"
+          DATABASE_PASSWORD="${{ secrets.DATABASE_PASSWORD }}"
+          DATABASE_HOST="${{ secrets.DATABASE_HOST }}"
+          DATABASE_PORT="${{ secrets.DATABASE_PORT }}"
+          
           # Admin
-          ADMIN_EMAIL=${{ secrets.ADMIN_EMAIL }}
-          ADMIN_PWD=${{ secrets.ADMIN_PWD }}
-          ADMIN_USERNAME=${{ secrets.ADMIN_USERNAME }}
-
+          ADMIN_EMAIL="${{ secrets.ADMIN_EMAIL }}"
+          ADMIN_PWD="${{ secrets.ADMIN_PWD }}"
+          ADMIN_USERNAME="${{ secrets.ADMIN_USERNAME }}"
+          
           # Grafana
-          GRAFANA_PASSWORD=${{ secrets.GRAFANA_PASSWORD }}
+          GRAFANA_PASSWORD="${{ secrets.GRAFANA_PASSWORD }}"
           EOF
 
       - name: Start application using Makefile
