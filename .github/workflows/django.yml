@@ -11,56 +11,22 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Extraire la version Python du Pipfile
-        id: python_version
+      - name: Start application using Makefile
+        run: make up &> output.log &
+
+      - name: Wait for application to start
         run: |
-          python_version=$(grep "python_version" Pipfile | sed -E 's/python_version[[:space:]]+=[[:space:]]+"([^"]+)"/\1/')
-          echo "python_version=$python_version" >> $GITHUB_ENV
+          sleep 15  # Give some time for services to start
+          cat output.log
 
-      - name: Set up Python
-        uses: actions/setup-python@v3
-        with:
-          python-version: ${{ env.python_version }}
-
-      # Ajouter du cache pour pipenv et les dépendances Python
-      - name: Cache des dépendances Python
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-python-${{ env.python_version }}-pipenv-${{ hashFiles('Pipfile.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-python-${{ env.python_version }}-pipenv-
-
-      # Installer pipenv
-      - name: Installer pipenv
+      - name: Verify startup messages
         run: |
-          python -m pip install --upgrade pip
-          pip install pipenv
-
-      # Utiliser le cache pipenv pour accélérer l'installation
-      - name: Cache de l'environnement virtuel pipenv
-        uses: actions/cache@v3
-        with:
-          path: .venv
-          key: ${{ runner.os }}-python-${{ env.python_version }}-pipenv-venv-${{ hashFiles('Pipfile.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-python-${{ env.python_version }}-pipenv-venv-
-
-      # Installer les dépendances avec pipenv
-      - name: Installer les dépendances avec Pipenv
-        run: |
-          pipenv sync --dev
-          echo "Contents of Pipfile:"
-          cat Pipfile
-
-      - name: Installer les migrations
-        run: |
-          pipenv run python manage.py makemigrations
-          pipenv run python manage.py migrate
-
-      # Lancer les tests
-      - name: Lancer les tests
-        run: |
-          pipenv run python manage.py test
+          if grep -q "Application startup complete" output.log && grep -q "Established new database connection" output.log; then
+            echo "✅ Application and database started successfully"
+          else
+            echo "❌ Startup check failed"
+            exit 1
+          fi
