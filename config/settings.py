@@ -131,8 +131,8 @@ REST_FRAMEWORK = {
 # ─────────────────────────────────────── Redis ──────────────────────────────────────── #
 
 # REDIS_HOST = 'localhost'
-REDIS_HOST = 'redis'
-REDIS_PORT = 6380
+REDIS_HOST = ENV('REDIS_HOST', default='redis')
+REDIS_PORT = ENV('REDIS_POST', default='6380')
 
 REDIS_CONNECTIONS = {
     'default': {
@@ -169,16 +169,6 @@ ASGI_APPLICATION = 'config.asgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
-
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'transcendence.sqlite3',
-#         'TEST': {
-#             'NAME': BASE_DIR / 'test_db.sqlite3',
-#         },
-#     }
-# }
 
 DATABASES = {
     'default': {
