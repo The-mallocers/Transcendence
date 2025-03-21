@@ -1,16 +1,13 @@
 import json
 import uuid
+
 from channels.layers import get_channel_layer
 
 from apps.chat.models import Messages, Rooms
 from apps.shared.models import Clients
-from utils.pong.enums import EventType, ResponseAction, ResponseError  
-from utils.websockets.services.services import BaseServices, ServiceError  
-from utils.websockets.channel_send import send_group, send_group_error  
-
-from asgiref.sync import sync_to_async
-from apps.chat.models import Messages, Rooms
-from apps.auth.api.views import logger
+from utils.pong.enums import EventType, ResponseAction, ResponseError
+from utils.websockets.channel_send import send_group, send_group_error
+from utils.websockets.services.services import BaseServices, ServiceError
 
 uuid_global_room = uuid.UUID('00000000-0000-0000-0000-000000000000')
 

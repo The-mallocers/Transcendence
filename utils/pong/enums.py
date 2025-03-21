@@ -1,6 +1,5 @@
 from enum import Enum
 
-
 class GameStatus(str, Enum):
     CREATING: str = 'creating'
     MATCHMAKING: str = 'matchmaking'
@@ -12,6 +11,8 @@ class GameStatus(str, Enum):
     ERROR: str = 'error'
 
 
+status_order = list(GameStatus)
+
 class TournamentStatus(str, Enum):
     CREATING: str = 'creating'
     MATCHMAKING: str = 'matchmaking'
@@ -22,16 +23,13 @@ class TournamentStatus(str, Enum):
     FINISHED: str = 'finished'
     ERROR: str = 'error'
 
-status_order = list(GameStatus)
-
 class EventType(str, Enum):
     MATCHMAKING: str = 'matchmaking'
     GAME: str = 'game'
+    TOURNAMENT: str = 'tournament'
     UPDATE: str = 'update'
     ERROR: str = 'error'
     CHAT: str = 'chat'
-    # ENDGAME: str = 'endgame'
-
 
 # All the actions the client sends to the server
 class RequestAction(str, Enum):
@@ -48,10 +46,17 @@ class RequestAction(str, Enum):
     PADDLE_MOVE: str = 'paddle_move'
 
     # ── Chat Actions ──────────────────────────────────────────────────────────────────
-    CREATE_ROOM = "create_room"
-    SEND_MESSAGE = "send_message"
-    GET_HISTORY = "get_history"
-    GET_ALL_ROOM_BY_CLIENT ="get_all_room_by_client"
+    CREATE_ROOM: str = "create_room"
+    SEND_MESSAGE: str = "send_message"
+    GET_HISTORY: str = "get_history"
+    GET_ALL_ROOM_BY_CLIENT: str = "get_all_room_by_client"
+
+    # ── Tournament ────────────────────────────────────────────────────────────────────
+    CREATE_TOURNAMENT: str = 'create_tournament'
+    JOIN_TOURNAMENT: str = 'join_tournament'
+    LEAVE_TOURNAMENT: str = 'leave_tournament'
+    START_TOURNAMENT: str = 'start_tournement'
+    LIST_TOURNAMENT: str = 'list_tournament'
 
 
 # All the responses the server sends to the client

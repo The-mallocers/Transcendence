@@ -13,7 +13,7 @@ from utils.pong.enums import GameStatus, EventType, ResponseAction, \
 from utils.pong.objects.ball import Ball
 from utils.pong.objects.paddle import Paddle
 from utils.pong.objects.score import Score
-from utils.threads import Threads
+from utils.threads.threads import Threads
 from utils.websockets.channel_send import send_group, send_group_error
 
 
