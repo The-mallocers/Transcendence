@@ -110,7 +110,7 @@ class GameThread(Threads):
         print("ca marche les bebous trop bien")
         await self.game_manager.rset_status(GameStatus.FINISHED)
         await self.redis.hdel('player_game', self.game_manager.pL.id, self.game_manager.pR.id)
-        await asyncio.sleep(1)
+        await asyncio.sleep(3)
         #Sending the return message before stopping, maybe bad maybe good idk
         # await send_group(self.game_id, EventType.ENDGAME, ResponseAction.ENDGAME, {
         #         # 'left': pL_data,

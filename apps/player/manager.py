@@ -73,7 +73,6 @@ class PlayerManager:
             await channel_layer.group_add(str(game_manager.get_id()), channel_name.decode('utf-8'))
 
             await send_group(self.player.id, EventType.GAME, ResponseAction.JOIN_GAME)
-            await self.leave_mm()
 
         except Exception as e:
             await send_group_error(self.player.id, ResponseError.JOINING_ERROR)
