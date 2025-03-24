@@ -25,15 +25,12 @@ class MatchmakingThread(Threads):
 
                 if matched:
                     await game_manager.create_game()
-                    print("CREATING GAME GAME MANAGER")
                     self._logger.info(f"Found match: {game_manager.pL} vs {game_manager.pR}")
                     await game_manager.rset_status(GameStatus.MATCHMAKING)
 
                     await game_manager.pL.join_game(game_manager)
-                    await game_manager.pR.join_game(game_manager)
-                    await game_manager.pL.leave_mm()
-                    await game_manager.pR.leave_mm()
                     await game_manager.pL.paddle.set_x(0 + OFFSET_PADDLE)
+                    await game_manager.pR.join_game(game_manager)
                     await game_manager.pR.paddle.set_x(CANVAS_WIDTH - OFFSET_PADDLE - PADDLE_WIDTH)
                     await game_manager.rset_status(GameStatus.STARTING)
                     await self.redis.hset(name="player_game", key=str(game_manager.pL.id),
@@ -41,11 +38,9 @@ class MatchmakingThread(Threads):
                     await self.redis.hset(name="player_game", key=str(game_manager.pR.id),
                                           value=str(game_manager.get_id()))
                     GameThread(manager=game_manager).start()
-                    print("CREATING GAME THREAD")
                     game_manager = None
-                    matched = False
 
-                await asyncio.sleep(5) #Very important sleep !
+                await asyncio.sleep(5)
 
             except Exception as e:
                 self._logger.error(str(e))
