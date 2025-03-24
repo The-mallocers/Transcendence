@@ -28,3 +28,15 @@ def get(request):
     return JsonResponse({
         'html': html_content,
     })
+
+
+def monitoring(request):
+    client = Clients.get_client_by_request(request)
+    if client is not None:
+        context = {
+            "client": client
+        }
+    html_content = render_to_string("apps/admin/monitoring.html", context)
+    return JsonResponse({
+        'html': html_content,
+    })
