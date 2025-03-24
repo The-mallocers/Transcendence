@@ -59,9 +59,10 @@ class Router {
         });
     }
 
-    navigate(path) {
+    navigate(path) { 
         
-        let splitedPath = path.split("/")
+        
+        let splitedPath = path.split("/") 
         console.log(splitedPath)
         if( splitedPath.includes("pong")) {
             WebSocketManager.closeChatSocket()
@@ -69,7 +70,8 @@ class Router {
         else {
             WebSocketManager.closeAllSockets(); //for now we close all
         }
-
+        
+        if ( path ==  window.location.pathname) {return ;} //on veut rien faire si on spam le meme bouton
         //In the future, we will have to do some better logics with the path to decide if we want to close
         //a websocket or not.
         

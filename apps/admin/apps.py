@@ -21,7 +21,7 @@ class AdminConfig(AppConfig):
             if sender.name == self.name:
                 if Clients.get_client_by_email(settings.ADMIN_EMAIL) is None:
                     with transaction.atomic():
-                        print(settings.ADMIN_PWD, settings.ADMIN_USERNAME, settings.ADMIN_EMAIL)
+                        print(f'Admin password: {settings.ADMIN_PWD}, Admin username: {settings.ADMIN_USERNAME}, Admin email: {settings.ADMIN_EMAIL}')
                         profile = Profile.objects.create(email=settings.ADMIN_EMAIL, username=settings.ADMIN_USERNAME)
                         password = Password.objects.create(password=settings.ADMIN_PWD)
                         stats = PlayerStats.objects.create()

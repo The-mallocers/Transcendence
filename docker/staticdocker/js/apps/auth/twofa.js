@@ -1,5 +1,7 @@
 import { navigateTo } from '../../spa/spa.js';
 
+console.log("twoja loaded")
+
 const email = document.getElementById("data-email").getAttribute("email");
 
 async function validateCode() {

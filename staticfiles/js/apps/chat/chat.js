@@ -3,7 +3,7 @@ import { WebSocketManager } from "../../websockets/websockets.js"
 
 
 const element  = document.querySelector("#clientID");
-const clientId = element.dataset.clientId
+// const clientId = element.dataset.clientId
 
 // console.log(clientId)
 
@@ -14,7 +14,7 @@ const clientId = await getClientId();
 //     return ;
 // }
 console.log("Got client ID :", clientId);
-const chatSocket = new WebSocket('ws://' + window.location.host + '/ws/chat/?id=' + clientId);
+const chatSocket = new WebSocket('wss://' + window.location.host + '/ws/chat/?id=' + clientId);
 
 chatSocket.onopen = function () {
     console.log("WebSocket is open now.");

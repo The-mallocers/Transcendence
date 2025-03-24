@@ -6,15 +6,29 @@ let client_id = null;
 let room_id = null; 
 
 const clientId = await getClientId();
-// if (clientId == null) {
-//     return ;
-// }
 console.log("Got client ID :", clientId);
-const chatSocket = new WebSocket('ws://' + window.location.host + '/ws/chat/?id=' + clientId);
+const chatSocket = new WebSocket('wss://' + window.location.host + '/ws/chat/?id=' + clientId);
 
-chatSocket.onopen = function () {
-    console.log("WebSocket is open now.");
+// chatSocket.onopen = function () {
+//     console.log("WebSocket is open now.");
     
+//     const message = {
+//         "event": "chat",
+//         "data": {
+//             "action": "get_all_room_by_client",
+//             "args": {}
+//         }
+//     };
+//     chatSocket.send(JSON.stringify(message));
+// };
+
+//Tu troll !!! NON JE DIS que je suis dans le callllll 
+//jarrive apres ca | ok
+
+
+chatSocket.addEventListener("open", (event) => {
+    console.log("WebSocket is open now.");
+        
     const message = {
         "event": "chat",
         "data": {
@@ -22,9 +36,8 @@ chatSocket.onopen = function () {
             "args": {}
         }
     };
-    
     chatSocket.send(JSON.stringify(message));
-};
+});
 
 chatSocket.onmessage = (event) => {
     const message = JSON.parse(event.data);
