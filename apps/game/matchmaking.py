@@ -25,6 +25,7 @@ class MatchmakingThread(Threads):
 
                 if matched:
                     await game_manager.create_game()
+                    print("CREATING GAME")
                     self._logger.info(f"Found match: {game_manager.pL} vs {game_manager.pR}")
                     await game_manager.rset_status(GameStatus.MATCHMAKING)
 

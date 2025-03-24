@@ -107,6 +107,7 @@ class GameThread(Threads):
             await self._stopping()
 
     async def _stopping(self):
+        print("ca marche les bebous trop bien")
         await self.game_manager.rset_status(GameStatus.FINISHED)
         await self.redis.hdel('player_game', self.game_manager.pL.id, self.game_manager.pR.id)
         await asyncio.sleep(1)
