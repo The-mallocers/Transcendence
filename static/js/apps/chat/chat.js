@@ -9,22 +9,6 @@ const clientId = await getClientId();
 console.log("Got client ID :", clientId);
 const chatSocket = new WebSocket('wss://' + window.location.host + '/ws/chat/?id=' + clientId);
 
-// chatSocket.onopen = function () {
-//     console.log("WebSocket is open now.");
-    
-//     const message = {
-//         "event": "chat",
-//         "data": {
-//             "action": "get_all_room_by_client",
-//             "args": {}
-//         }
-//     };
-//     chatSocket.send(JSON.stringify(message));
-// };
-
-//Tu troll !!! NON JE DIS que je suis dans le callllll 
-//jarrive apres ca | ok
-
 
 chatSocket.addEventListener("open", (event) => {
     console.log("WebSocket is open now.");
@@ -41,6 +25,7 @@ chatSocket.addEventListener("open", (event) => {
 
 chatSocket.onmessage = (event) => {
     const message = JSON.parse(event.data);
+    console.log("message send");
 
     if(message.data.action == "HISTORY_RECEIVED") {
         displayHistory(message.data.content.messages);
@@ -57,6 +42,7 @@ chatSocket.onmessage = (event) => {
         const msgElement = doc.body.firstChild; // Get the actual <div> element
     
         chatHistory.appendChild(msgElement);
+        scrollToBottom(chatHistory);
         //Do things to show the new message on the front
     }
 }
@@ -124,6 +110,7 @@ async function getClientId() {
     }
 }
 
+
 async function displayHistory(message){
     console.log("Displaying history");
     let chatHistory = document.querySelector('.chatHistory');
@@ -142,16 +129,28 @@ async function displayRooms(rooms){
     console.log("Displaying rooms");
     let chatRooms = document.querySelector('.chatRooms');
     chatRooms.innerHTML = "";
+    
     for (let i = 0; i < rooms.length; i++) {
-        let htmlString;
+        let roomName = rooms[i].player.length > 1 ? "Chat Global" : rooms[i].player[0];
+        let isActive = room_id === rooms[i].room ? "active" : "";
+        
+        const htmlString = `
+            <button class="roomroom ${isActive}" id="${rooms[i].room}">
+                <span class="room-name">${roomName}</span>
+                ${rooms[i].unread_count > 0 ? `<span class="unread-badge">${rooms[i].unread_count}</span>` : ''}
+            </button>
+        `;
+        
         const parser = new DOMParser();
-        if(rooms[i].player.length > 1)
-            htmlString = `<button class="roomroom" id="${rooms[i].room}">chat global</button>`;
-        else
-            htmlString = `<button class="roomroom" id="${rooms[i].room}">${rooms[i].player[0]}</button>`;
         const doc = parser.parseFromString(htmlString, "text/html");
-        const roomElement = doc.body.firstChild; // Get the actual <div> element
+        const roomElement = doc.body.firstChild;
 
         chatRooms.appendChild(roomElement);
     }
+    
+    scrollToBottom(chatRooms);
+}
+
+async function scrollToBottom(element) {
+    element.scrollTop = element.scrollHeight;
 }

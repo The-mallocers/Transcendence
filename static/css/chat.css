@@ -1,4 +1,4 @@
-/* Main container */
+/* Main container (inchangé) */
 .chatContainer {
     height: calc(100vh - 70px);
     width: 100%;
@@ -40,7 +40,7 @@
     margin-left: 2rem;
 }
 
-/* Chat section */
+/* Chat section - Modifications principales */
 .chatBox {
     width: 66.66%;
     height: 100%;
@@ -49,7 +49,6 @@
     flex-direction: column;
 }
 
-/* This is the critical part */
 .chatHistory {
     position: absolute;
     top: 0;
@@ -57,32 +56,40 @@
     right: 0;
     bottom: 60px;
     padding: 2rem;
-    overflow-y: scroll;
-    
-    scrollbar-width: thin; 
-    -ms-overflow-style: -ms-autohiding-scrollbar; 
+    overflow-y: auto;
+    scrollbar-width: thin;
+    -ms-overflow-style: -ms-autohiding-scrollbar;
+    display: flex;
+    flex-direction: column;
+    gap: 10px; /* Espacement entre les messages */
 }
 
+/* Styles des messages - Modifications clés */
 .chatBox .msg {
-    padding: .5rem 1rem;
-    border-radius: 5px;
-    margin-bottom: 10px;
+    padding: 0.8rem 1.2rem;
+    border-radius: 12px;
     word-wrap: break-word;
-    max-width: 60%;
+    white-space: pre-wrap; /* Respecte les sauts de ligne */
+    overflow-wrap: break-word; /* Empêche le débordement */
+    max-width: 75%; /* Largeur maximale pour éviter un étirement excessif */
+    width: fit-content; /* S'adapte au contenu */
 }
 
 .chatBox .me {
     color: #141517;
     background-color: aliceblue;
-    margin-left: auto;
+    margin-left: auto; /* Alignement à droite */
+    border-bottom-right-radius: 4px; /* Style arrondi asymétrique */
 }
 
 .chatBox .you {
     color: aliceblue;
     background-color: #292c33;
-    margin-right: auto;
+    margin-right: auto; /* Alignement à gauche */
+    border-bottom-left-radius: 4px; /* Style arrondi asymétrique */
 }
 
+/* Champ de saisie (inchangé) */
 .chatBox input {
     position: absolute;
     bottom: 0;
@@ -96,6 +103,7 @@
     color: aliceblue;
 }
 
+/* Classes utilitaires (inchangées) */
 .col-4 {
     width: 33.33%;
     padding: 0;
@@ -104,4 +112,71 @@
 .col-8 {
     width: 66.66%;
     padding: 0;
+}
+
+/* Styles for room buttons */
+.chatRooms {
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.roomroom {
+    position: relative;
+    padding: 12px 15px;
+    background-color: #242832;
+    color: aliceblue;
+    border: none;
+    border-radius: 8px;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.roomroom:hover {
+    background-color: #2e313d;
+    transform: translateY(-2px);
+}
+
+.roomroom.active {
+    background-color: #3a3f4b;
+    font-weight: bold;
+}
+
+.roomroom .room-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.unread-badge {
+    background-color: #4CAF50;
+    color: white;
+    border-radius: 50%;
+    padding: 2px 6px;
+    font-size: 12px;
+    margin-left: 8px;
+}
+
+/* Scrollbar styling */
+.chatRooms::-webkit-scrollbar {
+    width: 6px;
+}
+
+.chatRooms::-webkit-scrollbar-track {
+    background: #181a22;
+}
+
+.chatRooms::-webkit-scrollbar-thumb {
+    background: #3a3f4b;
+    border-radius: 3px;
+}
+
+.chatRooms::-webkit-scrollbar-thumb:hover {
+    background: #4e5464;
 }
