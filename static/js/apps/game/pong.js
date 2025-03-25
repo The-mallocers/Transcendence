@@ -1,5 +1,6 @@
 import { WebSocketManager } from "../../websockets/websockets.js";
 import { navigateTo } from '../../spa/spa.js';
+import { isGameOver } from "./VarGame.js"
 
 const socket = WebSocketManager.gameSocket;
 let canvas = document.getElementById("pongCanvas");
@@ -16,7 +17,7 @@ const ballSize = 10;
 const paddleThickness = 10;
 let paddleHeight = 100;
 
-let game_is_over = false;
+
 
 canvas.width = width;
 canvas.height = height;
@@ -65,7 +66,7 @@ socket.onmessage = (e) => {
         //We will want to navigate to a specific game
         console.log("Navigating to /pong/gameover/");
         navigateTo(`/pong/gameover/?game=${game_id}`);
-        game_is_over = true;
+        isGameOver.gameIsOver = true;
         WebSocketManager.closeGameSocket();
     }
         // return render()
@@ -177,16 +178,19 @@ const render = () => {
 render()
 
 function gameLoop() {
-    if(game_is_over === true) {
+    if(isGameOver.gameIsOver == true) {
+        alert("returning like a fucking idiot")
         return ;
     }
-    console.log("Im looping, ", game_is_over)
+    // console.log("Im looping, ", game_is_over)
     updatePaddles();
     render();
     requestAnimationFrame(gameLoop);
 }
 
 // Start the game loop
-if (game_is_over === false) {
+isGameOver.gameIsOver = false;
+if (isGameOver.gameIsOver == false) {
+    // alert("I am in the loop for the first time")
     requestAnimationFrame(gameLoop);
 }
