@@ -20,7 +20,7 @@ def get(req):
     html_content = render_to_string("apps/auth/login.html", {
         "users": users, 
         "csrf_token": csrf_token,
-        "urlpostgres" :urlpostgres,
+        "urlpostgres": urlpostgres,
         })
 
     return JsonResponse({
