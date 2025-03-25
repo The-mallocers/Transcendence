@@ -18,7 +18,7 @@ class GameConfig(AppConfig):
         if not self.is_running_server():
             return
 
-        from apps.game.matchmaking import MatchmakingThread
+        from utils.threads.matchmaking import MatchmakingThread
         self.thread = MatchmakingThread("MatchmakingThread")
         self.thread.start()
         atexit.register(self.stop_thread)
