@@ -39,6 +39,8 @@ class PlayerManager:
             self._player_game: PlayerGame = await self.get_player_game_id_db_async(self.player.id, game_manager.get_id())
 
             game_key = f'game:{game_manager.get_id()}'
+            
+            #All of this is just to pick a side
             players = await self._redis.json().get(game_key, Path("players"))
             player_ids = [player["id"] for player in players]
 
