@@ -179,9 +179,10 @@ render()
 
 function gameLoop() {
     if(isGameOver.gameIsOver == true) {
+        alert("returning like a fucking idiot")
         return ;
     }
-    console.log("Im looping, ", game_is_over)
+    // console.log("Im looping, ", game_is_over)
     updatePaddles();
     render();
     requestAnimationFrame(gameLoop);
