@@ -68,7 +68,7 @@ class GameManager:
         if await self.rget_status() != status:
             self._game.status = status
             await self._game.asave()
-        await self._redis.json().set(self.game_key, Path('status'), status.value)
+            await self._redis.json().set(self.game_key, Path('status'), status.value)
 
     async def rget_pL_id(self):
         try:
