@@ -10,3 +10,8 @@ def admin_get(request):
 def edit_user_get(request, client_id):
     from apps.profile.view.profile import get
     return get(request, client_id)
+
+@require_http_methods(["GET"])
+def get_monitoring(request):
+    from apps.admin.view.admin import monitoring
+    return monitoring(request)

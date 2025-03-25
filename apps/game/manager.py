@@ -63,7 +63,7 @@ class GameManager:
             return None
 
     async def rset_status(self, status: GameStatus):
-        if self.rget_status() != status:
+        if await self.rget_status() != status:
             self._game.status = status
             await self._game.asave()
         await self._redis.json().set(self.game_key, Path('status'), status.value)

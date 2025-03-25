@@ -66,5 +66,3 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Fonction pour fermer le popup
     window.closePopup = closePopup;
-    window.deleteUser = deleteUser;
-});

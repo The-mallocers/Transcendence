@@ -24,7 +24,10 @@ def get(req):
     })
     
 def get_settings(req):
-    html_content = render_to_string("apps/profile/myinformations.html", {"csrf_token": get_token(req)})
+    print("wiiwiiiwiiiii")
+    client = Clients.get_client_by_request(req)
+
+    html_content = render_to_string("apps/profile/myinformations.html", {"csrf_token": get_token(req), "client": client, "isAdmin": client.rights.is_admin})
     return JsonResponse({
         'html': html_content,
     })

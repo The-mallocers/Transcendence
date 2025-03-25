@@ -235,10 +235,13 @@ function gameLoop() {
     if(game_is_over === true) {
         return ;
     }
+    console.log("Im looping, ", game_is_over)
     updatePaddles();
     render();
     requestAnimationFrame(gameLoop);
 }
 
 // Start the game loop
-requestAnimationFrame(gameLoop);
+if (game_is_over === false) {
+    requestAnimationFrame(gameLoop);
+}

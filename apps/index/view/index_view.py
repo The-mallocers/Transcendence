@@ -14,7 +14,17 @@ def get(req):
     if client is not None:
         Games_played = GameManager.get_games_of_player(client.player.id)
         Games_played = sorted(Games_played, key=lambda g: g.created_at, reverse=True)     
-                
+
+        faulty_games = False
+        for game in Games_played:
+            if game.winner == None:
+                faulty_games = True
+                print("WARNING : You have created a game without a winner, this is bad !")
+        
+        if faulty_games == True:
+            print("Removing the faulty games, fix your code !")
+            Games_played = [game for game in Games_played if game.winner is not None]
+
         if client is not None:
             winrate = get_winrate(client, Games_played)
             ghistory = get_last_matches(client, Games_played)

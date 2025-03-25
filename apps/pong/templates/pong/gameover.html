@@ -1,4 +1,3 @@
-
 {% load static %}
 <style>
     .gameoverPage {
@@ -66,7 +65,7 @@
     .endState > span:nth-child(9) { animation-delay: calc(0.1s * 9); }
     .endState > span:nth-child(10) { animation-delay: calc(0.1s * 10);}
 
-    .gameoverPage .wordEnd{
+    .gameoverPage .wordEnd:not(:last-child){
         margin-right: 2rem;
     }
 
@@ -177,3 +176,6 @@
     </div>
 
 </div>
+
+
+<script src="{% static '/js/apps/game/gameover.js' %}"></script>

@@ -18,8 +18,9 @@ services:
       retries: 5
     environment:
       # - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
-      - POSTGRES_DB=${DATABASE_NAME}
+      #Im adding some default values as for some reasons my github test doesnt set the password
+      - POSTGRES_PASSWORD=${DATABASE_PASSWORD:-githubpassword}
+      - POSTGRES_DB=${DATABASE_NAME:-githubdb}
     restart: always
   
   django-web:
@@ -42,6 +43,7 @@ services:
   nginx:
     ports: 
       - "8000:443"
+      # -  "8080:80"
     depends_on:
       - django-web
     container_name: nginx
