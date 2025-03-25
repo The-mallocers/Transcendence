@@ -12,7 +12,7 @@ from utils.pong.objects import PADDLE_WIDTH, OFFSET_PADDLE, CANVAS_WIDTH
 from utils.threads import Threads
 from utils.websockets.channel_send import send_group_error
 
-
+#Game Will be the new game manager !
 class MatchmakingThread(Threads):
     async def main(self):
         game_manager: GameManager = None
@@ -73,6 +73,8 @@ class MatchmakingThread(Threads):
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ FUNCTIONS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
     async def select_players(self, game_manager):
+        #game.Pl = players[0]
+        #game.Pr = players[1]
         players_queue = await self.redis.hgetall('matchmaking_queue')
         players = [player.decode('utf-8') for player in players_queue]
         if len(players) >= 2:  #il faudra ce base sur les mmr

@@ -27,6 +27,8 @@ class GameThread(Threads):
         print('test')
 
     async def main(self):
+        #Well move the Ending.
+        
         try:
             initialized = await self.init_game()
             while not self._stop_event.is_set() and initialized and await self.game_manager.rget_status() is not GameStatus.ERROR:

@@ -30,6 +30,7 @@ class PlayerManager:
         self.score: Score = Score(self._redis, player_id=self.id, game_id=game_id)
 
     async def join_game(self, game_manager: GameManager):
+        #We will only want to join with Redis, not add to DB.
         try:
             self._redis = await RedisConnectionPool.get_async_connection(self.__class__.__name__)
             self.paddle._redis = self._redis
@@ -42,6 +43,7 @@ class PlayerManager:
             players = await self._redis.json().get(game_key, Path("players"))
             player_ids = [player["id"] for player in players]
 
+            #This is just to find a side.
             if self.player.id in player_ids:
                 return await send_group_error(self.player.id, ResponseError.ALREADY_JOINED)
             else:
@@ -59,7 +61,7 @@ class PlayerManager:
                 await sync_to_async(self._player_game.save)()
 
             # ── Send Reponse To Player ────────────────────────────────────────────────
-
+            #this wont really change.
             self.paddle.game_key = game_key
             serializer = PlayerSerializer(self.player,
                                           context={'paddle': self.paddle, 'side': self._player_game.side, 'score': self.score.score})

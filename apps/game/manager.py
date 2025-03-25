@@ -12,6 +12,7 @@ from utils.pong.enums import GameStatus
 from utils.pong.objects.ball import Ball
 from utils.redis import RedisConnectionPool
 
+#Watch out for all the function modifying the db as well as redis.
 
 class GameManager:
     def __init__(self, game=None, redis=None):
@@ -27,6 +28,7 @@ class GameManager:
         self.pR: PlayerManager = None  # PlayerManager(self.rget_pR_id())
 
     async def create_game(self):
+        #We will only create the game in redis not in the DB
         from apps.game.api.serializers import GameSerializer
         self._redis = await RedisConnectionPool.get_async_connection(self.__class__.__name__)
 

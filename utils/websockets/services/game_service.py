@@ -54,6 +54,8 @@ class GameService(BaseServices):
         await self.game_manager.rset_status(GameStatus.ENDING)
 
     async def _handle_paddle_move(self, data, player: Player):
+        # This will only update the redis db in the future
+        #So that we dont directly change the paddle everytime.
         if await self.game_manager.rget_status() is GameStatus.RUNNING:
             if str(player.id) == str(self.game_manager.pL.id):
                 await self.game_manager.pL.paddle.set_move(data['data']['args'])
