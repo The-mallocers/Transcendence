@@ -20,14 +20,6 @@ let game_is_over = false;
 
 canvas.width = width;
 canvas.height = height;
-let paddleDefaultPos = 250 - (paddleHeight / 2)
-
-// window.GameState = {
-//     ballX: width / 2,
-//     ballY: height / 2,
-//     leftPaddleY: paddleDefaultPos,
-//     rightPaddleY: paddleDefaultPos
-// };
 
 lnick.innerHTML = window.GameState.left.nick
 rnick.innerHTML = window.GameState.right.nick
@@ -35,7 +27,6 @@ console.log('meowmeowmeow', window.GameState)
 
 
 socket.onmessage = (e) => {
-    // queueMicrotask(() => {
     const jsonData = JSON.parse(e.data);
     console.log("VTGVTVYTHVYTFVYTFVYTVFYTRVYTRVBYT")
     console.log("87786guTV7B",jsonData)
@@ -75,8 +66,7 @@ socket.onmessage = (e) => {
         console.log("Navigating to /pong/gameover/");
         navigateTo(`/pong/gameover/?game=${game_id}`);
         game_is_over = true;
-        socket.closeGameSocket();
-
+        WebSocketManager.closeGameSocket();
     }
         // return render()
     // })s
@@ -92,16 +82,6 @@ const previous_keys = {
     'a': false,
     'd': false,
 }
-
-//A -> D
-// A true D false -> D -> EN BAS
-
-//0 - 0
-//A - 0
-//Update old keys
-// A = true - D = false
-
-//if A == true D == True
 
 document.addEventListener('keydown', (event) => {
     switch(event.key) {
@@ -123,8 +103,6 @@ function updatePaddles() {
     // gauche
     let direction = null;
     if (keys.up && keys.down) {
-        //I want to check the old key combination, and have the direction be
-        //what the "new" direction is
         if (previous_keys.up) {
             direction = 'down'
         }
@@ -190,43 +168,10 @@ const drawBall = (x, y) => {
 const render = () => {
     clearArena();
     drawArena();
-
-    ///////////////
-    // updatePaddles()
-    ///////////////
     drawPaddle(10, window.GameState.left.y);
     drawPaddle(width - paddleThickness - 10, window.GameState.right.y);
     drawBall(window.GameState.ballX, window.GameState.ballY);
 };
-
-
-/*{
-    "event": "UPDATE",
-    "data": {
-        "action": "PADDLE_1_UPDATE",
-        "content": {
-            "width": 10.0,
-            "height": 100.0,
-            "x": 0.0,
-            "y": -1.0,
-            "speed": 10.0
-        }
-    }
-}*/
-
-
-
-
-// Animation loop
-// function animationLoop() {
-//     render();
-//     requestAnimationFrame(animationLoop);
-// }
-
-// // Start the animation loop
-// requestAnimationFrame(animationLoop);
-
-// setInterval(render, 1);  // 60 fps
 
 
 render()

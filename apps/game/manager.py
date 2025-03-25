@@ -27,6 +27,7 @@ class GameManager:
         self.pR: PlayerManager = None  # PlayerManager(self.rget_pR_id())
 
     async def create_game(self):
+        #This will only create in redis.
         from apps.game.api.serializers import GameSerializer
         self._redis = await RedisConnectionPool.get_async_connection(self.__class__.__name__)
 

@@ -287,7 +287,7 @@ LOGGING = {
             'mode': 'w',  # Overwrites the file each time
         },
         'redis_file': {
-            'level': 'INFO',
+            'level': 'DEBUG',
             'class': 'logging.FileHandler',
             'filename': BASE_DIR / 'logs' / 'redis.log',
             'formatter': 'verbose',
@@ -339,13 +339,24 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': False,
         },
-        'utils.redis': {  # Update this to match your actual module path
+        'utils.redis': {  # Redis logging
+            'handlers': ['console', 'redis_file'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'channels': {  # Django Channels core
+            'handlers': ['console', 'file', 'latest_file'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'channels_redis': {  # Redis backend for Channels
             'handlers': ['console', 'redis_file'],
             'level': 'DEBUG',
             'propagate': False,
         },
     },
 }
+
 
 # Apply permissions to latest.log file if it exists
 latest_log_path = os.path.join(LOG_DIR, LATEST_LOG_FILENAME)

@@ -89,13 +89,13 @@ let connectToMMPool = (client_id) => {
                 left: {
                     x : jsonData.data.content.left.paddle.x,
                     y: jsonData.data.content.left.paddle.y,
-                    nick : jsonData.data.content.left.nickname,
+                    nick : jsonData?.data?.content?.left?.nickname,
                     id: ""
                 },
                 right : {
                     x : jsonData.data.content.right.paddle.x,
                     y: jsonData.data.content.right.paddle.y,
-                    nick : jsonData.data.content.right.nickname,
+                    nick : jsonData?.data?.content?.right?.nickname,
                     id: ""
                 }
             }

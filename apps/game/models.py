@@ -34,4 +34,7 @@ class Game(models.Model):
     players = ManyToManyField(Player, through='player.PlayerGame')
     timer = DurationField(default=timedelta(minutes=0), editable=False, null=True) #In default there is no timer
 
+    #Joueur a Gauche
+    #Joueur a Droite
+
     
