@@ -1,4 +1,5 @@
 // window.addEventListener('load', onPageLoad);
+import { WebSocketManager } from "../../websockets/websockets.js"
 
 
 let client_id = null;
@@ -12,7 +13,8 @@ function scrollToBottom(element){
 
 const clientId = await getClientId();
 console.log("Got client ID :", clientId);
-const chatSocket = new WebSocket('wss://' + window.location.host + '/ws/chat/?id=' + clientId);
+const chatSocket = await WebSocketManager.initChatSocket(clientId);
+// const chatSocket = new WebSocket('wss://' + window.location.host + '/ws/chat/?id=' + clientId);
 
 chatSocket.addEventListener("open", (event) => {
     console.log("WebSocket is open now.");
@@ -75,7 +77,7 @@ document.getElementById("messageInput").addEventListener("keydown", function(eve
 // Attach event listener to a parent that exists before buttons are created
 document.addEventListener("click", function(event) {
     if (event.target.classList.contains("roomroom")) { 
-        
+        console.log("chatSocket = ", chatSocket);
         const id = event.target.id;
         room_id = id;
         console.log("Clicked on room", id);
@@ -89,7 +91,10 @@ document.addEventListener("click", function(event) {
                 }
             }
         };
-        chatSocket.send(JSON.stringify(message));
+        //Dirty fucking hack because for some reason it tried to send the message twice.
+        if(chatSocket.readyState === WebSocket.OPEN) {
+            chatSocket.send(JSON.stringify(message));
+        }
     }
 });
 
@@ -153,10 +158,16 @@ async function displayRooms(rooms){
         if(rooms[i].player.length > 1)
             htmlString = `<button class="roomroom" id="${rooms[i].room}">chat global</button>`;
         else
+        {
+            let player = rooms[i].player[0];
+            let div
+            if(player == undefined)
+                player = "delete user";
             htmlString = `<div id="${rooms[i].room}" class="roomroom container d-flex align-items-center gap-3">
                     <img src="/static/assets/imgs/profile/default.png">
-                    <div>${rooms[i].player[0]}</div>
+                    <div>${player}</div>
                 </div>`
+        }
         const doc = parser.parseFromString(htmlString, "text/html");
         const roomElement = doc.body.firstChild;
         chatRooms.appendChild(roomElement);

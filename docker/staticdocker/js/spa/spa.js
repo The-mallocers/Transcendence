@@ -65,7 +65,7 @@ class Router {
         let splitedPath = path.split("/") 
         console.log(splitedPath)
         if( splitedPath.includes("pong")) {
-            WebSocketManager.closeChatSocket()
+            WebSocketManager.closeChatSocket();
         }
         else {
             WebSocketManager.closeAllSockets(); //for now we close all

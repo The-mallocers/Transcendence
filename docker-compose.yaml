@@ -65,6 +65,8 @@ services:
     networks:
         - Tnetwork
     restart: unless-stopped
+    stop_grace_period: 1s
+
 
   prometheus:
     image: prom/prometheus
