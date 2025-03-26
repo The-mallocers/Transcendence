@@ -39,6 +39,8 @@ class PlayerManager:
             self._player_game: PlayerGame = await self.get_player_game_id_db_async(self.player.id, game_manager.get_id())
 
             game_key = f'game:{game_manager.get_id()}'
+            
+            #All of this is just to pick a side
             players = await self._redis.json().get(game_key, Path("players"))
             player_ids = [player["id"] for player in players]
 
@@ -73,7 +75,6 @@ class PlayerManager:
             await channel_layer.group_add(str(game_manager.get_id()), channel_name.decode('utf-8'))
 
             await send_group(self.player.id, EventType.GAME, ResponseAction.JOIN_GAME)
-            await self.leave_mm()
 
         except Exception as e:
             await send_group_error(self.player.id, ResponseError.JOINING_ERROR)
