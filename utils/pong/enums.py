@@ -30,6 +30,7 @@ class EventType(str, Enum):
     UPDATE: str = 'update'
     ERROR: str = 'error'
     CHAT: str = 'chat'
+    NOTIFICATION: str = 'notification'
 
 # All the actions the client sends to the server
 class RequestAction(str, Enum):
@@ -57,6 +58,11 @@ class RequestAction(str, Enum):
     LEAVE_TOURNAMENT: str = 'leave_tournament'
     START_TOURNAMENT: str = 'start_tournement'
     LIST_TOURNAMENT: str = 'list_tournament'
+    
+    # ── Notification Actions ──────────────────────────────────────────────────────────────────
+    SEND_FRIEND_REQUEST: str = "send_friend_request"
+    
+    
 
 
 # All the responses the server sends to the client
@@ -85,6 +91,10 @@ class ResponseAction(str, Enum):
     MESSAGE_RECEIVED = "New message received"
     HISTORY_RECEIVED = "history_received"
     ALL_ROOM_RECEIVED = "all_room_received"
+    
+    # ── NOTIFICATION Actions ──────────────────────────────────────────────────────────
+    NOTIF_TEST = "notification_test"
+    
 
 
     TEST: str = 'test'
@@ -109,6 +119,9 @@ class ResponseError(str, Enum):
 
     # ── Chat ──────────────────────────────────────────────────────────────────────────
     NO_HISTORY: str = 'There are no messages in this room.'
+
+    # ── Notification ──────────────────────────────────────────────────────────────────────────
+    USER_NOT_FOUND: str = 'User not found'
 
     # ── Errors ────────────────────────────────────────────────────────────────────────
     PLAYER_NOT_FOUND: str = 'Your player ID does not correspond to a player.'

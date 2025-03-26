@@ -301,6 +301,71 @@ const pongRoute = new Route(
     
 )
 
+//create socker for notifications
+let client_id = null;
+const clientId = await getClientId();
+const notifSocket = new WebSocket(`wss://${window.location.host}/ws/notification/?id=${clientId}`);
+
+//<button >
+
+async function getClientId() {
+    // if (client_id !== null) return client_id;
+    console.log("Getting client ID")
+    try {
+        const response = await fetch("/api/auth/getId/", {
+            method: "GET",
+            credentials: "include",
+        });
+        const data = await response.json();
+
+        if (data.client_id) {
+            client_id = data.client_id;
+            return client_id;
+        } else {
+            throw new Error(data.error);
+        }
+    } catch (error) {
+        console.error("Erreur lors de la récupération de l'ID :", error);
+        return null;
+    }
+}
+
+
+notifSocket.onmessage = (event) => {
+    const message = JSON.parse(event.data);
+    console.log("message receive");
+
+    if(message.data.action == "NOTIF_TEST") {
+        console.log("sasa de sasa")
+        // displayHistory(message.data.content.messages);
+    }
+}
+
+document.addEventListener("click", function(event) {
+    const routeElement = event.target.closest('.friendrequest');
+    console.log(routeElement);
+    if (routeElement) {
+        const urlParams = new URLSearchParams(window.location.search);
+        const targetUser = urlParams.get('username');
+        console.log("targetuser " + targetUser);
+
+        this.value = ""; // Clear the input field after handling
+        //Sending this to the websocket
+        let message = {
+            "event": "notification",
+            "data": {
+                "action": "send_friend_request",
+                "args": {
+                    "target_name": targetUser,
+                }
+            }
+        }
+        notifSocket.send(JSON.stringify(message));
+    }
+});
+//Je me connecete a ma websocket notif.
+//on message color == blue
+
 /// routes
 
 /*

@@ -5,6 +5,7 @@ from django.views.generic import TemplateView
 
 from utils.websockets.consumers.chat import ChatConsumer
 from utils.websockets.consumers.game import GameConsumer
+from utils.websockets.consumers.notification import NotificationfConsumer
 from utils.websockets.consumers.tournament import TournamentConsumer
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ HTTP ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
@@ -21,7 +22,8 @@ urlpatterns = [
 websocket_urlpatterns = [
     path("ws/game/", GameConsumer.as_asgi()),
     path("ws/chat/", ChatConsumer.as_asgi()),
-    path("ws/tournaments/", TournamentConsumer.as_asgi())
+    path("ws/tournaments/", TournamentConsumer.as_asgi()),
+    path("ws/notification/", NotificationfConsumer.as_asgi())
 ]
 
 if settings.DEBUG:

@@ -52,6 +52,13 @@ class Clients(models.Model):
             return None  # Or handle the error appropriately
 
     @staticmethod
+    async def ASget_client_by_username(username: str):
+        try:
+            return await Clients.objects.aget(profile__username=username)
+        except :
+            return None 
+
+    @staticmethod
     def get_client_by_request(request: HttpRequest):
         from utils.jwt.TokenGenerator import TokenGenerator, TokenType
         token = TokenGenerator.extract_token(request, TokenType.ACCESS)
