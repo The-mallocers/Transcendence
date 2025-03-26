@@ -24,6 +24,7 @@ def get(req):
     })
     
 def get_settings(req):
+    print("wiiwiiiwiiiii")
     html_content = render_to_string("apps/profile/myinformations.html", {"csrf_token": get_token(req)})
     return JsonResponse({
         'html': html_content,

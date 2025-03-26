@@ -40,7 +40,7 @@ class MatchmakingThread(Threads):
                     GameThread(manager=game_manager).start()
                     game_manager = None
 
-                await asyncio.sleep(1)
+                await asyncio.sleep(5)
 
             except Exception as e:
                 self._logger.error(str(e))
@@ -76,6 +76,8 @@ class MatchmakingThread(Threads):
         players_queue = await self.redis.hgetall('matchmaking_queue')
         players = [player.decode('utf-8') for player in players_queue]
         if len(players) >= 2:  #il faudra ce base sur les mmr
+            #Game.pL = player_id=players[0]
+            #Game.pR = player_id=players[0]
             game_manager.pL = PlayerManager(player_id=players[0])
             game_manager.pR = PlayerManager(player_id=players[1])
             if game_manager.pL is not None and game_manager.pR is not None:

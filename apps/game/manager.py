@@ -27,6 +27,7 @@ class GameManager:
         self.pR: PlayerManager = None  # PlayerManager(self.rget_pR_id())
 
     async def create_game(self):
+        #This will only create in redis.
         from apps.game.api.serializers import GameSerializer
         self._redis = await RedisConnectionPool.get_async_connection(self.__class__.__name__)
 
@@ -63,7 +64,7 @@ class GameManager:
             return None
 
     async def rset_status(self, status: GameStatus):
-        if self.rget_status() != status:
+        if await self.rget_status() != status:
             self._game.status = status
             await self._game.asave()
         await self._redis.json().set(self.game_key, Path('status'), status.value)

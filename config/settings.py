@@ -59,7 +59,19 @@ ALLOWED_HOSTS = [
     '127.0.0.1',
 ]
 
-CSRF_TRUSTED_ORIGINS = os.getenv("DJANGO_CSRF_TRUSTED_ORIGINS","https://127.0.0.1").split(",")
+# CSRF_TRUSTED_ORIGINS = os.getenv("DJANGO_CSRF_TRUSTED_ORIGINS","https://127.0.0.1").split(",")
+
+# In settings.py
+CSRF_TRUSTED_ORIGINS = ['https://localhost:8000', 'https://127.0.0.1:8000']
+
+# Add this to ensure Django knows requests are HTTPS
+#Not exactly sure this is needed
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# Not exactly sure this is needed
+SECURE_SSL_REDIRECT = True
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
 
 # Application definition
 # had to add django.contrib.auth, not sure why
@@ -275,7 +287,7 @@ LOGGING = {
             'mode': 'w',  # Overwrites the file each time
         },
         'redis_file': {
-            'level': 'INFO',
+            'level': 'DEBUG',
             'class': 'logging.FileHandler',
             'filename': BASE_DIR / 'logs' / 'redis.log',
             'formatter': 'verbose',
@@ -327,13 +339,24 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': False,
         },
-        'utils.redis': {  # Update this to match your actual module path
+        'utils.redis': {  # Redis logging
+            'handlers': ['console', 'redis_file'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'channels': {  # Django Channels core
+            'handlers': ['console', 'file', 'latest_file'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'channels_redis': {  # Redis backend for Channels
             'handlers': ['console', 'redis_file'],
             'level': 'DEBUG',
             'propagate': False,
         },
     },
 }
+
 
 # Apply permissions to latest.log file if it exists
 latest_log_path = os.path.join(LOG_DIR, LATEST_LOG_FILENAME)
