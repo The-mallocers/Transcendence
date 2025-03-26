@@ -21,6 +21,7 @@ class Router {
         const route = this.routes.find(r => r.path === path);
 
         if (!route) {
+            console.log("We didnt find the route in the routing table");
             navigateTo("/error/404/");
         }
         else {
@@ -233,6 +234,12 @@ const routes = [
         template: async (query) => {
             console.log(`/pages/profile/${query}`)
             return await fetchRoute(`/pages/admin/monitoring/`);
+        },
+    },
+    {
+        path: '/chat/friendrequest/',
+        template: async () => {
+            return await fetchRoute(`/pages/chat/friendrequest/`);
         },
     },
 ];

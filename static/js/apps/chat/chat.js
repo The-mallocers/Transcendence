@@ -5,6 +5,13 @@ let client_id = null;
 
 let room_id = null; 
 
+
+function scrollToBottom(element){
+    console.log("meowmeow")
+
+    element.scrollTop = element.scrollHeight;
+    console.log(element)
+}
 const clientId = await getClientId();
 // if (clientId == null) {
 //     return ;
@@ -44,6 +51,7 @@ chatSocket.onmessage = (event) => {
         const msgElement = doc.body.firstChild; // Get the actual <div> element
     
         chatHistory.appendChild(msgElement);
+        scrollToBottom(chatHistory);
         //Do things to show the new message on the front
     }
 }
@@ -72,6 +80,7 @@ document.getElementById("messageInput").addEventListener("keydown", function(eve
 // Attach event listener to a parent that exists before buttons are created
 document.addEventListener("click", function(event) {
     if (event.target.classList.contains("roomroom")) { 
+        
         const id = event.target.id;
         room_id = id;
         console.log("Clicked on room", id);
@@ -122,6 +131,8 @@ async function displayHistory(message){
         const msgElement = doc.body.firstChild; // Get the actual <div> element
 
         chatHistory.appendChild(msgElement);
+
+        scrollToBottom(chatHistory);
     }
 }
 
@@ -135,10 +146,12 @@ async function displayRooms(rooms){
         if(rooms[i].player.length > 1)
             htmlString = `<button class="roomroom" id="${rooms[i].room}">chat global</button>`;
         else
-            htmlString = `<button class="roomroom" id="${rooms[i].room}">${rooms[i].player[0]}</button>`;
+            htmlString = `<div id="${rooms[i].room}" class="roomroom container d-flex align-items-center gap-3">
+                    <img src="/static/assets/imgs/profile/default.png">
+                    <div>${rooms[i].player[0]}</div>
+                </div>`
         const doc = parser.parseFromString(htmlString, "text/html");
-        const roomElement = doc.body.firstChild; // Get the actual <div> element
-
+        const roomElement = doc.body.firstChild;
         chatRooms.appendChild(roomElement);
     }
 }

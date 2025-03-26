@@ -10,6 +10,8 @@ from apps.shared.models import Clients
 
 
 def get(req):
+    print("bahahahahahhahahah")
+    print(req.get_full_path())
     client = Clients.get_client_by_request(req)
     if client is not None:
         Games_played = GameManager.get_games_of_player(client.player.id)
@@ -36,7 +38,8 @@ def get(req):
             "winrate" : winrate,
             "winrate_angle" : int((winrate / 100) * 360),
             "rivals": rivals,
-            "csrf_token": get_token(req)
+            "csrf_token": get_token(req),
+            "show_friend_request": False
         }
 
         #{

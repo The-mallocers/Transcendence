@@ -105,3 +105,21 @@
     width: 66.66%;
     padding: 0;
 }
+
+.roomroom{
+    padding: 1rem 2rem;
+}
+
+.roomroom:nth-child(odd){
+    background-color: #31343b
+}
+
+.roomroom:nth-child(even){
+    background-color: #3a3c41
+}
+
+.roomroom img{
+    height: 42px;
+    width: 42px;
+    border-radius: 100px;
+}
