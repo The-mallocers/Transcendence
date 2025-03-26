@@ -71,7 +71,9 @@ class Router {
         else {
             WebSocketManager.closeAllSockets(); //for now we close all
         }
-
+        if (window.location.pathname == path) {return ;}
+        
+        isGameOver.gameIsOver = true;
         //In the future, we will have to do some better logics with the path to decide if we want to close
         //a websocket or not.
         
