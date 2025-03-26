@@ -1,11 +1,6 @@
-import asyncio
-import enum
-import inspect
 import logging
 import threading
 from abc import ABC, abstractmethod
-
-import redis.asyncio as aioredis
 
 from utils.redis import RedisConnectionPool
 
@@ -19,7 +14,7 @@ class Threads(threading.Thread, ABC):
         # self.loop = asyncio.new_event_loop()
 
         self._logger = logging.getLogger(self.__class__.__name__)
-        # self._stop_event = threading.Event()
+        self._stop_event = threading.Event()
         # self._completed_actions = set()
 
     def run(self):

@@ -1,47 +1,46 @@
 import asyncio
 import traceback
 
-from django.conf import settings
-from redis import Redis
+from redis.commands.json.path import Path
 
 from apps.game.manager import GameManager
-from apps.player.manager import PlayerManager
+from apps.game.models import Game
+from apps.player.models import Player
 from utils.pong.enums import GameStatus, ResponseError
-from utils.pong.objects import PADDLE_WIDTH, OFFSET_PADDLE, CANVAS_WIDTH
 from utils.threads.game import GameThread
 from utils.threads.threads import Threads
 from utils.websockets.channel_send import send_group_error
-from redis.commands.json.path import Path
 
-#Game Will be the new game manager !
-from apps.game.models import Game
 
+# Game Will be the new game manager !
 class MatchmakingThread(Threads):
     def main(self):
-        # game_manager: GameManager = None
-        game = None
+        game: Game = None
+        matched: bool = False
         
         while not self._stop_event.is_set():
             try:
-                matched = self.select_players()
+                if game:
+                    matched = self.select_players(game)
+                else:
+                    game = Game()
 
                 if matched:
-                    game = Game()  
                     self.create_game(game)
-                    self._logger.info(f"Found match: {game_manager.pL} vs {game_manager.pR}")
-                    game.rset_status(GameStatus.MATCHMAKING, self.redis)
+                    self._logger.info(f"Found match: {game.pL} vs {game.pR}")
+                    game.rset_status(GameStatus.MATCHMAKING)
 
-                    game_manager.pL.join_game(game_manager)
-                    game_manager.pL.paddle.set_x(0 + OFFSET_PADDLE)
-                    game_manager.pR.join_game(game_manager)
-                    game_manager.pR.paddle.set_x(CANVAS_WIDTH - OFFSET_PADDLE - PADDLE_WIDTH)
-                    game_manager.rset_status(GameStatus.STARTING)
-                    self.redis.hset(name="player_game", key=str(game_manager.pL.id),
-                                          value=str(game_manager.get_id()))
-                    self.redis.hset(name="player_game", key=str(game_manager.pR.id),
-                                          value=str(game_manager.get_id()))
-                    GameThread(manager=game_manager).start()
-                    game_manager = None
+                    game.pL.join_game(game)
+                    game.pR.join_game(game)
+                    # game.pL.paddle.set_x(0 + OFFSET_PADDLE)
+                    # game.pR.paddle.set_x(CANVAS_WIDTH - OFFSET_PADDLE - PADDLE_WIDTH)
+                    game.rset_status(GameStatus.STARTING)
+                    self.redis.hset(name="player_game", key=str(game.pL.id),
+                                    value=str(game.get_id()))
+                    self.redis.hset(name="player_game", key=str(game.pR.id),
+                                    value=str(game.get_id()))
+                    GameThread(manager=game).start()
+                    game = None
 
                 asyncio.sleep(1)
 
@@ -77,9 +76,9 @@ class MatchmakingThread(Threads):
         players_queue = self.redis.hgetall('matchmaking_queue')
         players = [player.decode('utf-8') for player in players_queue]
         if len(players) >= 2:  #il faudra ce base sur les mmr
-            game.pl = players[0]
-            game.pr = players[1]
-            if game.pl is not None and game.pr is not None:
+            game.pL = Player.get_player_by_client(players[0])
+            game.pR = Player.get_player_by_client(players[1])
+            if game.pL is not None and game.pR is not None:
                 return True
         return False
     
@@ -87,11 +86,5 @@ class MatchmakingThread(Threads):
         #We will only create the game in redis not in the DB
         from apps.game.api.serializers import GameSerializer
         
-        game.id = game.pk #very important
         serializer = GameSerializer(game)
-        self.redis.json().set(f'game:{game.id}', Path.root_path(), serializer.data)
-
-        
-    
-
-
+        self.redis.json().set(game.game_key, Path.root_path(), serializer.data)

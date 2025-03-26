@@ -1,42 +1,37 @@
 import random
-import uuid
 
-from asgiref.sync import sync_to_async
-from channels.db import database_sync_to_async
 from django.db import models, transaction
-from django.db.models import ManyToManyField, ForeignKey, \
-    OneToOneField
-from django.db.models.fields import CharField, IntegerField, BooleanField, \
-    DateTimeField
-from django.utils import timezone
-
-from utils.pong.enums import ResponseError, Side, Ranks
-from apps.shared.models import Clients
-from utils.redis import RedisConnectionPool
+from django.db.models import ForeignKey
+from django.db.models.fields import IntegerField
 from redis.commands.json.path import Path
 
+from apps.shared.models import Clients
+from utils.pong.enums import ResponseError, Side
+from utils.redis import RedisConnectionPool
 from utils.websockets.channel_send import send_group_error
 
 
 class Player(models.Model):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.redis = RedisConnectionPool.get_sync_connection(self.__class__.__name__)
-
     class Meta:
         db_table = 'pong_players'
 
-    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ MODELS FIEDLS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
+    # ═══════════════════════════════ Database Fields ════════════════════════════════ #
 
-    # ━━ PRIMARY FIELD ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
+    # ━━ PRIMARY FIELD ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
     game = ForeignKey('game.Game', on_delete=models.SET_NULL, null=False)
     client = ForeignKey(Clients, on_delete=models.CASCADE, null=False)
 
-    # ━━ PLAYER INFOS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
+    # ━━ PLAYER INFOS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
     score = IntegerField(default=0)
 
+    # ═════════════════════════════════ Local Fields ═════════════════════════════════ #
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.redis = RedisConnectionPool.get_sync_connection(
+            self.__class__.__name__)
 
-    # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ METHODS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
+    def __str__(self):
+        return f'Player with client id: {self.client.id}'
 
     def join_game(self, game):
         #We will only want to join with Redis, not add to DB.
@@ -82,6 +77,18 @@ class Player(models.Model):
             await self.leave_mm()
             raise RuntimeError(str(e))
 
+    # ━━ GETTER / SETTER ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
+
+    # ── Setter ────────────────────────────────────────────────────────────────────── #
+
+    # ── Getter ────────────────────────────────────────────────────────────────────── #
+    @staticmethod
+    def get_player_by_client(client_id):
+        try:
+            with transaction.atomic():
+                return Player.objects.get(client__id=client_id)
+        except Clients.DoesNotExist:
+            return None
 
 
 
