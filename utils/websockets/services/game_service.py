@@ -26,8 +26,8 @@ class GameService(BaseServices):
                                                  self.redis)
             self.game_manager.pR = PlayerManager(await self.game_manager.rget_pR_id(), self.game_manager.get_id(),
                                                  self.redis)
-            self.game_manager.pL.paddle.update()
-            self.game_manager.pR.paddle.update()
+            await self.game_manager.pL.paddle.update()
+            await self.game_manager.pR.paddle.update()
         else:
             client = await Clients.get_client_by_player_id_async(player.id)
             await send_group_error(client.id, ResponseError.NO_GAME)
@@ -61,14 +61,18 @@ class GameService(BaseServices):
                 await self.game_manager.pR.paddle.set_move(data['data']['args'])
 
     async def handle_disconnect(self, client):
-        p1_id = await self.game_manager.rget_pL_id()
-        p2_id = await self.game_manager.rget_pR_id()
-        opponent_id = p1_id if client.id is not p1_id else p2_id
-        opponent_client: Clients = await Clients.get_client_by_player_id_async(opponent_id)
-        # il faut checker quand un player se deco alors que la game est en starting et donc pas commencer
-        if opponent_client:
-            await send_group_error(opponent_id, ResponseError.OPPONENT_LEFT, close=True)
-            await self.game_manager.rset_status(GameStatus.ENDING)
+        pass
+
+        #Be careful, this breaks because it sets stuff back to ending instead of finished.
+
+        # p1_id = await self.game_manager.rget_pL_id()
+        # p2_id = await self.game_manager.rget_pR_id()
+        # opponent_id = p1_id if client.id is not p1_id else p2_id
+        # opponent_client: Clients = await Clients.get_client_by_player_id_async(opponent_id)
+        # # il faut checker quand un player se deco alors que la game est en starting et donc pas commencer
+        # if opponent_client:
+        #     await send_group_error(opponent_id, ResponseError.OPPONENT_LEFT, close=True)
+        #     await self.game_manager.rset_status(GameStatus.ENDING)
 
 
         #Le code si dessous a pour but de checker si un joueur se deconnecte pendant une game

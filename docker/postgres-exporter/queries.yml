@@ -1,0 +1,6 @@
+user_count:
+  query: "SELECT COUNT(*) AS user_count FROM client_list"
+  metrics:
+    - metric:
+        usage: "GAUGE"
+        description: "Total number of registered users"

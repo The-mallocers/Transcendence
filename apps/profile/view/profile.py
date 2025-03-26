@@ -11,20 +11,26 @@ def get(req):
     requestUsername = req.GET.get("username", "minimeow")
     client = Clients.get_client_by_username(requestUsername)
     # do something if client not found
-
     if client is None : 
         html_content = render_to_string("apps/error/404.html", {"csrf_token": get_token(req), "error_code": "404"})
         return JsonResponse({
             'html': html_content,
         })
      
-    html_content = render_to_string("apps/profile/profile.html", {"csrf_token": get_token(req), "client": client})
+    html_content = render_to_string("apps/profile/profile.html",
+                                    {"csrf_token": get_token(req), 
+                                     "client": client,
+                                     "show_friend_request": True
+                                    })
     return JsonResponse({
         'html': html_content,
     })
     
 def get_settings(req):
-    html_content = render_to_string("apps/profile/myinformations.html", {"csrf_token": get_token(req)})
+    print("wiiwiiiwiiiii")
+    client = Clients.get_client_by_request(req)
+
+    html_content = render_to_string("apps/profile/myinformations.html", {"csrf_token": get_token(req), "client": client, "isAdmin": client.rights.is_admin})
     return JsonResponse({
         'html': html_content,
     })

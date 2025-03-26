@@ -6,8 +6,6 @@ from apps.shared.models import Clients
 from apps.chat.models import Rooms
     
 
-
-
 # Create your views here.
 
 def chat(request):
@@ -16,41 +14,33 @@ def chat(request):
     #message_content
     
     client = Clients.get_client_by_request(request)
-    rooms  = Rooms.get_room_id_by_client_id(client.id)
-    
+    rooms  = Rooms.get_room_by_client_id(client.id)
     me = None
     if client:
         me = client.id
-#     conversation = [
-#     {
-#         "sender": me,
-#         "timestamp" : 345678567,
-#         "content" : "yo la team"
-#     },
-#     {
-#         "sender": "UUIDRDyrfhtyi!",
-#         "timestamp" : 345678567,
-#         "content" : "hellowwww"
-#     },
-#     {
-#         "sender": "UUIDRDyrfhtyi!",
-#         "timestamp" : 345678567,
-#         "content" : "go faire une game"
-#     }
-# ]
-    conversation = [] 
     
     html_content = render_to_string("apps/chat/chat.html", {
         "csrf_token": get_token(request), 
         'my_range': range(0),
-        'conversation': conversation,
         "client_id" : me,
+        "client" : client,
         "rooms" : rooms
         }),
         
-        
-
     return JsonResponse({
         'html': html_content,
     })
 
+def friendrequest(request):
+    client = Clients.get_client_by_request(request)
+    username = request.GET.get('username', None)
+    
+    print(f"Received username: {username}")
+    html_content = render_to_string("apps/profile/myinformations.html", {
+        "csrf_token": get_token(request),
+        "isAdmin": client.rights.is_admin,
+        "client" : client,
+        }),
+    return JsonResponse({
+        'html': html_content,
+    })

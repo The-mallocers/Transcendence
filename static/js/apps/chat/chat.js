@@ -5,10 +5,14 @@ let client_id = null;
 
 let room_id = null; 
 
+
+function scrollToBottom(element){
+    element.scrollTop = element.scrollHeight;
+}
+
 const clientId = await getClientId();
 console.log("Got client ID :", clientId);
 const chatSocket = new WebSocket('wss://' + window.location.host + '/ws/chat/?id=' + clientId);
-
 
 chatSocket.addEventListener("open", (event) => {
     console.log("WebSocket is open now.");
@@ -71,6 +75,7 @@ document.getElementById("messageInput").addEventListener("keydown", function(eve
 // Attach event listener to a parent that exists before buttons are created
 document.addEventListener("click", function(event) {
     if (event.target.classList.contains("roomroom")) { 
+        
         const id = event.target.id;
         room_id = id;
         console.log("Clicked on room", id);
@@ -122,6 +127,8 @@ async function displayHistory(message){
         const msgElement = doc.body.firstChild; // Get the actual <div> element
 
         chatHistory.appendChild(msgElement);
+
+        scrollToBottom(chatHistory);
     }
 }
 
@@ -129,28 +136,31 @@ async function displayRooms(rooms){
     console.log("Displaying rooms");
     let chatRooms = document.querySelector('.chatRooms');
     chatRooms.innerHTML = "";
+    let htmlString;
     
     for (let i = 0; i < rooms.length; i++) {
-        let roomName = rooms[i].player.length > 1 ? "Chat Global" : rooms[i].player[0];
-        let isActive = room_id === rooms[i].room ? "active" : "";
+        // let roomName = rooms[i].player.length > 1 ? "Chat Global" : rooms[i].player[0];
+        // let isActive = room_id === rooms[i].room ? "active" : "";
         
-        const htmlString = `
-            <button class="roomroom ${isActive}" id="${rooms[i].room}">
-                <span class="room-name">${roomName}</span>
-                ${rooms[i].unread_count > 0 ? `<span class="unread-badge">${rooms[i].unread_count}</span>` : ''}
-            </button>
-        `;
+        // const htmlString = `
+        //     <button class="roomroom ${isActive}" id="${rooms[i].room}">
+        //         <span class="room-name">${roomName}</span>
+        //         ${rooms[i].unread_count > 0 ? `<span class="unread-badge">${rooms[i].unread_count}</span>` : ''}
+        //     </button>
+        // `;
         
         const parser = new DOMParser();
+        if(rooms[i].player.length > 1)
+            htmlString = `<button class="roomroom" id="${rooms[i].room}">chat global</button>`;
+        else
+            htmlString = `<div id="${rooms[i].room}" class="roomroom container d-flex align-items-center gap-3">
+                    <img src="/static/assets/imgs/profile/default.png">
+                    <div>${rooms[i].player[0]}</div>
+                </div>`
         const doc = parser.parseFromString(htmlString, "text/html");
         const roomElement = doc.body.firstChild;
-
         chatRooms.appendChild(roomElement);
     }
     
     scrollToBottom(chatRooms);
-}
-
-async function scrollToBottom(element) {
-    element.scrollTop = element.scrollHeight;
 }

@@ -114,69 +114,20 @@
     padding: 0;
 }
 
-/* Styles for room buttons */
-.chatRooms {
-    padding: 10px;
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
+.roomroom{
+    padding: 1rem 2rem;
 }
 
-.roomroom {
-    position: relative;
-    padding: 12px 15px;
-    background-color: #242832;
-    color: aliceblue;
-    border: none;
-    border-radius: 8px;
-    text-align: left;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
+.roomroom:nth-child(odd){
+    background-color: #31343b
 }
 
-.roomroom:hover {
-    background-color: #2e313d;
-    transform: translateY(-2px);
+.roomroom:nth-child(even){
+    background-color: #3a3c41
 }
 
-.roomroom.active {
-    background-color: #3a3f4b;
-    font-weight: bold;
-}
-
-.roomroom .room-name {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.unread-badge {
-    background-color: #4CAF50;
-    color: white;
-    border-radius: 50%;
-    padding: 2px 6px;
-    font-size: 12px;
-    margin-left: 8px;
-}
-
-/* Scrollbar styling */
-.chatRooms::-webkit-scrollbar {
-    width: 6px;
-}
-
-.chatRooms::-webkit-scrollbar-track {
-    background: #181a22;
-}
-
-.chatRooms::-webkit-scrollbar-thumb {
-    background: #3a3f4b;
-    border-radius: 3px;
-}
-
-.chatRooms::-webkit-scrollbar-thumb:hover {
-    background: #4e5464;
+.roomroom img{
+    height: 42px;
+    width: 42px;
+    border-radius: 100px;
 }

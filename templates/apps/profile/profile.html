@@ -6,7 +6,8 @@
     <h3>{{ client.profile.username }}</h3>
 
     <div class="avatar">
-        <img  src="{% static 'assets/imgs/matboyer.jpg' %}">
+        
+        <img  src="{% static 'assets/imgs/' %}{{ client.profile.profile_picture }}">
     </div>
     <div class="container infos">
         <div class="row">
@@ -77,10 +78,11 @@
                             </span>
                         </div>
                     {% endfor %}
-
-
                 </div>
             </div>
         </div>
     </div>
 </div>
+{% if show_friend_request %}
+    <div class="friendrequest container btn btn-secondary" data-route="/chat/friendrequest?username={{ client.profile.username }}">Friend Request</div>
+{%endif%}

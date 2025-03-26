@@ -230,6 +230,19 @@ const routes = [
             return await fetchRoute(`/pages/pong/gameover/${query}`);
         },
     },
+    {
+        path: '/admin/monitoring/',
+        template: async (query) => {
+            console.log(`/pages/profile/${query}`)
+            return await fetchRoute(`/pages/admin/monitoring/`);
+        },
+    },
+    {
+        path: '/chat/friendrequest/',
+        template: async () => {
+            return await fetchRoute(`/pages/chat/friendrequest/`);
+        },
+    },
 ];
 
 //Need to do this so that the event listerner also listens to the dynamic html
@@ -294,5 +307,4 @@ const pongRoute = new Route(
         directSubRoutes: [{route object}]
     }
 */
-
 

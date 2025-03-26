@@ -8,7 +8,8 @@ from redis import Redis
 from apps.game.manager import GameManager
 from apps.player.api.serializers import PlayerInformationSerializer
 from apps.pong.pong import PongLogic
-from utils.pong.enums import GameStatus, EventType, ResponseAction, ResponseError
+from utils.pong.enums import GameStatus, EventType, ResponseAction, \
+    ResponseError
 from utils.pong.objects.ball import Ball
 from utils.pong.objects.paddle import Paddle
 from utils.pong.objects.score import Score
@@ -23,6 +24,7 @@ class GameThread(Threads):
         self.game_manager._redis = self.redis
         self.game_id = manager.get_id()
         self.logic: PongLogic = None
+        print('test')
 
     async def main(self):
         try:
