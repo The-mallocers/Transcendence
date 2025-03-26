@@ -8,10 +8,11 @@ from redis.commands.json.path import Path
 @dataclass
 class Score:
     def __init__(self, redis=None, game_id=None, player_id=None):
-        self.score = 0
-        self._redis: Redis = redis
-        self.game_key = f'game:{game_id}'
-        self.player_id = player_id
+        pass
+        # self.score = 0
+        # self._redis: Redis = redis
+        # self.game_key = f'game:{game_id}'
+        # self.player_id = player_id
 
     async def update(self):
         self.score = await self.get_score()

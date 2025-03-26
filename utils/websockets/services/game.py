@@ -1,7 +1,6 @@
 from typing import Dict, Any
 
 from apps.game.manager import GameManager
-from apps.player.manager import PlayerManager
 from apps.player.models import Player
 from apps.shared.models import Clients
 from utils.pong.enums import GameStatus, ResponseError, status_order
@@ -22,10 +21,8 @@ class GameService(BaseServices):
             game = await GameManager.get_game_db_async(game_id_bytes.decode('utf-8'))
             self.game_manager = GameManager(game, self.redis)
             self.game_manager._redis = self.redis
-            self.game_manager.pL = PlayerManager(await self.game_manager.rget_pL_id(), self.game_manager.get_id(),
-                                                 self.redis)
-            self.game_manager.pR = PlayerManager(await self.game_manager.rget_pR_id(), self.game_manager.get_id(),
-                                                 self.redis)
+            self.game_manager.pL = None #PlayerManager(await self.game_manager.rget_pL_id(), self.game_manager.get_id(),self.redis)
+            self.game_manager.pR = None #PlayerManager(await self.game_manager.rget_pR_id(), self.game_manager.get_id(),self.redis)
             await self.game_manager.pL.paddle.update()
             await self.game_manager.pR.paddle.update()
         else:

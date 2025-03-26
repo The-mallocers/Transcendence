@@ -1,4 +1,3 @@
-import asyncio
 import traceback
 
 from asgiref.sync import sync_to_async
@@ -6,39 +5,38 @@ from django.db import transaction, DatabaseError
 from redis import DataError
 from redis.commands.json.path import Path
 
-from apps.game.models import Game
-from apps.player.models import PlayerGame
 from utils.pong.enums import GameStatus
-from utils.pong.objects.ball import Ball
-from utils.redis import RedisConnectionPool
+from apps.game.models import Game
 
 #Watch out for all the function modifying the db as well as redis.
 
 class GameManager:
     def __init__(self, game=None, redis=None):
-        from apps.game.models import Game
-        from apps.player.manager import PlayerManager
+        pass
+        # from apps.game.models import Game
+        # from apps.player.manager import PlayerManager
 
-        self._game: Game = game
-        self._redis = RedisConnectionPool.get_sync_connection() if redis is not None else redis
+        # self._game: Game = game
+        # self._redis = RedisConnectionPool.get_sync_connection() if redis is not None else redis
 
-        self.game_key = None if game is None else f'game:{game.id}'
-        self.loop = asyncio.get_running_loop()
-        self.pL: PlayerManager = None  # PlayerManager(self.rget_pL_id())
-        self.pR: PlayerManager = None  # PlayerManager(self.rget_pR_id())
+        # self.game_key = None if game is None else f'game:{game.id}'
+        # self.loop = asyncio.get_running_loop()
+        # self.pL: PlayerManager = None  # PlayerManager(self.rget_pL_id())
+        # self.pR: PlayerManager = None  # PlayerManager(self.rget_pR_id())
 
     async def create_game(self):
+        pass
         #We will only create the game in redis not in the DB
-        from apps.game.api.serializers import GameSerializer
-        self._redis = await RedisConnectionPool.get_async_connection(self.__class__.__name__)
+        # from apps.game.api.serializers import GameSerializer
+        # self._redis = await RedisConnectionPool.get_async_connection(self.__class__.__name__)
 
-        self._game = await self._create_game()
-        self.game_key = f'game:{self._game.id}'
+        # self._game = await self._create_game()
+        # self.game_key = f'game:{self._game.id}'
 
-        serializer = GameSerializer(self._game, context={'ball': Ball()})
-        value = await sync_to_async(lambda: serializer.data)()
+        # serializer = GameSerializer(self._game, context={'ball': Ball()})
+        # value = await sync_to_async(lambda: serializer.data)()
 
-        await self._redis.json().set(self.game_key, Path.root_path(), value)
+        # await self._redis.json().set(self.game_key, Path.root_path(), value)
 
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ Functions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
 

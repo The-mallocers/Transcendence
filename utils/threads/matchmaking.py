@@ -11,6 +11,7 @@ from utils.pong.enums import GameStatus, ResponseError
 from utils.threads.game import GameThread
 from utils.threads.threads import Threads
 from utils.websockets.channel_send import send_group_error
+import time
 
 
 # Game Will be the new game manager !
@@ -35,18 +36,21 @@ class MatchmakingThread(Threads):
                     game.rset_status(GameStatus.STARTING)
                     
                     self.redis.hset(name="player_game", key=str(game.pL.id),
-                                    value=str(game.get_id()))
+                                    value=str(game.id))
                     self.redis.hset(name="player_game", key=str(game.pR.id),
-                                    value=str(game.get_id()))
+                                    value=str(game.id))
                     # GameThread(manager=game).start()
-                    self._logger('Game started')
+                    # self._stop_event.set()
+                    print('Game started')
                     game = None
 
-                asyncio.sleep(1)
+
+                time.sleep(1) 
 
             except Exception as e:
-                self._logger.error(str(e))
+                print(str(e))
                 traceback.print_exc()
+                pass
                 if game:
                     game.error_game()
                 if game.pL:

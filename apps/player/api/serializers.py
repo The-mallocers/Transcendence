@@ -11,23 +11,14 @@ from utils.pong.objects import PADDLE_WIDTH, CANVAS_WIDTH, OFFSET_PADDLE
 from utils.pong.enums import Side
 
 class PlayerSerializer(serializers.ModelSerializer):
+    id = serializers.SerializerMethodField()
     paddle = serializers.SerializerMethodField()
     side = serializers.SerializerMethodField()
     score = serializers.SerializerMethodField()
 
-    nickname = serializers.CharField(validators=[
-        MinLengthValidator(3),
-        MaxLengthValidator(50),
-        RegexValidator(
-            regex=r'^[a-zA-ZáàäâéèêëíìîïóòôöúùûüçñÁÀÄÂÉÈÊËÍÌÎÏÓÒÔÖÚÙÛÜÇÑ0-9_-]+$',
-            message="Username can only contain letters, numbers, and underscores."
-        )
-    ], required=True)
-
     class Meta:
         model = Player
-        fields = ['id', 'nickname', 'score', 'side', 'paddle']
-        read_only_fields = ['id']
+        fields = ['id', 'score', 'side', 'paddle']
 
     def get_paddle(self, obj):
         paddle = self.context.get('paddle')
@@ -40,6 +31,10 @@ class PlayerSerializer(serializers.ModelSerializer):
     def get_score(self, obj):
         score = self.context.get('score', 0)
         return score
+    
+    def get_id(self, obj):
+        id = self.context.get('id')
+        return id
 
 
 class PlayerInformationSerializer(serializers.ModelSerializer):
@@ -49,7 +44,7 @@ class PlayerInformationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Player
-        fields = ['client_id', 'nickname', 'player_profile', 'paddle']
+        fields = ['client_id', 'player_profile', 'paddle']
 
     def get_paddle(self, obj):
         paddle = self.context.get('paddle')
@@ -75,8 +70,8 @@ class PlayersRedisSerializer(serializers.ModelSerializer):
         paddle_left = Paddle(OFFSET_PADDLE)
         paddle_right = Paddle(CANVAS_WIDTH - OFFSET_PADDLE - PADDLE_WIDTH)
         return {
-            'player_left': PlayerSerializer(instance.get('player_left'), context={'paddle': paddle_left, 'side': Side.LEFT}).data,
-            'player_right': PlayerSerializer(instance.get('player_right'), context={'paddle': paddle_right, 'side': Side.RIGHT}).data
+            'player_left': PlayerSerializer(instance.get('player_left'), context={'paddle': paddle_left, 'side': Side.LEFT, 'id': str(instance.get('player_left').class_client.id)}).data,
+            'player_right': PlayerSerializer(instance.get('player_right'), context={'paddle': paddle_right, 'side': Side.RIGHT, 'id': str(instance.get('player_right').class_client.id)}).data
         }
 
     

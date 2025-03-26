@@ -6,7 +6,6 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from django.conf import settings
 from redis.asyncio import Redis
 
-from apps.player.manager import PlayerManager
 from apps.shared.models import Clients
 from utils.pong.enums import EventType, ResponseError
 from utils.websockets.channel_send import asend_group_error
@@ -55,20 +54,16 @@ class WsConsumer(AsyncWebsocketConsumer):
                 raise ServiceError("Service is not available")
 
             if self.event_type is EventType.MATCHMAKING:
-                player = await PlayerManager.get_player_from_client_db_async(self.client.id)
-                await self.service.process_action(data, self.client, player)
+                await self.service.process_action(data, self.client)
 
             if self.event_type is EventType.GAME:
-                player = await PlayerManager.get_player_from_client_db_async(self.client.id)
-                await self.service.process_action(data, player)
+                await self.service.process_action(data, self.client)
 
             if self.event_type is EventType.CHAT:
                 await self.service.process_action(data, self.client)
 
             if self.event_type is EventType.TOURNAMENT:
-                player = await PlayerManager.get_player_from_client_db_async(
-                    self.client.id)
-                await self.service.process_action(data, player)
+                await self.service.process_action(data, self.client)
             
         except json.JSONDecodeError as e:
             self._logger.error(e)

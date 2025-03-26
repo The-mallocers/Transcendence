@@ -1,3 +1,4 @@
+from multiprocessing import context
 import random
 import traceback
 
@@ -10,7 +11,6 @@ from redis.commands.json.path import Path
 
 from apps.player.api.serializers import PlayersRedisSerializer
 from apps.player.models import Player
-from apps.game.api.serializers import GameSerializer
 from apps.shared.models import Clients
 from apps.tournaments.models import Tournaments
 from utils.pong.enums import GameStatus, ResponseAction, Side
@@ -19,6 +19,7 @@ from utils.util import create_game_id
 from channels.layers import get_channel_layer
 from utils.websockets.channel_send import send_group
 from utils.pong.enums import EventType, ResponseAction
+from asgiref.sync import async_to_sync
 
 class Game(models.Model):
     class Meta:
@@ -27,7 +28,7 @@ class Game(models.Model):
     # ═══════════════════════════════ Database Fields ════════════════════════════════ #
 
     # ━━ PRIMARY FIELD ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
-    pk = IntegerField(primary_key=True, editable=False, null=False, unique=True)
+    id = IntegerField(primary_key=True, editable=False, null=False, unique=True)
 
     # ━━ Game informations ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
     winner = ForeignKey(Player, on_delete=models.SET_NULL, null=True, related_name='winner', blank=True)
@@ -43,36 +44,38 @@ class Game(models.Model):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.redis = RedisConnectionPool.get_sync_connection()
-        self.id = create_game_id()
-        self.game_key = f'game:{self.id}'
+        self.game_id = create_game_id()
+        self.game_key = f'game:{self.game_id}'
         self.pL: Player = None
         self.pR: Player = None
         print(self)
 
     def __str__(self):
-        return f'Game with id: {self.id}'
+        return f'Game with id: {self.game_id}'
     
     def create_redis_game(self):
-        serializer = GameSerializer(self)
+        from apps.game.api.serializers import GameSerializer
+        serializer = GameSerializer(self, context={'id': self.game_id})
+        print(serializer.data)
         self.redis.json().set(self.game_key, Path.root_path(), serializer.data)
 
     def init_players(self):
         #On ajoute a la db de redis , a l'id de la game, les infos des deux joueurs
         players_serializer = PlayersRedisSerializer({'player_left': self.pL, 'player_right': self.pR})
-        self.redis.json().arrappend(self.id, Path("players"), players_serializer.data) 
+        self.redis.json().arrappend(self.game_key, Path("players"), players_serializer.data) 
 
         #getting channel layer
         channel_layer = get_channel_layer()
 
         channel_name_pL = self.redis.hget(name="consumers_channels", key=str(self.pL.class_client.id))
-        channel_layer.group_add(str(self.id), channel_name_pL.decode('utf-8'))
+        async_to_sync(channel_layer.group_add)(str(self.game_id), channel_name_pL)
         channel_name_pR = self.redis.hget(name="consumers_channels", key=str(self.pR.class_client.id))
-        channel_layer.group_add(str(self.id), channel_name_pR.decode('utf-8'))
+        async_to_sync(channel_layer.group_add)(str(self.game_id), channel_name_pR)
 
         self.pL.leave_queue()
         self.pR.leave_queue()
 
-        send_group(self.id, EventType.GAME, ResponseAction.JOIN_GAME)
+        send_group(self.game_id, EventType.GAME, ResponseAction.JOIN_GAME)
 
     def error_game(self):
         self.rset_status(GameStatus.ERROR)

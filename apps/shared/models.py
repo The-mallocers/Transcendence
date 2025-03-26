@@ -21,7 +21,7 @@ class Clients(models.Model):
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
     twoFa = models.ForeignKey(TwoFA, on_delete=models.CASCADE)
     rights = models.ForeignKey('admin.Rights', on_delete=models.CASCADE, null=True)
-    player = models.ForeignKey(Player, on_delete=models.CASCADE, null=True)
+    # player = models.ForeignKey(Player, on_delete=models.CASCADE, null=True)
 
     class Meta:
         db_table = 'client_list'

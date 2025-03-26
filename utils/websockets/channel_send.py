@@ -1,9 +1,7 @@
 from channels.layers import get_channel_layer
-from django.conf import settings
-from redis.asyncio import Redis
-from redis.commands.json.path import Path
 
 from utils.pong.enums import ResponseError, EventType, ResponseAction
+from asgiref.sync import async_to_sync
 
 async def asend_group(channel_name, event_type: EventType, msg_type: ResponseAction, content=None, close=False):
     channel_layer = get_channel_layer()
@@ -24,7 +22,7 @@ async def asend_group(channel_name, event_type: EventType, msg_type: ResponseAct
 
 def send_group(channel_name, event_type: EventType, msg_type: ResponseAction, content=None, close=False):
     channel_layer = get_channel_layer()
-    channel_layer.group_send(
+    async_to_sync(channel_layer.group_send)(
         str(channel_name),
         {
             'type': 'send_channel',
@@ -58,7 +56,7 @@ async def asend_group_error(channel_name, error_type: ResponseError, content=Non
 
 def send_group_error(channel_name, error_type: ResponseError, content=None, close=False):
     channel_layer = get_channel_layer()
-    channel_layer.group_send(
+    async_to_sync(channel_layer.group_send)(
         str(channel_name),
         {
             'type': 'send_channel',
