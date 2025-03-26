@@ -1,7 +1,7 @@
 from json import JSONDecodeError, loads
 
 from utils.pong.enums import EventType, ResponseError
-from utils.websockets.channel_send import send_group_error
+from utils.websockets.channel_send import asend_group_error
 from utils.websockets.consumers.consumer import WsConsumer
 from utils.websockets.services.game import GameService
 from utils.websockets.services.matchmaking import MatchmakingService
@@ -23,7 +23,7 @@ class GameConsumer(WsConsumer):
 
         except JSONDecodeError as e:
             self._logger.error(e)
-            await send_group_error(self.client.id, ResponseError.JSON_ERROR)
+            await asend_group_error(self.client.id, ResponseError.JSON_ERROR)
 
     async def disconnect(self, close_code):
         print('disconnect')

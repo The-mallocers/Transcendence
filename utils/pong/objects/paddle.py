@@ -9,11 +9,11 @@ from utils.pong.objects import PADDLE_WIDTH, PADDLE_HEIGHT, PADDLE_SPEED, CANVAS
 
 @dataclass
 class Paddle:
-    def __init__(self, redis=None, game_id=None, player_id=None):
+    def __init__(self, redis=None, game_id=None, player_id=None, x=0):
         self._redis: Redis = redis
         self.width: float = PADDLE_WIDTH
         self.height: float = PADDLE_HEIGHT
-        self.x: float = 0
+        self.x: float = x
         self.y: float = (CANVAS_HEIGHT / 2) - (PADDLE_HEIGHT / 2)
         self.speed: float = PADDLE_SPEED
         self.move: PaddleMove = PaddleMove.IDLE

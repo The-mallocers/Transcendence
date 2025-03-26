@@ -42,9 +42,6 @@ class GameManager:
 
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ Functions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
 
-    async def error_game(self):
-        await self.rset_status(GameStatus.ERROR)
-        await self._redis.delete(f'game:{str(self._game.id)}')
 
     def get_id(self):
         if self._game:

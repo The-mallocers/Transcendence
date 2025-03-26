@@ -13,7 +13,7 @@ from utils.pong.objects.ball import Ball
 from utils.pong.objects.objects_state import GameState
 from utils.pong.objects.paddle import Paddle
 from utils.pong.objects.score import Score
-from utils.websockets.channel_send import send_group
+from utils.websockets.channel_send import asend_group
 
 
 class PongLogic:
@@ -126,26 +126,26 @@ class PongLogic:
         # self._logger.info(changes)
         if changes['ball']:
             await self.ball.update()
-            await send_group(self.game_id, EventType.UPDATE, ResponseAction.BALL_UPDATE, BallSerializer(self.ball).data)
+            await asend_group(self.game_id, EventType.UPDATE, ResponseAction.BALL_UPDATE, BallSerializer(self.ball).data)
 
         if changes['paddle_pL']:
             await self.paddle_pL.update()
-            await send_group(self.game_id, EventType.UPDATE, ResponseAction.PADDLE_LEFT_UPDATE,
+            await asend_group(self.game_id, EventType.UPDATE, ResponseAction.PADDLE_LEFT_UPDATE,
                              PaddleSerializer(self.paddle_pL).data)
 
         if changes['paddle_pR']:
             await self.paddle_pR.update()
-            await send_group(self.game_id, EventType.UPDATE, ResponseAction.PADDLE_RIGHT_UPDATE,
+            await asend_group(self.game_id, EventType.UPDATE, ResponseAction.PADDLE_RIGHT_UPDATE,
                              PaddleSerializer(self.paddle_pR).data)
 
         if changes['score_pL']:
             await self.score_pL.update()
-            await send_group(self.game_id, EventType.UPDATE, ResponseAction.SCORE_LEFT_UPDATE,
+            await asend_group(self.game_id, EventType.UPDATE, ResponseAction.SCORE_LEFT_UPDATE,
                              await self.score_pL.get_score())
 
         if changes['score_pR']:
             await self.score_pR.update()
-            await send_group(self.game_id, EventType.UPDATE, ResponseAction.SCORE_RIGHT_UPDATE,
+            await asend_group(self.game_id, EventType.UPDATE, ResponseAction.SCORE_RIGHT_UPDATE,
                              await self.score_pR.get_score())
 
     async def _reset_ball(self, ball):

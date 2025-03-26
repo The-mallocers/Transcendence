@@ -9,7 +9,7 @@ from redis.asyncio import Redis
 from apps.player.manager import PlayerManager
 from apps.shared.models import Clients
 from utils.pong.enums import EventType, ResponseError
-from utils.websockets.channel_send import send_group_error
+from utils.websockets.channel_send import asend_group_error
 from utils.websockets.services.services import ServiceError, BaseServices
 
 
@@ -33,7 +33,7 @@ class WsConsumer(AsyncWebsocketConsumer):
         await self.accept()
         if self.client is None:
             await self.channel_layer.group_add('consumer_error', self.channel_name)
-            await send_group_error('consumer_error', ResponseError.PLAYER_NOT_FOUND, close=True)
+            await asend_group_error('consumer_error', ResponseError.PLAYER_NOT_FOUND, close=True)
             return
         else:
             await self.channel_layer.group_add(str(self.client.id), self.channel_name)
@@ -72,11 +72,11 @@ class WsConsumer(AsyncWebsocketConsumer):
             
         except json.JSONDecodeError as e:
             self._logger.error(e)
-            await send_group_error(self.client.id, ResponseError.JSON_ERROR)
+            await asend_group_error(self.client.id, ResponseError.JSON_ERROR)
 
         except ServiceError as e:
             self._logger.error(e)
-            await send_group_error(self.client.id, ResponseError.SERVICE_ERROR, content=str(e))
+            await asend_group_error(self.client.id, ResponseError.SERVICE_ERROR, content=str(e))
 
     async def send_channel(self, event):
         message = event['message']

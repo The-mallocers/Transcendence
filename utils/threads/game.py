@@ -14,7 +14,7 @@ from utils.pong.objects.ball import Ball
 from utils.pong.objects.paddle import Paddle
 from utils.pong.objects.score import Score
 from utils.threads.threads import Threads
-from utils.websockets.channel_send import send_group, send_group_error
+from utils.websockets.channel_send import asend_group, asend_group_error
 
 
 class GameThread(Threads):
@@ -42,7 +42,7 @@ class GameThread(Threads):
             self._logger.error(e)
             traceback.print_exc()
             await self.game_manager.rset_status(GameStatus.ERROR)
-            await send_group_error(self.game_id, ResponseError.EXCEPTION, close=True)
+            await asend_group_error(self.game_id, ResponseError.EXCEPTION, close=True)
             self.stop()
 
     def cleanup(self):
@@ -76,14 +76,14 @@ class GameThread(Threads):
 
     async def _starting(self):
         if await self.game_manager.rget_status() is GameStatus.STARTING:
-            await send_group(self.game_id, EventType.GAME, ResponseAction.STARTING)
+            await asend_group(self.game_id, EventType.GAME, ResponseAction.STARTING)
             pL_serializer = PlayerInformationSerializer(self.game_manager.pL.player,
                                                         context={'id': self.game_manager.pL.id, 'paddle': self.game_manager.pL.paddle})
             pR_serializer = PlayerInformationSerializer(self.game_manager.pR.player,
                                                         context={'id': self.game_manager.pR.id, 'paddle': self.game_manager.pR.paddle})
             pL_data = await sync_to_async(lambda: pL_serializer.data)()
             pR_data = await sync_to_async(lambda: pR_serializer.data)()
-            await send_group(self.game_id, EventType.GAME, ResponseAction.PLAYER_INFOS, {
+            await asend_group(self.game_id, EventType.GAME, ResponseAction.PLAYER_INFOS, {
                 'left': pL_data,
                 'right': pR_data
             })
@@ -93,14 +93,14 @@ class GameThread(Threads):
 
     async def _running(self):
         if await self.game_manager.rget_status() is GameStatus.RUNNING:
-            await self.execute_once(send_group, self.game_id, EventType.GAME, ResponseAction.STARTED)
+            await self.execute_once(asend_group, self.game_id, EventType.GAME, ResponseAction.STARTED)
             await self.logic.game_task()
 
     async def _ending(self):
         if await self.game_manager.rget_status() is GameStatus.ENDING:
             if await self.game_manager.rget_pL_score() == self.game_manager._game.points_to_win or await self.game_manager.rget_pR_score() == self.game_manager._game.points_to_win:
                 await self.game_manager.set_result()
-                await send_group(self.game_id, EventType.GAME, ResponseAction.GAME_ENDING, self.game_id)
+                await asend_group(self.game_id, EventType.GAME, ResponseAction.GAME_ENDING, self.game_id)
                 print("sending to group that game is over")
             else: #ya eu une erreur, genre client deco ou erreur sur le server
                 pass

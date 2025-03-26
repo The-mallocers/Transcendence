@@ -15,7 +15,7 @@ from utils.pong.enums import EventType, ResponseError, ResponseAction, Side
 from utils.pong.objects.paddle import Paddle
 from utils.pong.objects.score import Score
 from utils.redis import RedisConnectionPool
-from utils.websockets.channel_send import send_group_error, send_group
+from utils.websockets.channel_send import asend_group_error, asend_group
 
 
 class PlayerManager:
@@ -45,7 +45,7 @@ class PlayerManager:
 
             #This is just to find a side.
             if self.player.id in player_ids:
-                return await send_group_error(self.player.id, ResponseError.ALREADY_JOINED)
+                return await asend_group_error(self.player.id, ResponseError.ALREADY_JOINED)
             else:
                 if len(player_ids) == 0:
                     rand_side = random.choice(list(Side))
@@ -57,7 +57,7 @@ class PlayerManager:
                     if first_player.side == Side.LEFT.value:
                         self._player_game.side = Side.RIGHT
                 elif len(player_ids) == 2:
-                    return await send_group_error(self.player.id, ResponseError.GAME_FULL)
+                    return await asend_group_error(self.player.id, ResponseError.GAME_FULL)
                 await sync_to_async(self._player_game.save)()
 
             # ── Send Reponse To Player ────────────────────────────────────────────────
@@ -74,11 +74,11 @@ class PlayerManager:
             channel_name = await self._redis.hget(name="consumers_channels", key=str(client.id))
             await channel_layer.group_add(str(game_manager.get_id()), channel_name.decode('utf-8'))
 
-            await send_group(self.player.id, EventType.GAME, ResponseAction.JOIN_GAME)
+            await asend_group(self.player.id, EventType.GAME, ResponseAction.JOIN_GAME)
             await self.leave_mm()
 
         except Exception as e:
-            await send_group_error(self.player.id, ResponseError.JOINING_ERROR)
+            await asend_group_error(self.player.id, ResponseError.JOINING_ERROR)
             await self.leave_mm()
             raise RuntimeError(str(e))
 

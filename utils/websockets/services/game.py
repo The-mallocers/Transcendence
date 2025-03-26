@@ -5,7 +5,7 @@ from apps.player.manager import PlayerManager
 from apps.player.models import Player
 from apps.shared.models import Clients
 from utils.pong.enums import GameStatus, ResponseError, status_order
-from utils.websockets.channel_send import send_group_error
+from utils.websockets.channel_send import asend_group_error
 from utils.websockets.services.services import BaseServices
 
 
@@ -30,7 +30,7 @@ class GameService(BaseServices):
             await self.game_manager.pR.paddle.update()
         else:
             client = await Clients.get_client_by_player_id_async(player.id)
-            await send_group_error(client.id, ResponseError.NO_GAME)
+            await asend_group_error(client.id, ResponseError.NO_GAME)
             self._logger.error(f"No active game found for player {player.id}")
         return True
 
@@ -44,9 +44,9 @@ class GameService(BaseServices):
     async def _handle_start_game(self, data, player: Player):
         status = await self.game_manager.rget_status()
         if status_order.index(status) < status_order.index(GameStatus.STARTING):
-            await send_group_error(player.id, ResponseError.NOT_READY_TO_START)
+            await asend_group_error(player.id, ResponseError.NOT_READY_TO_START)
         elif status_order.index(status) > status_order.index(GameStatus.STARTING):
-            await send_group_error(player.id, ResponseError.ALREADY_START)
+            await asend_group_error(player.id, ResponseError.ALREADY_START)
         elif status is GameStatus.STARTING:
             await self.game_manager.rset_status(GameStatus.RUNNING)
 

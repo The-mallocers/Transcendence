@@ -6,7 +6,9 @@ from apps.player.models import Player
 from apps.pong.api.serializers import PaddleSerializer
 from apps.shared.models import Clients
 from utils.pong.enums import Side
-
+from utils.pong.objects.paddle import Paddle
+from utils.pong.objects import PADDLE_WIDTH, CANVAS_WIDTH, OFFSET_PADDLE
+from utils.pong.enums import Side
 
 class PlayerSerializer(serializers.ModelSerializer):
     paddle = serializers.SerializerMethodField()
@@ -32,7 +34,7 @@ class PlayerSerializer(serializers.ModelSerializer):
         return PaddleSerializer(paddle).data
 
     def get_side(self, obj):
-        side = self.context.get('side', Side.LEFT) #
+        side = self.context.get('side', Side.LEFT)
         return side
 
     def get_score(self, obj):
@@ -60,6 +62,24 @@ class PlayerInformationSerializer(serializers.ModelSerializer):
     def get_player_profile(self, obj):
         client = Clients.get_client_by_player(self.context.get('id'))
         return str(client.profile.profile_picture) if client and client.profile else None
+
+class PlayersRedisSerializer(serializers.ModelSerializer):
+    player_left = PlayerSerializer()
+    player_right = PlayerSerializer()
+
+    class Meta:
+        model = Player
+        fields = ['player_left', 'player_right']
+
+    def to_representation(self, instance):
+        paddle_left = Paddle(OFFSET_PADDLE)
+        paddle_right = Paddle(CANVAS_WIDTH - OFFSET_PADDLE - PADDLE_WIDTH)
+        return {
+            'player_left': PlayerSerializer(instance.get('player_left'), context={'paddle': paddle_left, 'side': Side.LEFT}).data,
+            'player_right': PlayerSerializer(instance.get('player_right'), context={'paddle': paddle_right, 'side': Side.RIGHT}).data
+        }
+
+    
 
 class GameFinishSerializer(serializers.ModelSerializer):
     winner = serializers.SerializerMethodField()
