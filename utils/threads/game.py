@@ -74,10 +74,9 @@ class GameThread(Threads):
 
     def _ending(self):
         if self.game.rget_status() is GameStatus.ENDING:
-            if self.game.rget_pL_score() == self.game._game.points_to_win or self.game.rget_pR_score() == self.game._game.points_to_win:
-                self.game.set_result()
+            if self.logic.score_pL.get_score() == self.game.points_to_win or self.logic.score_pR.get_score() == self.game.points_to_win:
+                self.logic.set_result()
                 send_group(self.game_id, EventType.GAME, ResponseAction.GAME_ENDING, self.game_id)
-                print("sending to group that game is over")
             else: #ya eu une erreur, genre client deco ou erreur sur le server
                 pass
             
@@ -86,11 +85,6 @@ class GameThread(Threads):
 
     def _stopping(self):
         self.game.rset_status(GameStatus.FINISHED)
-        self.redis.hdel('player_game', self.game.pL.id, self.game.pR.id)
-        asyncio.sleep(1)
-        #Sending the return message before stopping, maybe bad maybe good idk
-        # send_group(self.game_id, EventType.ENDGAME, ResponseAction.ENDGAME, {
-        #         # 'left': pL_data,
-        #         # 'right': pR_data
-        #     })
+        self.redis.hdel('player_game', self.game.pL.client_id, self.game.pR.client_id)
+        time.sleep(1)
         self.stop()

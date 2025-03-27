@@ -28,8 +28,8 @@ class Game(models.Model):
     id = IntegerField(primary_key=True, editable=False, null=False, unique=True)
 
     # ━━ Game informations ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
-    winner = ForeignKey(Player, on_delete=models.SET_NULL, null=True, related_name='winner', blank=True)
-    loser = ForeignKey(Player, on_delete=models.SET_NULL, null=True, related_name='loser', blank=True)
+    winner = ForeignKey(Player, on_delete=models.SET_NULL, related_name='winner', null=True)
+    loser = ForeignKey(Player, on_delete=models.SET_NULL, related_name='loser', null=True)
     tournament_id = ForeignKey(Tournaments, on_delete=models.SET_NULL,
                                null=True, related_name='tournament', blank=True)
     created_at = DateTimeField(default=timezone.now)

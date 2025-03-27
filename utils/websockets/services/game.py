@@ -23,16 +23,6 @@ class GameService(BaseServices):
             self.game_key = f'game:{game_id}'
             self.pL = await self.redis.json().get(self.game_key, Path('player_left'))
             self.pR = await self.redis.json().get(self.game_key, Path('player_right'))
-            
-            # le client est bien associer a une game
-            
-            # game = await GameManager.get_game_db_async(game_id_bytes.decode('utf-8'))
-            # # self.game_manager = GameManager(game, self.redis)
-            # self.game_manager._redis = self.redis
-            # self.game_manager.pL = None #PlayerManager(await self.game_manager.rget_pL_id(), self.game_manager.get_id(),self.redis)
-            # self.game_manager.pR = None #PlayerManager(await self.game_manager.rget_pR_id(), self.game_manager.get_id(),self.redis)
-            # await self.game_manager.pL.paddle.update()
-            # await self.game_manager.pR.paddle.update()
             return True
         else:
             await asend_group_error(client.id, ResponseError.NO_GAME)
@@ -67,9 +57,6 @@ class GameService(BaseServices):
             if str(client.id) == self.pR['id']:
                 await self.redis.json().set(self.game_key, Path('player_right.paddle.move'), data['data']['args'])
         
-        status2 = GameStatus(await self.redis.json().get(self.game_key, Path('status')))
-        print(status2)
-
     async def handle_disconnect(self, client):
         pass
 

@@ -17,13 +17,13 @@ class Player(models.Model):
 
     # ━━ PRIMARY FIELD ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
     game = ForeignKey('game.Game', on_delete=models.SET_NULL, null=True)
-    client = ForeignKey('shared.Clients', on_delete=models.CASCADE, null=False)
+    client = ForeignKey('shared.Clients', on_delete=models.SET_NULL, null=True)
 
     # ━━ PLAYER INFOS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
     score = IntegerField(default=0)
 
     # ═════════════════════════════════ Local Fields ═════════════════════════════════ #
-    def __init__(self, client_id, *args, **kwargs):
+    def __init__(self, client_id=None, *args, **kwargs):
         from apps.shared.models import Clients
         super().__init__(*args, **kwargs)
         self.class_client = Clients.get_client_by_id(client_id)

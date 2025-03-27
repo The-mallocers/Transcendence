@@ -5,6 +5,8 @@ import time
 
 from apps.pong.api.serializers import PaddleSerializer, BallSerializer
 from apps.game.models import Game
+from apps.player.models import Player
+from apps.shared.models import Clients
 from utils.pong.enums import EventType, ResponseAction
 from utils.pong.enums import GameStatus
 from utils.pong.enums import PaddleMove
@@ -154,3 +156,33 @@ class PongLogic:
         ball.set_y(CANVAS_HEIGHT / 2)
         ball.set_dx(BALL_SPEED * (1 if random.random() > 0.5 else -1))
         ball.set_dy(BALL_SPEED * (1 if random.random() > 0.5 else -1))
+        
+    def set_result(self):
+        if self.score_pL.get_score() > self.score_pR.get_score():
+            winner = Player()
+            winner.client = Clients.get_client_by_id(self.game.pL.client_id)
+            winner.score = self.score_pL.get_score()
+            winner.save()
+            loser = Player()
+            loser.client = Clients.get_client_by_id(self.game.pR.client_id)
+            loser.score = self.score_pR.get_score()
+            loser.save()
+            # loser = Player.objects.create(client=Clients.get_client_by_id(self.game.pR.client_id), score=self.score_pR.get_score())
+        elif self.score_pL.get_score() < self.score_pR.get_score():
+            winner = Player()
+            winner.client = Clients.get_client_by_id(self.game.pR.client_id)
+            winner.score = self.score_pR.get_score()
+            winner.save()
+            loser = Player()
+            loser.client = Clients.get_client_by_id(self.game.pL.client_id)
+            loser.score = self.score_pL.get_score()
+            loser.save()
+            # winner = Player.objects.create(client=client, score=self.score_pR.get_score())
+            # loser = Player.objects.create(client=Clients.get_client_by_id(self.game.pL.client_id), score=self.score_pL.get_score())
+        finished_game = Game.objects.create(id=self.game.game_id, winner=winner, loser=loser, points_to_win=self.game.points_to_win)
+        winner.game = finished_game
+        winner.save()
+        loser.game = finished_game
+        loser.save()
+        # winner.update(game=finished_game)
+        # loser.update(game=finished_game)
