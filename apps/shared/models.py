@@ -15,22 +15,23 @@ class Clients(models.Model):
     #Primary key
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False,
                           null=False)
-
+    
     #Joined tables
     password = models.ForeignKey(Password, on_delete=models.CASCADE)
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
     twoFa = models.ForeignKey(TwoFA, on_delete=models.CASCADE)
     rights = models.ForeignKey('admin.Rights', on_delete=models.CASCADE, null=True)
     player = models.ForeignKey(Player, on_delete=models.CASCADE, null=True)
-
+    friendrequest = models.ForeignKey('notifications.Friend', on_delete=models.CASCADE, null=True)
+    
     class Meta:
         db_table = 'client_list'
 
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ SURCHARGE ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
 
     def __str__(self):
-        return f"Client data => Email:{self.profile.email}, Username:{self.profile.username}"
-
+        # return f"Client data => Email:{self.profile.email}, Username:{self.profile.username}"
+        return f"Client data => ID:{self.id}"
     @property
     def is_authenticated(self):
         return True
@@ -104,7 +105,6 @@ class Clients(models.Model):
             if not token:
                 return None
             return Clients.get_client_by_id(token.SUB)
-
         return None
 
     @staticmethod
@@ -164,4 +164,13 @@ class Clients(models.Model):
         try:
             return Clients.objects.select_related('player').get(id=client_id)
         except Clients.DoesNotExist:
+            return None
+
+    @sync_to_async
+    def get_friend_table(self):
+        try:
+            with transaction.atomic():
+                return self.friendrequest
+        except Exception as e:
+            print(f"Error retrieving friend request: {e}")
             return None

@@ -1,5 +1,5 @@
 from django.db import transaction
-from apps.notifications.models import FriendRequest
+from apps.notifications.models import Friend
 from rest_framework import serializers
 
 from apps.admin.models import Rights
@@ -34,9 +34,9 @@ class ClientSerializer(serializers.ModelSerializer):
                 player = Player.objects.create(**player_data, stats=stats)
                 two_fa = TwoFA.objects.create()
                 right = Rights.objects.create()
+                friendrequest = Friend.objects.create(email=profile.email)
                 client = Clients.objects.create(profile=profile, password=passwrod, twoFa=two_fa, rights=right,
-                                                player=player)
-                FriendRequest.objects.create(id=client, friends=None, pending_friends=None)
+                                                player=player, friendrequest=friendrequest)
                 
         except Exception as e:
             raise serializers.ValidationError(f"Error creating client: {str(e)}")
