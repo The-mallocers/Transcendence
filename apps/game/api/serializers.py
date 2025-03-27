@@ -8,14 +8,13 @@ from utils.pong.objects.ball import Ball
 
 
 class GameSerializer(serializers.ModelSerializer):
-    players = serializers.PrimaryKeyRelatedField(queryset=Player.objects.all(), many=True)  # Permet l'ajout/modif
     ball = serializers.SerializerMethodField()
     status = serializers.SerializerMethodField()
     game_id = serializers.SerializerMethodField()
 
     class Meta:
         model = Game
-        fields = ['game_id', 'players', 'ball', 'status']
+        fields = ['game_id', 'status', 'ball']
         # fields = ['id', 'players', 'ball', 'status', 'timer']
 
     def get_ball(self, obj):
@@ -23,7 +22,7 @@ class GameSerializer(serializers.ModelSerializer):
         return BallSerializer(ball).data
     
     def get_status(self, obj):
-        status = GameStatus.CREATING
+        status = GameStatus(GameStatus.CREATING)
         return status
     
     def get_game_id(self, obj):

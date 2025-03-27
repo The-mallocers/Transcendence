@@ -1,63 +1,74 @@
-from typing import Dict, Any
-
-from apps.game.manager import GameManager
-from apps.player.models import Player
+import logging
+from apps.game.models import Game
 from apps.shared.models import Clients
-from utils.pong.enums import GameStatus, ResponseError, status_order
+from utils.pong.enums import GameStatus, ResponseError, status_order, Side
+from utils.pong.objects.paddle import Paddle
 from utils.websockets.channel_send import asend_group_error
 from utils.websockets.services.services import BaseServices
+from redis.commands.json.path import Path
+from asgiref.sync import sync_to_async
 
 
 class GameService(BaseServices):
     def __init__(self):
         super().__init__()
-        self.game_manager: GameManager = None
+        # self.game_manager: GameManager = None
 
-    async def init(self, player: Player):
+    async def init(self, client: Clients) -> bool:
         await super().init()
-        game_id_bytes = await self.redis.hget(name="player_game", key=str(player.id))
+        game_id_bytes = await self.redis.hget(name="current_matches", key=str(client.id))
+        game_id = game_id_bytes.decode('utf-8')
 
-        if game_id_bytes:
-            game = await GameManager.get_game_db_async(game_id_bytes.decode('utf-8'))
-            self.game_manager = GameManager(game, self.redis)
-            self.game_manager._redis = self.redis
-            self.game_manager.pL = None #PlayerManager(await self.game_manager.rget_pL_id(), self.game_manager.get_id(),self.redis)
-            self.game_manager.pR = None #PlayerManager(await self.game_manager.rget_pR_id(), self.game_manager.get_id(),self.redis)
-            await self.game_manager.pL.paddle.update()
-            await self.game_manager.pR.paddle.update()
+        if game_id:
+            self.game_key = f'game:{game_id}'
+            self.pL = await self.redis.json().get(self.game_key, Path('player_left'))
+            self.pR = await self.redis.json().get(self.game_key, Path('player_right'))
+            
+            # le client est bien associer a une game
+            
+            # game = await GameManager.get_game_db_async(game_id_bytes.decode('utf-8'))
+            # # self.game_manager = GameManager(game, self.redis)
+            # self.game_manager._redis = self.redis
+            # self.game_manager.pL = None #PlayerManager(await self.game_manager.rget_pL_id(), self.game_manager.get_id(),self.redis)
+            # self.game_manager.pR = None #PlayerManager(await self.game_manager.rget_pR_id(), self.game_manager.get_id(),self.redis)
+            # await self.game_manager.pL.paddle.update()
+            # await self.game_manager.pR.paddle.update()
+            return True
         else:
-            client = await Clients.get_client_by_player_id_async(player.id)
             await asend_group_error(client.id, ResponseError.NO_GAME)
-            self._logger.error(f"No active game found for player {player.id}")
+            self._logger.error(f"No active game found for client {client.id}")
         return True
 
-    async def process_action(self, data: Dict[str, Any], *args):
-        # if await self.redis.hget(name='player_game', key=str(args[0].id)) is None:
-        #     client = await Clients.get_client_by_player_id_async(args[0].id)
-        #     await send_group_error(client.id, ResponseError.NO_GAME)
-        # else:
-        return await super().process_action(data, *args)
+    # async def process_action(self, data: Dict[str, Any], *args):
+    #     # if await self.redis.hget(name='player_game', key=str(args[0].id)) is None:
+    #     #     client = await Clients.get_client_by_player_id_async(args[0].id)
+    #     #     await send_group_error(client.id, ResponseError.NO_GAME)
+    #     # else:
+    #     return await super().process_action(data, *args)
 
-    async def _handle_start_game(self, data, player: Player):
-        status = await self.game_manager.rget_status()
-        if status_order.index(status) < status_order.index(GameStatus.STARTING):
-            await asend_group_error(player.id, ResponseError.NOT_READY_TO_START)
-        elif status_order.index(status) > status_order.index(GameStatus.STARTING):
-            await asend_group_error(player.id, ResponseError.ALREADY_START)
-        elif status is GameStatus.STARTING:
-            await self.game_manager.rset_status(GameStatus.RUNNING)
+    async def _handle_start_game(self, data, client: Clients):
+        status = GameStatus(await self.redis.json().get(self.game_key, Path('status')))
+        if status_order.index(status) < status_order.index(GameStatus.MATCHMAKING):
+            await asend_group_error(client.id, ResponseError.NOT_READY_TO_START)
+        elif status_order.index(status) > status_order.index(GameStatus.MATCHMAKING):
+            await asend_group_error(client.id, ResponseError.ALREADY_START)
+        elif status is GameStatus.MATCHMAKING:
+            await self.redis.json().set(self.game_key, Path('status'), GameStatus.STARTING)
 
-    async def _handle_stop_game(self, data, player: Player):
+    async def _handle_stop_game(self, data, client: Clients):
         await self.game_manager.rset_status(GameStatus.ENDING)
 
-    async def _handle_paddle_move(self, data, player: Player):
-        # This will only update the redis db in the future
-        #So that we dont directly change the paddle everytime.
-        if await self.game_manager.rget_status() is GameStatus.RUNNING:
-            if str(player.id) == str(self.game_manager.pL.id):
-                await self.game_manager.pL.paddle.set_move(data['data']['args'])
-            if str(player.id) == str(self.game_manager.pR.id):
-                await self.game_manager.pR.paddle.set_move(data['data']['args'])
+    async def _handle_paddle_move(self, data, client: Clients):
+        status = GameStatus(await self.redis.json().get(self.game_key, Path('status')))
+        if status is GameStatus.RUNNING:
+            logging.info(client.id, self.pL)
+            if str(client.id) == self.pL['id']:
+                await self.redis.json().set(self.game_key, Path('player_left.paddle.move'), data['data']['args'])
+            if str(client.id) == self.pR['id']:
+                await self.redis.json().set(self.game_key, Path('player_right.paddle.move'), data['data']['args'])
+        
+        status2 = GameStatus(await self.redis.json().get(self.game_key, Path('status')))
+        print(status2)
 
     async def handle_disconnect(self, client):
         pass

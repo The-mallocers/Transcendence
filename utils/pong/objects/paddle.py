@@ -1,99 +1,99 @@
 from dataclasses import dataclass
 
-from redis.asyncio import Redis
 from redis.commands.json.path import Path
 
 from utils.pong.enums import PaddleMove
 from utils.pong.objects import PADDLE_WIDTH, PADDLE_HEIGHT, PADDLE_SPEED, CANVAS_HEIGHT
-
-# from utils.pong.enums import PaddleMove
+from apps.player.models import Player
 
 
 @dataclass
 class Paddle:
-    def __init__(self, redis=None, game_id=None, player_id=None, x=0):
-        # pass
-        self._redis: Redis = redis
+    def __init__(self, game_id=None, redis=None, player_id=None, x=0):
+        # ── Fields ────────────────────────────────────────────────────────────────────────
         self.width: float = PADDLE_WIDTH
         self.height: float = PADDLE_HEIGHT
         self.x: float = x
         self.y: float = (CANVAS_HEIGHT / 2) - (PADDLE_HEIGHT / 2)
         self.speed: float = PADDLE_SPEED
-        self.move: PaddleMove = PaddleMove.IDLE
+        
+        # ── Utils ─────────────────────────────────────────────────────────────────────────    
+        self.redis = redis
         self.game_key = f'game:{game_id}'
         self.player_id = player_id
+        self.move: PaddleMove = PaddleMove.IDLE
+        self.player_side = Player.get_player_side(self.player_id, self.game_key, self.redis)
 
-    async def update(self):
-        # pass
-        print(self)
-        self.width = await self.get_width()
-        self.height = await self.get_height()
-        self.x = await self.get_x()
-        self.y = await self.get_y()
-        self.speed = await self.get_speed()
+    def update(self):
+        self.width = self.get_width()
+        self.height = self.get_height()
+        self.x = self.get_x()
+        self.y = self.get_y()
+        self.speed = self.get_speed()
 
     def __str__(self):
         return f'X: {self.x}, Y: {self.y}'
 
     # ── Getter ────────────────────────────────────────────────────────────────────────
 
-    async def get_width(self):
-        return await self._redis.json().get(self.game_key, Path('players[?(@.id=="{}")].paddle.width'.format(self.player_id)))
+    def get_width(self):
+        return self.redis.json().get(self.game_key, Path(f'player_{self.player_side}.paddle.width'))
 
-    async def get_height(self):
-        return await self._redis.json().get(self.game_key, Path('players[?(@.id=="{}")].paddle.height'.format(self.player_id)))
+    def get_height(self):
+        return self.redis.json().get(self.game_key, Path(f'player_{self.player_side}.paddle.height'))
 
-    async def get_x(self):
-        return await self._redis.json().get(self.game_key, Path('players[?(@.id=="{}")].paddle.x'.format(self.player_id)))
+    def get_x(self):
+        return self.redis.json().get(self.game_key, Path(f'player_{self.player_side}.paddle.x'))
 
-    async def get_y(self):
-        return await self._redis.json().get(self.game_key, Path('players[?(@.id=="{}")].paddle.y'.format(self.player_id)))
+    def get_y(self):
+        return self.redis.json().get(self.game_key, Path(f'player_{self.player_side}.paddle.y'))
 
-    async def get_speed(self):
-        return await self._redis.json().get(self.game_key, Path('players[?(@.id=="{}")].paddle.speed'.format(self.player_id)))
+    def get_speed(self):
+        return self.redis.json().get(self.game_key, Path(f'player_{self.player_side}.paddle.speed'))
 
-    async def get_move(self):
-        return await self._redis.json().get(self.game_key, Path('players[?(@.id=="{}")].paddle.move'.format(self.player_id)))
+    def get_move(self):
+        return self.redis.json().get(self.game_key, Path(f'player_{self.player_side}.paddle.move'))
 
-    # ── Setter ────────────────────────────────────────────────────────────────────────
+# ── Setter ────────────────────────────────────────────────────────────────────────
 
-    async def set_width(self, width):
-        await self._redis.json().set(self.game_key, Path('players[?(@.id=="{}")].paddle.width'.format(self.player_id)), width)
+    def set_width(self, width):
+        self.redis.json().set(self.game_key, Path(f'player_{self.player_side}.paddle.width'), width)
         self.width = width
 
-    async def set_height(self, height):
-        await self._redis.json().set(self.game_key, Path('players[?(@.id=="{}")].paddle.height'.format(self.player_id)), height)
+    def set_height(self, height):
+        self.redis.json().set(self.game_key, Path(f'player_{self.player_side}.paddle.height'), height)
         self.height = height
 
-    async def set_x(self, x):
-        await self._redis.json().set(self.game_key, Path('players[?(@.id=="{}")].paddle.x'.format(self.player_id)), x)
+    def set_x(self, x):
+        self.redis.json().set(self.game_key, Path(f'player_{self.player_side}.paddle.x'), x)
         self.x = x
 
-    async def set_y(self, y):
-        await self._redis.json().set(self.game_key, Path('players[?(@.id=="{}")].paddle.y'.format(self.player_id)), y)
+    def set_y(self, y):
+        self.redis.json().set(self.game_key, Path(f'player_{self.player_side}.paddle.y'), y)
         self.y = y
 
-    async def set_speed(self, speed):
-        await self._redis.json().set(self.game_key, Path('players[?(@.id=="{}")].paddle.speed'.format(self.player_id)), speed)
+    def set_speed(self, speed):
+        self.redis.json().set(self.game_key, Path(f'player_{self.player_side}.paddle.speed'), speed)
         self.speed = speed
 
-    async def set_move(self, move):
-        await self._redis.json().set(self.game_key, Path('players[?(@.id=="{}")].paddle.move'.format(self.player_id)), move)
+    def set_move(self, move):
+        self.redis.json().set(self.game_key, Path(f'player_{self.player_side}.paddle.move'), move)
         self.move = move
+    
 
-    # ── Helper Methods for Incrementing/Decrementing ─────────────────────────────────
+# ── Helper Methods for Incrementing/Decrementing ─────────────────────────────────
 
-    async def increase_x(self):
-        current_x = await self.get_x()
-        await self.set_x(current_x + await self.get_speed())
+    def increase_x(self):
+        current_x = self.get_x()
+        self.set_x(current_x + self.get_speed())
 
-    async def decrease_x(self):
-        current_x = await self.get_x()
-        await self.set_x(current_x - await self.get_speed())
+    def decrease_x(self):
+        current_x = self.get_x()
+        self.set_x(current_x - self.get_speed())
 
-    #
-    async def handle_wall_collision(self, y) -> float:
-        height = await self.get_height()
+#
+    def handle_wall_collision(self, y) -> float:
+        height = self.get_height()
         if y <= 0:
             return 0    
         elif y + height >= CANVAS_HEIGHT:
@@ -101,53 +101,53 @@ class Paddle:
         else:
             return y
 
-    #I changed both function below so it doesnt even move the paddle if its gonna be out of bound
-    async def increase_y(self, delta_time):
-        current_y = await self.get_y() + (await self.get_speed() * delta_time)
-        current_y = await self.handle_wall_collision(current_y)
-        await self.set_y(current_y)
+#I changed both function below so it doesnt even move the paddle if its gonna be out of bound
+    def increase_y(self, delta_time):
+        current_y = self.get_y() + (self.get_speed() * delta_time)
+        current_y = self.handle_wall_collision(current_y)
+        self.set_y(current_y)
 
-    async def decrease_y(self, delta_time):
-        current_y = await self.get_y() - (await self.get_speed() * delta_time)
-        current_y = await self.handle_wall_collision(current_y)
-        await self.set_y(current_y)
+    def decrease_y(self, delta_time):
+        current_y = self.get_y() - (self.get_speed() * delta_time)
+        current_y = self.handle_wall_collision(current_y)
+        self.set_y(current_y)
 
-    async def increase_speed(self):
-        current_speed = await self.get_speed()
-        await self.set_speed(current_speed + 0) #Later 
+    def increase_speed(self):
+        current_speed = self.get_speed()
+        self.set_speed(current_speed + 0) #Later 
 
-    async def decrease_speed(self):
-        current_speed = await self.get_speed()
-        await self.set_speed(current_speed - 0) #later
+    def decrease_speed(self):
+        current_speed = self.get_speed()
+        self.set_speed(current_speed - 0) #later
 
     # ── Helper Methods for Multiplication/Division ─────────────────────────────────
 
-    async def multiply_x(self, factor: float):
-        current_x = await self.get_x()
-        await self.set_x(current_x * factor)
+    def multiply_x(self, factor: float):
+        current_x = self.get_x()
+        self.set_x(current_x * factor)
 
-    async def divide_x(self, factor: float):
+    def divide_x(self, factor: float):
         if factor == 0:
             raise ValueError("Cannot divide by zero")
-        current_x = await self.get_x()
-        await self.set_x(current_x / factor)
+        current_x = self.get_x()
+        self.set_x(current_x / factor)
 
-    async def multiply_y(self, factor: float):
-        current_y = await self.get_y()
-        await self.set_y(current_y * factor)
+    def multiply_y(self, factor: float):
+        current_y = self.get_y()
+        self.set_y(current_y * factor)
 
-    async def divide_y(self, factor: float):
+    def divide_y(self, factor: float):
         if factor == 0:
             raise ValueError("Cannot divide by zero")
-        current_y = await self.get_y()
-        await self.set_y(current_y / factor)
+        current_y = self.get_y()
+        self.set_y(current_y / factor)
 
-    async def multiply_speed(self, factor: float):
-        current_speed = await self.get_speed()
-        await self.set_speed(current_speed * factor)
+    def multiply_speed(self, factor: float):
+        current_speed = self.get_speed()
+        self.set_speed(current_speed * factor)
 
-    async def divide_speed(self, factor: float):
+    def divide_speed(self, factor: float):
         if factor == 0:
             raise ValueError("Cannot divide by zero")
-        current_speed = await self.get_speed()
-        await self.set_speed(current_speed / factor)
+        current_speed = self.get_speed()
+        self.set_speed(current_speed / factor)

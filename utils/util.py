@@ -6,7 +6,7 @@ from django.core.exceptions import ValidationError
 def create_game_id():
     from apps.game.models import Game
     while True:
-        code = random.randint(0000, 9999)
+        code = f"{random.randint(0, 9999):04d}"  # Génère un nombre et le formate sur 4 chiffres
         if not Game.objects.filter(id=code).exists():
             return code
 

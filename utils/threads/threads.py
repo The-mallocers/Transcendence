@@ -1,3 +1,5 @@
+import enum
+import inspect
 import logging
 import threading
 from abc import ABC, abstractmethod
@@ -15,7 +17,7 @@ class Threads(threading.Thread, ABC):
 
         self._logger = logging.getLogger(self.__class__.__name__)
         self._stop_event = threading.Event()
-        # self._completed_actions = set()
+        self._completed_actions = set()
 
     def run(self):
         self._logger.info(f"Starting thread [{self.name}]")
@@ -28,22 +30,22 @@ class Threads(threading.Thread, ABC):
         self._stop_event.set()
         self.cleanup()
 
-    # async def execute_once(self, action_func, *args, **kwargs):
-    #     frame = inspect.currentframe().f_back
-    #     caller_name = frame.f_code.co_name
-    #     func_name = action_func.__name__
-    #     args_str = ""
-    #     for arg in args:
-    #         if isinstance(arg, (str, int, float, bool, enum.Enum)):
-    #             args_str += f"_{str(arg)}"
-    #     action_id = f"{self.name}_{caller_name}_{func_name}{args_str}"
+    def execute_once(self, action_func, *args, **kwargs):
+        frame = inspect.currentframe().f_back
+        caller_name = frame.f_code.co_name
+        func_name = action_func.__name__
+        args_str = ""
+        for arg in args:
+            if isinstance(arg, (str, int, float, bool, enum.Enum)):
+                args_str += f"_{str(arg)}"
+        action_id = f"{self.name}_{caller_name}_{func_name}{args_str}"
 
-    #     if action_id not in self._completed_actions:
-    #         await action_func(*args, **kwargs)
-    #         self._completed_actions.add(action_id)
-    #         self._logger.debug(f"Action '{action_id}' executed")
-    #         return True
-    #     return False
+        if action_id not in self._completed_actions:
+            action_func(*args, **kwargs)
+            self._completed_actions.add(action_id)
+            self._logger.debug(f"Action '{action_id}' executed")
+            return True
+        return False
 
     # async def exec(self):
     #     self.redis = await RedisConnectionPool.get_async_connection(self.name)

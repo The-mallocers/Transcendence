@@ -1,17 +1,15 @@
-import asyncio
 import random
 import traceback
+import time
 
-from redis.commands.json.path import Path
 
-from apps.game.manager import GameManager
 from apps.game.models import Game
 from apps.player.models import Player
 from utils.pong.enums import GameStatus, ResponseError
 from utils.threads.game import GameThread
 from utils.threads.threads import Threads
 from utils.websockets.channel_send import send_group_error
-import time
+from utils.redis import RedisConnectionPool
 
 
 # Game Will be the new game manager !
@@ -22,29 +20,18 @@ class MatchmakingThread(Threads):
         
         while not self._stop_event.is_set():
             try:
-                if game is not None:
-                    matched = self.select_players(game)
-                elif game is None:
-                    print("create new game instance")
+                if game is None:
                     game = Game()
-
+                
+                matched = self.select_players(game)
                 if matched:
                     game.create_redis_game()
                     self._logger.info(f"Found match: {game.pL} vs {game.pR}")
                     game.rset_status(GameStatus.MATCHMAKING)
 
                     game.init_players()
-                    game.rset_status(GameStatus.STARTING)
-                    
-                    self.redis.hset(name="player_game", key=str(game.pL.id),
-                                    value=str(game.id))
-                    self.redis.hset(name="player_game", key=str(game.pR.id),
-                                    value=str(game.id))
-                    # GameThread(manager=game).start()
-                    # self._stop_event.set()
-                    print('Game started')
+                    GameThread(game=game).start()
                     game = None
-
 
                 time.sleep(1) 
 
@@ -70,9 +57,10 @@ class MatchmakingThread(Threads):
 
         self.redis.delete("consumers_channels")
         self.redis.delete("matchmaking_queue")
-        self.redis.delete("player_game")
+        self.redis.delete("current_matches")
+        
+        # RedisConnectionPool.close_connection(self.__class__.__name__)
 
-        GameManager.clean_db()
         self._logger.info("Cleanup of unfinished games complete")
 
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ FUNCTIONS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
