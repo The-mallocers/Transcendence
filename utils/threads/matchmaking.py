@@ -17,14 +17,15 @@ import time
 # Game Will be the new game manager !
 class MatchmakingThread(Threads):
     def main(self):
-        game: Game = None
+        game: Game = Game()
         matched: bool = False
         
         while not self._stop_event.is_set():
             try:
-                if game:
+                if game is not None:
                     matched = self.select_players(game)
-                else:
+                elif game is None:
+                    print("create new game instance")
                     game = Game()
 
                 if matched:
