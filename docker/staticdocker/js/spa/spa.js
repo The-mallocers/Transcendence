@@ -363,15 +363,3 @@ document.addEventListener("click", function(event) {
         notifSocket.send(JSON.stringify(message));
     }
 });
-//Je me connecete a ma websocket notif.
-//on message color == blue
-
-/// routes
-
-/*
-    example objects skeleton: {
-        route: -------,
-        directSubRoutes: [{route object}]
-    }
-*/
-

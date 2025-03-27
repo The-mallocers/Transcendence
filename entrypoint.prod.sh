@@ -13,11 +13,17 @@ trap _term SIGTERM
 python manage.py collectstatic --noinput
 python manage.py makemigrations --noinput
 python manage.py migrate --noinput
-exec gunicorn config.asgi:application \
-    --bind 0.0.0.0:8000 \
-    --workers 3 \
-    --worker-class uvicorn.workers.UvicornWorker \
-    --reload
+exec uvicorn config.asgi:application \
+    --host 0.0.0.0 \
+    --port 8000 \
+    --reload \
+    --reload-dir . \
+    --workers 3
+# exec gunicorn config.asgi:application \
+#     --bind 0.0.0.0:8000 \
+#     --workers 3 \
+#     --worker-class uvicorn.workers.UvicornWorker \
+#     --reload
 # python -m gunicorn \
 #     --bind 0.0.0.0:8000 \
 #     --workers 3 \

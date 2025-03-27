@@ -99,7 +99,7 @@ INSTALLED_APPS = [
     'apps.error.apps.ErrorConfig',
     'apps.chat.apps.ChatConfig',
     'apps.tournaments.apps.TournamentsConfig',
-    'apps.tournaments.apps.NotificationConfig'
+    'apps.notifications.apps.NotificationConfig'
 ]
 
 MIDDLEWARE = [

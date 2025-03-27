@@ -1,5 +1,6 @@
 
 from apps.shared.models import Clients
+from apps.notifications.models import FriendRequest
 from utils.pong.enums import EventType, ResponseAction, ResponseError
 from utils.websockets.channel_send import send_group, send_group_error
 from utils.websockets.services.services import BaseServices
@@ -11,9 +12,12 @@ class NotificationService(BaseServices):
     
     async def _handle_send_friend_request(self, data, client):
         print(f"Searching for username: '{data['data']['args']['target_name']}'")
+        # target is the client that I want to add
         target = await Clients.ASget_client_by_username(data['data']['args']['target_name'])
         if target is None:
             return await send_group_error(client.id, ResponseError.USER_NOT_FOUND)
+        friend = await FriendRequest.ASget_me(target)
+        # print(friend)
         
         await send_group(target.id, EventType.NOTIFICATION, ResponseAction.NOTIF_TEST, {"message": "hello veux tu etre mon ami ??????????????", "sender": str(client.id)})
         
