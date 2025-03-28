@@ -1,4 +1,3 @@
-import asyncio
 import traceback
 
 from asgiref.sync import sync_to_async
@@ -7,43 +6,40 @@ from redis import DataError
 from redis.commands.json.path import Path
 
 from apps.game.models import Game
-from apps.player.models import PlayerGame
 from utils.pong.enums import GameStatus
-from utils.pong.objects.ball import Ball
-from utils.redis import RedisConnectionPool
 
+
+# Watch out for all the function modifying the db as well as redis.
 
 class GameManager:
     def __init__(self, game=None, redis=None):
-        from apps.game.models import Game
-        from apps.player.manager import PlayerManager
+        pass
+        # from apps.game.models import Game
+        # from apps.player.manager import PlayerManager
 
-        self._game: Game = game
-        self._redis = RedisConnectionPool.get_sync_connection() if redis is not None else redis
+        # self._game: Game = game
+        # self._redis = RedisConnectionPool.get_sync_connection() if redis is not None else redis
 
-        self.game_key = None if game is None else f'game:{game.id}'
-        self.loop = asyncio.get_running_loop()
-        self.pL: PlayerManager = None  # PlayerManager(self.rget_pL_id())
-        self.pR: PlayerManager = None  # PlayerManager(self.rget_pR_id())
+        # self.game_key = None if game is None else f'game:{game.id}'
+        # self.loop = asyncio.get_running_loop()
+        # self.pL: PlayerManager = None  # PlayerManager(self.rget_pL_id())
+        # self.pR: PlayerManager = None  # PlayerManager(self.rget_pR_id())
 
     async def create_game(self):
-        #This will only create in redis.
-        from apps.game.api.serializers import GameSerializer
-        self._redis = await RedisConnectionPool.get_async_connection(self.__class__.__name__)
+        pass
+        # We will only create the game in redis not in the DB
+        # from apps.game.api.serializers import GameSerializer
+        # self._redis = await RedisConnectionPool.get_async_connection(self.__class__.__name__)
 
-        self._game = await self._create_game()
-        self.game_key = f'game:{self._game.id}'
+        # self._game = await self._create_game()
+        # self.game_key = f'game:{self._game.id}'
 
-        serializer = GameSerializer(self._game, context={'ball': Ball()})
-        value = await sync_to_async(lambda: serializer.data)()
+        # serializer = GameSerializer(self._game, context={'ball': Ball()})
+        # value = await sync_to_async(lambda: serializer.data)()
 
-        await self._redis.json().set(self.game_key, Path.root_path(), value)
+        # await self._redis.json().set(self.game_key, Path.root_path(), value)
 
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ Functions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
-
-    async def error_game(self):
-        await self.rset_status(GameStatus.ERROR)
-        await self._redis.delete(f'game:{str(self._game.id)}')
 
     def get_id(self):
         if self._game:
@@ -67,7 +63,7 @@ class GameManager:
         if await self.rget_status() != status:
             self._game.status = status
             await self._game.asave()
-        await self._redis.json().set(self.game_key, Path('status'), status.value)
+            await self._redis.json().set(self.game_key, Path('status'), status.value)
 
     async def rget_pL_id(self):
         try:
@@ -100,17 +96,16 @@ class GameManager:
         self._game.loser_score = 0
         disconnected_player = disconnected_client.player
         alive_player = alive_client.player
-        disconnected_game: PlayerGame = await disconnected_player.get_player_game_id_db_async(player_id=disconnected_player.id, game_id=self.get_id())
-        alive_game: PlayerGame = await alive_player.get_player_game_id_db_async(player_id=alive_player.id, game_id=self.get_id())
+        disconnected_game: PlayerGame = await disconnected_player.get_player_game_id_db_async(
+            player_id=disconnected_player.id, game_id=self.get_id())
+        alive_game: PlayerGame = await alive_player.get_player_game_id_db_async(player_id=alive_player.id,
+                                                                                game_id=self.get_id())
 
         disconnected_game.score = 0
         alive_game.score = 3
         await disconnected_game.asave()
         await alive_game.asave()
         await self._game.asave()
-
-
-
 
     async def set_result(self):
         score_pL = await self.rget_pL_score()
@@ -140,7 +135,6 @@ class GameManager:
         await pR_game.asave()
         await self._game.asave()
 
-
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ DATABASE OPERATIONS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
 
     @staticmethod
@@ -163,8 +157,8 @@ class GameManager:
             return Game.objects.get(id=game_id)
         except Game.DoesNotExist:
             return None
-        
-    #Freshly added function to get all games a player played (from our database of ALL games)
+
+    # Freshly added function to get all games a player played (from our database of ALL games)
     @staticmethod
     def get_games_of_player(player_id):
         """Load an existing game from the database."""

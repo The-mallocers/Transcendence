@@ -1,20 +1,20 @@
 groups:
   - name: postgresql_alerts
     rules:
-    # - alert: HighCPUUsage
-    #   expr: node_cpu_seconds_total{mode!="idle"} > 0.5
-    #   for: 10s
-    #   labels:
-    #     severity: warning
-    #   annotations:
-    #     summary: "High CPU Usage"
-    #     description: "CPU usage is high"
+      # - alert: HighCPUUsage
+      #   expr: node_cpu_seconds_total{mode!="idle"} > 0.5
+      #   for: 10s
+      #   labels:
+      #     severity: warning
+      #   annotations:
+      #     summary: "High CPU Usage"
+      #     description: "CPU usage is high"
 
-    - alert: TooManyConnections
-      expr: postgresql:total_connections > 0
-      for: 10s
-      labels:
-        severity: warning
-      annotations:
-        summary: "Excessive Database Connections"
-        description: "Total connections ({{ $value }}) are above threshold"
+      - alert: TooManyConnections
+        expr: postgresql:total_connections > 0
+        for: 10s
+        labels:
+          severity: warning
+        annotations:
+          summary: "Excessive Database Connections"
+          description: "Total connections ({{ $value }}) are above threshold"

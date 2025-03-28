@@ -3,8 +3,6 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from apps.shared.models import Clients
-
 
 class PlayerApiView(APIView):
     def get(self, request: HttpRequest, *args, **kwargs):

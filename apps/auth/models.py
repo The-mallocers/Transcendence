@@ -6,11 +6,11 @@ from django.db import models
 
 
 class Password(models.Model):
-    #Primary key
+    # Primary key
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False,
                           null=False)
 
-    #Secondary key
+    # Secondary key
     password = models.CharField(max_length=512, null=False, editable=True)
     old_password = models.CharField(max_length=521, null=True, editable=True)
 
@@ -41,7 +41,7 @@ class TwoFA(models.Model):
     enable = models.BooleanField(default=False, editable=True)
     scanned = models.BooleanField(default=False, editable=True)
     qrcode = models.ImageField(upload_to='2fa_qrcodes/', null=True, blank=True)
-    
+
     def update(self, data, value) -> None:
         match data:
             case "key":
@@ -55,8 +55,6 @@ class TwoFA(models.Model):
             case _:
                 return None
         self.save()
-    
-    
-    
+
     class Meta:
         db_table = 'client_auth_2fa'

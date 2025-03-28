@@ -1,4 +1,4 @@
-import { navigateTo } from '../../spa/spa.js';
+import {navigateTo} from '../../spa/spa.js';
 
 
 function logout() {
@@ -7,7 +7,7 @@ function logout() {
     fetch('/api/auth/logout/', {
         method: 'POST',
         headers: {
-            'X-CSRFToken': csrfToken, 
+            'X-CSRFToken': csrfToken,
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({})  // sending an empty body for some reasons
@@ -25,10 +25,12 @@ function logout() {
         })
         .catch(error => {
             console.error('Error during logout:', error);
-    });
-};
+        });
+}
 
 let element = document.querySelector("#logout-btn");
 
 
-element.addEventListener("click", (e)=>{logout(e)} )
+element.addEventListener("click", (e) => {
+    logout(e)
+})

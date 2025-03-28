@@ -1,7 +1,6 @@
 from django.http import JsonResponse
-from django.shortcuts import render
-from django.template.loader import render_to_string
 from django.middleware.csrf import get_token
+from django.template.loader import render_to_string
 
 from apps.shared.models import Clients
 

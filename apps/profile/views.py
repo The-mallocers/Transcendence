@@ -1,16 +1,18 @@
 from django.views.decorators.http import require_http_methods
 
-from apps.profile.view.profile import get, get_settings , post, delete
+from apps.profile.view.profile import get, get_settings, post, delete
 
 
 @require_http_methods(["GET"])
 def profile_get(req):
     return get(req)
 
+
 @require_http_methods(["GET"])
 def settings_get(req):
     print('huuuh')
     return get_settings(req)
+
 
 @require_http_methods(["POST"])
 def profile_post(req, client_id):

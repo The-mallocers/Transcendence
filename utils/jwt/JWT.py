@@ -1,5 +1,4 @@
 import uuid
-from dataclasses import dataclass
 from datetime import timezone, datetime, timedelta
 from enum import Enum
 

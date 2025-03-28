@@ -1,20 +1,29 @@
 from rest_framework import serializers
 
 from apps.game.models import Game
-from apps.player.models import Player
 from apps.pong.api.serializers import BallSerializer
-from utils.pong.objects import ball
+from utils.pong.enums import GameStatus
+from utils.pong.objects.ball import Ball
 
 
 class GameSerializer(serializers.ModelSerializer):
-    players = serializers.PrimaryKeyRelatedField(queryset=Player.objects.all(), many=True)  # Permet l'ajout/modif
     ball = serializers.SerializerMethodField()
+    status = serializers.SerializerMethodField()
+    game_id = serializers.SerializerMethodField()
 
     class Meta:
         model = Game
-        fields = ['id', 'players', 'ball', 'status', 'timer']
+        fields = ['game_id', 'status', 'ball']
         # fields = ['id', 'players', 'ball', 'status', 'timer']
 
     def get_ball(self, obj):
-        ball = self.context.get('ball')
+        ball = Ball()
         return BallSerializer(ball).data
+
+    def get_status(self, obj):
+        status = GameStatus(GameStatus.CREATING)
+        return status
+
+    def get_game_id(self, obj):
+        game_id = self.context.get('id')
+        return game_id

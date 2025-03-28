@@ -58,9 +58,9 @@
     bottom: 60px;
     padding: 2rem;
     overflow-y: scroll;
-    
-    scrollbar-width: thin; 
-    -ms-overflow-style: -ms-autohiding-scrollbar; 
+
+    scrollbar-width: thin;
+    -ms-overflow-style: -ms-autohiding-scrollbar;
 }
 
 .chatBox .msg {

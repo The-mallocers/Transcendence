@@ -99,12 +99,12 @@ class JWTMiddleware:
                 return JsonResponse({
                     'status': 'unauthorized',
                     'redirect': '/auth/login',
-                    'message': 'Session expired' }, status=302)
+                    'message': 'Session expired'}, status=302)
         except (jwt.InvalidTokenError, jwt.InvalidKeyError):
             return JsonResponse({
-                    'status': 'unauthorized',
-                    'redirect': '/auth/login',
-                    'message': 'Invalid authentication' }, status=302)
+                'status': 'unauthorized',
+                'redirect': '/auth/login',
+                'message': 'Invalid authentication'}, status=302)
         except Exception as e:
             return JsonResponse(
                 {'error': f'Internal server error: {str(e)}'},

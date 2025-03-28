@@ -1,12 +1,11 @@
-import { WebSocketManager } from "../../websockets/websockets.js";
-import { navigateTo } from '../../spa/spa.js';
-import { isGameOver } from "./VarGame.js"
+import {WebSocketManager} from "../../websockets/websockets.js";
+import {navigateTo} from '../../spa/spa.js';
 
 const socket = WebSocketManager.gameSocket;
 let canvas = document.getElementById("pongCanvas");
 let ctx = canvas.getContext("2d");
-let lnick = document.getElementById("lnick");
-let rnick = document.getElementById("rnick");
+let lusername = document.getElementById("lusername");
+let rusername = document.getElementById("rusername");
 let lscore = document.getElementById("scoreLeft");
 let rscore = document.getElementById("scoreRight");
 
@@ -17,20 +16,29 @@ const ballSize = 10;
 const paddleThickness = 10;
 let paddleHeight = 100;
 
-
+let game_is_over = false;
 
 canvas.width = width;
 canvas.height = height;
+let paddleDefaultPos = 250 - (paddleHeight / 2)
 
-lnick.innerHTML = window.GameState.left.nick
-rnick.innerHTML = window.GameState.right.nick
+// window.GameState = {
+//     ballX: width / 2,
+//     ballY: height / 2,
+//     leftPaddleY: paddleDefaultPos,
+//     rightPaddleY: paddleDefaultPos
+// };
+
+lusername.innerHTML = window.GameState.left.username
+rusername.innerHTML = window.GameState.right.username
 console.log('meowmeowmeow', window.GameState)
 
 
 socket.onmessage = (e) => {
+    // queueMicrotask(() => {
     const jsonData = JSON.parse(e.data);
     console.log("VTGVTVYTHVYTFVYTFVYTVFYTRVYTRVBYT")
-    console.log("87786guTV7B",jsonData)
+    console.log("87786guTV7B", jsonData)
     console.log(jsonData.data)
     if (jsonData.data) {
         console.log(jsonData.data.action)
@@ -38,27 +46,23 @@ socket.onmessage = (e) => {
     console.log("LACTION EST: ", jsonData.data.action);
     if (jsonData.event == "UPDATE") {
 
-        if (jsonData.data.action == "PADDLE_LEFT_UPDATE"){
+        if (jsonData.data.action == "PADDLE_LEFT_UPDATE") {
             console.log(jsonData.data.content.y)
-            window.GameState.left.y  = jsonData.data.content.y
-        }
-        else if (jsonData.data.action == "PADDLE_RIGHT_UPDATE"){
-            window.GameState.right.y =  jsonData.data.content.y
-        }
-        else if (jsonData.data.action == "BALL_UPDATE") {
+            window.GameState.left.y = jsonData.data.content.y
+        } else if (jsonData.data.action == "PADDLE_RIGHT_UPDATE") {
+            window.GameState.right.y = jsonData.data.content.y
+        } else if (jsonData.data.action == "BALL_UPDATE") {
             window.GameState.ballX = jsonData.data.content.x;
             window.GameState.ballY = jsonData.data.content.y;
             // console.table(jsonData.data.content.x, jsonData.data.content.y)
-        }
-        else if (jsonData.data.action == "SCORE_LEFT_UPDATE"){
+        } else if (jsonData.data.action == "SCORE_LEFT_UPDATE") {
             lscore.innerHTML = jsonData.data.content
-        }
-        else if (jsonData.data.action == "SCORE_RIGHT_UPDATE"){
+        } else if (jsonData.data.action == "SCORE_RIGHT_UPDATE") {
             rscore.innerHTML = jsonData.data.content
         }
     }
-    
-    if (jsonData.data.action == "GAME_ENDING"){
+
+    if (jsonData.data.action == "GAME_ENDING") {
         //Close socket here as well
         const game_id = jsonData.data.content
         console.log("game id is ", game_id);
@@ -66,10 +70,11 @@ socket.onmessage = (e) => {
         //We will want to navigate to a specific game
         console.log("Navigating to /pong/gameover/");
         navigateTo(`/pong/gameover/?game=${game_id}`);
-        isGameOver.gameIsOver = true;
+        game_is_over = true;
         WebSocketManager.closeGameSocket();
+
     }
-        // return render()
+    // return render()
     // })s
 };
 
@@ -84,18 +89,36 @@ const previous_keys = {
     'd': false,
 }
 
+//A -> D
+// A true D false -> D -> EN BAS
+
+//0 - 0
+//A - 0
+//Update old keys
+// A = true - D = false
+
+//if A == true D == True
+
 document.addEventListener('keydown', (event) => {
-    switch(event.key) {
-        case 'ArrowUp': keys.up = true; break;
-        case 'ArrowDown': keys.down = true; break;
+    switch (event.key) {
+        case 'ArrowUp':
+            keys.up = true;
+            break;
+        case 'ArrowDown':
+            keys.down = true;
+            break;
     }
     // updatePaddles()
 });
 
 document.addEventListener('keyup', (event) => {
-    switch(event.key) {
-        case 'ArrowUp': keys.up = false; break;
-        case 'ArrowDown': keys.down = false; break;
+    switch (event.key) {
+        case 'ArrowUp':
+            keys.up = false;
+            break;
+        case 'ArrowDown':
+            keys.down = false;
+            break;
     }
     // updatePaddles()
 });
@@ -104,28 +127,26 @@ function updatePaddles() {
     // gauche
     let direction = null;
     if (keys.up && keys.down) {
+        //I want to check the old key combination, and have the direction be
+        //what the "new" direction is
         if (previous_keys.up) {
             direction = 'down'
-        }
-        else if (previous_keys.down) {
+        } else if (previous_keys.down) {
             direction = 'up'
         }
-    }
-    else if (keys.up) {
+    } else if (keys.up) {
         direction = 'up'
         previous_keys.up = true;
         previous_keys.down = false;
-    }
-    else if (keys.down) {
+    } else if (keys.down) {
         direction = 'down'
         previous_keys.down = true;
         previous_keys.up = false;
-    }
-    else {
+    } else {
         direction = 'idle'
     }
     if (direction) {
-        console.log("direction is :", direction)
+        // console.log("direction is :", direction)
         const message = {
             "event": "game",
             "data": {
@@ -169,28 +190,55 @@ const drawBall = (x, y) => {
 const render = () => {
     clearArena();
     drawArena();
+
+    ///////////////
+    // updatePaddles()
+    ///////////////
     drawPaddle(10, window.GameState.left.y);
     drawPaddle(width - paddleThickness - 10, window.GameState.right.y);
     drawBall(window.GameState.ballX, window.GameState.ballY);
 };
 
 
+/*{
+    "event": "UPDATE",
+    "data": {
+        "action": "PADDLE_1_UPDATE",
+        "content": {
+            "width": 10.0,
+            "height": 100.0,
+            "x": 0.0,
+            "y": -1.0,
+            "speed": 10.0
+        }
+    }
+}*/
+
+
+// Animation loop
+// function animationLoop() {
+//     render();
+//     requestAnimationFrame(animationLoop);
+// }
+
+// // Start the animation loop
+// requestAnimationFrame(animationLoop);
+
+// setInterval(render, 1);  // 60 fps
+
+
 render()
 
 function gameLoop() {
-    if(isGameOver.gameIsOver == true) {
-        alert("returning like a fucking idiot")
-        return ;
+    if (game_is_over === true) {
+        return;
     }
-    // console.log("Im looping, ", game_is_over)
     updatePaddles();
     render();
     requestAnimationFrame(gameLoop);
 }
 
 // Start the game loop
-isGameOver.gameIsOver = false;
-if (isGameOver.gameIsOver == false) {
-    // alert("I am in the loop for the first time")
+if (game_is_over === false) {
     requestAnimationFrame(gameLoop);
 }

@@ -23,7 +23,7 @@ class ProfileApiView(APIView):
         if not profile_instance:
             return Response({"profile": ["Profile entry not found"]}, status=status.HTTP_404_NOT_FOUND)
 
-        #Partial is for specified the patch is for specifique object
+        # Partial is for specified the patch is for specifique object
         serializer = ProfileSerializer(profile_instance, data=request.data, partial=True)
 
         if serializer.is_valid():
@@ -38,7 +38,7 @@ class ProfileApiView(APIView):
         if not profile_instance:
             return Response({"profile": ["Profile entry not found"]}, status=status.HTTP_404_NOT_FOUND)
 
-        #Partial is for specified the patch is for specifique object
+        # Partial is for specified the patch is for specifique object
         serializer = ProfileSerializer(profile_instance, data=request.data, partial=True)
 
         if serializer.is_valid():

@@ -2,11 +2,11 @@
 
 <div class="informationsContainer">
     <img class="background" src="{% static 'assets/imgs/fire_coalition.jpg' %}">
-    
+
     <h3>{{ client.profile.username }}</h3>
 
     <div class="avatar">
-        <img  src="{% static 'assets/imgs/matboyer.jpg' %}">
+        <img src="{% static 'assets/imgs/matboyer.jpg' %}">
     </div>
     <div class="container infos">
         <div class="row">
@@ -17,12 +17,12 @@
                         <!-- <div class="progressBar">
                             <div class="filler"></div>
                         </div> -->
-                        <div class="progress-circle animated" style="--angle: {{winrate_angle}}deg;">
+                        <div class="progress-circle animated" style="--angle: {{ winrate_angle }}deg;">
                             <div class="progress-content">
-                                <div>{{winrate}}%</div>
+                                <div>{{ winrate }}%</div>
                             </div>
                         </div>
-                        
+
                     </div>
                 </div>
             </div>
@@ -67,13 +67,13 @@
                     {% for game in gamesHistory %}
                         <div class="lastGames container d-flex flex-row align-items-center justify-content-between">
                             <span class="names d-flex flex-row justify-content-center">
-                                <div class="nickname {% if game.won %}win{% else %} loss {% endif %}">{{game.opponent}}</div>
+                                <div class="nickname {% if game.won %}win{% else %} loss {% endif %}">{{ game.opponent }}</div>
                                 <div class="time">A day ago</div>
                             </span>
                             <span class="scores d-flex flex-row justify-content-center align-items-center">
-                                <div class="myScore">{{game.myPoints}}</div>
+                                <div class="myScore">{{ game.myPoints }}</div>
                                 <div class="dash"></div>
-                                <div class="enemyScore">{{game.enemyPoints}}</div>
+                                <div class="enemyScore">{{ game.enemyPoints }}</div>
                             </span>
                         </div>
                     {% endfor %}
