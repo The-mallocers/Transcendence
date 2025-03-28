@@ -26,10 +26,5 @@ class GameConsumer(WsConsumer):
             await asend_group_error(self.client.id, ResponseError.JSON_ERROR)
 
     async def disconnect(self, close_code):
-        pass
-        # print('disconnect')
-        # await self.service.handle_disconnect(self.client)
-        # if self.service.game_manager is not None:
-        #     print('disconnect in game service')
-        #     await self.service.handle_disconnect(self.client)
-        # await super().disconnect(close_code)
+        await super().disconnect(close_code)
+        await self.service.handle_disconnect(self.client)

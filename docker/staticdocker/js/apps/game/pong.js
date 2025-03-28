@@ -26,16 +26,30 @@ lusername.innerHTML = window.GameState.left.username
 rusername.innerHTML = window.GameState.right.username
 console.log('meowmeowmeow', window.GameState)
 
+socket.onclose = (e) => {
+    isGameOver.gameIsOver = true;
+    WebSocketManager.closeGameSocket();
+    navigateTo("/"); //Maybe redirect to an error page idk.
+}
+
 
 socket.onmessage = (e) => {
     const jsonData = JSON.parse(e.data);
-    console.log("VTGVTVYTHVYTFVYTFVYTVFYTRVYTRVBYT")
-    console.log("87786guTV7B", jsonData)
+    console.log("received the message below");
+    console.log(jsonData);
+    console.log("received the message with Data");
     console.log(jsonData.data)
     if (jsonData.data) {
         console.log(jsonData.data.action)
     }
-    console.log("LACTION EST: ", jsonData.data.action);
+    
+    //Attempt at handling errors
+    if (jsonData.data.action == "EXCEPTION") {
+        isGameOver.gameIsOver = true;
+        WebSocketManager.closeGameSocket();
+        navigateTo("/");
+    }
+
     if (jsonData.event == "UPDATE") {
 
         if (jsonData.data.action == "PADDLE_LEFT_UPDATE") {
@@ -53,8 +67,15 @@ socket.onmessage = (e) => {
             rscore.innerHTML = jsonData.data.content
         }
     }
-
-    if (jsonData.data.action == "GAME_ENDING") {
+    else if (jsonData.data.event == "ERROR") {
+        if (jsonData.data.action == "OPPONENT_LEFT") {
+            console.log("Opponent Disconnected");
+            navigateTo("/"); //Later, Redirect to a screen telling your opponent he disconnected.
+            isGameOver.gameIsOver = true;
+            WebSocketManager.closeGameSocket();
+        }
+    }
+    else if (jsonData.data.action == "GAME_ENDING") {
         //Close socket here as well
         const game_id = jsonData.data.content
         console.log("game id is ", game_id);
