@@ -1,7 +1,7 @@
 DOCKER_COMPOSE_FILE=docker-compose.yaml
 
 up:
-	sudo rm -rf ./docker/staticdocker
+	rm -rf ./docker/staticdocker
 	docker compose -f ./$(DOCKER_COMPOSE_FILE) up  --build --no-attach mailhog --no-attach alertmanager --no-attach grafana
 
 down:
