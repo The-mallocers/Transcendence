@@ -92,9 +92,6 @@ class Game(models.Model):
         if self.rget_status() != status:
             self.redis.json().set(self.game_key, Path('status'), status)
 
-    def rset_player(self, player: Player):
-        pass
-
     # ── Getter ────────────────────────────────────────────────────────────────────── #
 
     def rget_status(self) -> GameStatus | None:

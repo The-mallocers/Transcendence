@@ -28,13 +28,13 @@ class MatchmakingThread(Threads):
                     game.rset_status(GameStatus.MATCHMAKING)
 
                     game.init_players()
+                    game.rset_status(GameStatus.STARTING)
                     GameThread(game=game).start()
                     game = None
 
                 time.sleep(1)
 
             except Exception as e:
-                print(str(e))
                 traceback.print_exc()
                 pass
                 if game:

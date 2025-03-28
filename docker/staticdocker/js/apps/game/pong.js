@@ -71,7 +71,7 @@ socket.onmessage = (e) => {
         console.log("Navigating to /pong/gameover/");
         navigateTo(`/pong/gameover/?game=${game_id}`);
         game_is_over = true;
-        socket.closeGameSocket();
+        WebSocketManager.closeGameSocket();
 
     }
     // return render()

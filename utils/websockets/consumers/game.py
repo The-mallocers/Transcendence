@@ -22,7 +22,7 @@ class GameConsumer(WsConsumer):
             return await super().receive(text_data, bytes_data)
 
         except JSONDecodeError as e:
-            self._logger.error(e)
+            self._logger.error(f'Json error: {e}')
             await asend_group_error(self.client.id, ResponseError.JSON_ERROR)
 
     async def disconnect(self, close_code):

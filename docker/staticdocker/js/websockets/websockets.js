@@ -7,7 +7,7 @@ export const WebSocketManager = {
         //   client_id = await getClientId(); // Ensure client_id is available
         // }
         if (!this.gameSocket || this.gameSocket.readyState === WebSocket.CLOSED) {
-            this.gameSocket = new WebSocket(`ws://${window.location.host}/ws/game/?id=${client_id}`);
+            this.gameSocket = new WebSocket(`wss://${window.location.host}/ws/game/?id=${client_id}`);
             this.gameSocket.onopen = () => console.log("Game socket connected");
         }
         return this.gameSocket;
@@ -18,7 +18,7 @@ export const WebSocketManager = {
         //   client_id = await getClientId();
         // }
         if (!this.chatSocket || this.chatSocket.readyState === WebSocket.CLOSED) {
-            this.chatSocket = new WebSocket(`ws://${window.location.host}/ws/chat/?id=${client_id}`);
+            this.chatSocket = new WebSocket(`wss://${window.location.host}/ws/chat/?id=${client_id}`);
             this.chatSocket.onopen = () => console.log("chat socket connected");
         }
         return this.chatSocket;

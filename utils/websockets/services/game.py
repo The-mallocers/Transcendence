@@ -37,11 +37,11 @@ class GameService(BaseServices):
 
     async def _handle_start_game(self, data, client: Clients):
         status = GameStatus(await self.redis.json().get(self.game_key, Path('status')))
-        if status_order.index(status) < status_order.index(GameStatus.MATCHMAKING):
+        if status_order.index(status) < status_order.index(GameStatus.STARTING):
             await asend_group_error(client.id, ResponseError.NOT_READY_TO_START)
-        elif status_order.index(status) > status_order.index(GameStatus.MATCHMAKING):
+        elif status_order.index(status) > status_order.index(GameStatus.STARTING):
             await asend_group_error(client.id, ResponseError.ALREADY_START)
-        elif status is GameStatus.MATCHMAKING:
+        elif status is GameStatus.STARTING:
             await self.redis.json().set(self.game_key, Path('status'), GameStatus.STARTING)
 
     async def _handle_stop_game(self, data, client: Clients):
@@ -50,7 +50,6 @@ class GameService(BaseServices):
     async def _handle_paddle_move(self, data, client: Clients):
         status = GameStatus(await self.redis.json().get(self.game_key, Path('status')))
         if status is GameStatus.RUNNING:
-            logging.info(client.id, self.pL)
             if str(client.id) == self.pL['id']:
                 await self.redis.json().set(self.game_key, Path('player_left.paddle.move'), data['data']['args'])
             if str(client.id) == self.pR['id']:

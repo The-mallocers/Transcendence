@@ -107,7 +107,6 @@ class PongLogic:
             self.score_pR.add_score()
             self._reset_ball(self.ball)
         elif self.ball.get_x() >= CANVAS_WIDTH:
-            print(self.ball.get_x())
             self.score_pL.add_score()
             self._reset_ball(self.ball)
 
@@ -126,7 +125,6 @@ class PongLogic:
         self.last_update = current_time
 
     def _game_update(self, changes):
-        # self._logger.info(changes)
         if changes['ball']:
             self.ball.update()
             send_group(self.game_id, EventType.UPDATE, ResponseAction.BALL_UPDATE, BallSerializer(self.ball).data)
