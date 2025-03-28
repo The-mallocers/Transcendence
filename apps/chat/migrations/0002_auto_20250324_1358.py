@@ -2,25 +2,27 @@
 
 from django.db import migrations
 from utils.websockets.services.chat import uuid_global_room
+from django.conf import settings
+
 
 def create_global_room(apps, schema_editor):
     Rooms = apps.get_model('chat', 'Rooms')
+    Clients = apps.get_model('shared', 'Clients')
+    
     global_room = Rooms.objects.create(id=uuid_global_room)
 
-    Clients = apps.get_model('shared', 'Clients')
     clients = Clients.objects.all()
-    for client in clients:
-        global_room.clients.add(client)
+    global_room.clients.add(*clients)
         
 def delete_global_room(apps, schema_editor):
     Rooms = apps.get_model('chat', 'Rooms')
-    Rooms.objects.delete(id=uuid_global_room)
+    Rooms.objects.filter(id=uuid_global_room).delete()
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('chat', '0001_initial'),
         ('shared', '0001_initial'),
+        ('chat', '0001_initial'),
     ]
 
     operations = [
