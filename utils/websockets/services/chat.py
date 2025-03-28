@@ -40,6 +40,7 @@ class ChatService(BaseServices):
             rooms_target = await Rooms.ASget_room_id_by_client_id(target.id)
 
             common_rooms = set(rooms_admin) & set(rooms_target)  # Optimized set intersection
+            
             common_rooms.remove(uuid_global_room)
                 
             if common_rooms:
