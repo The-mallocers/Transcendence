@@ -31,18 +31,22 @@ class PlayerSerializer(serializers.ModelSerializer):
 
 from rest_framework import serializers
 
-
+#Uncomment this when we will have player stats + the name of client within client model.
 class PlayerInformationSerializer(serializers.ModelSerializer):
     client_id = serializers.SerializerMethodField()
+    username = serializers.SerializerMethodField()
     player_profile = serializers.SerializerMethodField()
     paddle = serializers.SerializerMethodField()
 
     class Meta:
         model = Player
-        fields = ['client_id', 'player_profile', 'paddle']
+        fields = ['client_id', 'username', 'player_profile', 'paddle']
 
     def get_client_id(self, instance):
         return instance.client_id
+
+    def get_username(self, instance):
+        return instance.class_client.profile.username
 
     def get_player_profile(self, instance):
         return instance.class_client.profile.profile_picture.url

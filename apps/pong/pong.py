@@ -151,7 +151,7 @@ class PongLogic:
 
     def _reset_ball(self, ball):
         ball.set_x(CANVAS_WIDTH / 2)
-        ball.set_y(CANVAS_HEIGHT / 2)
+        ball.set_y(CANVAS_HEIGHT / ((random.random() + 1) * 2))
         ball.set_dx(BALL_SPEED * (1 if random.random() > 0.5 else -1))
         ball.set_dy(BALL_SPEED * (1 if random.random() > 0.5 else -1))
 

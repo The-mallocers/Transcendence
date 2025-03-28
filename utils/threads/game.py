@@ -46,6 +46,7 @@ class GameThread(Threads):
         self.redis.delete(f'game:{self.game_id}')
         self.redis.hdel('current_matches', str(self.game.pL.client_id))
         self.redis.hdel('current_matches', str(self.game.pR.client_id))
+        self.redis.delete(f'channels::group:{self.game_id}')
         # RedisConnectionPool.close_connection(self.__class__.__name__)
 
         self._logger.info("Cleanup of game complete")

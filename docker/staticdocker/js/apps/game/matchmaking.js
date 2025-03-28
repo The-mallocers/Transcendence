@@ -24,13 +24,13 @@ window.GameState = {
     left: {
         x: paddleDefaultPos,
         y: paddleDefaultPos,
-        nick: "",
+        username: "",
         id: ""
     },
     right: {
         x: paddleDefaultPos,
         y: paddleDefaultPos,
-        nick: "",
+        username: "",
         id: ""
     }
 }
@@ -79,6 +79,7 @@ let connectToMMPool = (client_id) => {
         //On message on regarde si c'est que la game a commencer
         //on renvois le json approprie
         if (jsonData.data.action == "PLAYER_INFOS") {
+            console.log("PLAYER INFOS IS:")
             console.log(jsonData.data.content)
             window.GameState = {
                 ballY: height / 2,
@@ -87,13 +88,13 @@ let connectToMMPool = (client_id) => {
                 left: {
                     x: jsonData.data.content.left.paddle.x,
                     y: jsonData.data.content.left.paddle.y,
-                    nick: jsonData.data.content.left.nickname,
+                    username: jsonData.data.content.left.username,
                     id: ""
                 },
                 right: {
                     x: jsonData.data.content.right.paddle.x,
                     y: jsonData.data.content.right.paddle.y,
-                    nick: jsonData.data.content.right.nickname,
+                    username: jsonData.data.content.right.username,
                     id: ""
                 }
             }

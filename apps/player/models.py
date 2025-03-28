@@ -78,16 +78,3 @@ class Player(models.Model):
         # Return None if player not found
         return None
 
-
-class PlayerStats(models.Model):
-    class Meta:
-        db_table = 'players_stats'
-
-    # ── Informations ──────────────────────────────────────────────────────────────────
-    total_game = IntegerField(default=0, blank=True)
-    wins = IntegerField(default=0, blank=True)
-    losses = IntegerField(default=0, blank=True)
-    mmr = IntegerField(default=50, blank=True)
-    # rank = ForeignKey('pong.Rank', on_delete=models.SET_NULL, null=True, blank=True, default=Ranks.BRONZE.value)
-    rank = CharField(default=Ranks.BRONZE.value, max_length=100, blank=True)
-    # I am like so sure this doesnt work because it doesnt know where pong.rank is

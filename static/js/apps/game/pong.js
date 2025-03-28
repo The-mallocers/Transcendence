@@ -4,8 +4,8 @@ import {navigateTo} from '../../spa/spa.js';
 const socket = WebSocketManager.gameSocket;
 let canvas = document.getElementById("pongCanvas");
 let ctx = canvas.getContext("2d");
-let lnick = document.getElementById("lnick");
-let rnick = document.getElementById("rnick");
+let lusername = document.getElementById("lusername");
+let rusername = document.getElementById("rusername");
 let lscore = document.getElementById("scoreLeft");
 let rscore = document.getElementById("scoreRight");
 
@@ -29,8 +29,8 @@ let paddleDefaultPos = 250 - (paddleHeight / 2)
 //     rightPaddleY: paddleDefaultPos
 // };
 
-lnick.innerHTML = window.GameState.left.nick
-rnick.innerHTML = window.GameState.right.nick
+lusername.innerHTML = window.GameState.left.username
+rusername.innerHTML = window.GameState.right.username
 console.log('meowmeowmeow', window.GameState)
 
 
@@ -146,7 +146,7 @@ function updatePaddles() {
         direction = 'idle'
     }
     if (direction) {
-        console.log("direction is :", direction)
+        // console.log("direction is :", direction)
         const message = {
             "event": "game",
             "data": {
@@ -233,7 +233,6 @@ function gameLoop() {
     if (game_is_over === true) {
         return;
     }
-    console.log("Im looping, ", game_is_over)
     updatePaddles();
     render();
     requestAnimationFrame(gameLoop);

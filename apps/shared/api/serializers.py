@@ -6,7 +6,7 @@ from apps.auth.api.serializers import PasswordSerializer
 from apps.auth.models import Password, TwoFA
 from apps.profile.api.serializers import ProfileSerializer
 from apps.profile.models import Profile
-from apps.shared.models import Clients
+from apps.shared.models import Clients, Stats
 
 
 class ClientSerializer(serializers.ModelSerializer):
@@ -22,17 +22,15 @@ class ClientSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         profile_data = validated_data.pop('profile')
         password_data = validated_data.pop('password')
-        # player_data = validated_data.pop('player')
 
         try:
             with transaction.atomic():
                 profile = Profile.objects.create(**profile_data)
                 passwrod = Password.objects.create(**password_data)
-                # stats = PlayerStats.objects.create()
-                # player = Player.objects.create(**player_data, stats=stats)
+                stats = Stats.objects.create() #just added this
                 two_fa = TwoFA.objects.create()
                 right = Rights.objects.create()
-                client = Clients.objects.create(profile=profile, password=passwrod, twoFa=two_fa, rights=right)
+                client = Clients.objects.create(profile=profile, password=passwrod, twoFa=two_fa, rights=right, stats=stats)
 
         except Exception as e:
             raise serializers.ValidationError(f"Error creating client: {str(e)}")

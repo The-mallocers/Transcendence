@@ -1,14 +1,32 @@
+from pickle import TRUE
 import uuid
 
 from asgiref.sync import sync_to_async
 from channels.db import database_sync_to_async
 from django.core.exceptions import ValidationError
 from django.db import models, IntegrityError, transaction
+from django.db.models import IntegerField, CharField, ForeignKey, ManyToManyField
 from django.http import HttpRequest
 
 from apps.auth.models import Password, TwoFA
 from apps.player.models import Player
 from apps.profile.models import Profile
+from utils.pong.enums import Ranks
+
+
+class Stats(models.Model):
+    class Meta:
+        db_table = 'client_stats'
+
+    # ── Informations ──────────────────────────────────────────────────────────────────
+    total_game = IntegerField(default=0, blank=True)
+    wins = IntegerField(default=0, blank=True)
+    losses = IntegerField(default=0, blank=True)
+    mmr = IntegerField(default=50, blank=True)
+    # rank = ForeignKey('pong.Rank', on_delete=models.SET_NULL, null=True, blank=True, default=Ranks.BRONZE.value)
+    rank = CharField(default=Ranks.BRONZE.value, max_length=100, blank=True)
+    games = ManyToManyField('game.Game', blank=True)
+
 
 
 class Clients(models.Model):
@@ -17,10 +35,11 @@ class Clients(models.Model):
                           null=False)
 
     # Joined tables
-    password = models.ForeignKey(Password, on_delete=models.CASCADE)
-    profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
-    twoFa = models.ForeignKey(TwoFA, on_delete=models.CASCADE)
-    rights = models.ForeignKey('admin.Rights', on_delete=models.CASCADE, null=True)
+    password = ForeignKey(Password, on_delete=models.CASCADE)
+    profile = ForeignKey(Profile, on_delete=models.CASCADE)
+    twoFa = ForeignKey(TwoFA, on_delete=models.CASCADE)
+    rights = ForeignKey('admin.Rights', on_delete=models.CASCADE, null=True)
+    stats = ForeignKey(Stats, on_delete=models.CASCADE, null=True)
 
     # player = models.ForeignKey(Player, on_delete=models.CASCADE, null=True)
 
@@ -131,8 +150,11 @@ class Clients(models.Model):
                 player_mod = Player(nickname=profile_mod.username)
                 player_mod.save()
 
+                stats_mod = Stats()
+                stats_mod.save()
+
                 client = Clients(password=password_mod, profile=profile_mod,
-                                 rights=rights_mod, twoFa=two_fa_mod, player=player_mod)
+                                 rights=rights_mod, twoFa=two_fa_mod, player=player_mod, stats=stats_mod)
                 client.save()
 
                 return client
@@ -159,3 +181,5 @@ class Clients(models.Model):
             return Clients.objects.select_related('player').get(id=client_id)
         except Clients.DoesNotExist:
             return None
+        
+    
