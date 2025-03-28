@@ -26,6 +26,12 @@ def get(req):
             ghistory = get_last_matches(client, Games_played)
             rivals = get_rivals(client, Games_played)
         
+        friends_list = client.get_all_friends()
+        friends_pending = client.get_all_pending_request()
+        
+        print("friends list", friends_list)
+        print("pending_list", friends_pending)
+        
         context = {
             "client": client,
             "clients": Clients.objects.all(),
@@ -34,7 +40,9 @@ def get(req):
             "winrate_angle" : int((winrate / 100) * 360),
             "rivals": rivals,
             "csrf_token": get_token(req),
-            "show_friend_request": False
+            "show_friend_request": False,
+            "friends_list": friends_list,
+            "friends_pending" : friends_pending
         }
         html_content = render_to_string("apps/profile/profile.html", context)
         return JsonResponse({'html': html_content})

@@ -308,6 +308,7 @@ const notifSocket = new WebSocket(`wss://${window.location.host}/ws/notification
 
 //<button >
 
+
 async function getClientId() {
     // if (client_id !== null) return client_id;
     console.log("Getting client ID")
@@ -334,6 +335,7 @@ async function getClientId() {
 notifSocket.onmessage = (event) => {
     const message = JSON.parse(event.data);
     console.log("message receive");
+    console.log(message);
 
     if(message.data.action == "NOTIF_TEST") {
         console.log("sasa de sasa")
@@ -362,4 +364,5 @@ document.addEventListener("click", function(event) {
         }
         notifSocket.send(JSON.stringify(message));
     }
+    navigateTo('/')
 });

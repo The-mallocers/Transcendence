@@ -9,22 +9,31 @@ from apps.shared.models import Clients
 
 def get(req):
     requestUsername = req.GET.get("username", "minimeow")
-    client = Clients.get_client_by_username(requestUsername)
+    # print(requestUsername)
+    target = Clients.get_client_by_username(requestUsername)
     # do something if client not found
-    if client is None : 
+    if target is None : 
         html_content = render_to_string("apps/error/404.html", {"csrf_token": get_token(req), "error_code": "404"})
         return JsonResponse({
             'html': html_content,
         })
-     
+    
+    #test if I have a friend
+    #If I have it i dont display the friend request button
+    client = Clients.get_client_by_request(req)
+    is_friend = client.is_friend_by_id(target)
+    show_friend_request = False
+    if is_friend is False or None:
+        show_friend_request = True
+
+
     html_content = render_to_string("apps/profile/profile.html",
-                                    {"csrf_token": get_token(req), 
-                                     "client": client,
-                                     "show_friend_request": True
-                                    })
-    return JsonResponse({
-        'html': html_content,
-    })
+                            {"csrf_token": get_token(req), 
+                                "client": target,
+                                "show_friend_request": show_friend_request
+                            })
+    
+    return JsonResponse({'html': html_content,})
     
 def get_settings(req):
     print("wiiwiiiwiiiii")

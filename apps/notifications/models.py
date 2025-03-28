@@ -27,10 +27,11 @@ class Friend(models.Model):
         try:
             with transaction.atomic():
                 #if friend is not my friend i add it to pending_friend
-                if not self.friends.filter(id=client.id).exists():
+                if not self.friends.filter(id=client.id).exists() and not self.pending_friends.filter(id=client.id).exists():
                     print("entering in the adding pending friend")
                     self.pending_friends.add(client)
                     self.save()
+                    return client
         except Exception as e:
             print(f"Error retrieving friend request: {e}")
             return None

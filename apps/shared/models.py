@@ -182,3 +182,36 @@ class Clients(models.Model):
         except Exception as e:
             print(f"Error retrieving friend request: {e}")
             return None
+
+    def is_friend_by_id(self, client):
+        try:
+            return self.friendrequest.friends.filter(id=client.id).exists()
+        except Exception as e:
+            print(f"Error retrieving client: {e}")
+            return None
+    
+    def get_all_friends(self):
+        try:
+            friend_list = []
+            for friend in self.friendrequest.friends.all():
+                friend_list.append({"client": friend,
+                                    "username": friend.profile.username})
+            print("here")
+            return friend_list
+        except Exception as e:
+            print(f"Error retrieving client: {e}")
+            return None
+
+    def get_all_pending_request(self):
+        try:
+            pending_list = []
+            for friend in self.friendrequest.pending_friends.all():
+                pending_list.append({"client": friend,
+                                    "username": friend.profile.username})
+            print("here1")
+            return pending_list
+        except Exception as e:
+            print(f"Error retrieving client: {e}")
+            return None
+
+

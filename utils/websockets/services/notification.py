@@ -10,17 +10,17 @@ class NotificationService(BaseServices):
     async def init(self, client):
         await super().init()
     
-    #client is the person that want to add a friend to his friend list
-    #target is the friends to add
-    # when i add a friend I put the client is to pending friend of the target person
+    # Client is the person that want to add a friend to his friend list
+    # Target is the friends to add
+    # When i add a friend I put the client is to pending friend of the target person
     async def _handle_send_friend_request(self, data, client):
         print(f"Searching for username: '{data['data']['args']['target_name']}'")
         # target is the client that I want to add
         target = await Clients.ASget_client_by_username(data['data']['args']['target_name'])
         if target is None:
             return await send_group_error(client.id, ResponseError.USER_NOT_FOUND)
-        friendTable = await target.get_friend_table()
-        askfriend = await friendTable.add_pending_friend(client)
+        friendTargetTable = await target.get_friend_table()
+        askfriend = await friendTargetTable.add_pending_friend(client)
         # if I am already his friend 
         if askfriend is None:
             return await send_group_error(client.id, ResponseError.USER_ALREADY_MY_FRIEND)
