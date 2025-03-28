@@ -78,7 +78,8 @@ class GameThread(Threads):
                 self.logic.set_result()
                 send_group(self.game_id, EventType.GAME, ResponseAction.GAME_ENDING, self.game_id)
             else:  # ya eu une erreur, genre client deco ou erreur sur le server
-                pass
+                self.logic.set_result(disconnect=True)
+                send_group_error(self.game_id, ResponseError.OPPONENT_LEFT, close=True)
 
             self._stop_event.set()
             self._stopping()

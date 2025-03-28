@@ -33,3 +33,7 @@ class Score:
         current = self.get_score()
         self.redis.json().set(self.game_key, Path(f'player_{self.player_side}.score'), current - 1)
         self.score -= 1
+
+    def set_score(self, score):
+        self.redis.json().set(self.game_key, Path(f'player_{self.player_side}.score'), score)
+        self.score = score

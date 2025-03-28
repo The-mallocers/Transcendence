@@ -10,25 +10,25 @@ from apps.shared.models import Clients
 def get(req):
     client = Clients.get_client_by_request(req)
     if client is not None:
-        # Games_played = GameManager.get_games_of_player(client.player.id)
-        # Games_played = sorted(Games_played, key=lambda g: g.created_at, reverse=True)
-
+        games_played = client.stats.games.all().order_by('-created_at')
+        
+        #debug stuff that no longer should trigger
         # faulty_games = False
         # for game in Games_played:
         #     if game.winner == None:
         #         faulty_games = True
-        #         print("WARNING : You have created a game without a winner, this is bad !")
+        #         print("WARNING : Somehow, You have created a game without a winner, this is bad !")
 
         # if faulty_games == True:
         #     print("Removing the faulty games, fix your code !")
         #     Games_played = [game for game in Games_played if game.winner is not None]
 
-
         winrate = ghistory = rivals = None
-        # if client is not None:
-        #     winrate = get_winrate(client, Games_played)
-        #     ghistory = get_last_matches(client, Games_played)
-        #     rivals = get_rivals(client, Games_played)
+        if client is not None:
+            winrate = get_winrate(client, games_played)
+            print('winrate: ', winrate)
+            # ghistory = get_last_matches(client, Games_played)
+            # rivals = get_rivals(client, Games_played)
         context = {
             "client": client,
             "clients": Clients.objects.all(),
@@ -38,13 +38,6 @@ def get(req):
             "rivals": rivals,
             "csrf_token": get_token(req)
         }
-
-        # {
-        #     "avatar": "matboyer.jpg",
-        #     "name"  : "Mathieu Boyer",
-        #     "nickname" : "EZ4C"
-        # }
-
         html_content = render_to_string("apps/profile/profile.html", context)
         return JsonResponse({'html': html_content})
     else:
@@ -55,17 +48,23 @@ def get(req):
 
 
 def get_winrate(client, games_played) -> int:
-    total_games = len(games_played)
+    wins = games_played.filter(winner__client=client).count()
+    print("wins:", wins)
+    
+    total_games = games_played.count()
     if total_games == 0:
         return 0
-    print(total_games)
-    won_games = 0
 
-    for game in games_played:
-        if client.player.id == game.winner.id:
-            won_games += 1
-    print(won_games)
-    return int((won_games / total_games) * 100)
+    #TFREYDIE Note -> If someone can explain to me why the code below doesnt work I will love you 4 ever.
+    # for game in games_played:
+    #     print("game is:", game)
+    #     # print("in get winrate, winner is :", game.winner)
+    #     if game.winner == None :
+    #         print("UUHHH")
+    #     elif client.id == game.winner.client.id:
+    #         won_games += 1
+    # print("won games:", won_games)
+    return int((wins / games_played.count()) * 100)
 
 
 def get_last_matches(client, games_played) -> list:

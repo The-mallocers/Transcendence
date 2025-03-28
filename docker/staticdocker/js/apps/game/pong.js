@@ -1,5 +1,6 @@
-import {WebSocketManager} from "../../websockets/websockets.js";
-import {navigateTo} from '../../spa/spa.js';
+import { WebSocketManager } from "../../websockets/websockets.js";
+import { navigateTo } from '../../spa/spa.js';
+import { isGameOver } from "./VarGame.js"
 
 const socket = WebSocketManager.gameSocket;
 let canvas = document.getElementById("pongCanvas");
@@ -16,34 +17,39 @@ const ballSize = 10;
 const paddleThickness = 10;
 let paddleHeight = 100;
 
-let game_is_over = false;
+
 
 canvas.width = width;
 canvas.height = height;
-let paddleDefaultPos = 250 - (paddleHeight / 2)
-
-// window.GameState = {
-//     ballX: width / 2,
-//     ballY: height / 2,
-//     leftPaddleY: paddleDefaultPos,
-//     rightPaddleY: paddleDefaultPos
-// };
 
 lusername.innerHTML = window.GameState.left.username
 rusername.innerHTML = window.GameState.right.username
 console.log('meowmeowmeow', window.GameState)
 
+socket.onclose = (e) => {
+    isGameOver.gameIsOver = true;
+    WebSocketManager.closeGameSocket();
+    navigateTo("/"); //Maybe redirect to an error page idk.
+}
+
 
 socket.onmessage = (e) => {
-    // queueMicrotask(() => {
     const jsonData = JSON.parse(e.data);
-    console.log("VTGVTVYTHVYTFVYTFVYTVFYTRVYTRVBYT")
-    console.log("87786guTV7B", jsonData)
+    console.log("received the message below");
+    console.log(jsonData);
+    console.log("received the message with Data");
     console.log(jsonData.data)
     if (jsonData.data) {
         console.log(jsonData.data.action)
     }
-    console.log("LACTION EST: ", jsonData.data.action);
+    
+    //Attempt at handling errors
+    if (jsonData.data.action == "EXCEPTION") {
+        isGameOver.gameIsOver = true;
+        WebSocketManager.closeGameSocket();
+        navigateTo("/");
+    }
+
     if (jsonData.event == "UPDATE") {
 
         if (jsonData.data.action == "PADDLE_LEFT_UPDATE") {
@@ -61,8 +67,15 @@ socket.onmessage = (e) => {
             rscore.innerHTML = jsonData.data.content
         }
     }
-
-    if (jsonData.data.action == "GAME_ENDING") {
+    else if (jsonData.data.event == "ERROR") {
+        if (jsonData.data.action == "OPPONENT_LEFT") {
+            console.log("Opponent Disconnected");
+            navigateTo("/"); //Later, Redirect to a screen telling your opponent he disconnected.
+            isGameOver.gameIsOver = true;
+            WebSocketManager.closeGameSocket();
+        }
+    }
+    else if (jsonData.data.action == "GAME_ENDING") {
         //Close socket here as well
         const game_id = jsonData.data.content
         console.log("game id is ", game_id);
@@ -70,9 +83,8 @@ socket.onmessage = (e) => {
         //We will want to navigate to a specific game
         console.log("Navigating to /pong/gameover/");
         navigateTo(`/pong/gameover/?game=${game_id}`);
-        game_is_over = true;
+        isGameOver.gameIsOver = true;
         WebSocketManager.closeGameSocket();
-
     }
     // return render()
     // })s
@@ -89,36 +101,18 @@ const previous_keys = {
     'd': false,
 }
 
-//A -> D
-// A true D false -> D -> EN BAS
-
-//0 - 0
-//A - 0
-//Update old keys
-// A = true - D = false
-
-//if A == true D == True
-
 document.addEventListener('keydown', (event) => {
-    switch (event.key) {
-        case 'ArrowUp':
-            keys.up = true;
-            break;
-        case 'ArrowDown':
-            keys.down = true;
-            break;
+    switch(event.key) {
+        case 'ArrowUp': keys.up = true; break;
+        case 'ArrowDown': keys.down = true; break;
     }
     // updatePaddles()
 });
 
 document.addEventListener('keyup', (event) => {
-    switch (event.key) {
-        case 'ArrowUp':
-            keys.up = false;
-            break;
-        case 'ArrowDown':
-            keys.down = false;
-            break;
+    switch(event.key) {
+        case 'ArrowUp': keys.up = false; break;
+        case 'ArrowDown': keys.down = false; break;
     }
     // updatePaddles()
 });
@@ -127,8 +121,6 @@ function updatePaddles() {
     // gauche
     let direction = null;
     if (keys.up && keys.down) {
-        //I want to check the old key combination, and have the direction be
-        //what the "new" direction is
         if (previous_keys.up) {
             direction = 'down'
         } else if (previous_keys.down) {
@@ -190,55 +182,28 @@ const drawBall = (x, y) => {
 const render = () => {
     clearArena();
     drawArena();
-
-    ///////////////
-    // updatePaddles()
-    ///////////////
     drawPaddle(10, window.GameState.left.y);
     drawPaddle(width - paddleThickness - 10, window.GameState.right.y);
     drawBall(window.GameState.ballX, window.GameState.ballY);
 };
 
 
-/*{
-    "event": "UPDATE",
-    "data": {
-        "action": "PADDLE_1_UPDATE",
-        "content": {
-            "width": 10.0,
-            "height": 100.0,
-            "x": 0.0,
-            "y": -1.0,
-            "speed": 10.0
-        }
-    }
-}*/
-
-
-// Animation loop
-// function animationLoop() {
-//     render();
-//     requestAnimationFrame(animationLoop);
-// }
-
-// // Start the animation loop
-// requestAnimationFrame(animationLoop);
-
-// setInterval(render, 1);  // 60 fps
-
-
 render()
 
 function gameLoop() {
-    if (game_is_over === true) {
-        return;
+    if(isGameOver.gameIsOver == true) {
+        // alert("returning like a fucking idiot")
+        return ;
     }
+    // console.log("Im looping, ", game_is_over)
     updatePaddles();
     render();
     requestAnimationFrame(gameLoop);
 }
 
 // Start the game loop
-if (game_is_over === false) {
+isGameOver.gameIsOver = false;
+if (isGameOver.gameIsOver == false) {
+    // alert("I am in the loop for the first time")
     requestAnimationFrame(gameLoop);
 }
