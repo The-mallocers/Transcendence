@@ -159,6 +159,7 @@ class PongLogic:
         if self.score_pL.get_score() > self.score_pR.get_score():
             winner = Player()
             winner.client = Clients.get_client_by_id(self.game.pL.client_id)
+            # print("WINNER CLIENT IS:", winner.client)
             winner.score = self.score_pL.get_score()
             winner.save()
             loser = Player()
@@ -169,6 +170,7 @@ class PongLogic:
         elif self.score_pL.get_score() < self.score_pR.get_score():
             winner = Player()
             winner.client = Clients.get_client_by_id(self.game.pR.client_id)
+            # print("WINNER CLIENT IS:", winner.client)
             winner.score = self.score_pR.get_score()
             winner.save()
             loser = Player()
@@ -180,8 +182,12 @@ class PongLogic:
         finished_game = Game.objects.create(id=self.game.game_id, winner=winner, loser=loser,
                                             points_to_win=self.game.points_to_win)
         winner.game = finished_game
+        winner.client.stats.games.add(finished_game)
+        winner.client.stats.save()
         winner.save()
         loser.game = finished_game
+        loser.client.stats.games.add(finished_game)
+        loser.client.stats.save()
         loser.save()
         # winner.update(game=finished_game)
         # loser.update(game=finished_game)
