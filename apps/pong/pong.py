@@ -155,7 +155,7 @@ class PongLogic:
         ball.set_dx(BALL_SPEED * (1 if random.random() > 0.5 else -1))
         ball.set_dy(BALL_SPEED * (1 if random.random() > 0.5 else -1))
 
-    def set_result(self):
+    def set_result(self, error=False):
         if self.score_pL.get_score() > self.score_pR.get_score():
             winner = Player()
             winner.client = Clients.get_client_by_id(self.game.pL.client_id)

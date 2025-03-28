@@ -3,6 +3,7 @@ import logging
 from redis.commands.json.path import Path
 
 from apps.shared.models import Clients
+from apps.game.models import Game
 from utils.pong.enums import GameStatus, ResponseError, status_order
 from utils.websockets.channel_send import asend_group_error
 from utils.websockets.services.services import BaseServices
@@ -56,7 +57,11 @@ class GameService(BaseServices):
                 await self.redis.json().set(self.game_key, Path('player_right.paddle.move'), data['data']['args'])
 
     async def handle_disconnect(self, client):
-        pass
+        Game.rset_status(GameStatus.ENDING)
+
+        #Envoyer un message a celui qui s'est pas deconnecter qu'il a gagner (pour que le front le redirige)
+        #On veux arreter la game thread et faire en sorte qu'il comprenne que c'est une deco
+        #Update le score specialement pour une disconnect
 
         # Be careful, this breaks because it sets stuff back to ending instead of finished.
 
