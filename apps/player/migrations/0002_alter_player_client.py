@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('player', '0001_initial'),
         ('shared', '0001_initial'),

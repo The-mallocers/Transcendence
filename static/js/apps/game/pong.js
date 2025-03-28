@@ -1,5 +1,5 @@
-import { WebSocketManager } from "../../websockets/websockets.js";
-import { navigateTo } from '../../spa/spa.js';
+import {WebSocketManager} from "../../websockets/websockets.js";
+import {navigateTo} from '../../spa/spa.js';
 
 const socket = WebSocketManager.gameSocket;
 let canvas = document.getElementById("pongCanvas");
@@ -38,7 +38,7 @@ socket.onmessage = (e) => {
     // queueMicrotask(() => {
     const jsonData = JSON.parse(e.data);
     console.log("VTGVTVYTHVYTFVYTFVYTVFYTRVYTRVBYT")
-    console.log("87786guTV7B",jsonData)
+    console.log("87786guTV7B", jsonData)
     console.log(jsonData.data)
     if (jsonData.data) {
         console.log(jsonData.data.action)
@@ -46,27 +46,23 @@ socket.onmessage = (e) => {
     console.log("LACTION EST: ", jsonData.data.action);
     if (jsonData.event == "UPDATE") {
 
-        if (jsonData.data.action == "PADDLE_LEFT_UPDATE"){
+        if (jsonData.data.action == "PADDLE_LEFT_UPDATE") {
             console.log(jsonData.data.content.y)
-            window.GameState.left.y  = jsonData.data.content.y
-        }
-        else if (jsonData.data.action == "PADDLE_RIGHT_UPDATE"){
-            window.GameState.right.y =  jsonData.data.content.y
-        }
-        else if (jsonData.data.action == "BALL_UPDATE") {
+            window.GameState.left.y = jsonData.data.content.y
+        } else if (jsonData.data.action == "PADDLE_RIGHT_UPDATE") {
+            window.GameState.right.y = jsonData.data.content.y
+        } else if (jsonData.data.action == "BALL_UPDATE") {
             window.GameState.ballX = jsonData.data.content.x;
             window.GameState.ballY = jsonData.data.content.y;
             // console.table(jsonData.data.content.x, jsonData.data.content.y)
-        }
-        else if (jsonData.data.action == "SCORE_LEFT_UPDATE"){
+        } else if (jsonData.data.action == "SCORE_LEFT_UPDATE") {
             lscore.innerHTML = jsonData.data.content
-        }
-        else if (jsonData.data.action == "SCORE_RIGHT_UPDATE"){
+        } else if (jsonData.data.action == "SCORE_RIGHT_UPDATE") {
             rscore.innerHTML = jsonData.data.content
         }
     }
-    
-    if (jsonData.data.action == "GAME_ENDING"){
+
+    if (jsonData.data.action == "GAME_ENDING") {
         //Close socket here as well
         const game_id = jsonData.data.content
         console.log("game id is ", game_id);
@@ -78,7 +74,7 @@ socket.onmessage = (e) => {
         socket.closeGameSocket();
 
     }
-        // return render()
+    // return render()
     // })s
 };
 
@@ -104,17 +100,25 @@ const previous_keys = {
 //if A == true D == True
 
 document.addEventListener('keydown', (event) => {
-    switch(event.key) {
-        case 'ArrowUp': keys.up = true; break;
-        case 'ArrowDown': keys.down = true; break;
+    switch (event.key) {
+        case 'ArrowUp':
+            keys.up = true;
+            break;
+        case 'ArrowDown':
+            keys.down = true;
+            break;
     }
     // updatePaddles()
 });
 
 document.addEventListener('keyup', (event) => {
-    switch(event.key) {
-        case 'ArrowUp': keys.up = false; break;
-        case 'ArrowDown': keys.down = false; break;
+    switch (event.key) {
+        case 'ArrowUp':
+            keys.up = false;
+            break;
+        case 'ArrowDown':
+            keys.down = false;
+            break;
     }
     // updatePaddles()
 });
@@ -127,22 +131,18 @@ function updatePaddles() {
         //what the "new" direction is
         if (previous_keys.up) {
             direction = 'down'
-        }
-        else if (previous_keys.down) {
+        } else if (previous_keys.down) {
             direction = 'up'
         }
-    }
-    else if (keys.up) {
+    } else if (keys.up) {
         direction = 'up'
         previous_keys.up = true;
         previous_keys.down = false;
-    }
-    else if (keys.down) {
+    } else if (keys.down) {
         direction = 'down'
         previous_keys.down = true;
         previous_keys.up = false;
-    }
-    else {
+    } else {
         direction = 'idle'
     }
     if (direction) {
@@ -215,8 +215,6 @@ const render = () => {
 }*/
 
 
-
-
 // Animation loop
 // function animationLoop() {
 //     render();
@@ -232,8 +230,8 @@ const render = () => {
 render()
 
 function gameLoop() {
-    if(game_is_over === true) {
-        return ;
+    if (game_is_over === true) {
+        return;
     }
     console.log("Im looping, ", game_is_over)
     updatePaddles();

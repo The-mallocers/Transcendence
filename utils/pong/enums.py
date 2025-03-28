@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class GameStatus(str, Enum):
     CREATING: str = 'creating'
     MATCHMAKING: str = 'matchmaking'
@@ -13,6 +14,7 @@ class GameStatus(str, Enum):
 
 status_order = list(GameStatus)
 
+
 class TournamentStatus(str, Enum):
     CREATING: str = 'creating'
     MATCHMAKING: str = 'matchmaking'
@@ -23,6 +25,7 @@ class TournamentStatus(str, Enum):
     FINISHED: str = 'finished'
     ERROR: str = 'error'
 
+
 class EventType(str, Enum):
     MATCHMAKING: str = 'matchmaking'
     GAME: str = 'game'
@@ -30,6 +33,7 @@ class EventType(str, Enum):
     UPDATE: str = 'update'
     ERROR: str = 'error'
     CHAT: str = 'chat'
+
 
 # All the actions the client sends to the server
 class RequestAction(str, Enum):
@@ -86,7 +90,6 @@ class ResponseAction(str, Enum):
     HISTORY_RECEIVED = "history_received"
     ALL_ROOM_RECEIVED = "all_room_received"
 
-
     TEST: str = 'test'
 
 
@@ -129,6 +132,7 @@ class ResponseError(str, Enum):
 class Side(str, Enum):
     LEFT: str = 'left'
     RIGHT: str = 'right'
+
 
 class PaddleMove(str, Enum):
     UP: str = 'up'

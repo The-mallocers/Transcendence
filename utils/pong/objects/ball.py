@@ -14,7 +14,7 @@ class Ball:
         self.y: float = CANVAS_HEIGHT / 2
         self.dx: float = BALL_SPEED
         self.dy: float = BALL_SPEED
-        
+
         # ── Utils ─────────────────────────────────────────────────────────────────────────    
         self.redis = redis
         self.game_key = f'game:{game_id}'

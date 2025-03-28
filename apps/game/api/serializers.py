@@ -1,7 +1,6 @@
 from rest_framework import serializers
 
 from apps.game.models import Game
-from apps.player.models import Player
 from apps.pong.api.serializers import BallSerializer
 from utils.pong.enums import GameStatus
 from utils.pong.objects.ball import Ball
@@ -20,11 +19,11 @@ class GameSerializer(serializers.ModelSerializer):
     def get_ball(self, obj):
         ball = Ball()
         return BallSerializer(ball).data
-    
+
     def get_status(self, obj):
         status = GameStatus(GameStatus.CREATING)
         return status
-    
+
     def get_game_id(self, obj):
         game_id = self.context.get('id')
         return game_id

@@ -1,10 +1,11 @@
 from django.db import models
 
+
 class Rights(models.Model):
-    #Primary key
+    # Primary key
     id = models.AutoField(primary_key=True, null=False, editable=False)
 
-    #Secondary key
+    # Secondary key
     is_admin = models.BooleanField(default=False, null=False, editable=True)
 
     # Grafana

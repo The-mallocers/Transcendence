@@ -35,26 +35,28 @@ class PasswordApiView(APIView):
             return Response({"password": {"valid": True, "id": serializer.data.get('id')}}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 class RegisterApiView(APIView):
     permission_classes = []
     authentication_classes = []
-    
 
     def post(self, request, *args, **kwargs):
         serializer = ClientSerializer(data=request.data)
         if serializer.is_valid():
             try:
-                client = serializer.save() #this can fail so we added a catch
+                client = serializer.save()  # this can fail so we added a catch
                 print("\n\nSave successful!\n\n")
                 return Response(ClientSerializer(client).data, status=status.HTTP_201_CREATED)
             except Exception as e:
                 import traceback
                 print("\n\nException during save:", str(e))
                 print(traceback.format_exc())
-                return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR) #this is ia stuff, maybe shouldnt be 500 idk
+                return Response({"error": str(e)},
+                                status=status.HTTP_500_INTERNAL_SERVER_ERROR)  # this is ia stuff, maybe shouldnt be 500 idk
         else:
             print("Validation errors:", serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class LoginApiView(APIView):
     permission_classes = []
@@ -69,8 +71,8 @@ class LoginApiView(APIView):
                 "error": "Invalid credentials"
             }, status=status.HTTP_401_UNAUTHORIZED)
         else:
-            response = None   
-            #adding the 2fa check here
+            response = None
+            # adding the 2fa check here
             if client.twoFa.enable:
                 if not client.twoFa.scanned:
                     get_qrcode(client)
@@ -78,8 +80,9 @@ class LoginApiView(APIView):
                     'message': '2FA activated, redirecting',
                     'redirect': '/auth/2fa',
                 }, status=status.HTTP_302_FOUND)
-                response.set_cookie(key='email', value=email, httponly=False, secure=True, samesite='Lax') #httpfalse is less ugly than the alternatives
-                
+                response.set_cookie(key='email', value=email, httponly=False, secure=True,
+                                    samesite='Lax')  # httpfalse is less ugly than the alternatives
+
             else:
                 response = Response({
                     'message': 'Login successful'
@@ -87,7 +90,8 @@ class LoginApiView(APIView):
                 JWTGenerator(client, JWTType.ACCESS).set_cookie(response)
                 JWTGenerator(client, JWTType.REFRESH).set_cookie(response)
             return response
-        
+
+
 class LogoutApiView(APIView):
     permission_classes = []
     authentication_classes = []
@@ -102,62 +106,70 @@ class LogoutApiView(APIView):
             return Response({
                 "error": "You are not log"
             }, status=status.HTTP_401_UNAUTHORIZED)
-        
+
+
 from django.http import JsonResponse
 import json
 
-#the 2FA does not use the restful api stuff like above, too bad !
+
+# the 2FA does not use the restful api stuff like above, too bad !
 def change_two_fa(req):
     if req.method == "POST":
         data = json.loads(req.body.decode('utf-8'))
         client = Clients.get_client_by_request(req)
-        if client is not None :
+        if client is not None:
             client.twoFa.update("enable", data['status'])
             response = JsonResponse({
-                "success" : True,
-                "message" : "State 2fa change"
+                "success": True,
+                "message": "State 2fa change"
             }, status=200)
-        else :
+        else:
             response = JsonResponse({
-            "success" : False,
-            "message" : "No client available"
-        }, status=403)
+                "success": False,
+                "message": "No client available"
+            }, status=403)
         return response
-    
-#utils function for 2fa
+
+
+# utils function for 2fa
 import pyotp
 import qrcode
 import io
 from django.core.files.base import ContentFile
 
+
 def get_qrcode(user):
     # create a qrcode and convert it
     print("first_name: " + user.profile.username + " creating qrcode")
     if not user.twoFa.qrcode:
-        uri = pyotp.totp.TOTP(user.twoFa.key).provisioning_uri(name=user.profile.username, issuer_name="Transcendance_" + str(user.profile.username))
+        uri = pyotp.totp.TOTP(user.twoFa.key).provisioning_uri(name=user.profile.username,
+                                                               issuer_name="Transcendance_" + str(
+                                                                   user.profile.username))
         qr_image = qrcode.make(uri)
         buf = io.BytesIO()
         qr_image.save(buf, "PNG")
         contents = buf.getvalue()
-        
+
         # convert it to adapt to a imagefield type in my db
         image_file = ContentFile(contents, name=f"{user.profile.username}_qrcode.png")
         user.twoFa.update("qrcode", image_file)
-        
+
         return True
     return False
 
-def formulate_json_response(state,status, message, redirect):
-    return(JsonResponse({
-            "success": state,
-            "message": message,
-            "redirect":redirect
-        }, status=status))
+
+def formulate_json_response(state, status, message, redirect):
+    return (JsonResponse({
+        "success": state,
+        "message": message,
+        "redirect": redirect
+    }, status=status))
+
 
 def post_twofa_code(req):
     email = req.COOKIES.get('email')
     client = Clients.get_client_by_email(email)
-    response = formulate_json_response(False, 400, "Error getting the user", "/auth/login") 
+    response = formulate_json_response(False, 400, "Error getting the user", "/auth/login")
     if client is None:
         return response
     if req.method == "POST":
@@ -178,8 +190,8 @@ def post_twofa_code(req):
 
 
 import logging
-logger = logging.getLogger(__name__)
 
+logger = logging.getLogger(__name__)
 
 
 class GetClientIDApiView(APIView):
@@ -189,9 +201,9 @@ class GetClientIDApiView(APIView):
         if client == None:
             return Response({
                 "client_id": None,
-                "message" : "Could not retrieve user ID"
+                "message": "Could not retrieve user ID"
             }, status=status.HTTP_401_UNAUTHORIZED)
         return Response({
-                "client_id": client.id,
-                "message" : "ID retrieved succesfully"
-            }, status=status.HTTP_200_OK)
+            "client_id": client.id,
+            "message": "ID retrieved succesfully"
+        }, status=status.HTTP_200_OK)

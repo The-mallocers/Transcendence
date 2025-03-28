@@ -4,7 +4,6 @@ import jwt
 from django.conf import settings
 from django.http import JsonResponse, HttpRequest, HttpResponse, \
     HttpResponseRedirect
-
 from shared.models import Clients
 from utils.jwt.TokenGenerator import TokenType, Token, TokenGenerator
 

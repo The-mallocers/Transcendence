@@ -1,7 +1,7 @@
 from datetime import timedelta
 
 from django.db import models
-from django.db.models import IntegerField, ManyToManyField, DateTimeField, \
+from django.db.models import IntegerField, DateTimeField, \
     CharField, DurationField, JSONField
 from django.utils import timezone
 

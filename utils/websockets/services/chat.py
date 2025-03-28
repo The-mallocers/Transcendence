@@ -17,12 +17,12 @@ class ChatService(BaseServices):
         await super().init()
         self.channel_layer = get_channel_layer()
         self.channel_name = await self.redis.hget(name="consumers_channels", key=str(client.id))
-        
+
     async def process_action(self, data, *args):
         if 'room_id' in data['data']['args'] and data['data']['args']['room_id'] == 'global':
             data['data']['args']['room_id'] = uuid_global_room
         return await super().process_action(data, *args)
-    
+
     async def _handle_create_room(self, data, admin: Clients):
         try:
             # Retrieve the target client
@@ -31,7 +31,7 @@ class ChatService(BaseServices):
             # Initial checks (target does not exist or same ID)
             if target is None:
                 return await asend_group_error(admin.id, ResponseError.TARGET_NOT_FOUND)
-            
+
             if admin.id == target.id:
                 return await asend_group_error(admin.id, ResponseError.SAME_ID)
 
@@ -128,7 +128,8 @@ class ChatService(BaseServices):
                 {"message": msg.content, "sender": str(await msg.get_sender_id()), "room_id": str(room_id)}
                 for msg in messages
             ]
-            await asend_group(client.id, EventType.CHAT, ResponseAction.HISTORY_RECEIVED, {"messages": formatted_messages})
+            await asend_group(client.id, EventType.CHAT, ResponseAction.HISTORY_RECEIVED,
+                              {"messages": formatted_messages})
 
         except json.JSONDecodeError as e:
             self._logger.error(f"JSON parsing error: {e}")

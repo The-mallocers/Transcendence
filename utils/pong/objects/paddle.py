@@ -2,9 +2,9 @@ from dataclasses import dataclass
 
 from redis.commands.json.path import Path
 
+from apps.player.models import Player
 from utils.pong.enums import PaddleMove
 from utils.pong.objects import PADDLE_WIDTH, PADDLE_HEIGHT, PADDLE_SPEED, CANVAS_HEIGHT
-from apps.player.models import Player
 
 
 @dataclass
@@ -16,7 +16,7 @@ class Paddle:
         self.x: float = x
         self.y: float = (CANVAS_HEIGHT / 2) - (PADDLE_HEIGHT / 2)
         self.speed: float = PADDLE_SPEED
-        
+
         # ── Utils ─────────────────────────────────────────────────────────────────────────    
         self.redis = redis
         self.game_key = f'game:{game_id}'
@@ -54,7 +54,7 @@ class Paddle:
     def get_move(self):
         return self.redis.json().get(self.game_key, Path(f'player_{self.player_side}.paddle.move'))
 
-# ── Setter ────────────────────────────────────────────────────────────────────────
+    # ── Setter ────────────────────────────────────────────────────────────────────────
 
     def set_width(self, width):
         self.redis.json().set(self.game_key, Path(f'player_{self.player_side}.paddle.width'), width)
@@ -79,9 +79,8 @@ class Paddle:
     def set_move(self, move):
         self.redis.json().set(self.game_key, Path(f'player_{self.player_side}.paddle.move'), move)
         self.move = move
-    
 
-# ── Helper Methods for Incrementing/Decrementing ─────────────────────────────────
+    # ── Helper Methods for Incrementing/Decrementing ─────────────────────────────────
 
     def increase_x(self):
         current_x = self.get_x()
@@ -91,17 +90,17 @@ class Paddle:
         current_x = self.get_x()
         self.set_x(current_x - self.get_speed())
 
-#
+    #
     def handle_wall_collision(self, y) -> float:
         height = self.get_height()
         if y <= 0:
-            return 0    
+            return 0
         elif y + height >= CANVAS_HEIGHT:
             return CANVAS_HEIGHT - height
         else:
             return y
 
-#I changed both function below so it doesnt even move the paddle if its gonna be out of bound
+    # I changed both function below so it doesnt even move the paddle if its gonna be out of bound
     def increase_y(self, delta_time):
         current_y = self.get_y() + (self.get_speed() * delta_time)
         current_y = self.handle_wall_collision(current_y)
@@ -114,11 +113,11 @@ class Paddle:
 
     def increase_speed(self):
         current_speed = self.get_speed()
-        self.set_speed(current_speed + 0) #Later 
+        self.set_speed(current_speed + 0)  # Later
 
     def decrease_speed(self):
         current_speed = self.get_speed()
-        self.set_speed(current_speed - 0) #later
+        self.set_speed(current_speed - 0)  # later
 
     # ── Helper Methods for Multiplication/Division ─────────────────────────────────
 

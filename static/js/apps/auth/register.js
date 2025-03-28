@@ -1,7 +1,7 @@
-import { navigateTo } from '../../spa/spa.js';
+import {navigateTo} from '../../spa/spa.js';
 
 
-function register (event) {
+function register(event) {
     console.log("I am register.js")
     event.preventDefault();
     const form = document.querySelector("form");
@@ -19,7 +19,7 @@ function register (event) {
         password: {
             password: password
         },
-        player : {
+        player: {
             nickname: username
         }
     }
@@ -35,11 +35,9 @@ function register (event) {
         },
     })
         .then(response => {
-            if (response.ok)
-            {
+            if (response.ok) {
                 navigateTo('/');
-            }
-            else {
+            } else {
                 console.log("we registered badly")
                 console.log(response);
                 response.json().then(data => {
@@ -62,8 +60,10 @@ function register (event) {
         .catch(error => {
             console.error("There was an error with the fetch operation:", error);
         });
-};
+}
 
 let element = document.querySelector("#register-btn");
 
-element.addEventListener("click", (e)=>{register(e)} )
+element.addEventListener("click", (e) => {
+    register(e)
+})

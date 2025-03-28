@@ -2,7 +2,6 @@ from django.views.decorators.http import require_http_methods
 
 from apps.auth.view.login import get as get_login
 from apps.auth.view.register import get
-
 from apps.auth.view.twofa import view_two_fa
 
 
@@ -10,15 +9,12 @@ from apps.auth.view.twofa import view_two_fa
 def register_get(req):
     return get(req)
 
+
 @require_http_methods(["GET"])
 def login_get(req):
     return get_login(req)
 
+
 @require_http_methods(["GET"])
 def twofa_get(req):
     return view_two_fa(req)
-
-
-
-
-

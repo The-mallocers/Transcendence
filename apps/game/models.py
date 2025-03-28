@@ -1,5 +1,7 @@
 import traceback
 
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
 from django.db import models
 from django.db.models import IntegerField, ForeignKey
 from django.db.models.fields import DateTimeField
@@ -10,13 +12,12 @@ from redis.commands.json.path import Path
 from apps.player.api.serializers import PlayersRedisSerializer
 from apps.player.models import Player
 from apps.tournaments.models import Tournaments
-from utils.pong.enums import GameStatus, ResponseAction
+from utils.pong.enums import EventType, ResponseAction
+from utils.pong.enums import GameStatus
 from utils.redis import RedisConnectionPool
 from utils.util import create_game_id
-from channels.layers import get_channel_layer
 from utils.websockets.channel_send import send_group
-from utils.pong.enums import EventType, ResponseAction
-from asgiref.sync import async_to_sync
+
 
 class Game(models.Model):
     class Meta:
@@ -48,29 +49,29 @@ class Game(models.Model):
 
     def __str__(self):
         return f'Game with id: {self.game_id}'
-    
+
     def create_redis_game(self):
         from apps.game.api.serializers import GameSerializer
         serializer = GameSerializer(self, context={'id': self.game_id})
         self.redis.json().set(self.game_key, Path.root_path(), serializer.data)
 
     def init_players(self):
-        #On ajoute a la db de redis , a l'id de la game, les infos des deux joueurs
+        # On ajoute a la db de redis , a l'id de la game, les infos des deux joueurs
         players_serializer = PlayersRedisSerializer(instance={'player_left': self.pL, 'player_right': self.pR})
         existing_data = self.redis.json().get(self.game_key)
         existing_data.update(players_serializer.data)
         self.redis.json().set(self.game_key, Path.root_path(), existing_data)
 
-        #getting channel layer
+        # getting channel layer
         channel_layer = get_channel_layer()
 
-        #Add two player in group of the new game
+        # Add two player in group of the new game
         channel_name_pL = self.redis.hget(name="consumers_channels", key=str(self.pL.client_id))
         async_to_sync(channel_layer.group_add)(str(self.game_id), channel_name_pL)
         channel_name_pR = self.redis.hget(name="consumers_channels", key=str(self.pR.client_id))
         async_to_sync(channel_layer.group_add)(str(self.game_id), channel_name_pR)
 
-        #Add the players in player_game redis table
+        # Add the players in player_game redis table
         self.redis.hset(name="current_matches", key=str(self.pL.client_id), value=str(self.game_id))
         self.redis.hset(name="current_matches", key=str(self.pR.client_id), value=str(self.game_id))
 

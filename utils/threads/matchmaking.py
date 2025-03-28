@@ -1,7 +1,6 @@
 import random
-import traceback
 import time
-
+import traceback
 
 from apps.game.models import Game
 from apps.player.models import Player
@@ -9,7 +8,6 @@ from utils.pong.enums import GameStatus, ResponseError
 from utils.threads.game import GameThread
 from utils.threads.threads import Threads
 from utils.websockets.channel_send import send_group_error
-from utils.redis import RedisConnectionPool
 
 
 # Game Will be the new game manager !
@@ -17,12 +15,12 @@ class MatchmakingThread(Threads):
     def main(self):
         game: Game = Game()
         matched: bool = False
-        
+
         while not self._stop_event.is_set():
             try:
                 if game is None:
                     game = Game()
-                
+
                 matched = self.select_players(game)
                 if matched:
                     game.create_redis_game()
@@ -33,7 +31,7 @@ class MatchmakingThread(Threads):
                     GameThread(game=game).start()
                     game = None
 
-                time.sleep(1) 
+                time.sleep(1)
 
             except Exception as e:
                 print(str(e))
@@ -58,7 +56,7 @@ class MatchmakingThread(Threads):
         self.redis.delete("consumers_channels")
         self.redis.delete("matchmaking_queue")
         self.redis.delete("current_matches")
-        
+
         # RedisConnectionPool.close_connection(self.__class__.__name__)
 
         self._logger.info("Cleanup of unfinished games complete")
@@ -68,8 +66,8 @@ class MatchmakingThread(Threads):
     def select_players(self, game):
         players_queue = self.redis.hgetall('matchmaking_queue')
         players = [player.decode('utf-8') for player in players_queue]
-        if len(players) >= 2:  #il faudra ce base sur les mmr
-            selected_players = players[:2] #this gets the first 2 players of the list
+        if len(players) >= 2:  # il faudra ce base sur les mmr
+            selected_players = players[:2]  # this gets the first 2 players of the list
             random.shuffle(selected_players)
             game.pL = Player(selected_players[0])
             game.pR = Player(selected_players[1])

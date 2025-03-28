@@ -19,6 +19,7 @@ class PaddleSerializer(serializers.Serializer):
             setattr(instance, attr, value)
         return instance
 
+
 class BallSerializer(serializers.Serializer):
     radius = serializers.FloatField()
     x = serializers.FloatField()

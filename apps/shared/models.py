@@ -12,15 +12,16 @@ from apps.profile.models import Profile
 
 
 class Clients(models.Model):
-    #Primary key
+    # Primary key
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False,
                           null=False)
 
-    #Joined tables
+    # Joined tables
     password = models.ForeignKey(Password, on_delete=models.CASCADE)
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
     twoFa = models.ForeignKey(TwoFA, on_delete=models.CASCADE)
     rights = models.ForeignKey('admin.Rights', on_delete=models.CASCADE, null=True)
+
     # player = models.ForeignKey(Player, on_delete=models.CASCADE, null=True)
 
     class Meta:
@@ -43,12 +44,12 @@ class Clients(models.Model):
             return None
         client = Clients.objects.get(id=id)
         return client
-        
+
     @staticmethod
     def get_client_by_username(username: str):
         try:
             return Clients.objects.get(profile__username=username)
-        except :
+        except:
             return None  # Or handle the error appropriately
 
     @staticmethod
@@ -58,7 +59,7 @@ class Clients(models.Model):
         if token is not None:
             return Clients.get_client_by_id(token.SUB)
         return None
-    
+
     @staticmethod
     @sync_to_async
     def get_client_by_id_async(id: uuid.UUID):

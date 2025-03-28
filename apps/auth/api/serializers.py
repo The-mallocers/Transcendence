@@ -10,7 +10,7 @@ class PasswordSerializer(serializers.ModelSerializer):
         MinLengthValidator(
             limit_value=4,
             message="Password must be at least 4 charcaters"
-        ),  
+        ),
         RegexValidator(
             regex=r'^(?=.*[!@#$%^&*()_+\-=\[\]{};:\'",<>\./?\\|`~]).*(?=.*\d).+$',
             message="Password must contain at least one special character and one number."
@@ -30,12 +30,12 @@ class PasswordSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("New password must be different from the old password.")
         return value
 
-    #Object level validation (validate password field)
+    # Object level validation (validate password field)
     def validate(self, attrs):
         self.validate_password(attrs.get('password'))
         return attrs
 
-    #Update custom object function
+    # Update custom object function
     def update(self, instance, validated_data):
         new_password = validated_data.get('password', instance.password)
         old_password = instance.password

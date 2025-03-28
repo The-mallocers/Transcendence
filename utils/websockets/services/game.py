@@ -1,12 +1,11 @@
 import logging
-from apps.game.models import Game
+
+from redis.commands.json.path import Path
+
 from apps.shared.models import Clients
-from utils.pong.enums import GameStatus, ResponseError, status_order, Side
-from utils.pong.objects.paddle import Paddle
+from utils.pong.enums import GameStatus, ResponseError, status_order
 from utils.websockets.channel_send import asend_group_error
 from utils.websockets.services.services import BaseServices
-from redis.commands.json.path import Path
-from asgiref.sync import sync_to_async
 
 
 class GameService(BaseServices):
@@ -56,11 +55,11 @@ class GameService(BaseServices):
                 await self.redis.json().set(self.game_key, Path('player_left.paddle.move'), data['data']['args'])
             if str(client.id) == self.pR['id']:
                 await self.redis.json().set(self.game_key, Path('player_right.paddle.move'), data['data']['args'])
-        
+
     async def handle_disconnect(self, client):
         pass
 
-        #Be careful, this breaks because it sets stuff back to ending instead of finished.
+        # Be careful, this breaks because it sets stuff back to ending instead of finished.
 
         # p1_id = await self.game_manager.rget_pL_id()
         # p2_id = await self.game_manager.rget_pR_id()
@@ -71,12 +70,9 @@ class GameService(BaseServices):
         #     await send_group_error(opponent_id, ResponseError.OPPONENT_LEFT, close=True)
         #     await self.game_manager.rset_status(GameStatus.ENDING)
 
+        # Le code si dessous a pour but de checker si un joueur se deconnecte pendant une game
+        # On veut register ca comme une defaite pour lui
+        # Je ne sais pas vraiment comment check si la deco arrive dans une des autres phases d'une game
 
-        #Le code si dessous a pour but de checker si un joueur se deconnecte pendant une game
-        #On veut register ca comme une defaite pour lui
-        #Je ne sais pas vraiment comment check si la deco arrive dans une des autres phases d'une game
-
-        
-        #Alexandre a l'aide
+        # Alexandre a l'aide
         # await self.game_manager.update_disconnect_result(client, opponent_client)
-

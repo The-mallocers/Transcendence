@@ -1,6 +1,6 @@
-import asyncio
-import traceback
 import time
+import time
+import traceback
 
 from apps.game.models import Game
 from apps.player.api.serializers import PlayerInformationSerializer
@@ -9,7 +9,6 @@ from utils.pong.enums import GameStatus, EventType, ResponseAction, \
     ResponseError, Side
 from utils.threads.threads import Threads
 from utils.websockets.channel_send import send_group, send_group_error
-from utils.redis import RedisConnectionPool
 
 
 class GameThread(Threads):
@@ -24,11 +23,11 @@ class GameThread(Threads):
             while self.game_is_running():
                 if self._starting() == False:
                     time.sleep(0.1)
-                else:    
+                else:
                     break
             while self.game_is_running():
                 self._running()
-                self._ending() #I will get this one out of this loop I swear it
+                self._ending()  # I will get this one out of this loop I swear it
 
         except Exception as e:
             self._logger.error(e)
@@ -77,9 +76,9 @@ class GameThread(Threads):
             if self.logic.score_pL.get_score() == self.game.points_to_win or self.logic.score_pR.get_score() == self.game.points_to_win:
                 self.logic.set_result()
                 send_group(self.game_id, EventType.GAME, ResponseAction.GAME_ENDING, self.game_id)
-            else: #ya eu une erreur, genre client deco ou erreur sur le server
+            else:  # ya eu une erreur, genre client deco ou erreur sur le server
                 pass
-            
+
             self._stop_event.set()
             self._stopping()
 

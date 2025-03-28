@@ -13,7 +13,7 @@
 
                         <label class="w-50 mt-4" for="nickname">Nickname</label>
                         <input class="p-3 mt-1 w-50" type="text" placeholder="nickname" id="nickname">
-                        
+
                         <label class="w-50 mt-4" for="changepw">Change password</label>
                         <input class="p-3 mt-1 w-50" type="password" placeholder="change password" id="changepw">
 
@@ -28,7 +28,8 @@
             <div class="col-5">
                 <div class="content d-flex flex-column justify-content-center align-items-center">
                     <svg class="shield" viewBox="0 0 94 125" xmlns="http://www.w3.org/2000/svg">
-                        <path  class="shieldPath"  d="M46.009 0.27625L14.5877 9.02375V11.0687C14.5877 22.0438 7.9441 17.275 1.98196 19.4575L0.00250072 20.1838L0 22.0438V67.92C0 83.7687 7.92035 98.5875 22.902 110.772C34.1035 119.884 45.195 124.29 45.6626 124.474L47.0006 125L48.3386 124.475C48.805 124.293 59.8953 119.885 71.0993 110.774C86.0809 98.5888 94 83.7688 94 67.9212V20.1863L92.018 19.4587C86.0547 17.275 79.4123 22.0438 79.4123 11.07V9.02375L47.0006 0L46.009 0.27625Z " />
+                        <path class="shieldPath"
+                              d="M46.009 0.27625L14.5877 9.02375V11.0687C14.5877 22.0438 7.9441 17.275 1.98196 19.4575L0.00250072 20.1838L0 22.0438V67.92C0 83.7687 7.92035 98.5875 22.902 110.772C34.1035 119.884 45.195 124.29 45.6626 124.474L47.0006 125L48.3386 124.475C48.805 124.293 59.8953 119.885 71.0993 110.774C86.0809 98.5888 94 83.7688 94 67.9212V20.1863L92.018 19.4587C86.0547 17.275 79.4123 22.0438 79.4123 11.07V9.02375L47.0006 0L46.009 0.27625Z "/>
                     </svg>
                     <h2 class="text-center mt-5">Enable 2-FA</h2>
 
@@ -42,8 +43,7 @@
                             if (e.dataset.status === 'on') {
                                 document.querySelector(".shieldPath").classList.add("fillOrange");
                                 bool_2fa = true;
-                            }
-                            else {
+                            } else {
                                 bool_2fa = false;
                                 document.querySelector(".shieldPath").classList.remove("fillOrange");
                             }
@@ -55,7 +55,7 @@
                                     'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
                                 },
                                 body: JSON.stringify({
-                                    status : bool_2fa,
+                                    status: bool_2fa,
                                 }),
                             });
                         }
@@ -63,7 +63,7 @@
                 </div>
             </div>
         </div>
-        
+
     </div>
 </div>
 <script type="module" src="{% static 'js/apps/auth/logout.js' %}"></script>

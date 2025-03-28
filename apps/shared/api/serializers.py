@@ -12,6 +12,7 @@ from apps.shared.models import Clients
 class ClientSerializer(serializers.ModelSerializer):
     profile = ProfileSerializer(many=False)
     password = PasswordSerializer(many=False)
+
     # player = PlayerSerializer(many=False)
 
     class Meta:
@@ -37,4 +38,3 @@ class ClientSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(f"Error creating client: {str(e)}")
 
         return client
-

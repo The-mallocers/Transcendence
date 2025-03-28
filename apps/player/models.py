@@ -1,12 +1,11 @@
 import json
+
 from django.db import models, transaction
 from django.db.models import ForeignKey
 from django.db.models.fields import IntegerField, CharField
 
 from utils.pong.enums import Ranks
 from utils.redis import RedisConnectionPool
-from redis.commands.json.path import Path
-from utils.pong.enums import Side
 
 
 class Player(models.Model):
@@ -32,7 +31,7 @@ class Player(models.Model):
 
     def __str__(self):
         return f'Player with client id: {self.client_id}'
-    
+
     def leave_queue(self):
         self.redis.hdel('matchmaking_queue', str(self.client_id))
 
@@ -49,36 +48,36 @@ class Player(models.Model):
                 return Player.objects.get(client__id=client_id)
         except Clients.DoesNotExist:
             return None
-        
+
     @staticmethod
     def get_player_side(player_id, game_key, redis):
         if redis is None:
             return None
         game_state_str = redis.json().get(game_key)
-        
+
         # Parse the JSON string if it's a string
         if isinstance(game_state_str, str):
             game_state = json.loads(game_state_str)
         else:
             game_state = game_state_str
-        
+
         # Ensure game_state is a list
         if not isinstance(game_state, list):
             game_state = [game_state]
-        
+
         # Iterate through the game state
         for game in game_state:
             # Check player_left
             if game.get('player_left', {}).get('id') == player_id:
                 return 'left'
-            
+
             # Check player_right
             if game.get('player_right', {}).get('id') == player_id:
                 return 'right'
-        
+
         # Return None if player not found
         return None
-    
+
 
 class PlayerStats(models.Model):
     class Meta:
@@ -91,4 +90,4 @@ class PlayerStats(models.Model):
     mmr = IntegerField(default=50, blank=True)
     # rank = ForeignKey('pong.Rank', on_delete=models.SET_NULL, null=True, blank=True, default=Ranks.BRONZE.value)
     rank = CharField(default=Ranks.BRONZE.value, max_length=100, blank=True)
-    #I am like so sure this doesnt work because it doesnt know where pong.rank is
+    # I am like so sure this doesnt work because it doesnt know where pong.rank is

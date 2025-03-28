@@ -1,8 +1,8 @@
-import logging
 from dataclasses import dataclass
 
 from redis.asyncio import Redis
 from redis.commands.json.path import Path
+
 from apps.player.models import Player
 
 
@@ -11,7 +11,7 @@ class Score:
     def __init__(self, game_id=None, redis=None, player_id=None):
         # ── Fields ────────────────────────────────────────────────────────────────────────
         self.score = 0
-        
+
         # ── Utils ─────────────────────────────────────────────────────────────────────────    
         self.redis: Redis = redis
         self.game_key = f'game:{game_id}'

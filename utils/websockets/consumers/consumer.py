@@ -64,7 +64,7 @@ class WsConsumer(AsyncWebsocketConsumer):
 
             if self.event_type is EventType.TOURNAMENT:
                 await self.service.process_action(data, self.client)
-            
+
         except json.JSONDecodeError as e:
             self._logger.error(e)
             await asend_group_error(self.client.id, ResponseError.JSON_ERROR)
@@ -77,7 +77,3 @@ class WsConsumer(AsyncWebsocketConsumer):
         message = event['message']
         close = event['close']
         await self.send(text_data=json.dumps(message, ensure_ascii=False), close=bool(close))
-
-
-
-

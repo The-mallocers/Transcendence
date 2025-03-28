@@ -5,10 +5,11 @@ from django.db import transaction, DatabaseError
 from redis import DataError
 from redis.commands.json.path import Path
 
-from utils.pong.enums import GameStatus
 from apps.game.models import Game
+from utils.pong.enums import GameStatus
 
-#Watch out for all the function modifying the db as well as redis.
+
+# Watch out for all the function modifying the db as well as redis.
 
 class GameManager:
     def __init__(self, game=None, redis=None):
@@ -26,7 +27,7 @@ class GameManager:
 
     async def create_game(self):
         pass
-        #We will only create the game in redis not in the DB
+        # We will only create the game in redis not in the DB
         # from apps.game.api.serializers import GameSerializer
         # self._redis = await RedisConnectionPool.get_async_connection(self.__class__.__name__)
 
@@ -39,7 +40,6 @@ class GameManager:
         # await self._redis.json().set(self.game_key, Path.root_path(), value)
 
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ Functions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
-
 
     def get_id(self):
         if self._game:
@@ -96,17 +96,16 @@ class GameManager:
         self._game.loser_score = 0
         disconnected_player = disconnected_client.player
         alive_player = alive_client.player
-        disconnected_game: PlayerGame = await disconnected_player.get_player_game_id_db_async(player_id=disconnected_player.id, game_id=self.get_id())
-        alive_game: PlayerGame = await alive_player.get_player_game_id_db_async(player_id=alive_player.id, game_id=self.get_id())
+        disconnected_game: PlayerGame = await disconnected_player.get_player_game_id_db_async(
+            player_id=disconnected_player.id, game_id=self.get_id())
+        alive_game: PlayerGame = await alive_player.get_player_game_id_db_async(player_id=alive_player.id,
+                                                                                game_id=self.get_id())
 
         disconnected_game.score = 0
         alive_game.score = 3
         await disconnected_game.asave()
         await alive_game.asave()
         await self._game.asave()
-
-
-
 
     async def set_result(self):
         score_pL = await self.rget_pL_score()
@@ -136,7 +135,6 @@ class GameManager:
         await pR_game.asave()
         await self._game.asave()
 
-
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ DATABASE OPERATIONS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
 
     @staticmethod
@@ -159,8 +157,8 @@ class GameManager:
             return Game.objects.get(id=game_id)
         except Game.DoesNotExist:
             return None
-        
-    #Freshly added function to get all games a player played (from our database of ALL games)
+
+    # Freshly added function to get all games a player played (from our database of ALL games)
     @staticmethod
     def get_games_of_player(player_id):
         """Load an existing game from the database."""

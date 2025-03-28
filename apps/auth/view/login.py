@@ -1,13 +1,15 @@
+import json
+
+import requests
 from django.conf import settings
 from django.http import JsonResponse
+from django.middleware.csrf import get_token
+from django.template.loader import render_to_string
 
 from apps.shared.models import Clients
-from django.template.loader import render_to_string
-from django.middleware.csrf import get_token
-
-import requests, json
 
 grafana_id = 0
+
 
 def get(req):
     csrf_token = get_token(req)
@@ -18,15 +20,16 @@ def get(req):
     users = Clients.objects.all()
     print(urlpostgres)
     html_content = render_to_string("apps/auth/login.html", {
-        "users": users, 
+        "users": users,
         "csrf_token": csrf_token,
-        "urlpostgres" :urlpostgres,
-        })
+        "urlpostgres": urlpostgres,
+    })
 
     return JsonResponse({
         'html': html_content,
         'users': list(users.values())
     })
+
 
 def authenticate_grafana_user():
     login_url = "http://grafana:3000/login"
@@ -44,20 +47,21 @@ def authenticate_grafana_user():
         print(f"Failed to authenticate: {response.status_code}, {response.text}")
         return None
 
+
 def create_api_key(session):
     admin_client = Clients.get_client_by_email(settings.ADMIN_EMAIL)
     admin_user = "admin"
     admin_password = settings.GRFANA_ADMIN_PWD
     url = f"http://grafana:3000/api/serviceaccounts"
-    
+
     # API key details
     key_data = {
         "name": "grafanaDashboard",
-        "role": "Admin" 
+        "role": "Admin"
     }
     if admin_client.rights.grafana_id != 0 and admin_client.rights.grafana_token not in (None, ''):
         return admin_client.rights.grafana_token
-    else :
+    else:
         # Make the API request
         response = session.post(
             url,
@@ -69,15 +73,16 @@ def create_api_key(session):
             grafana_id = response.json().get('id')
             admin_client.rights.grafana_id = grafana_id
             url = f"http://grafana:3000/api/serviceaccounts/{grafana_id}/tokens"
-            dataJson = {"name":"grafanaToken"}
+            dataJson = {"name": "grafanaToken"}
             res = session.post(url,
-                        headers={"Content-Type": "application/json"},
-                        auth=(admin_user, admin_password),
-                        data=json.dumps(dataJson))
+                               headers={"Content-Type": "application/json"},
+                               auth=(admin_user, admin_password),
+                               data=json.dumps(dataJson))
             admin_client.rights.grafana_token = res.json().get('key')
             admin_client.rights.save()
             return res.json().get('key')
         return admin_client.rights.grafana_token
+
 
 # For an API endpoint that returns JSON directly:
 def render_dashboard(request, secretkey, session) -> str:
@@ -102,7 +107,7 @@ def render_dashboard(request, secretkey, session) -> str:
                 "isEnabled": True,
                 "annotationsEnabled": True,
                 "share": "public",
-                "uid" : data[0].get('uid')
+                "uid": data[0].get('uid')
             }
             uidpostgres = data[0].get('uid')
             url = f"http://grafana:3000/api/dashboards/uid/{uidpostgres}/public-dashboards/"
@@ -119,7 +124,7 @@ def render_dashboard(request, secretkey, session) -> str:
             admin_client.rights.save()
             return urlpostgres
         return admin_client.rights.grafana_dashboard
-    
+
     except requests.exceptions.RequestException as e:
         print(str(e))
         return JsonResponse({'error': str(e)}, status=500)

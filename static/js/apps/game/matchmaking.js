@@ -1,9 +1,9 @@
 console.log("coucou je suis matchmaking")
-import { navigateTo } from "../../spa/spa.js";
-import { WebSocketManager } from "../../websockets/websockets.js"
+import {navigateTo} from "../../spa/spa.js";
+import {WebSocketManager} from "../../websockets/websockets.js"
 
 //Fetch pour dire au serveur qu'on veut join la queue
-const element  = document.querySelector("#clientID");
+const element = document.querySelector("#clientID");
 const clientId = element.dataset.clientId
 
 const gameStatusDiv = document.querySelector("#gameStatus")
@@ -17,28 +17,26 @@ const paddleHeight = 100;
 let paddleDefaultPos = 250 - (paddleHeight / 2)
 
 
-window.GameState  = {
+window.GameState = {
     ballY: height / 2,
     ballX: width / 2,
 
     left: {
-        x : paddleDefaultPos,
+        x: paddleDefaultPos,
         y: paddleDefaultPos,
-        nick : "",
+        nick: "",
         id: ""
     },
-    right : {
-        x : paddleDefaultPos,
+    right: {
+        x: paddleDefaultPos,
         y: paddleDefaultPos,
-        nick : "",
+        nick: "",
         id: ""
     }
 }
 
-window.GameInfos  = {
-    left : {
-        
-    }
+window.GameInfos = {
+    left: {}
 }
 
 const startGameMessage = {
@@ -50,11 +48,11 @@ const startGameMessage = {
 
 
 let connectToMMPool = (client_id) => {
-    
+
     WebSocketManager.initGameSocket(client_id);
-    
+
     const socket = WebSocketManager.gameSocket;
-    
+
     const message = {
         "event": "matchmaking",
         "data": {
@@ -62,15 +60,15 @@ let connectToMMPool = (client_id) => {
         }
     }
     socket.onopen = () => {
-        
+
         socket.send(JSON.stringify(message));
     }
     socket.onclose = () => {
         console.log("You disconnected your matchmaking socket");
     }
-    
-    socket.onmessage =  (e) => {
-        const jsonData =  JSON.parse(e.data)
+
+    socket.onmessage = (e) => {
+        const jsonData = JSON.parse(e.data)
 
         if (jsonData.data.action)
             gameStatusDiv.innerHTML = jsonData.data.content
@@ -80,27 +78,27 @@ let connectToMMPool = (client_id) => {
 
         //On message on regarde si c'est que la game a commencer
         //on renvois le json approprie
-        if (jsonData.data.action == "PLAYER_INFOS"){
+        if (jsonData.data.action == "PLAYER_INFOS") {
             console.log(jsonData.data.content)
-            window.GameState = {  
+            window.GameState = {
                 ballY: height / 2,
                 ballX: width / 2,
-            
+
                 left: {
-                    x : jsonData.data.content.left.paddle.x,
+                    x: jsonData.data.content.left.paddle.x,
                     y: jsonData.data.content.left.paddle.y,
-                    nick : jsonData.data.content.left.nickname,
+                    nick: jsonData.data.content.left.nickname,
                     id: ""
                 },
-                right : {
-                    x : jsonData.data.content.right.paddle.x,
+                right: {
+                    x: jsonData.data.content.right.paddle.x,
                     y: jsonData.data.content.right.paddle.y,
-                    nick : jsonData.data.content.right.nickname,
+                    nick: jsonData.data.content.right.nickname,
                     id: ""
                 }
             }
         }
-        if (jsonData.data.action == "STARTING"){
+        if (jsonData.data.action == "STARTING") {
             navigateTo("/pong/arena/")
             console.log()
 

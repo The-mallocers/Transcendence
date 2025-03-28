@@ -2,11 +2,10 @@ from rest_framework import serializers
 
 from apps.player.models import Player
 from apps.pong.api.serializers import PaddleSerializer
-from apps.shared.models import Clients
 from utils.pong.enums import Side
-from utils.pong.objects.paddle import Paddle
 from utils.pong.objects import PADDLE_WIDTH, CANVAS_WIDTH, OFFSET_PADDLE
-from utils.pong.enums import Side
+from utils.pong.objects.paddle import Paddle
+
 
 class PlayerSerializer(serializers.ModelSerializer):
     id = serializers.SerializerMethodField()
@@ -20,17 +19,18 @@ class PlayerSerializer(serializers.ModelSerializer):
     def get_paddle(self, obj):
         paddle = self.context.get('paddle')
         return PaddleSerializer(paddle).data
-    
+
     def get_score(self, obj):
         score = self.context.get('score', 0)
         return score
-    
+
     def get_id(self, obj):
         id = self.context.get('id')
         return id
 
 
 from rest_framework import serializers
+
 
 class PlayerInformationSerializer(serializers.ModelSerializer):
     client_id = serializers.SerializerMethodField()
@@ -40,13 +40,13 @@ class PlayerInformationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Player
         fields = ['client_id', 'player_profile', 'paddle']
-        
+
     def get_client_id(self, instance):
         return instance.client_id
-    
+
     def get_player_profile(self, instance):
         return instance.class_client.profile.profile_picture.url
-    
+
     def get_paddle(self, instance):
         side = self.context.get('side')
         game_id = self.context.get('game_id')
@@ -55,19 +55,20 @@ class PlayerInformationSerializer(serializers.ModelSerializer):
         # Create Paddle with necessary context
         x = self._get_paddle_x(side)
         paddle = Paddle(
-            game_id=game_id, 
-            player_id=player_id, 
+            game_id=game_id,
+            player_id=player_id,
             x=x
         )
-        
+
         return PaddleSerializer(paddle).data
-    
+
     def _get_paddle_x(self, side):
         if side is Side.LEFT:
             return OFFSET_PADDLE
         elif side is Side.RIGHT:
             return CANVAS_WIDTH - OFFSET_PADDLE - PADDLE_WIDTH
         return None  # or a default value
+
 
 class PlayersRedisSerializer(serializers.ModelSerializer):
     player_left = PlayerSerializer()
@@ -84,10 +85,9 @@ class PlayersRedisSerializer(serializers.ModelSerializer):
         pr = instance.get('player_right')
         return {
             'player_left': PlayerSerializer(pl, context={'paddle': paddle_left, 'id': str(pl.client_id)}).data,
-            'player_right': PlayerSerializer(pr, context={'paddle': paddle_right, 'id': str(pr.client_id)}).data 
+            'player_right': PlayerSerializer(pr, context={'paddle': paddle_right, 'id': str(pr.client_id)}).data
         }
-        
-    
+
 
 class GameFinishSerializer(serializers.ModelSerializer):
     winner = serializers.SerializerMethodField()
@@ -101,4 +101,3 @@ class GameFinishSerializer(serializers.ModelSerializer):
     def get_winner(self, obj):
         from utils.threads.game import GameManager
         game = GameManager.get_game_db(self.context.get('id'))
-

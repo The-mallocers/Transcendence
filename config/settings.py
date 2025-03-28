@@ -28,7 +28,7 @@ JWT_EXP_ACCESS_TOKEN = ENV('JWT_EXP_ACCESS_TOKEN', default=10)  # 30 minutes
 JWT_EXP_REFRESH_TOKEN = ENV('JWT_EXP_REFRESH_TOKEN', default=30)  # 30 days
 JWT_ALGORITH = 'HS256'
 
-#Middlware protected paths
+# Middlware protected paths
 PROTECTED_PATHS = [
     # '/*'
 ]
@@ -65,7 +65,7 @@ ALLOWED_HOSTS = [
 CSRF_TRUSTED_ORIGINS = ['https://localhost:8000', 'https://127.0.0.1:8000']
 
 # Add this to ensure Django knows requests are HTTPS
-#Not exactly sure this is needed
+# Not exactly sure this is needed
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # Not exactly sure this is needed
@@ -175,7 +175,6 @@ CHANNEL_LAYERS = {
 SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
 SESSION_CACHE_ALIAS = 'default'
 
-
 WSGI_APPLICATION = 'config.wsgi.application'
 ASGI_APPLICATION = 'config.asgi.application'
 
@@ -211,7 +210,6 @@ USE_TZ = True
 USE_I18N = True
 USE_L10N = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
@@ -222,8 +220,8 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
 ]
 
-#Media
-MEDIA_URL = '/media/' #Url publique pour acceder au media
+# Media
+MEDIA_URL = '/media/'  # Url publique pour acceder au media
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Default primary key field type

@@ -13,6 +13,7 @@ class ServiceError(Exception):
         self.code = code
         super().__init__(f'{message}')
 
+
 class BaseServices(ABC):
     def __init__(self):
         self._logger = logging.getLogger(self.__class__.__name__)
@@ -47,4 +48,3 @@ class BaseServices(ABC):
 
         except ServiceError as e:
             raise e
-

@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('game', '0002_initial'),
         ('player', '0001_initial'),
@@ -15,11 +14,13 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='game',
             name='loser',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='loser', to='player.player'),
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='loser',
+                                    to='player.player'),
         ),
         migrations.AlterField(
             model_name='game',
             name='winner',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='winner', to='player.player'),
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='winner',
+                                    to='player.player'),
         ),
     ]

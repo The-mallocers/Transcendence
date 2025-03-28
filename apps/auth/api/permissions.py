@@ -1,5 +1,4 @@
 from django.http import HttpRequest
-from rest_framework import permissions
 from rest_framework.permissions import BasePermission
 
 from apps.auth.models import Password
