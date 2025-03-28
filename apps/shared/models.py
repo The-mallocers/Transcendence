@@ -57,7 +57,15 @@ class Clients(models.Model):
         try:
             return await Clients.objects.aget(profile__username=username)
         except :
+            return None
+         
+    @staticmethod
+    async def ASget_client_by_ID(client_id: uuid.UUID):
+        try:
+            return await Clients.objects.aget(id=client_id)
+        except :
             return None 
+
 
     @staticmethod
     def get_client_by_request(request: HttpRequest):

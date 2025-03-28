@@ -1,7 +1,9 @@
 from django.db import models, IntegrityError, transaction
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
 import uuid
+import logging
 from asgiref.sync import sync_to_async
 
 from apps.shared.models import Clients
@@ -9,7 +11,7 @@ from apps.shared.models import Clients
 class Friend(models.Model):
     # id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, null=False)
-    email = models.EmailField(null=False, editable=True)
+    email = models.EmailField(null=False, editable=True, blank=True)
     friends = models.ManyToManyField(Clients, related_name='friend_requests_as_friend', blank=True)
     pending_friends = models.ManyToManyField(Clients, related_name='friend_requests_as_pending', blank=True)
     
@@ -20,40 +22,40 @@ class Friend(models.Model):
     def __str__(self):
         return f"Friend Request with {self.id}"
     
-    @staticmethod
-    def are_friends(cls, client1, client2):
-        try:
-            friend_request1 = cls.objects.get(id=client1)
-            return client2 in friend_request1.friends
-        except cls.DoesNotExist:
-            return False
-    
     @sync_to_async
     def add_pending_friend(self, client):
         try:
             with transaction.atomic():
+                #if friend is not my friend i add it to pending_friend
                 if not self.friends.filter(id=client.id).exists():
                     print("entering in the adding pending friend")
                     self.pending_friends.add(client)
                     self.save()
         except Exception as e:
             print(f"Error retrieving friend request: {e}")
-            return Noneast
+            return None
     
-    #for the accept friend=> need to accept on the current client that have the pending and add client
-    #add the friend to the client being pending
+    @sync_to_async
+    def accept_pending_friend(self, client):
+        with transaction.atomic():
+            print("in the accepting function")
+            #check if my friend is in pending
+            pending_friend = self.pending_friends.filter(id=client.id).exists()
+            if not pending_friend:
+                print("no pending friend")
+                raise ValidationError("No pending friend with this id")
+            #check if my friend is already my friend
+            friend = self.friends.filter(id=client.id).exists()
+            if friend:
+                print("already friends")
+                raise ValidationError("Already Friend")
+            self.friends.add(client)
+            self.pending_friends.remove(client)
+            self.save()   
     
-    def add_friend(self, friend_id):
-        if friend_id not in self.friends:
-            self.friends.append(friend_id)
+    @sync_to_async
+    def accept_other_friend(self, client):
+        with transaction.atomic():
+            self.friends.add(client)
             self.save()
     
-    def remove_friend(self, friend_id):
-        if friend_id in self.friends:
-            self.friends.remove(friend_id)
-            self.save()
-    
-    def remove_pending_friend(self, friend_id):
-        if friend_id in self.pending_friends:
-            self.pending_friends.remove(friend_id)
-            self.save()

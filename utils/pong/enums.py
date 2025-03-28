@@ -61,7 +61,7 @@ class RequestAction(str, Enum):
     
     # ── Notification Actions ──────────────────────────────────────────────────────────────────
     SEND_FRIEND_REQUEST: str = "send_friend_request"
-    
+    ACCEPT_FRIEND_REQUEST: str = "accept_friend_request"
     
 
 
@@ -91,6 +91,10 @@ class ResponseAction(str, Enum):
     MESSAGE_RECEIVED = "New message received"
     HISTORY_RECEIVED = "history_received"
     ALL_ROOM_RECEIVED = "all_room_received"
+    
+    #NOTIFICATION ACTION
+    ACK_SEND_FRIEND_REQUEST: str = "acknowledge_send_friend_request"
+    ACK_ACCEPT_FRIEND_REQUEST: str = "acknowledge_accept_friend_request"
     
     # ── NOTIFICATION Actions ──────────────────────────────────────────────────────────
     NOTIF_TEST = "notification_test"
@@ -122,6 +126,8 @@ class ResponseError(str, Enum):
 
     # ── Notification ──────────────────────────────────────────────────────────────────────────
     USER_NOT_FOUND: str = 'User not found'
+    USER_ALREADY_MY_FRIEND: str = 'User already my friend'
+    USER_ALREADY_FRIEND_OR_NOT_PENDING_FRIEND: str = 'User already friend or not in pending list'
 
     # ── Errors ────────────────────────────────────────────────────────────────────────
     PLAYER_NOT_FOUND: str = 'Your player ID does not correspond to a player.'
