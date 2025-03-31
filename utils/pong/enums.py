@@ -62,6 +62,7 @@ class RequestAction(str, Enum):
     # ── Notification Actions ──────────────────────────────────────────────────────────────────
     SEND_FRIEND_REQUEST: str = "send_friend_request"
     ACCEPT_FRIEND_REQUEST: str = "accept_friend_request"
+    REFUSE_FRIEND_REQUEST: str = "refuse_friend_request"
     
 
 
@@ -92,14 +93,14 @@ class ResponseAction(str, Enum):
     HISTORY_RECEIVED = "history_received"
     ALL_ROOM_RECEIVED = "all_room_received"
     
-    #NOTIFICATION ACTION
+    # ── NOTIFICATION ACTION ───────────────────────────────────────────────────────────
     ACK_SEND_FRIEND_REQUEST: str = "acknowledge_send_friend_request"
     ACK_ACCEPT_FRIEND_REQUEST: str = "acknowledge_accept_friend_request"
-    
-    # ── NOTIFICATION Actions ──────────────────────────────────────────────────────────
+    ACK_ACCEPT_FRIEND_REQUEST_HOST: str = "acknowledge_accept_friend_request_host"
+    ACK_REFUSE_FRIEND_REQUEST: str = "acknowledge_refuse_friend_request"
+
     NOTIF_TEST = "notification_test"
     
-
 
     TEST: str = 'test'
 

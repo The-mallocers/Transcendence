@@ -22,10 +22,11 @@ def get(req):
     #If I have it i dont display the friend request button
     client = Clients.get_client_by_request(req)
     is_friend = client.is_friend_by_id(target)
+    
     show_friend_request = False
     if is_friend is False or None:
         show_friend_request = True
-
+    
 
     html_content = render_to_string("apps/profile/profile.html",
                             {"csrf_token": get_token(req), 

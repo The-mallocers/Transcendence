@@ -173,7 +173,16 @@ class Clients(models.Model):
             return Clients.objects.select_related('player').get(id=client_id)
         except Clients.DoesNotExist:
             return None
-
+        
+    @sync_to_async
+    def aget_profile_username(self):
+        try:
+            with transaction.atomic():
+                return self.profile.username
+        except Exception as e:
+            print(f"Error retrieving username: {e}")
+            return None
+        
     @sync_to_async
     def get_friend_table(self):
         try:

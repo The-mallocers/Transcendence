@@ -24,19 +24,19 @@ class NotificationService(BaseServices):
         # if I am already his friend 
         if askfriend is None:
             return await send_group_error(client.id, ResponseError.USER_ALREADY_MY_FRIEND)
-                
-        await send_group(client.id, 
+            
+        await send_group(target.id, 
                                 EventType.NOTIFICATION, 
-                                ResponseAction.ACK_SEND_FRIEND_REQUEST, 
-                                {"message": "hello veux tu etre mon ami ??????????????", 
-                                 "sender": str(client.id)})
+                                ResponseAction.ACK_SEND_FRIEND_REQUEST,
+                                {"sender": str(client.id),
+                                 "username": await client.aget_profile_username()})
+    
         
     # client is the client that want to add the friend from his pending list
     # target is the friend pending
     async def _handle_accept_friend_request(self, data, client):
-        print(f"Accept friend and searching for username: '{data['data']['args']['target_id']}'")
-        target_id = data['data']['args']['target_id']
-        target = await Clients.ASget_client_by_ID(target_id)
+        print(f"Accept friend and searching for username: '{data['data']['args']['target_name']}'")
+        target = await Clients.ASget_client_by_username(data['data']['args']['target_name'])
         if target is None:
             return await send_group_error(client.id, ResponseError.USER_NOT_FOUND)
         try:
@@ -49,9 +49,45 @@ class NotificationService(BaseServices):
         except:
             return await send_group_error(client.id, ResponseError.USER_ALREADY_FRIEND_OR_NOT_PENDING_FRIEND)     
         await send_group(client.id, EventType.NOTIFICATION, 
-                         ResponseAction.NOTIF_TEST, 
-                         {"message": "hello oui je veux etre ton ami !!!!!!!!", 
-                          "sender": str(client.id)})
+                                ResponseAction.ACK_ACCEPT_FRIEND_REQUEST_HOST,
+                                {
+                                    "sender": str(target.id),
+                                    "username": await target.aget_profile_username()
+                                })
+        
+        await send_group(target.id, EventType.NOTIFICATION, 
+                                ResponseAction.ACK_ACCEPT_FRIEND_REQUEST,
+                                {
+                                    "sender": str(client.id),
+                                    "username": await client.aget_profile_username()
+                                })
+        
+    async def _handle_refuse_friend_request(self, data, client):
+        print(f"Refuse friend request and searching for username: '{data['data']['args']['target_name']}'")
+        target = await Clients.ASget_client_by_username(data['data']['args']['target_name'])
+        if target is None:
+            return await send_group_error(client.id, ResponseError.USER_NOT_FOUND)
+        try:
+            # refuse the pending friend request
+            friendTable = await client.get_friend_table()
+            await friendTable.refuse_pending_friend(target)
+
+        except:
+            return await send_group_error(client.id, ResponseError.USER_ALREADY_FRIEND_OR_NOT_PENDING_FRIEND, )    
+        # await send_group(target.id, EventType.NOTIFICATION, 
+        #                         ResponseAction.ACK_REFUSE_FRIEND_RESQUEST,
+        #                         {
+        #                             "sender": str(client.id),
+        #                             "username": await client.aget_profile_username()
+        #                         })
+        
+        await send_group(client.id, EventType.NOTIFICATION, 
+                                ResponseAction.ACK_REFUSE_FRIEND_REQUEST,
+                                {
+                                    "sender": str(target.id),
+                                    "username": await target.aget_profile_username()
+                                })
+        
     
     async def handle_disconnect(self, client):
         pass

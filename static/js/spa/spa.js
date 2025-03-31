@@ -115,7 +115,7 @@ async function fetchRoute(path) {
         credentials: 'include'
     });
     const data = await response.json();
-    console.log("testing redirect, data is :", data)
+    // console.log("testing redirect, data is :", data)
     if (response.ok) {
         console.log("response is A ok")
         return data.html;
@@ -306,9 +306,6 @@ let client_id = null;
 const clientId = await getClientId();
 const notifSocket = new WebSocket(`wss://${window.location.host}/ws/notification/?id=${clientId}`);
 
-//<button >
-
-
 async function getClientId() {
     // if (client_id !== null) return client_id;
     console.log("Getting client ID")
@@ -331,38 +328,114 @@ async function getClientId() {
     }
 }
 
-
 notifSocket.onmessage = (event) => {
+    console.log(event.data);
     const message = JSON.parse(event.data);
-    console.log("message receive");
-    console.log(message);
-
-    if(message.data.action == "NOTIF_TEST") {
-        console.log("sasa de sasa")
-        // displayHistory(message.data.content.messages);
+    
+    if(message.data.action == "ACK_SEND_FRIEND_REQUEST") {
+        let pending_group = document.querySelector('.pending_group');
+        const parser = new DOMParser();
+        const htmlString = 
+        `<li class="list-group-item pending_item d-flex justify-content-between align-items-center" id="${message.data.content.username}">
+        ${message.data.content.username}
+            <div class="btn-group" role="group" aria-label="Basic example">
+                <button type="button" class="accept_friend btn btn-secondary" data-username="${message.data.content.username}">accept</button>
+                <button type="button" class="refuse_friend btn btn-secondary" data-username="${message.data.content.username}">refuse</button>
+                </div>
+            </li>
+        `
+        const doc = parser.parseFromString(htmlString, "text/html");
+        const pendingElement = doc.body.firstChild;
+        pending_group.appendChild(pendingElement);
+    }
+    else if(message.data.action == "ACK_ACCEPT_FRIEND_REQUEST_HOST") {
+        let friends_group = document.querySelector('.friends_group');
+        const parser = new DOMParser();
+        const add_to_friend = 
+        `<li class="list-group-item d-flex justify-content-between align-items-center">
+            ${message.data.content.username}
+            <button type="button" class="delete_friend btn btn-secondary" data-username="${message.data.content.username}" >delete</button>
+            <span class="badge badge-primary badge-pill">14</span>
+        </li>
+        `
+        const doc = parser.parseFromString(add_to_friend, "text/html");
+        const friendElement = doc.body.firstChild;
+        friends_group.appendChild(friendElement);
+        const buttonToDelete = document.querySelector(`li.pending_item#${message.data.content.username}`);
+        console.log(buttonToDelete);
+        console.log(message.data.content.username);
+        if(buttonToDelete)
+        {
+            buttonToDelete.remove();
+        }
+    }
+    else if(message.data.action == "ACK_ACCEPT_FRIEND_REQUEST") {
+        let friends_group = document.querySelector('.friends_group');
+        const parser = new DOMParser();
+        const add_to_friend = 
+        `<li class="list-group-item d-flex justify-content-between align-items-center">
+            ${message.data.content.username}
+            <button type="button" class="delete_friend btn btn-secondary" data-username="${message.data.content.username}" >delete</button>
+            <span class="badge badge-primary badge-pill">14</span>
+        </li>
+        `
+        const doc = parser.parseFromString(add_to_friend, "text/html");
+        const friendElement = doc.body.firstChild;
+        friends_group.appendChild(friendElement);
+    }
+    else if(message.data.action == "ACK_REFUSE_FRIEND_REQUEST") {
+        const buttonToDelete = document.querySelector(`li.pending_item#${message.data.content.username}`);
+        console.log(buttonToDelete);
+        console.log(message.data.content.username);
+        if(buttonToDelete)
+        {
+            buttonToDelete.remove();
+        }
     }
 }
 
 document.addEventListener("click", function(event) {
     const routeElement = event.target.closest('.friendrequest');
-    console.log(routeElement);
+    const acceptFriend = event.target.closest('.accept_friend');
+    const refuseFriend = event.target.closest('.refuse_friend');
+    const urlParams = new URLSearchParams(window.location.search);
+    // console.log(routeElement);
     if (routeElement) {
-        const urlParams = new URLSearchParams(window.location.search);
+        console.log("send friend")
         const targetUser = urlParams.get('username');
-        console.log("targetuser " + targetUser);
-
         this.value = ""; // Clear the input field after handling
-        //Sending this to the websocket
-        let message = {
-            "event": "notification",
-            "data": {
-                "action": "send_friend_request",
-                "args": {
-                    "target_name": targetUser,
-                }
-            }
-        }
+        const message = create_message("send_friend_request", targetUser);
+        notifSocket.send(JSON.stringify(message));
+        navigateTo('/')
+    }
+    else if(acceptFriend)
+    {
+        console.log("accept friend")
+        const targetUser = acceptFriend.dataset.username;
+        this.value = ""; // Clear the input field after handling
+        const message = create_message("accept_friend_request", targetUser)
         notifSocket.send(JSON.stringify(message));
     }
-    navigateTo('/')
+    else if(refuseFriend)
+    {
+        console.log("refuse friend")
+        const targetUser = refuseFriend.dataset.username;
+        this.value = ""; // Clear the input field after handling
+        const message = create_message("refuse_friend_request", targetUser);
+        notifSocket.send(JSON.stringify(message));
+    }
 });
+
+function create_message(action, targetUser)
+{
+    let message = {
+        "event": "notification",
+        "data": {
+            "action": action,
+            "args": {
+                "target_name": targetUser,
+            }
+        } 
+    }
+    return message;
+}

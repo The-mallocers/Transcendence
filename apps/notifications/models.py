@@ -38,25 +38,42 @@ class Friend(models.Model):
     
     @sync_to_async
     def accept_pending_friend(self, client):
-        with transaction.atomic():
-            print("in the accepting function")
-            #check if my friend is in pending
-            pending_friend = self.pending_friends.filter(id=client.id).exists()
-            if not pending_friend:
-                print("no pending friend")
-                raise ValidationError("No pending friend with this id")
-            #check if my friend is already my friend
-            friend = self.friends.filter(id=client.id).exists()
-            if friend:
-                print("already friends")
-                raise ValidationError("Already Friend")
-            self.friends.add(client)
-            self.pending_friends.remove(client)
-            self.save()   
+        try: 
+            with transaction.atomic():
+                print("in the accepting function")
+                #check if my friend is in pending
+                pending_friend = self.pending_friends.filter(id=client.id).exists()
+                if not pending_friend:
+                    print("no pending friend")
+                    raise ValidationError("No pending friend with this id")
+                #check if my friend is already my friend
+                friend = self.friends.filter(id=client.id).exists()
+                if friend:
+                    print("already friends")
+                    raise ValidationError("Already Friend")
+                self.friends.add(client)
+                self.pending_friends.remove(client)
+                self.save()
+        except:
+            raise ValidationError("")
+                
     
     @sync_to_async
     def accept_other_friend(self, client):
         with transaction.atomic():
             self.friends.add(client)
             self.save()
+
+    @sync_to_async
+    def refuse_pending_friend(self, client):
+        try:
+            with transaction.atomic():
+                self.pending_friends.remove(client)
+        except:
+            raise ValidationError("Friend not in pending")   
+                
+            
+
+
+        
     

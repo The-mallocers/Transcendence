@@ -87,36 +87,33 @@
             <div class="box">
                 <h3>Friends List</h3>
                 <div class="lastPlayerContainer mt-4">
-                    {% for rival in rivals %}
-                        <div class="lastPlayer container d-flex flex-row align-items-center justify-content-center"  data-route="/profile/?username={{rival.username}}">
-                            <!-- <img src="{% static 'assets/imgs/' %}{{ rival.profile_picture }}" alt="{{rival.profile_picture}}"> -->
-                            <span class="names d-flex flex-row align-items-end justify-content-center">
-                                <h4 class="fullName">{{rival.username}}</h4>
-                                <small class="mx-2">(Wins: {{rival.games_won}}, Losses: {{rival.games_lost}})</small>
-                            </span>
-                        </div>
-                    {% endfor %}
+                    <ul class="friends_group list-group">
+                        {% for friend in friends_list %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                            {{friend.username}}
+                            <button type="button" class="delete_friend btn btn-secondary" data-username="{{friend.username}}" >delete</button>
+                            <span class="badge badge-primary badge-pill">14</span>
+                            </li>
+                        {% endfor %}
+                      </ul>
                 </div>
             </div>
         </div>
-
         <div class="col-6 col-md-6">
             <div class="box">
                 <h3>Friends Pending</h3>
                 <div class="lastGamesContainer">
-                    {% for game in gamesHistory %}
-                        <div class="lastGames container d-flex flex-row align-items-center justify-content-between">
-                            <span class="names d-flex flex-row justify-content-center">
-                                <div class="nickname {% if game.won %}win{% else %} loss {% endif %}">{{game.opponent}}</div>
-                                <div class="time">A day ago</div>
-                            </span>
-                            <span class="scores d-flex flex-row justify-content-center align-items-center">
-                                <div class="myScore">{{game.myPoints}}</div>
-                                <div class="dash"></div>
-                                <div class="enemyScore">{{game.enemyPoints}}</div>
-                            </span>
-                        </div>
-                    {% endfor %}
+                    <ul class="pending_group list-group">
+                        {% for friend_pending in friends_pending %}
+                            <li class="list-group-item pending_item d-flex justify-content-between align-items-center" id="{{friend_pending.username}}">
+                                {{friend_pending.username}}
+                                <div class="btn-group" role="group" aria-label="Basic example">
+                                    <button type="button" class="accept_friend btn btn-secondary" data-username="{{friend_pending.username}}">accept</button>
+                                    <button type="button" class="refuse_friend btn btn-secondary" data-username="{{friend_pending.username}}">refuse</button>
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
                 </div>
             </div>
         </div>
