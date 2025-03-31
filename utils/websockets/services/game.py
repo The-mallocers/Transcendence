@@ -1,7 +1,7 @@
 from redis.commands.json.path import Path
 
-from apps.shared.models import Clients
-from utils.pong.enums import GameStatus, ResponseError, status_order
+from apps.client.models import Clients
+from utils.enums import GameStatus, ResponseError, status_order
 from utils.websockets.channel_send import asend_group_error
 from utils.websockets.services.services import BaseServices
 

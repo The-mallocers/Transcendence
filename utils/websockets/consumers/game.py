@@ -1,6 +1,6 @@
 from json import JSONDecodeError, loads
 
-from utils.pong.enums import EventType, ResponseError
+from utils.enums import EventType, ResponseError
 from utils.websockets.channel_send import asend_group_error
 from utils.websockets.consumers.consumer import WsConsumer
 from utils.websockets.services.game import GameService

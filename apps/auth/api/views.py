@@ -3,13 +3,13 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from apps.auth.api.permissions import PasswordPermission
-from apps.auth.api.serializers import PasswordSerializer
 from apps.auth.models import Password
-from apps.shared.api.serializers import ClientSerializer
-from apps.shared.models import Clients
+from apps.client.models import Clients
 from utils.jwt.JWT import JWTType
 from utils.jwt.JWTGenerator import JWTGenerator
+from utils.serializers.auth import PasswordSerializer
+from utils.serializers.client import ClientSerializer
+from utils.serializers.permissions.auth import PasswordPermission
 
 
 class PasswordApiView(APIView):

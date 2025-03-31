@@ -3,7 +3,7 @@ from django.http import HttpRequest
 from rest_framework.authentication import BaseAuthentication
 from rest_framework.exceptions import AuthenticationFailed
 
-from apps.shared.models import Clients
+from apps.client.models import Clients
 from utils.jwt.JWT import JWTType, JWT
 from utils.jwt.JWTGenerator import JWTGenerator
 

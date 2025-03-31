@@ -2,9 +2,9 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from apps.profile.api.permissions import ProfilePermission
-from apps.profile.api.serializers import ProfileSerializer
 from apps.profile.models import Profile
+from utils.serializers.permissions.profile import ProfilePermission
+from utils.serializers.profile import ProfileSerializer
 
 
 class ProfileApiView(APIView):

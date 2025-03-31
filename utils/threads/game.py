@@ -1,12 +1,11 @@
 import time
-import time
 import traceback
 
 from apps.game.models import Game
-from apps.player.api.serializers import PlayerInformationSerializer
-from apps.pong.pong import PongLogic
-from utils.pong.enums import GameStatus, EventType, ResponseAction, \
+from utils.enums import GameStatus, EventType, ResponseAction, \
     ResponseError, Side
+from utils.pong.logic import PongLogic
+from utils.serializers.player import PlayerInformationSerializer
 from utils.threads.threads import Threads
 from utils.websockets.channel_send import send_group, send_group_error
 

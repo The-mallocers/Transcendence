@@ -3,20 +3,31 @@ import traceback
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 from django.db import models
-from django.db.models import IntegerField, ForeignKey
+from django.db.models import IntegerField, ForeignKey, CharField, ImageField
 from django.db.models.fields import DateTimeField
 from django.utils import timezone
 from redis import DataError
 from redis.commands.json.path import Path
 
-from apps.player.api.serializers import PlayersRedisSerializer
 from apps.player.models import Player
 from apps.tournaments.models import Tournaments
-from utils.pong.enums import EventType, ResponseAction
-from utils.pong.enums import GameStatus
+from utils.enums import EventType, ResponseAction, Ranks
+from utils.enums import GameStatus
 from utils.redis import RedisConnectionPool
+from utils.serializers.player import PlayersRedisSerializer
 from utils.util import create_game_id
 from utils.websockets.channel_send import send_group
+
+
+class Rank(models.Model):
+    class Meta:
+        db_table = 'ranks_list'
+
+    name = CharField(primary_key=True, max_length=15, editable=False, null=False,
+                     choices=[(ranks.name, ranks.value) for ranks in Ranks])
+    icon = ImageField(upload_to='rank_icon/', null=False)
+    mmr_min = IntegerField(null=False)
+    mmr_max = IntegerField(null=False)
 
 
 class Game(models.Model):
@@ -51,7 +62,7 @@ class Game(models.Model):
         return f'Game with id: {self.game_id}'
 
     def create_redis_game(self):
-        from apps.game.api.serializers import GameSerializer
+        from utils.serializers.game import GameSerializer
         serializer = GameSerializer(self, context={'id': self.game_id})
         self.redis.json().set(self.game_key, Path.root_path(), serializer.data)
 

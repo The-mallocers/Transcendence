@@ -4,7 +4,7 @@ import traceback
 
 from apps.game.models import Game
 from apps.player.models import Player
-from utils.pong.enums import GameStatus, ResponseError
+from utils.enums import GameStatus, ResponseError
 from utils.threads.game import GameThread
 from utils.threads.threads import Threads
 from utils.websockets.channel_send import send_group_error

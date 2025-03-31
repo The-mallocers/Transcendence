@@ -4,7 +4,7 @@ import jwt
 from django.conf import settings
 from django.http import JsonResponse, HttpRequest, HttpResponseRedirect
 
-from apps.shared.models import Clients
+from apps.client.models import Clients
 from utils.jwt.JWTGenerator import JWTType, JWT, JWTGenerator
 
 

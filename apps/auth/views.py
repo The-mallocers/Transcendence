@@ -1,8 +1,8 @@
 from django.views.decorators.http import require_http_methods
 
-from apps.auth.view.login import get as get_login
-from apps.auth.view.register import get
-from apps.auth.view.twofa import view_two_fa
+from apps.auth.views.login import get as get_login
+from apps.auth.views.register import get
+from apps.auth.views.twofa import view_two_fa
 
 
 @require_http_methods(["GET"])

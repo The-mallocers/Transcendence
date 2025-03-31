@@ -14,7 +14,7 @@ class AdminConfig(AppConfig):
         from apps.auth.models import Password
         from apps.auth.models import TwoFA
         from apps.admin.models import Rights
-        from apps.shared.models import Clients
+        from apps.client.models import Clients
         @receiver(post_migrate)
         def create_admin_user(sender, **kwargs):
             if sender.name == self.name:

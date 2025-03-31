@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('game', '0001_initial'),
-        ('shared', '0001_initial'),
+        ('client', '0001_initial'),
     ]
 
     operations = [

@@ -1,0 +1,36 @@
+import {navigateTo} from '../../spa/spa.js';
+
+
+function logout() {
+    console.log("logout.js online")
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    fetch('/api/auth/logout/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrfToken,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({})  // sending an empty body for some reasons
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Logout successful:', data);
+            localStorage.removeItem('client_id'); //Recent addition since our client id is stored in localstorage, we need to remove it.
+            navigateTo('/auth/login')
+        })
+        .catch(error => {
+            console.error('Error during logout:', error);
+        });
+}
+
+let element = document.querySelector("#logout-btn");
+
+
+element.addEventListener("click", (e) => {
+    logout(e)
+})

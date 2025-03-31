@@ -1,7 +1,7 @@
 from channels.layers import get_channel_layer
 
-from apps.shared.models import Clients
-from utils.pong.enums import EventType, ResponseAction, ResponseError
+from apps.client.models import Clients
+from utils.enums import EventType, ResponseAction, ResponseError
 from utils.websockets.channel_send import asend_group, asend_group_error
 from utils.websockets.services.services import BaseServices
 

@@ -1,7 +1,7 @@
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 
-from utils.pong.enums import ResponseError, EventType, ResponseAction
+from utils.enums import ResponseError, EventType, ResponseAction
 
 
 async def asend_group(channel_name, event_type: EventType, msg_type: ResponseAction, content=None, close=False):
