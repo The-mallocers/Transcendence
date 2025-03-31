@@ -1,6 +1,6 @@
 from django.views.decorators.http import require_http_methods
 
-from apps.index.view.index import get
+from apps.index.views.index import get
 
 
 @require_http_methods(["GET"])

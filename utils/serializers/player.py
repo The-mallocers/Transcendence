@@ -4,7 +4,6 @@ from apps.player.models import Player
 from utils.enums import Side
 from utils.pong.objects import PADDLE_WIDTH, CANVAS_WIDTH, OFFSET_PADDLE
 from utils.pong.objects.paddle import Paddle
-from utils.serializers.game import PaddleSerializer
 
 
 class PlayerSerializer(serializers.ModelSerializer):
@@ -17,6 +16,7 @@ class PlayerSerializer(serializers.ModelSerializer):
         fields = ['id', 'score', 'paddle']
 
     def get_paddle(self, obj):
+        from utils.serializers.game import PaddleSerializer
         paddle = self.context.get('paddle')
         return PaddleSerializer(paddle).data
 
@@ -53,6 +53,7 @@ class PlayerInformationSerializer(serializers.ModelSerializer):
         return instance.class_client.profile.profile_picture.url
 
     def get_paddle(self, instance):
+        from utils.serializers.game import PaddleSerializer
         side = self.context.get('side')
         game_id = self.context.get('game_id')
         player_id = instance.id
@@ -102,7 +103,3 @@ class GameFinishSerializer(serializers.ModelSerializer):
 
     class Meta:
         fields = ['winner', 'loser', 'pL_score', 'pR_score']
-
-    def get_winner(self, obj):
-        from utils.threads.game import GameManager
-        game = GameManager.get_game_db(self.context.get('id'))

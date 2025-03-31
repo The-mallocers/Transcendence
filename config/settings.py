@@ -93,7 +93,7 @@ INSTALLED_APPS = [
     'apps.auth.apps.AuthConfig',
     'apps.index.apps.IndexConfig',
     'apps.profile.apps.ProfileConfig',
-    'apps.client.apps.SharedConfig',
+    'apps.client.apps.ClientConfig',
     'apps.player.apps.PlayerConfig',
     'apps.game.apps.GameConfig',
     'apps.error.apps.ErrorConfig',

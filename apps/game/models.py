@@ -21,7 +21,7 @@ from utils.websockets.channel_send import send_group
 
 class Rank(models.Model):
     class Meta:
-        db_table = 'ranks_list'
+        db_table = 'pong_ranks'
 
     name = CharField(primary_key=True, max_length=15, editable=False, null=False,
                      choices=[(ranks.name, ranks.value) for ranks in Ranks])

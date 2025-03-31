@@ -68,7 +68,7 @@
                     if (_old)
                         _old.apply(this, arguments);
                     jQuery([ajax]).dequeue("ajax" + port);
-
+                    ;
                 };
 
                 jQuery([ajax]).queue("ajax" + port, function () {

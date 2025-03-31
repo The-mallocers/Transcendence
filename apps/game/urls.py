@@ -1,11 +1,11 @@
 from django.urls import path
 
-from apps.game import views
+from apps.game import view
 
 urlpatterns = [
-    path('gamemodes/', views.gamemodes_get, name='gamemodes'),
-    path('matchmaking/', views.matchmaking_get, name='matchmaking'),
-    path('arena/', views.arena_get, name='arena'),
-    path('', views.pong_get, name='pong'),
-    path('gameover/', views.gameover_get, name='gameover'),
+    path('gamemodes/', view.gamemodes_get, name='gamemodes'),
+    path('matchmaking/', view.matchmaking_get, name='matchmaking'),
+    path('arena/', view.arena_get, name='arena'),
+    path('', view.pong_get, name='pong'),
+    path('gameover/', view.gameover_get, name='gameover'),
 ]
