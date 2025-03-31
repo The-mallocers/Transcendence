@@ -27,9 +27,13 @@ class ClientSerializer(serializers.ModelSerializer):
                 passwrod = Password.objects.create(**password_data)
                 stats = Stats.objects.create()
                 two_fa = TwoFA.objects.create()
-                right = Rights.objects.create()
+                right = Rights.objects.create(is_admin=False)
                 client = Clients.objects.create(profile=profile, password=passwrod, twoFa=two_fa, rights=right,
                                                 stats=stats)
+
+                if validated_data.get('is_admin', False):
+                    right.is_admin = True
+                    right.save()
 
         except Exception as e:
             raise serializers.ValidationError(f"Error creating client: {str(e)}")
