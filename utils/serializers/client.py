@@ -32,8 +32,8 @@ class ClientSerializer(serializers.ModelSerializer):
                                                 stats=stats)
 
                 if validated_data.get('is_admin', False):
-                    right.is_admin = True
-                    right.save()
+                    client.rights.is_admin = True
+                    client.rights.save()
 
         except Exception as e:
             raise serializers.ValidationError(f"Error creating client: {str(e)}")
