@@ -1,4 +1,3 @@
-from pickle import TRUE
 import uuid
 
 from asgiref.sync import sync_to_async
@@ -26,7 +25,6 @@ class Stats(models.Model):
     # rank = ForeignKey('pong.Rank', on_delete=models.SET_NULL, null=True, blank=True, default=Ranks.BRONZE.value)
     rank = CharField(default=Ranks.BRONZE.value, max_length=100, blank=True)
     games = ManyToManyField('game.Game', blank=True)
-
 
 
 class Clients(models.Model):
@@ -181,5 +179,3 @@ class Clients(models.Model):
             return Clients.objects.select_related('player').get(id=client_id)
         except Clients.DoesNotExist:
             return None
-        
-    

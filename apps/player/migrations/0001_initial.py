@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
@@ -19,7 +18,8 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('score', models.IntegerField(default=0)),
-                ('client', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='shared.clients')),
+                ('client',
+                 models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='shared.clients')),
                 ('game', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='game.game')),
             ],
             options={

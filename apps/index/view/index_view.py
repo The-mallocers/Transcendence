@@ -2,17 +2,16 @@ from django.http import JsonResponse
 from django.middleware.csrf import get_token
 from django.template.loader import render_to_string
 
-from apps.game.manager import GameManager
 from apps.shared.models import Clients
 
 
-#I will fix the stats later.
+# I will fix the stats later.
 def get(req):
     client = Clients.get_client_by_request(req)
     if client is not None:
         games_played = client.stats.games.all().order_by('-created_at')
-        
-        #debug stuff that no longer should trigger
+
+        # debug stuff that no longer should trigger
         # faulty_games = False
         # for game in Games_played:
         #     if game.winner == None:
@@ -34,7 +33,7 @@ def get(req):
             "clients": Clients.objects.all(),
             "gamesHistory": ghistory,
             "winrate": winrate,
-            "winrate_angle": 42, #int((winrate / 100) * 360),
+            "winrate_angle": 42,  # int((winrate / 100) * 360),
             "rivals": rivals,
             "csrf_token": get_token(req)
         }
@@ -50,12 +49,12 @@ def get(req):
 def get_winrate(client, games_played) -> int:
     wins = games_played.filter(winner__client=client).count()
     print("wins:", wins)
-    
+
     total_games = games_played.count()
     if total_games == 0:
         return 0
 
-    #TFREYDIE Note -> If someone can explain to me why the code below doesnt work I will love you 4 ever.
+    # TFREYDIE Note -> If someone can explain to me why the code below doesnt work I will love you 4 ever.
     # for game in games_played:
     #     print("game is:", game)
     #     # print("in get winrate, winner is :", game.winner)

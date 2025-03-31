@@ -2,7 +2,6 @@ from django.http import JsonResponse
 from django.middleware.csrf import get_token
 from django.template.loader import render_to_string
 
-from apps.game.manager import GameManager
 from apps.shared.models import Clients
 
 
@@ -65,9 +64,9 @@ def gameover(request):
 
     # opponent_player_name = opponent.nickname
 
-    #Delete this line later
+    # Delete this line later
     client_player_name = opponent_player_name = message = client_score = opponent_score = None
-    
+
     html_content = render_to_string("pong/gameover.html", {
         "csrf_token": get_token(request),
         "client": client_player_name,

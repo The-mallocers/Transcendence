@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
@@ -14,7 +13,10 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Rank',
             fields=[
-                ('name', models.CharField(choices=[('BRONZE', 'bronze'), ('SILVER', 'silver'), ('GOLD', 'gold'), ('PLATINUM', 'platinum'), ('DIAMOND', 'diamond'), ('CHAMPION', 'champion')], editable=False, max_length=15, primary_key=True, serialize=False)),
+                ('name', models.CharField(
+                    choices=[('BRONZE', 'bronze'), ('SILVER', 'silver'), ('GOLD', 'gold'), ('PLATINUM', 'platinum'),
+                             ('DIAMOND', 'diamond'), ('CHAMPION', 'champion')], editable=False, max_length=15,
+                    primary_key=True, serialize=False)),
                 ('icon', models.ImageField(upload_to='rank_icon/')),
                 ('mmr_min', models.IntegerField()),
                 ('mmr_max', models.IntegerField()),

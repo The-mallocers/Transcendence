@@ -31,7 +31,8 @@ class PlayerSerializer(serializers.ModelSerializer):
 
 from rest_framework import serializers
 
-#Uncomment this when we will have player stats + the name of client within client model.
+
+# Uncomment this when we will have player stats + the name of client within client model.
 class PlayerInformationSerializer(serializers.ModelSerializer):
     client_id = serializers.SerializerMethodField()
     username = serializers.SerializerMethodField()

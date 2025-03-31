@@ -158,7 +158,7 @@ class PongLogic:
     def set_result(self, disconnect=False):
         winner = Player()
         loser = Player()
-        
+
         if disconnect is True:
             if self.redis.hget(name="consumers_channels", key=str(self.game.pL.id)) is None:
                 self.score_pL.set_score(0)
@@ -179,7 +179,7 @@ class PongLogic:
             winner.score = self.score_pR.get_score()
             loser.client = Clients.get_client_by_id(self.game.pL.client_id)
             loser.score = self.score_pL.get_score()
-        
+
         loser.save()
         winner.save()
         finished_game = Game.objects.create(id=self.game.game_id, winner=winner, loser=loser,

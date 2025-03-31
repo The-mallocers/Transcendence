@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
@@ -17,12 +16,14 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='messages',
             name='sender',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='shared.clients'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL,
+                                    to='shared.clients'),
         ),
         migrations.AddField(
             model_name='rooms',
             name='admin',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='admin', to='shared.clients'),
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='admin',
+                                    to='shared.clients'),
         ),
         migrations.AddField(
             model_name='rooms',
@@ -32,6 +33,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='messages',
             name='room',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='messages', to='chat.rooms'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='messages',
+                                    to='chat.rooms'),
         ),
     ]

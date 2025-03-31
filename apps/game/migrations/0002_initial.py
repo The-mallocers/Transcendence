@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
@@ -18,16 +17,19 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='game',
             name='loser',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='loser', to='player.player'),
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='loser',
+                                    to='player.player'),
         ),
         migrations.AddField(
             model_name='game',
             name='tournament_id',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='tournament', to='tournaments.tournaments'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL,
+                                    related_name='tournament', to='tournaments.tournaments'),
         ),
         migrations.AddField(
             model_name='game',
             name='winner',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='winner', to='player.player'),
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='winner',
+                                    to='player.player'),
         ),
     ]

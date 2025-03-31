@@ -2,9 +2,8 @@ import json
 
 from django.db import models, transaction
 from django.db.models import ForeignKey
-from django.db.models.fields import IntegerField, CharField
+from django.db.models.fields import IntegerField
 
-from utils.pong.enums import Ranks
 from utils.redis import RedisConnectionPool
 
 
@@ -77,4 +76,3 @@ class Player(models.Model):
 
         # Return None if player not found
         return None
-

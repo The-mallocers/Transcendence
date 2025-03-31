@@ -355,7 +355,6 @@ LOGGING = {
     },
 }
 
-
 # Apply permissions to latest.log file if it exists
 latest_log_path = os.path.join(LOG_DIR, LATEST_LOG_FILENAME)
 if os.path.exists(latest_log_path):
