@@ -90,7 +90,6 @@ __pycache__/
 local_settings.py
 
 .env
-.secrets
 my_fixture.json
 transcendence.sqlite3
 test_db.sqlite3
