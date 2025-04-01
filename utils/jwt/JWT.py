@@ -26,10 +26,10 @@ class JWT:
         self.IAT = now
         if token_type == JWTType.ACCESS:
             self.EXP = now + timedelta(
-                minutes=getattr(settings, 'JWT_EXP_ACCESS_TOKEN'))
+                minutes=settings.JWT_EXP_ACCESS_TOKEN)
         elif token_type == JWTType.REFRESH:
             self.EXP = now + timedelta(
-                days=getattr(settings, 'JWT_EXP_REFRESH_TOKEN'))
+                days=settings.JWT_EXP_REFRESH_TOKEN)
 
         self.TYPE: JWTType = token_type
 

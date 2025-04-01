@@ -32,6 +32,9 @@ services:
       - .env
     networks:
       - Tnetwork
+    environment:
+      REDIS_HOST: 'redis'
+      REDIS_POST: '6380'
     restart: always
 
   nginx:
