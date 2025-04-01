@@ -26,7 +26,7 @@ def get(req):
         if client is not None:
             winrate = get_winrate(client, games_played)
             print('winrate: ', winrate)
-            # ghistory = get_last_matches(client, Games_played)
+            ghistory = get_last_matches(client, games_played)
             # rivals = get_rivals(client, Games_played)
         context = {
             "client": client,
@@ -75,19 +75,19 @@ def get_last_matches(client, games_played) -> list:
         myPoints = 0
         enemyPoints = 0
         oponnent = ""
-        print(client.player.id, game.winner.id)
-        if (client.player.id == game.winner.id):
-            myPoints = game.winner_score
-            enemyPoints = game.loser_score
-            oponnent = game.loser.nickname
+        print(game.winner, client)
+        if (game.winner == client):
+            myPoints = game.winner.score
+            enemyPoints = game.loser.score
+            oponnent = game.loser.profile.username
         else:
-            myPoints = game.loser_score
-            enemyPoints = game.winner_score
-            oponnent = game.winner.nickname
+            myPoints = game.loser.score
+            enemyPoints = game.winner.score
+            oponnent = game.winner.profile.username
 
         ghistory.append({
             "opponent": oponnent,
-            "won": client.player.id == game.winner.id,
+            "won": game.winner == client,
             "myPoints": myPoints,
             "enemyPoints": enemyPoints,
             "when": game.created_at
@@ -141,12 +141,3 @@ def get_rivals(client, games_played) -> dict:
     #     ]
     # }
     return opponents
-
-# if (client.player.id == game.winner.id):
-#     myPoints = game.winner_score
-#     enemyPoints =  game.loser_score
-#     oponnent = game.loser.nickname
-# else :
-#     myPoints = game.loser_score
-#     enemyPoints =  game.winner_score
-#     oponnent = game.winner.nickname
