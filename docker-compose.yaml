@@ -10,11 +10,12 @@ services:
       - .env
     networks:
       - Tnetwork
-    #    healthcheck:
-    #      test: [ "CMD-SHELL", "pg_isready -U postgres -d dockerdjango" ]
-    #      interval: 5s
-    #      timeout: 5s
-    #      retries: 5
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d dockerdjango -h 127.0.0.1 -p 5432" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
     restart: always
   
   django-web:
