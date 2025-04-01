@@ -11,27 +11,6 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
 
-    env:
-      #Secrets
-      DJANGO_SECRET_KEY: "${{ secrets.DJANGO_SECRET_KEY }}"
-      JWT_SECRET_KEY: "${{ secrets.JWT_SECRET_KEY }}"
-      SECRET_FA_KEY: "${{ secrets.SECRET_FA_KEY }}"
-      DATABASE_PASSWORD: "${{ secrets.DATABASE_PASSWORD }}"
-      GRAFANA_PASSWORD: "${{ secrets.GRAFANA_PASSWORD }}"
-      ADMIN_PWD: "${{ secrets.ADMIN_PWD }}"
-
-      #variables
-      DATABASE_NAME: "${{ vars.DATABASE_NAME }}"
-      DATABASE_USERNAME: "${{ vars.DATABASE_USERNAME }}"
-      DATABASE_HOST: "${{ vars.DATABASE_HOST }}"
-      DATABASE_PORT: "${{ vars.DATABASE_PORT }}"
-      JWT_EXP_ACCESS_TOKEN: "${{ vars.JWT_EXP_ACCESS_TOKEN }}"
-      JWT_EXP_REFRSH_TOKEN: "${{ vars.JWT_EXP_REFRSH_TOKEN }}"
-      REDIS_HOST: "${{ vars.REDIS_HOST }}"
-      REDIS_PORT: "${{ vars.REDIS_PORT }}"
-      ADMIN_EMAIL: "${{ vars.ADMIN_EMAIL }}"
-      ADMIN_USERNAME: "${{ vars.ADMIN_USERNAME }}"
-
     steps:
     - uses: actions/checkout@v3
 
@@ -56,22 +35,22 @@ jobs:
 
     - name: Create .env file
       run: |
-        echo "DJANGO_SECRET_KEY='${DJANGO_SECRET_KEY}'" >> .env
-        echo "JWT_SECRET_KEY='${JWT_SECRET_KEY}'" >> .env
-        echo "SECRET_FA_KEY='${SECRET_FA_KEY}'" >> .env
-        echo "DATABASE_PASSWORD=${DATABASE_PASSWORD}" >> .env
-        echo "GRAFANA_PASSWORD=${GRAFANA_PASSWORD}" >> .env
-        echo "ADMIN_PWD='${ADMIN_PWD}'" >> .env
-        echo "DATABASE_NAME=${DATABASE_NAME}" >> .env
-        echo "DATABASE_USERNAME=${DATABASE_USERNAME}" >> .env
-        echo "DATABASE_HOST=${DATABASE_HOST}" >> .env
-        echo "DATABASE_PORT=${DATABASE_PORT}" >> .env
-        echo "JWT_EXP_ACCESS_TOKEN='${JWT_EXP_ACCESS_TOKEN}'" >> .env
-        echo "JWT_EXP_REFRSH_TOKEN='${JWT_EXP_REFRSH_TOKEN}'" >> .env
-        echo "REDIS_HOST='${REDIS_HOST}'" >> .env
-        echo "REDIS_PORT='${REDIS_PORT}'" >> .env
-        echo "ADMIN_EMAIL=${ADMIN_EMAIL}" >> .env
-        echo "ADMIN_USERNAME=${ADMIN_USERNAME}" >> .env
+        echo "DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}" >> .env
+        echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}" >> .env
+        echo "SECRET_FA_KEY=${{ secrets.SECRET_FA_KEY }}" >> .env
+        echo "DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}" >> .env
+        echo "GRAFANA_PASSWORD=${{ secrets.GRAFANA_PASSWORD }}" >> .env
+        echo "ADMIN_PWD=${{ secrets.ADMIN_PWD }}" >> .env
+        echo "DATABASE_NAME=${{ vars.DATABASE_NAME }}" >> .env
+        echo "DATABASE_USERNAME=${{ vars.DATABASE_USERNAME }}" >> .env
+        echo "DATABASE_HOST=${{ vars.DATABASE_HOST }}" >> .env
+        echo "DATABASE_PORT=${{ vars.DATABASE_PORT }}" >> .env
+        echo "JWT_EXP_ACCESS_TOKEN=${{ vars.JWT_EXP_ACCESS_TOKEN }}" >> .env
+        echo "JWT_EXP_REFRSH_TOKEN=${{ vars.JWT_EXP_REFRSH_TOKEN }}" >> .env
+        echo "REDIS_HOST=${{ vars.REDIS_HOST }}" >> .env
+        echo "REDIS_PORT=${{ vars.REDIS_PORT }}" >> .env
+        echo "ADMIN_EMAIL=${{ vars.ADMIN_EMAIL }}" >> .env
+        echo "ADMIN_USERNAME=${{ vars.ADMIN_USERNAME }}" >> .env
 
     - name: Display .env file (for debugging)
       run: cat .env
