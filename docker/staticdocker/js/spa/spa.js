@@ -450,3 +450,17 @@ function create_message(action, targetUser)
     }
     return message;
 }
+
+document.addEventListener("keypress", function(event) {
+    const routeElement = event.target.closest('.search_bar');
+    if (event.key === "Enter")
+    {
+        if (routeElement)
+        {
+            event.preventDefault();
+            let query = routeElement.value;
+            navigateTo('/profile/?username=' + query)
+        }
+    }
+    
+})
