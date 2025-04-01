@@ -28,8 +28,10 @@ class NotificationService(BaseServices):
         await send_group(target.id, 
                                 EventType.NOTIFICATION, 
                                 ResponseAction.ACK_SEND_FRIEND_REQUEST,
-                                {"sender": str(client.id),
-                                 "username": await client.aget_profile_username()})
+                                {
+                                    "sender": str(client.id),
+                                    "username": await client.aget_profile_username()
+                                })
     
         
     # client is the client that want to add the friend from his pending list
