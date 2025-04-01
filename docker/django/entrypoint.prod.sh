@@ -18,7 +18,7 @@ exec uvicorn config.asgi:application \
     --port 8000 \
     --reload \
     --reload-dir . \
-    --workers 3
+    --workers 3 \
 # python -m gunicorn \
 #     --bind 0.0.0.0:8000 \
 #     --workers 3 \
