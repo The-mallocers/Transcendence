@@ -73,14 +73,7 @@ class NotificationService(BaseServices):
             await friendTable.refuse_pending_friend(target)
 
         except:
-            return await send_group_error(client.id, ResponseError.USER_ALREADY_FRIEND_OR_NOT_PENDING_FRIEND, )    
-        # await send_group(target.id, EventType.NOTIFICATION, 
-        #                         ResponseAction.ACK_REFUSE_FRIEND_RESQUEST,
-        #                         {
-        #                             "sender": str(client.id),
-        #                             "username": await client.aget_profile_username()
-        #                         })
-        
+            return await send_group_error(client.id, ResponseError.USER_ALREADY_FRIEND_OR_NOT_PENDING_FRIEND, )        
         await send_group(client.id, EventType.NOTIFICATION, 
                                 ResponseAction.ACK_REFUSE_FRIEND_REQUEST,
                                 {

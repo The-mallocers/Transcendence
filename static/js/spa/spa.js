@@ -336,13 +336,13 @@ notifSocket.onmessage = (event) => {
         let pending_group = document.querySelector('.pending_group');
         const parser = new DOMParser();
         const htmlString = 
-        `<li class="list-group-item pending_item d-flex justify-content-between align-items-center" id="${message.data.content.username}">
-        ${message.data.content.username}
-            <div class="btn-group" role="group" aria-label="Basic example">
-                <button type="button" class="accept_friend btn btn-secondary" data-username="${message.data.content.username}">accept</button>
-                <button type="button" class="refuse_friend btn btn-secondary" data-username="${message.data.content.username}">refuse</button>
-                </div>
-            </li>
+        `<li class="list-group-item pending_item d-flex justify-content-between align-items-center" id="{{friend_pending.username}}">
+            ${message.data.content.username}
+            <div class="btn-group d-grid gap-2 d-md-flex justify-content-md-end"  role="group" aria-label="Basic example">
+                <button type="button" class="accept_friend btn btn-outline-success" data-username="{{friend_pending.username}}">accept</button>
+                <button type="button" class="refuse_friend btn btn-outline-danger" data-username="{{friend_pending.username}}">refuse</button>
+            </div>
+        </li>
         `
         const doc = parser.parseFromString(htmlString, "text/html");
         const pendingElement = doc.body.firstChild;
@@ -353,9 +353,11 @@ notifSocket.onmessage = (event) => {
         const parser = new DOMParser();
         const add_to_friend = 
         `<li class="list-group-item d-flex justify-content-between align-items-center">
-            ${message.data.content.username}
-            <button type="button" class="delete_friend btn btn-secondary" data-username="${message.data.content.username}" >delete</button>
-            <span class="badge badge-primary badge-pill">14</span>
+            <div>${message.data.content.username}</div>
+            <div class="d-flex align-items-center">
+                <button type="button" class="delete_friend btn btn-outline-danger me-4" data-username="{{friend.username}}" >delete</button>
+                <span class="badge badge-primary badge-pill">14</span>
+            </div>
         </li>
         `
         const doc = parser.parseFromString(add_to_friend, "text/html");
@@ -373,10 +375,12 @@ notifSocket.onmessage = (event) => {
         let friends_group = document.querySelector('.friends_group');
         const parser = new DOMParser();
         const add_to_friend = 
-        `<li class="list-group-item d-flex justify-content-between align-items-center">
+        `<li class="list-group-item pending_item d-flex justify-content-between align-items-center" id="{{friend_pending.username}}">
             ${message.data.content.username}
-            <button type="button" class="delete_friend btn btn-secondary" data-username="${message.data.content.username}" >delete</button>
-            <span class="badge badge-primary badge-pill">14</span>
+            <div class="btn-group d-grid gap-2 d-md-flex justify-content-md-end"  role="group" aria-label="Basic example">
+                <button type="button" class="accept_friend btn btn-outline-success" data-username="{{friend_pending.username}}">accept</button>
+                <button type="button" class="refuse_friend btn btn-outline-danger" data-username="{{friend_pending.username}}">refuse</button>
+            </div>
         </li>
         `
         const doc = parser.parseFromString(add_to_friend, "text/html");
@@ -398,10 +402,11 @@ document.addEventListener("click", function(event) {
     const routeElement = event.target.closest('.friendrequest');
     const acceptFriend = event.target.closest('.accept_friend');
     const refuseFriend = event.target.closest('.refuse_friend');
+    const deleteFriend = event.target.closest('.delete_friend');
+
     const urlParams = new URLSearchParams(window.location.search);
     // console.log(routeElement);
     if (routeElement) {
-        console.log("send friend")
         const targetUser = urlParams.get('username');
         this.value = ""; // Clear the input field after handling
         const message = create_message("send_friend_request", targetUser);
@@ -410,7 +415,6 @@ document.addEventListener("click", function(event) {
     }
     else if(acceptFriend)
     {
-        console.log("accept friend")
         const targetUser = acceptFriend.dataset.username;
         this.value = ""; // Clear the input field after handling
         const message = create_message("accept_friend_request", targetUser)
@@ -418,10 +422,16 @@ document.addEventListener("click", function(event) {
     }
     else if(refuseFriend)
     {
-        console.log("refuse friend")
         const targetUser = refuseFriend.dataset.username;
         this.value = ""; // Clear the input field after handling
         const message = create_message("refuse_friend_request", targetUser);
+        notifSocket.send(JSON.stringify(message));
+    }
+    else if(deleteFriend)
+    {
+        const targetUser = acceptFriend.dataset.username;
+        this.value = ""; // Clear the input field after handling
+        const message = create_message("accept_friend_request", targetUser)
         notifSocket.send(JSON.stringify(message));
     }
 });

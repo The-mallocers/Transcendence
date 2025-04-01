@@ -104,3 +104,15 @@
 .fillOrange {
     fill: #FFA042 !important;
 }
+
+.list-group-item{
+    color: white;
+}
+
+.list-group-item:nth-child(odd){
+    background-color: #31343b
+}
+
+.list-group-item:nth-child(even){
+    background-color: #3a3c41
+}
