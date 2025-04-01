@@ -6,7 +6,6 @@ services:
       - postgres-data:/var/lib/postgresql/data/
     ports:
       - "5432:5432"
-    # user: "102731:4223"
     env_file:
       - .env
     networks:
@@ -16,11 +15,6 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-    environment:
-      # - POSTGRES_USER=postgres
-      #Im adding some default values as for some reasons my github test doesnt set the password
-      - POSTGRES_PASSWORD=${DATABASE_PASSWORD:-githubpassword}
-      - POSTGRES_DB=${DATABASE_NAME:-githubdb}
     restart: always
   
   django-web:

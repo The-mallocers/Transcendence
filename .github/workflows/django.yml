@@ -1,75 +1,110 @@
-name: Django CI
+name: Django Docker CI
+
 on:
   push:
-    branches: [ "main" ]
+    branches: [ main, 135-feature-create-githubs-actions ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ main ]
+  workflow_dispatch:
+
 jobs:
-  build:
+  build-and-test:
     runs-on: ubuntu-latest
+
+    env:
+      ENVIRONMENT: "${{ secrets.ENVIRONEMENT }}"
+      DJANGO_SECRET_KEY: "${{ secrets.DJANGO_SECRET_KEY }}"
+      DJANGO_DEBUG: "${{ secrets.DJANGO_DEBUG }}"
+      DJANGO_ALLOWD_HOST: "${{ secrets.DJANGO_ALLOWD_HOST }}"
+      DJANGO_CSRF_TRUSTED_ORIGINS: "${{ secrets.DJANGO_CSRF_TRUSTED_ORIGINS }}"
+      JWT_SECRET_KEY: "${{ secrets.JWT_SECRET_KEY }}"
+      JWT_EXP_ACCESS_TOKEN: "${{ secrets.JWT_EXP_ACCESS_TOKEN }}"
+      JWT_EXP_REFRSH_TOKEN: "${{ secrets.JWT_EXP_REFRSH_TOKEN }}"
+      SECRET_FA_KEY: "${{ secrets.SECRET_FA_KEY }}"
+      REDIS_HOST: "${{ secrets.REDIS_HOST }}"
+      REDIS_PORT: "${{ secrets.REDIS_PORT }}"
+      USERNAME_LENGHT: "${{ secrets.USERNAME_LENGHT }}"
+      FIRSTNAME_LENGHT: "${{ secrets.FIRSTNAME_LENGHT }}"
+      LASTNAME_LENGHT: "${{ secrets.LASTNAME_LENGHT }}"
+      DATABASE_ENGINE: "${{ secrets.DATABASE_ENGINE }}"
+      DATABASE_NAME: "${{ secrets.DATABASE_NAME }}"
+      DATABASE_USERNAME: "${{ secrets.DATABASE_USERNAME }}"
+      DATABASE_PASSWORD: "${{ secrets.DATABASE_PASSWORD }}"
+      DATABASE_HOST: "${{ secrets.DATABASE_HOST }}"
+      DATABASE_PORT: "${{ secrets.DATABASE_PORT }}"
+      GRAFANA_PASSWORD: "${{ secrets.GRAFANA_PASSWORD }}"
+      ADMIN_EMAIL: "${{ secrets.ADMIN_EMAIL }}"
+      ADMIN_USERNAME: "${{ secrets.ADMIN_USERNAME }}"
+      ADMIN_PWD: "${{ secrets.ADMIN_PWD }}"
+
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+    - uses: actions/checkout@v3
 
-      - name: Setup Docker layer caching
-        uses: actions/cache@v3
-        with:
-          path: /var/lib/docker
-          key: ${{ runner.os }}-docker-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-docker-
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
 
-      - name: Create .env file
-        run: |
-          cat <<EOF > .env
-          ENVIRONMENT='DEVELOPMENT'
-          
-          # Django settings
-          DJANGO_SECRET_KEY="django-insecure-default-for-ci-testing"
-          DJANGO_DEBUG="True"
-          DJANGO_ALLOWED_HOST="*"
-          DJANGO_CSRF_TRUSTED_ORIGINS="http://localhost:8001"
-          
-          # Database settings
-          DATABASE_ENGINE="django.db.backends.postgresql"
-          DATABASE_NAME="dockerdjango"
-          DATABASE_USERNAME="postgres"
-          DATABASE_PASSWORD="postgres"
-          DATABASE_HOST="postgresql"
-          DATABASE_PORT="5432"
-          
-          # Admin
-          ADMIN_EMAIL="admin@transcendance.fr"
-          ADMIN_PWD="admin"
-          ADMIN_USERNAME="admin"
-          
-          # Other settings with reasonable defaults
-          JWT_SECRET_KEY="jwt-secret-for-testing"
-          JWT_EXP_ACCESS_TOKEN="3600"
-          JWT_EXP_REFRSH_TOKEN="86400"
-          SECRET_FA_KEY="fa-secret-for-testing"
-          USERNAME_LENGHT="32"
-          FIRSTNAME_LENGHT="32"
-          LASTNAME_LENGHT="32"
-          GRAFANA_PASSWORD="admin"
-          EOF
+    - name: Cache pip dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
 
-      - name: Start application using Makefile
-        run: make up &> output.log &
+    - name: Cache Docker layers
+      uses: actions/cache@v3
+      with:
+        path: /tmp/.buildx-cache
+        key: ${{ runner.os }}-docker-${{ github.sha }}
+        restore-keys: |
+          ${{ runner.os }}-docker-
 
-      - name: Verify startup messages
-        run: |
-          echo "Waiting for application to start..."
-          timeout=2400  # Set a max wait time
-          elapsed=0
-          while ! (grep -q "Application startup complete" output.log && grep -q "Established new database connection" output.log); do
-            sleep 2
-            elapsed=$((elapsed + 2))
-            echo "Waiting... ($elapsed seconds elapsed)"
-            if [ "$elapsed" -ge "$timeout" ]; then
-              echo "❌ Timeout reached. Application failed to start."
-              cat output.log  # Show logs for debugging
-              exit 1
-            fi
-          done
-          echo "✅ Application and database started successfully!"
+    - name: Create .env file
+      run: |
+        echo "ENVIRONMENT='${ENVIRONMENT}'" > .env
+        echo "DJANGO_SECRET_KEY='${DJANGO_SECRET_KEY}'" >> .env
+        echo "DJANGO_DEBUG='${DJANGO_DEBUG}'" >> .env
+        echo "DJANGO_ALLOWD_HOST='${DJANGO_ALLOWD_HOST}'" >> .env
+        echo "DJANGO_CSRF_TRUSTED_ORIGINS='${DJANGO_CSRF_TRUSTED_ORIGINS}'" >> .env
+        echo "JWT_SECRET_KEY='${JWT_SECRET_KEY}'" >> .env
+        echo "JWT_EXP_ACCESS_TOKEN='${JWT_EXP_ACCESS_TOKEN}'" >> .env
+        echo "JWT_EXP_REFRSH_TOKEN='${JWT_EXP_REFRSH_TOKEN}'" >> .env
+        echo "SECRET_FA_KEY='${SECRET_FA_KEY}'" >> .env
+        echo "REDIS_HOST='${REDIS_HOST}'" >> .env
+        echo "REDIS_PORT='${REDIS_PORT}'" >> .env
+        echo "USERNAME_LENGHT='${USERNAME_LENGHT}'" >> .env
+        echo "FIRSTNAME_LENGHT='${FIRSTNAME_LENGHT}'" >> .env
+        echo "LASTNAME_LENGHT='${LASTNAME_LENGHT}'" >> .env
+        echo "DATABASE_ENGINE=${DATABASE_ENGINE}" >> .env
+        echo "DATABASE_NAME=${DATABASE_NAME}" >> .env
+        echo "DATABASE_USERNAME=${DATABASE_USERNAME}" >> .env
+        echo "DATABASE_PASSWORD=${DATABASE_PASSWORD}" >> .env
+        echo "DATABASE_HOST=${DATABASE_HOST}" >> .env
+        echo "DATABASE_PORT=${DATABASE_PORT}" >> .env
+        echo "GRAFANA_PASSWORD=${GRAFANA_PASSWORD}" >> .env
+        echo "ADMIN_EMAIL=${ADMIN_EMAIL}" >> .env
+        echo "ADMIN_USERNAME=${ADMIN_USERNAME}" >> .env
+        echo "ADMIN_PWD='${ADMIN_PWD}'" >> .env
+
+
+    - name: Display .env file (for debugging)
+      run: cat .env
+
+    - name: Build and start Docker Compose services
+      run: docker compose up -d
+
+    - name: Wait for services to be ready
+      run: |
+        echo "Waiting for Django to start..."
+        until [ "$(curl -k -s -o /dev/null -w '%{http_code}' https://localhost:8000/)" -eq 200 ]; do
+          echo "Waiting for Django to start..."
+          sleep 5
+        done
+        echo "Django is ready!"
+
+    - name: Run Django tests
+      run: docker compose exec -T django-web python manage.py test
+
+    - name: Stop containers
+      if: always()
+      run: docker compose down

@@ -197,9 +197,6 @@ ADMIN_USERNAME = os.environ.get('ADMIN_USERNAME')
 
 GRFANA_ADMIN_PWD = os.environ.get('GRAFANA_PASSWORD')
 
-if 'test' in sys.argv:
-    DATABASES['default']['NAME'] = BASE_DIR / 'test_db.sqlite3'
-
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
