@@ -452,13 +452,15 @@ function create_message(action, targetUser)
 }
 
 document.addEventListener("keypress", function(event) {
-    const routeElement = event.target.closest('.search_bar');
+    const routeElement = event.target.closest('.searchBar');
+    console.log(routeElement);
     if (event.key === "Enter")
     {
         if (routeElement)
         {
             event.preventDefault();
-            let query = routeElement.value;
+            const inputElement = routeElement.querySelector('input');
+            let query = inputElement.value;
             navigateTo('/profile/?username=' + query)
         }
     }
