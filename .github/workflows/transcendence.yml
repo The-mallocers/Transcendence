@@ -59,6 +59,14 @@ jobs:
     - name: Build and start Docker Compose services
       run: docker compose up -d
 
+    - name: Wait for PostgreSQL to be healthy
+      run: |
+        until [ "$(docker compose exec -T postgres pg_isready -U your_user)" = "accepting connections" ]; do
+          echo "Waiting for PostgreSQL to be healthy..."
+          sleep 5
+        done
+        echo "PostgreSQL is healthy!"
+
     - name: Wait for Django to be ready
       run: |
         until [ "$(curl -k -s -o /dev/null -w '%{http_code}' https://localhost:8000/)" -eq 200 ]; do
