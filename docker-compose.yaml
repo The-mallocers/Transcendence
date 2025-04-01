@@ -30,7 +30,7 @@ services:
         condition: service_healthy
     expose:
       - 8000
-    build: .
+    build: ./docker/django
     volumes:
       - ./docker/staticdocker:/app/staticfiles
       - ./:/app/

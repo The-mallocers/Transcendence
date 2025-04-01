@@ -5,7 +5,7 @@ from django.db.models import IntegerField, DateTimeField, \
     CharField, DurationField, JSONField
 from django.utils import timezone
 
-from utils.pong.enums import TournamentStatus
+from utils.enums import TournamentStatus
 from utils.util import create_tournament_id, validate_even
 
 

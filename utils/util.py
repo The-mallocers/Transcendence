@@ -22,3 +22,21 @@ def create_tournament_id():
 def validate_even(value):
     if value % 2 != 0:
         raise ValidationError(f"%{value} is is not an even number")
+
+
+def format_validation_errors(errors):
+    result = []
+
+    def process_errors(prefix, error_dict):
+        if isinstance(error_dict, dict):
+            for key, value in error_dict.items():
+                new_prefix = f"{prefix}.{key}" if prefix else key
+                process_errors(new_prefix, value)
+        elif isinstance(error_dict, list):
+            error_messages = [str(error) for error in error_dict]
+            result.append(f"{prefix}: {' '.join(error_messages)}")
+        else:
+            result.append(f"{prefix}: {error_dict}")
+
+    process_errors("", errors)
+    return "; ".join(result)

@@ -1,6 +1,6 @@
-import { WebSocketManager } from "../../websockets/websockets.js";
-import { navigateTo } from '../../spa/spa.js';
-import { isGameOver } from "./VarGame.js"
+import {WebSocketManager} from "../../websockets/websockets.js";
+import {navigateTo} from '../../spa/spa.js';
+import {isGameOver} from "./VarGame.js"
 
 const socket = WebSocketManager.gameSocket;
 let canvas = document.getElementById("pongCanvas");
@@ -16,7 +16,6 @@ const width = 1000;
 const ballSize = 10;
 const paddleThickness = 10;
 let paddleHeight = 100;
-
 
 
 canvas.width = width;
@@ -42,7 +41,7 @@ socket.onmessage = (e) => {
     if (jsonData.data) {
         console.log(jsonData.data.action)
     }
-    
+
     //Attempt at handling errors
     if (jsonData.data.action == "EXCEPTION") {
         isGameOver.gameIsOver = true;
@@ -66,16 +65,14 @@ socket.onmessage = (e) => {
         } else if (jsonData.data.action == "SCORE_RIGHT_UPDATE") {
             rscore.innerHTML = jsonData.data.content
         }
-    }
-    else if (jsonData.data.event == "ERROR") {
+    } else if (jsonData.data.event == "ERROR") {
         if (jsonData.data.action == "OPPONENT_LEFT") {
             console.log("Opponent Disconnected");
             navigateTo("/"); //Later, Redirect to a screen telling your opponent he disconnected.
             isGameOver.gameIsOver = true;
             WebSocketManager.closeGameSocket();
         }
-    }
-    else if (jsonData.data.action == "GAME_ENDING") {
+    } else if (jsonData.data.action == "GAME_ENDING") {
         //Close socket here as well
         const game_id = jsonData.data.content
         console.log("game id is ", game_id);
@@ -102,17 +99,25 @@ const previous_keys = {
 }
 
 document.addEventListener('keydown', (event) => {
-    switch(event.key) {
-        case 'ArrowUp': keys.up = true; break;
-        case 'ArrowDown': keys.down = true; break;
+    switch (event.key) {
+        case 'ArrowUp':
+            keys.up = true;
+            break;
+        case 'ArrowDown':
+            keys.down = true;
+            break;
     }
     // updatePaddles()
 });
 
 document.addEventListener('keyup', (event) => {
-    switch(event.key) {
-        case 'ArrowUp': keys.up = false; break;
-        case 'ArrowDown': keys.down = false; break;
+    switch (event.key) {
+        case 'ArrowUp':
+            keys.up = false;
+            break;
+        case 'ArrowDown':
+            keys.down = false;
+            break;
     }
     // updatePaddles()
 });
@@ -191,9 +196,9 @@ const render = () => {
 render()
 
 function gameLoop() {
-    if(isGameOver.gameIsOver == true) {
+    if (isGameOver.gameIsOver == true) {
         // alert("returning like a fucking idiot")
-        return ;
+        return;
     }
     // console.log("Im looping, ", game_is_over)
     updatePaddles();

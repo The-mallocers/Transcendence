@@ -92,9 +92,8 @@ INSTALLED_APPS = [
     'apps.admin.apps.AdminConfig',
     'apps.auth.apps.AuthConfig',
     'apps.index.apps.IndexConfig',
-    'apps.pong.apps.PongConfig',
     'apps.profile.apps.ProfileConfig',
-    'apps.shared.apps.SharedConfig',
+    'apps.client.apps.ClientConfig',
     'apps.player.apps.PlayerConfig',
     'apps.game.apps.GameConfig',
     'apps.error.apps.ErrorConfig',
@@ -354,7 +353,6 @@ LOGGING = {
         },
     },
 }
-
 
 # Apply permissions to latest.log file if it exists
 latest_log_path = os.path.join(LOG_DIR, LATEST_LOG_FILENAME)

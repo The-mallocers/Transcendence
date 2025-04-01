@@ -21,3 +21,5 @@ dbclean: down
 
 clean: dbclean
 	docker system prune -fa
+
+re: down up

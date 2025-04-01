@@ -6,8 +6,8 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from django.conf import settings
 from redis.asyncio import Redis
 
-from apps.shared.models import Clients
-from utils.pong.enums import EventType, ResponseError
+from apps.client.models import Clients
+from utils.enums import EventType, ResponseError
 from utils.websockets.channel_send import asend_group_error
 from utils.websockets.services.services import ServiceError, BaseServices
 

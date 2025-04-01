@@ -4,7 +4,7 @@ from enum import Enum
 
 from django.conf import settings
 
-from apps.shared.models import Clients
+from apps.client.models import Clients
 
 
 class JWTType(str, Enum):

@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from redis.commands.json.path import Path
 
 from apps.player.models import Player
-from utils.pong.enums import PaddleMove
+from utils.enums import PaddleMove
 from utils.pong.objects import PADDLE_WIDTH, PADDLE_HEIGHT, PADDLE_SPEED, CANVAS_HEIGHT
 
 

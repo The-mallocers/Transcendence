@@ -6,7 +6,7 @@ from django.db import transaction
 from django.forms import ValidationError
 from django.utils import timezone
 
-from apps.shared.models import Clients
+from apps.client.models import Clients
 
 
 class Rooms(models.Model):

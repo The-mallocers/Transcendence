@@ -2,7 +2,7 @@ import jwt
 from django.conf import settings
 from django.http import HttpResponse, HttpRequest
 
-from apps.shared.models import Clients
+from apps.client.models import Clients
 from utils.jwt.JWT import JWT, JWTType
 
 
