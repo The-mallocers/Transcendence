@@ -462,5 +462,5 @@ document.addEventListener("keypress", function(event) {
             navigateTo('/profile/?username=' + query)
         }
     }
-
+    
 })
