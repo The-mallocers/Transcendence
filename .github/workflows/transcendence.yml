@@ -45,6 +45,11 @@ jobs:
     - name: Print env (debugging)
       run: printenv
 
+    - name: Write environment variables to .env file
+      run: |
+        printenv | grep '^ENV_' > .env
+        echo "Environment variables written to .env file"
+
     - name: Build Docker Compose services
       run: docker compose build
 
