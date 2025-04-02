@@ -339,8 +339,8 @@ notifSocket.onmessage = (event) => {
         `<li class="list-group-item pending_item d-flex justify-content-between align-items-center" id="${message.data.content.username}">
             ${message.data.content.username}
             <div class="btn-group d-grid gap-2 d-md-flex justify-content-md-end"  role="group" aria-label="Basic example">
-                <button type="button" class="accept_friend btn btn-outline-success" data-username="${message.data.content.username}">accept</button>
-                <button type="button" class="refuse_friend btn btn-outline-danger" data-username="${message.data.content.username}">refuse</button>
+                <button type="button" class="type-intra-green accept_friend" data-username="${message.data.content.username}">accept</button>
+                <button type="button" class="type-intra-white refuse_friend" data-username="${message.data.content.username}">refuse</button>
             </div>
         </li>
         `
@@ -355,8 +355,8 @@ notifSocket.onmessage = (event) => {
         `<li class="list-group-item d-flex justify-content-between align-items-center">
             <div>${message.data.content.username}</div>
             <div class="d-flex align-items-center">
-                <button type="button" class="delete_friend btn btn-outline-danger me-4" data-username="${message.data.content.username}" >delete</button>
-                <span class="badge badge-primary badge-pill">14</span>
+                <button type="button" class="type-intra-green delete_friend me-4" data-username="${message.data.content.username}" >delete</button>
+                <span>14</span>
             </div>
         </li>
         `
@@ -378,8 +378,8 @@ notifSocket.onmessage = (event) => {
         `<li class="list-group-item d-flex justify-content-between align-items-center">
             <div>${message.data.content.username}</div>
             <div class="d-flex align-items-center">
-                <button type="button" class="delete_friend btn btn-outline-danger me-4" data-username="${message.data.content.username}" >delete</button>
-                <span class="badge badge-primary badge-pill">14</span>
+                <button type="button" class="type-intra-green delete_friend me-4" data-username="${message.data.content.username}" >delete</button>
+                <span>14</span>
             </div>
         </li>
         `
@@ -445,6 +445,7 @@ document.addEventListener("click", function(event) {
         const message = create_message("refuse_friend_request", targetUser);
         notifSocket.send(JSON.stringify(message));
     }
+<<<<<<< HEAD
     else if(deleteFriend)
     {
         const targetUser = deleteFriend.dataset.username;
@@ -452,6 +453,15 @@ document.addEventListener("click", function(event) {
         const message = create_message("delete_friend", targetUser);
         notifSocket.send(JSON.stringify(message));
     }
+=======
+    // else if(deleteFriend)
+    // {
+    //     const targetUser = deleteFriend.dataset.username;
+    //     this.value = ""; // Clear the input field after handling
+    //     const message = create_message("accept_friend_request", targetUser)
+    //     notifSocket.send(JSON.stringify(message));
+    // }
+>>>>>>> 43bb308e6cf139b17464732317852c4be098a893
 });
 
 function create_message(action, targetUser)
@@ -469,13 +479,15 @@ function create_message(action, targetUser)
 }
 
 document.addEventListener("keypress", function(event) {
-    const routeElement = event.target.closest('.search_bar');
+    const routeElement = event.target.closest('.searchBar');
+    console.log(routeElement);
     if (event.key === "Enter")
     {
         if (routeElement)
         {
             event.preventDefault();
-            let query = routeElement.value;
+            const inputElement = routeElement.querySelector('input');
+            let query = inputElement.value;
             navigateTo('/profile/?username=' + query)
         }
     }
