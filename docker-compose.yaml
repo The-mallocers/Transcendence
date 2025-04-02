@@ -15,7 +15,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 10
-      start_period: '${DATABASE_START_PERIOD}s'
+      start_period: 60s #'${DATABASE_START_PERIOD}s'
     restart: always
   
   django-web:
