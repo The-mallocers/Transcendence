@@ -88,7 +88,7 @@ jobs:
     - name: Move cache
       run: |
         rm -rf /tmp/.buildx-cache
-        mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+#        mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
   test:
     needs: build-and-push
@@ -130,7 +130,7 @@ jobs:
         echo "ADMIN_USERNAME=${{ vars.ADMIN_USERNAME }}" >> .env
 
     - name: Copy override file to root
-      run: cp .github/workflows/docker-compose.override.yml ./docker-compose.override.yml
+      run: cp .github/docker-compose.override.yml ./docker-compose.override.yml
 
     - name: Start Docker Compose services with GHCR images
       run: docker compose -f docker-compose.yml up -d
