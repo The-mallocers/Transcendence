@@ -78,6 +78,9 @@ jobs:
 #        echo "ADMIN_EMAIL=${{ vars.ADMIN_EMAIL }}" >> .env
 #        echo "ADMIN_USERNAME=${{ vars.ADMIN_USERNAME }}" >> .env
 
+    - name: Print env (debugging)
+      run: printenv
+
     - name: Build Docker Compose services
       run: docker compose build
 
