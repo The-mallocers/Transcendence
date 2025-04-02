@@ -19,23 +19,6 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
     environment: Transcendence
-    env:
-      DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
-      JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
-      SECRET_FA_KEY: ${{ secrets.SECRET_FA_KEY }}
-      DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
-      GRAFANA_PASSWORD: ${{ secrets.GRAFANA_PASSWORD }}
-      ADMIN_PWD: ${{ secrets.ADMIN_PWD }}
-      DATABASE_NAME: ${{ vars.DATABASE_NAME }}
-      DATABASE_USERNAME: ${{ vars.DATABASE_USERNAME }}
-      DATABASE_HOST: ${{ vars.DATABASE_HOST }}
-      DATABASE_PORT: ${{ vars.DATABASE_PORT }}
-      JWT_EXP_ACCESS_TOKEN: ${{ vars.JWT_EXP_ACCESS_TOKEN }}
-      JWT_EXP_REFRESH_TOKEN: ${{ vars.JWT_EXP_REFRESH_TOKEN }}
-      REDIS_HOST: ${{ vars.REDIS_HOST }}
-      REDIS_PORT: ${{ vars.REDIS_PORT }}
-      ADMIN_EMAIL: ${{ vars.ADMIN_EMAIL }}
-      ADMIN_USERNAME: ${{ vars.ADMIN_USERNAME }}
 
     steps:
     - uses: actions/checkout@v3
