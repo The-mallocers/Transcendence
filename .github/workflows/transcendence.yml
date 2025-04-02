@@ -127,7 +127,7 @@ jobs:
     # Create docker-compose-ghcr.yml in the test job too
     - name: Create docker-compose-ghcr.yml
       run: |
-        cat docker-compose.yml > docker-compose-ghcr.yml
+        cat docker-compose.yaml > docker-compose-ghcr.yaml
         sed -i '/container_name: django/a\image: ${{ env.REGISTRY }}/${{ env.OWNER }}/django-web:latest' docker-compose-ghcr.yml
         sed -i '/build: docker\/django/c\' docker-compose-ghcr.yml
         
@@ -137,7 +137,7 @@ jobs:
         cat docker-compose-ghcr.yml
 
     - name: Start Docker Compose services with GHCR images
-      run: docker compose -f docker-compose-ghcr.yml up -d
+      run: docker compose -f docker-compose-ghcr.yaml up -d
 
     - name: Wait for Django to be ready
       run: |
@@ -148,8 +148,8 @@ jobs:
         echo "Django is ready!"
 
     - name: Run Django tests
-      run: docker compose -f docker-compose-ghcr.yml exec -T django-web python manage.py test
+      run: docker compose -f docker-compose-ghcr.yaml exec -T django-web python manage.py test
 
     - name: Stop containers
       if: always()
-      run: docker compose -f docker-compose-ghcr.yml down
+      run: docker compose -f docker-compose-ghcr.yaml down
