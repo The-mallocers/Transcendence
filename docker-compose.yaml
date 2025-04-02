@@ -43,12 +43,11 @@ services:
     restart: always
 
   nginx:
+    container_name: nginx
     ports:
       - "8000:443"
-      # -  "8080:80"
     depends_on:
       - django-web
-    container_name: nginx
     build: docker/nginx
     env_file:
       - .env
