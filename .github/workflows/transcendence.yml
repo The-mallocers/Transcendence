@@ -129,19 +129,6 @@ jobs:
         echo "ADMIN_EMAIL=${{ vars.ADMIN_EMAIL }}" >> .env
         echo "ADMIN_USERNAME=${{ vars.ADMIN_USERNAME }}" >> .env
 
-    # Create docker-compose-ghcr.yml in the test job too
-    # a delete
-#    - name: Create docker-compose-ghcr.yml
-#      run: |
-#        cat docker-compose.yaml > docker-compose-ghcr.yaml
-#        sed -i '/container_name: django/a\image: ${{ env.REGISTRY }}/${{ env.OWNER }}/django-web:latest' docker-compose-ghcr.yaml
-#        sed -i '/build: docker\/django/c\' docker-compose-ghcr.yaml
-#
-#        sed -i '/container_name: nginx/a\image: ${{ env.REGISTRY }}/${{ env.OWNER }}/nginx:latest' docker-compose-ghcr.yaml
-#        sed -i '/build: docker\/nginx/c\' docker-compose-ghcr.yaml
-#
-#        cat docker-compose-ghcr.yaml
-
     - name: Copy override file to root
       run: cp .github/workflows/docker-compose.override.yml ./docker-compose.override.yml
 
@@ -149,8 +136,12 @@ jobs:
       run: docker compose -f docker-compose.yml up -d
 
     - name: Wait for Django to be ready
-      run: docker compose -f docker-compose.yml wait django-web
-
+      run: |
+        until [ "$(curl -k -s -o /dev/null -w '%{http_code}' https://localhost:8000/)" -eq 200 ]; do
+          echo "Waiting for Django to start..."
+          sleep 5
+        done
+        echo "Django is ready!"
 
     - name: Run Django tests
       run: docker compose -f docker-compose.yml exec -T django-web python manage.py test

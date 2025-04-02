@@ -1,4 +1,4 @@
-DOCKER_COMPOSE_FILE=docker-compose.yaml
+DOCKER_COMPOSE_FILE=docker-compose.yml
 
 up:
 	rm -rf ./docker/staticdocker
