@@ -304,8 +304,8 @@ const pongRoute = new Route(
 //create socker for notifications
 let client_id = null;
 const clientId = await getClientId();
-const notifSocket = new WebSocket(`wss://${window.location.host}/ws/notification/?id=${clientId}`);
-
+// const notifSocket = new WebSocket(`wss://${window.location.host}/ws/notification/?id=${clientId}`);
+const notifSocket = await WebSocketManager.initNotifSocket(clientId);
 async function getClientId() {
     // if (client_id !== null) return client_id;
     console.log("Getting client ID")

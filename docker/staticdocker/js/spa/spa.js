@@ -304,8 +304,8 @@ const pongRoute = new Route(
 //create socker for notifications
 let client_id = null;
 const clientId = await getClientId();
-const notifSocket = new WebSocket(`wss://${window.location.host}/ws/notification/?id=${clientId}`);
-
+// const notifSocket = new WebSocket(`wss://${window.location.host}/ws/notification/?id=${clientId}`);
+const notifSocket = await WebSocketManager.initNotifSocket(clientId);
 async function getClientId() {
     // if (client_id !== null) return client_id;
     console.log("Getting client ID")
@@ -446,7 +446,6 @@ document.addEventListener("click", function(event) {
         const message = create_message("refuse_friend_request", targetUser);
         notifSocket.send(JSON.stringify(message));
     }
-<<<<<<< HEAD
     else if(deleteFriend)
     {
         const targetUser = deleteFriend.dataset.username;
@@ -454,15 +453,6 @@ document.addEventListener("click", function(event) {
         const message = create_message("delete_friend", targetUser);
         notifSocket.send(JSON.stringify(message));
     }
-=======
-    // else if(deleteFriend)
-    // {
-    //     const targetUser = deleteFriend.dataset.username;
-    //     this.value = ""; // Clear the input field after handling
-    //     const message = create_message("accept_friend_request", targetUser)
-    //     notifSocket.send(JSON.stringify(message));
-    // }
->>>>>>> 43bb308e6cf139b17464732317852c4be098a893
 });
 
 function create_message(action, targetUser)
