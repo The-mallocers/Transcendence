@@ -130,16 +130,20 @@ jobs:
         echo "ADMIN_USERNAME=${{ vars.ADMIN_USERNAME }}" >> .env
 
     # Create docker-compose-ghcr.yml in the test job too
-    - name: Create docker-compose-ghcr.yml
-      run: |
-        cat docker-compose.yaml > docker-compose-ghcr.yaml
-        sed -i '/container_name: django/a\image: ${{ env.REGISTRY }}/${{ env.OWNER }}/django-web:latest' docker-compose-ghcr.yaml
-        sed -i '/build: docker\/django/c\' docker-compose-ghcr.yaml
-        
-        sed -i '/container_name: nginx/a\image: ${{ env.REGISTRY }}/${{ env.OWNER }}/nginx:latest' docker-compose-ghcr.yaml
-        sed -i '/build: docker\/nginx/c\' docker-compose-ghcr.yaml
-        
-        cat docker-compose-ghcr.yaml
+    # a delete
+#    - name: Create docker-compose-ghcr.yml
+#      run: |
+#        cat docker-compose.yaml > docker-compose-ghcr.yaml
+#        sed -i '/container_name: django/a\image: ${{ env.REGISTRY }}/${{ env.OWNER }}/django-web:latest' docker-compose-ghcr.yaml
+#        sed -i '/build: docker\/django/c\' docker-compose-ghcr.yaml
+#
+#        sed -i '/container_name: nginx/a\image: ${{ env.REGISTRY }}/${{ env.OWNER }}/nginx:latest' docker-compose-ghcr.yaml
+#        sed -i '/build: docker\/nginx/c\' docker-compose-ghcr.yaml
+#
+#        cat docker-compose-ghcr.yaml
+
+    - name: Copy override file to root
+      run: cp .github/workflows/docker-compose.override.yml ./docker-compose.override.yml
 
     - name: Start Docker Compose services with GHCR images
       run: docker compose -f docker-compose-ghcr.yaml up -d
