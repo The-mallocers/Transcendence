@@ -70,6 +70,9 @@ class WsConsumer(AsyncWebsocketConsumer):
                     self.client.id)
                 await self.service.process_action(data, player)
             
+            if self.event_type is EventType.NOTIFICATION:
+                await self.service.process_action(data, self.client)
+            
         except json.JSONDecodeError as e:
             self._logger.error(e)
             await send_group_error(self.client.id, ResponseError.JSON_ERROR)

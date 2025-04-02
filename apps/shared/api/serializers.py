@@ -1,5 +1,6 @@
 from django.db import transaction
 from apps.chat.models import Rooms
+from apps.notifications.models import Friend
 from rest_framework import serializers
 
 from apps.admin.models import Rights
@@ -35,8 +36,9 @@ class ClientSerializer(serializers.ModelSerializer):
                 player = Player.objects.create(**player_data, stats=stats)
                 two_fa = TwoFA.objects.create()
                 right = Rights.objects.create()
+                friendrequest = Friend.objects.create(email=profile.email)
                 client = Clients.objects.create(profile=profile, password=passwrod, twoFa=two_fa, rights=right,
-                                                player=player)
+                                                player=player, friendrequest=friendrequest)
                 global_room = Rooms.objects.get(id=uuid_global_room)
                 global_room.clients.add(client)
         except Exception as e:

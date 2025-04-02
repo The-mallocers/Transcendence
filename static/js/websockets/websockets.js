@@ -1,6 +1,7 @@
 export const WebSocketManager = {
   gameSocket: null,
   chatSocket: null,
+  notifSocket: null,
   
   async initGameSocket(client_id) {
     // if (!client_id) {
@@ -23,10 +24,21 @@ export const WebSocketManager = {
     }
     return this.chatSocket;
   },
-  
+  async initNotifSocket(client_id) {
+    // if (!client_id) {
+    //   client_id = await getClientId();
+    // }
+    if (!this.notifSocket || this.notifSocket.readyState === WebSocket.CLOSED) {
+      this.notifSocket = new WebSocket(`wss://${window.location.host}/ws/notification/?id=${client_id}`);
+      this.notifSocket.onopen = () => console.log("notif socket connected");
+    }
+    return this.notifSocket;
+  },
+
   closeAllSockets() {
     this.closeGameSocket();
     this.closeChatSocket();
+    // this.closeNotifSocket();
   },
   
   closeGameSocket() {
@@ -43,8 +55,17 @@ export const WebSocketManager = {
       this.chatSocket = null;
       console.log("chat socket closed");
     }
+  },
+  closeNotifSocket() {
+    if (this.notifSocket && this.notifSocket.readyState === WebSocket.OPEN) {
+      this.notifSocket.close();
+      this.notifSocket = null;
+      console.log("notif socket closed");
+    }
   }
 };
+
+console.log("in the websocket function");
 
 // async function getClientId() {
 //   if (client_id !== null) return client_id; // Avoid multiple calls

@@ -60,7 +60,7 @@ svg:hover path {
     padding: 0 2rem;
     height: 70px;
     margin-left: 80px;
-    background-color: #1F212A;
+    background-color: #ffffff;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -69,8 +69,7 @@ svg:hover path {
 
 .searchBar input {
     color: #757575;
-    
-    background-color: #1F212A;
+    background-color: #ffffff;
     padding: 1rem 2rem;
     height: 100%;
     width: 100%;
@@ -89,8 +88,7 @@ main {
     width: calc(100% - 80px);
     /* margin-top: 80px; */
     /* background-color: aliceblue; */
-    background-color: #21252900;
-
+    /* background-color: #21252900; */
 }
 
 
@@ -146,7 +144,6 @@ main {
 .box {
     color: aliceblue;
     padding: 5px;
-
 }
 
 .informationsContainer .box {
@@ -205,23 +202,38 @@ main {
     background-color: #FFA042;
 }
 
-
 .main {
     /* padding: 0 2rem; */
+    background: transparent;
+    background-color: #F5F5F5;
 }
 
 .main .box {
-    padding-top: 1rem;
+    /* padding-top: 1rem;
     border: 1px solid #2D313C;
-    background-color: #1E2028;
+    background-color: #1E2028; */
+
+    background-color: #ffffff;
+    border: 1px solid #f7f7f7;
     height: 23rem;
     border-radius: 5px;
+    padding-top: 20px;
+    padding-left: 25px;
+    padding-right: 25px;
+    padding-bottom: 25px;
+    font-family: 'futura-pt', 'Noto Sans', 'Arial', 'Helvetica', 'Sans serif';
 }
 
-
-.main .box h3{
+.main .box h4{
+    text-transform: uppercase;
+    font-weight: bold;
+    color: #202026;
+    font-size: 0.9em;
+    margin-bottom: 25px;
+}
+/* .main .box h3{
     text-align: center;
-}
+} */
 
 
 /* .lastPlayerContainer:first-child {

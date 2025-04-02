@@ -21,3 +21,8 @@ dbclean: down
 
 clean: dbclean
 	docker system prune -fa
+
+volume:
+	docker volume rm transcendence_grafana-data &&\
+	docker volume rm transcendence_postgres-data &&\
+	docker volume rm transcendence_prometheus-data

@@ -1,9 +1,11 @@
 import { navigateTo } from '../../spa/spa.js';
+import { WebSocketManager } from "../../websockets/websockets.js"
 
 
 function logout() {
     console.log("logout.js online")
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    WebSocketManager.closeNotifSocket();
     fetch('/api/auth/logout/', {
         method: 'POST',
         headers: {

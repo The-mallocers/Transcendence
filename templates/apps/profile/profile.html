@@ -46,7 +46,7 @@
     <div class="row g-4 align-items-start justify-content-start">
         <div class="col-6 col-md-6">
             <div class="box">
-                <h3>Biggest rivals</h3>
+                <h4>Biggest rivals</h4>
                 <div class="lastPlayerContainer mt-4">
                     {% for rival in rivals %}
                         <div class="lastPlayer container d-flex flex-row align-items-center justify-content-center"  data-route="/profile/?username={{rival.username}}">
@@ -63,7 +63,7 @@
 
         <div class="col-6 col-md-6">
             <div class="box">
-                <h3>Games history</h3>
+                <h4>Games history</h4>
                 <div class="lastGamesContainer">
                     {% for game in gamesHistory %}
                         <div class="lastGames container d-flex flex-row align-items-center justify-content-between">
@@ -82,7 +82,46 @@
             </div>
         </div>
     </div>
+    <div class="row mt-4 g-4 align-items-start justify-content-start">
+        <div class="col-6 col-md-6">
+            <div class="box">
+                <h4>Friends List</h4>
+                <div class="lastPlayerContainer mt-4">
+                    {% if show_friend_request %}
+                        <button type="button" class="type-intra-green friendrequest" >Friend Request</button>
+                        {% comment %} <div class="friendrequest" id="friendrequest" >Friend Request</div> {% endcomment %}
+                    {%endif%}
+                    <ul class="friends_group list-group">
+                        {% for friend in friends_list %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>{{friend.username}}</div>
+                                <div class="d-flex align-items-center">
+                                    <button type="button" class="type-intra-green delete_friend me-4" data-username="{{friend.username}}" >delete</button>
+                                    <span>14</span>
+                                </div>
+                            </li>
+                        {% endfor %}
+                      </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-6">
+            <div class="box">
+                <h4>Friends Pending</h4>
+                <div class="lastGamesContainer">
+                    <ul class="pending_group list-group">
+                        {% for friend_pending in friends_pending %}
+                            <li class="list-group-item pending_item d-flex justify-content-between align-items-center" id="{{friend_pending.username}}">
+                                {{friend_pending.username}}
+                                <div class="btn-group d-grid gap-2 d-md-flex justify-content-md-end"  role="group" aria-label="Basic example">
+                                    <button type="button" class="type-intra-green accept_friend" data-username="{{friend_pending.username}}">accept</button>
+                                    <button type="button" class="type-intra-white refuse_friend" data-username="{{friend_pending.username}}">refuse</button>
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
-{% if show_friend_request %}
-    <div class="friendrequest container btn btn-secondary" data-route="/chat/friendrequest?username={{ client.profile.username }}">Friend Request</div>
-{%endif%}

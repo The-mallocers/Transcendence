@@ -10,27 +10,37 @@ from apps.auth.models import Password, TwoFA
 from apps.player.models import Player
 from apps.profile.models import Profile
 
+# Codes de couleur ANSI
+RED = '\033[91m'
+GREEN = '\033[92m'
+YELLOW = '\033[93m'
+BLUE = '\033[94m'
+MAGENTA = '\033[95m'
+CYAN = '\033[96m'
+WHITE = '\033[97m'
+ENDC = '\033[0m'  # Pour réinitialiser la couleur
 
 class Clients(models.Model):
     #Primary key
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False,
                           null=False)
-
+    
     #Joined tables
     password = models.ForeignKey(Password, on_delete=models.CASCADE)
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
     twoFa = models.ForeignKey(TwoFA, on_delete=models.CASCADE)
     rights = models.ForeignKey('admin.Rights', on_delete=models.CASCADE, null=True)
     player = models.ForeignKey(Player, on_delete=models.CASCADE, null=True)
-
+    friendrequest = models.ForeignKey('notifications.Friend', on_delete=models.CASCADE, null=True)
+    
     class Meta:
         db_table = 'client_list'
 
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ SURCHARGE ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
 
     def __str__(self):
-        return f"Client data => Email:{self.profile.email}, Username:{self.profile.username}"
-
+        # return f"Client data => Email:{self.profile.email}, Username:{self.profile.username}"
+        return f"Client data => ID:{self.id}"
     @property
     def is_authenticated(self):
         return True
@@ -50,6 +60,21 @@ class Clients(models.Model):
             return Clients.objects.get(profile__username=username)
         except :
             return None  # Or handle the error appropriately
+
+    @staticmethod
+    async def ASget_client_by_username(username: str):
+        try:
+            return await Clients.objects.aget(profile__username=username)
+        except :
+            return None
+         
+    @staticmethod
+    async def ASget_client_by_ID(client_id: uuid.UUID):
+        try:
+            return await Clients.objects.aget(id=client_id)
+        except :
+            return None 
+
 
     @staticmethod
     def get_client_by_request(request: HttpRequest):
@@ -97,7 +122,6 @@ class Clients(models.Model):
             if not token:
                 return None
             return Clients.get_client_by_id(token.SUB)
-
         return None
 
     @staticmethod
@@ -158,3 +182,74 @@ class Clients(models.Model):
             return Clients.objects.select_related('player').get(id=client_id)
         except Clients.DoesNotExist:
             return None
+        
+    @sync_to_async
+    def aget_profile_username(self):
+        try:
+            with transaction.atomic():
+                return self.profile.username
+        except Exception as e:
+            print(f"Error retrieving username: {e}")
+            return None
+        
+    @sync_to_async
+    def get_friend_table(self):
+        try:
+            with transaction.atomic():
+                return self.friendrequest
+        except Exception as e:
+            print(f"Error retrieving friend request: {e}")
+            return None
+
+    def is_friend_by_id(self, client):
+        try:
+            return self.friendrequest.friends.filter(id=client.id).exists()
+        except Exception as e:
+            print(f"Error retrieving client: {e}")
+            return None
+    
+    def get_all_friends(self):
+        try:
+            friend_list = []
+            for friend in self.friendrequest.friends.all():
+                friend_list.append({"client": friend,
+                                    "username": friend.profile.username})
+            return friend_list
+        except Exception as e:
+            print(f"Error retrieving client: {e}")
+            return None
+
+    def get_all_pending_request(self):
+        try:
+            pending_list = []
+            for friend in self.friendrequest.pending_friends.all():
+                pending_list.append({"client": friend,
+                                    "username": friend.profile.username})
+            return pending_list
+        except Exception as e:
+            print(f"Error retrieving client: {e}")
+            return None
+        
+    @sync_to_async
+    def Aget_all_pending_request(self):
+        try:
+            pending_list = []
+            for friend in self.friendrequest.pending_friends.all():
+                pending_list.append({"client": friend,
+                                    "username": friend.profile.username})
+            return pending_list
+        except Exception as e:
+            print(f"Error retrieving client: {e}")
+            return None
+    
+    @sync_to_async
+    def Aget_pending_request_by_client(self, target):
+        try:
+            for friend in self.friendrequest.pending_friends.all():
+                if friend.id == target.id:
+                    return friend
+            return None
+        except Exception as e:
+            print(f"Error retrieving target: {e}")
+            return None
+
