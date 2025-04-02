@@ -129,10 +129,10 @@ jobs:
       run: |
         cat docker-compose.yaml > docker-compose-ghcr.yaml
         sed -i '/container_name: django/a\image: ${{ env.REGISTRY }}/${{ env.OWNER }}/django-web:latest' docker-compose-ghcr.yaml
-        sed -i '/build: docker\/django/c\' docker-compose-ghcr.yml
+        sed -i '/build: docker\/django/c\' docker-compose-ghcr.yaml
         
         sed -i '/container_name: nginx/a\image: ${{ env.REGISTRY }}/${{ env.OWNER }}/nginx:latest' docker-compose-ghcr.yaml
-        sed -i '/build: docker\/nginx/c\' docker-compose-ghcr.yml
+        sed -i '/build: docker\/nginx/c\' docker-compose-ghcr.yaml
         
         cat docker-compose-ghcr.yml
 
