@@ -72,9 +72,11 @@ jobs:
     - name: Tag and Push Docker Images
       run: |
         for service in $(docker compose config --services); do
-          image="ghcr.io/the-mallocers/transcendence/${service}:latest"
-          docker tag "${service}:latest" "${image}"
-          docker push "${image}"
+          if [ "$service" != "db" ]; then
+            image="ghcr.io/the-mallocers/transcendence/${service}:latest"
+            docker tag "${service}:latest" "${image}"
+            docker push "${image}"
+          fi
         done
 
     - name: Start Docker Compose services
