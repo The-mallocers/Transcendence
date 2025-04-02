@@ -42,16 +42,16 @@ jobs:
           ${{ runner.os }}-pip-
 
 # delete docker cache
-    - name: Create Docker cache directory
-      run: mkdir -p /tmp/.buildx-cache
-
-    - name: Cache Docker layers
-      uses: actions/cache@v3
-      with:
-        path: /tmp/.buildx-cache
-        key: ${{ runner.os }}-docker-${{ hashFiles('docker-compose.yml') }}
-        restore-keys: |
-          ${{ runner.os }}-docker-
+#    - name: Create Docker cache directory
+#      run: mkdir -p /tmp/.buildx-cache
+#
+#    - name: Cache Docker layers
+#      uses: actions/cache@v3
+#      with:
+#        path: /tmp/.buildx-cache
+#        key: ${{ runner.os }}-docker-${{ hashFiles('docker-compose.yml') }}
+#        restore-keys: |
+#          ${{ runner.os }}-docker-
 
     - name: Login to GitHub Container Registry
       uses: docker/login-action@v2
@@ -67,10 +67,10 @@ jobs:
         context: ./docker/django
         push: true
         tags: ${{ env.REGISTRY }}/${{ env.OWNER }}/django-web:latest
-        cache-from: type=local,src=/tmp/.buildx-cache
-        cache-to: type=local,dest=/tmp/.buildx-cache-new
-#        cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.OWNER }}/django-web:cache
-#        cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ env.OWNER }}/django-web:cache,mode=max
+#        cache-from: type=local,src=/tmp/.buildx-cache
+#        cache-to: type=local,dest=/tmp/.buildx-cache-new
+        cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.OWNER }}/django-web:cache
+        cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ env.OWNER }}/django-web:cache,mode=max
 
     # Build and push Nginx image
     - name: Build and push Nginx image
@@ -79,10 +79,10 @@ jobs:
         context: ./docker/nginx
         push: true
         tags: ${{ env.REGISTRY }}/${{ env.OWNER }}/nginx:latest
-        cache-from: type=local,src=/tmp/.buildx-cache
-        cache-to: type=local,dest=/tmp/.buildx-cache-new
-#        cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.OWNER }}/nginx:cache
-#        cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ env.OWNER }}/nginx:cache,mode=max
+#        cache-from: type=local,src=/tmp/.buildx-cache
+#        cache-to: type=local,dest=/tmp/.buildx-cache-new
+        cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.OWNER }}/nginx:cache
+        cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ env.OWNER }}/nginx:cache,mode=max
 
     # Move cache to avoid cache growing in size indefinitely
     - name: Move cache
@@ -144,7 +144,25 @@ jobs:
         echo "Django is ready!"
 
     - name: Run Django tests
-      run: docker compose -f docker-compose.yml exec -T django-web python manage.py test
+      run: docker compose -f docker-compose.yml exec -T django-web python manage.py test > test_results.txt
+
+    - name: Archive test results
+      uses: actions/upload-artifact@v3
+      with:
+        name: test-results
+        path: test_results.txt
+
+    - name: Retrieve the latest log file
+      run: |
+        LAST_LOG_FILE=$(ls -t logs/* | head -n 1)
+        echo "Latest log file: $LAST_LOG_FILE"
+        cp "$LAST_LOG_FILE" latest_log.txt
+
+    - name: Archive latest log file
+      uses: actions/upload-artifact@v3
+      with:
+        name: latest-log
+        path: latest_log.txt
 
     - name: Stop containers
       if: always()
