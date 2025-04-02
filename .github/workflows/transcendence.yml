@@ -3,16 +3,8 @@ name: Transcendence Docker CI
 on:
   push:
     branches: [ main, 135-feature-create-githubs-actions ]
-    paths:
-      - 'docker-compose.yml'
-      - 'docker/django/requirements.txt'
-      - '.github/workflows/**'
   pull_request:
     branches: [ main ]
-    paths:
-      - 'docker-compose.yml'
-      - 'docker/django/requirements.txt'
-      - '.github/workflows/**'
   workflow_dispatch:
 
 jobs:
