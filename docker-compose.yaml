@@ -29,7 +29,7 @@ services:
         condition: service_healthy
     expose:
       - 8000
-    build: ./docker/django
+    build: docker/django
     volumes:
       - ./docker/staticdocker:/app/staticfiles
       - ./:/app/
@@ -49,7 +49,7 @@ services:
     depends_on:
       - django-web
     container_name: nginx
-    build: ./docker/nginx
+    build: docker/nginx
     env_file: .env
     volumes:
       - ./docker/staticdocker:/static:ro

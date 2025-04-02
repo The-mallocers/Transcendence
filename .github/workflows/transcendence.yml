@@ -4,14 +4,14 @@ on:
   push:
     branches: [ main, 135-feature-create-githubs-actions ]
     paths:
-      - 'docker-compose.yml'
-      - 'docker/django/requirements.txt'
+      - './docker-compose.yml'
+      - './docker/django/requirements.txt'
       - '.github/workflows/**'
   pull_request:
     branches: [ main ]
     paths:
-      - 'docker-compose.yml'
-      - 'docker/django/requirements.txt'
+      - './docker-compose.yml'
+      - './docker/django/requirements.txt'
       - '.github/workflows/**'
   workflow_dispatch:
 
@@ -30,7 +30,7 @@ jobs:
       uses: actions/cache@v3
       with:
         path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-${{ hashFiles('docker/django/requirements.txt') }}
+        key: ${{ runner.os }}-pip-${{ hashFiles('./docker/django/requirements.txt') }}
         restore-keys: |
           ${{ runner.os }}-pip-
 
@@ -38,7 +38,7 @@ jobs:
       uses: actions/cache@v3
       with:
         path: /tmp/.buildx-cache
-        key: ${{ runner.os }}-docker-${{ hashFiles('docker-compose.yml') }}
+        key: ${{ runner.os }}-docker-${{ hashFiles('./docker-compose.yml') }}
         restore-keys: |
           ${{ runner.os }}-docker-
 
@@ -60,9 +60,6 @@ jobs:
         echo "REDIS_PORT=${{ vars.REDIS_PORT }}" >> .env
         echo "ADMIN_EMAIL=${{ vars.ADMIN_EMAIL }}" >> .env
         echo "ADMIN_USERNAME=${{ vars.ADMIN_USERNAME }}" >> .env
-
-    - name: Display .env file (for debugging)
-      run: cat .env
 
     - name: Build Docker Compose services
       run: docker compose build
