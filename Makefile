@@ -1,5 +1,8 @@
 DOCKER_COMPOSE_FILE=docker-compose.yaml
 
+include .env
+export $(shell sed 's/=.*//' .env)
+
 up:
 	rm -rf ./docker/staticdocker
 	docker compose -f ./$(DOCKER_COMPOSE_FILE) up  --build --no-attach mailhog --no-attach alertmanager --no-attach grafana
@@ -16,8 +19,8 @@ status:
 restart:
 	down up
 
-dbclean: down
-	docker volume prune -f
+dbclean:
+	docker compose down -v
 
 clean: dbclean
 	docker system prune -fa

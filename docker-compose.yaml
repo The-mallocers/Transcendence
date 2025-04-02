@@ -6,8 +6,8 @@ services:
       - postgres-data:/var/lib/postgresql/data/
     ports:
       - "5432:5432"
-    env_file:
-      - .env
+    #    env_file:
+    #      - .env
     networks:
       - Tnetwork
     environment:
@@ -33,8 +33,8 @@ services:
     volumes:
       - ./docker/staticdocker:/app/staticfiles
       - ./:/app/
-    env_file:
-      - .env
+    #    env_file:
+    #      - .env
     networks:
       - Tnetwork
     environment:
@@ -50,7 +50,7 @@ services:
       - django-web
     container_name: nginx
     build: docker/nginx
-    env_file: .env
+    #    env_file: .env
     volumes:
       - ./docker/staticdocker:/static:ro
       - ./docker/secrets:/etc/nginx/certs:ro
@@ -150,8 +150,8 @@ services:
     depends_on:
       prometheus:
         condition: service_started
-    env_file:
-      - .env
+    #    env_file:
+    #      - .env
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
       - GF_SECURITY_X_CONTENT_TYPE_OPTIONS=false
