@@ -14,7 +14,7 @@ services:
       test: [ "CMD-SHELL", "pg_isready -U ${DATABASE_USERNAME} -d ${DATABASE_NAME} -h 127.0.0.1 -p ${DATABASE_PORT}" ]
       interval: 10s
       timeout: 5s
-      retries: 10
+      retries: 100
       start_period: 60s #'${DATABASE_START_PERIOD}s'
     restart: always
   

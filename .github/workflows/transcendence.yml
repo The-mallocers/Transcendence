@@ -3,8 +3,16 @@ name: Django Docker CI
 on:
   push:
     branches: [ main, 135-feature-create-githubs-actions ]
+    paths:
+      - 'docker-compose.yml'
+      - 'docker/django/requirements.txt'
+      - '.github/workflows/**'
   pull_request:
     branches: [ main ]
+    paths:
+      - 'docker-compose.yml'
+      - 'docker/django/requirements.txt'
+      - '.github/workflows/**'
   workflow_dispatch:
 
 jobs:
@@ -30,7 +38,7 @@ jobs:
       uses: actions/cache@v3
       with:
         path: /tmp/.buildx-cache
-        key: ${{ runner.os }}-docker-${{ github.sha }}
+        key: ${{ runner.os }}-docker-${{ hashFiles('docker-compose.yml') }}
         restore-keys: |
           ${{ runner.os }}-docker-
 
@@ -59,14 +67,6 @@ jobs:
 
     - name: Build and start Docker Compose services
       run: docker compose up -d
-
-    - name: Wait for PostgreSQL to be healthy
-      run: |
-        until [ "$(docker compose exec -T postgres pg_isready -U your_user)" = "accepting connections" ]; do
-          echo "Waiting for PostgreSQL to be healthy..."
-          sleep 5
-        done
-        echo "PostgreSQL is healthy!"
 
     - name: Wait for Django to be ready
       run: |
