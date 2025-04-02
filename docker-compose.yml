@@ -1,28 +1,27 @@
 services:
   db:
-    image: postgres
+    image: postgres:13.3
     container_name: postgresql
     volumes:
       - postgres-data:/var/lib/postgresql/data/
     ports:
       - "5432:5432"
-    # user: "102731:4223"
     env_file:
       - .env
     networks:
       - Tnetwork
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres -d dockerdjango" ]
-      interval: 5s
-      timeout: 5s
-      retries: 5
     environment:
-      # - POSTGRES_USER=postgres
-      #Im adding some default values as for some reasons my github test doesnt set the password
-      - POSTGRES_PASSWORD=${DATABASE_PASSWORD:-githubpassword}
-      - POSTGRES_DB=${DATABASE_NAME:-githubdb}
+      - POSTGRES_USER=${DATABASE_USERNAME}
+      - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
+      - POSTGRES_DB=${DATABASE_NAME}
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${DATABASE_USERNAME} -d ${DATABASE_NAME} -h 127.0.0.1 -p ${DATABASE_PORT}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
     restart: always
-  
+
   django-web:
     container_name: django
     depends_on:
@@ -30,7 +29,7 @@ services:
         condition: service_healthy
     expose:
       - 8000
-    build: ./docker/django
+    build: docker/django
     volumes:
       - ./docker/staticdocker:/app/staticfiles
       - ./:/app/
@@ -38,17 +37,26 @@ services:
       - .env
     networks:
       - Tnetwork
+    environment:
+      REDIS_HOST: 'redis'
+      REDIS_POST: '6380'
+    #    healthcheck:
+    #      test: [ "CMD", "curl", "-k", "-f", "https://localhost:8000" ]
+    #      interval: 10s
+    #      retries: 5
+    #      start_period: 5s
+    #      timeout: 5s
     restart: always
 
   nginx:
+    container_name: nginx
     ports:
       - "8000:443"
-      # -  "8080:80"
     depends_on:
       - django-web
-    container_name: nginx
-    build: ./docker/nginx
-    env_file: .env
+    build: docker/nginx
+    env_file:
+      - .env
     volumes:
       - ./docker/staticdocker:/static:ro
       - ./docker/secrets:/etc/nginx/certs:ro
@@ -83,7 +91,7 @@ services:
     networks:
       - Tnetwork
     ports:
-      - 9090:9090
+      - "9090:9090"
     restart: always
 
   node-exporter:
@@ -94,7 +102,7 @@ services:
     networks:
       - Tnetwork
     ports:
-      - 9101:9100
+      - "9101:9100"
     restart: unless-stopped
 
   postgresql-exporter:
@@ -118,8 +126,8 @@ services:
       prometheus:
         condition: service_started
     ports:
-      - 1025:1025  # SMTP server
-      - 8025:8025  # Web interface
+      - "1025:1025"  # SMTP server
+      - "8025:8025"  # Web interface
     logging:
       driver: "none"
     networks:

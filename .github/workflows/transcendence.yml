@@ -1,0 +1,162 @@
+name: Transcendence Docker CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    environment: Transcendence
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set lowercase repository owner
+        run: |
+          echo "OWNER=$(echo ${{ github.repository_owner }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+          echo "REPO_NAME=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Create pip cache directory
+        run: mkdir -p ~/.cache/pip
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('docker/django/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Django image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./docker/django
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.OWNER }}/django-web:latest
+          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.OWNER }}/django-web:cache
+          cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ env.OWNER }}/django-web:cache,mode=max
+
+      - name: Build and push Nginx image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./docker/nginx
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.OWNER }}/nginx:latest
+          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.OWNER }}/nginx:cache
+          cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ env.OWNER }}/nginx:cache,mode=max
+
+      - name: Move cache
+        run: |
+          rm -rf /tmp/.buildx-cache
+
+  test:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    environment: Transcendence
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set lowercase repository owner
+        run: |
+          echo "OWNER=$(echo ${{ github.repository_owner }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+          echo "REPO_NAME=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Write environment variables to .env file
+        run: |
+          echo "DJANGO_SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}" >> .env
+          echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}" >> .env
+          echo "SECRET_FA_KEY=${{ secrets.SECRET_FA_KEY }}" >> .env
+          echo "DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}" >> .env
+          echo "GRAFANA_PASSWORD=${{ secrets.GRAFANA_PASSWORD }}" >> .env
+          echo "ADMIN_PWD=${{ secrets.ADMIN_PWD }}" >> .env
+          echo "DATABASE_NAME=${{ vars.DATABASE_NAME }}" >> .env
+          echo "DATABASE_USERNAME=${{ vars.DATABASE_USERNAME }}" >> .env
+          echo "DATABASE_HOST=${{ vars.DATABASE_HOST }}" >> .env
+          echo "DATABASE_PORT=${{ vars.DATABASE_PORT }}" >> .env
+          echo "JWT_EXP_ACCESS_TOKEN=${{ vars.JWT_EXP_ACCESS_TOKEN }}" >> .env
+          echo "JWT_EXP_REFRESH_TOKEN=${{ vars.JWT_EXP_REFRESH_TOKEN }}" >> .env
+          echo "REDIS_HOST=${{ vars.REDIS_HOST }}" >> .env
+          echo "REDIS_PORT=${{ vars.REDIS_PORT }}" >> .env
+          echo "ADMIN_EMAIL=${{ vars.ADMIN_EMAIL }}" >> .env
+          echo "ADMIN_USERNAME=${{ vars.ADMIN_USERNAME }}" >> .env
+
+      - name: Copy override file to root
+        run: cp .github/docker-compose.override.yml ./docker-compose.override.yml
+
+      - name: Pull images from GHCR to avoid rebuild
+        run: |
+          docker pull ghcr.io/${{ env.OWNER }}/django-web:latest
+          docker pull ghcr.io/${{ env.OWNER }}/nginx:latest
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('docker/django/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Cache Docker images
+        uses: actions/cache@v4
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-docker-${{ hashFiles('**/Dockerfile') }}
+          restore-keys: |
+            ${{ runner.os }}-docker-
+
+      - name: Start Docker Compose services with GHCR images
+        run: docker compose -f docker-compose.yml up -d
+
+      - name: Run Django tests
+        run: docker compose -f docker-compose.yml exec -T django-web python manage.py test > test_results.txt
+
+      - name: Archive test results
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: test_results.txt
+
+      - name: Retrieve the latest log file
+        run: |
+          LAST_LOG_FILE=$(ls -t logs/* | head -n 1)
+          echo "Latest log file: $LAST_LOG_FILE"
+          cp "$LAST_LOG_FILE" latest_log.txt
+
+      - name: Archive latest log file
+        uses: actions/upload-artifact@v4
+        with:
+          name: latest-log
+          path: latest_log.txt
+
+      - name: Stop containers
+        if: always()
+        run: docker compose -f docker-compose.yml down
