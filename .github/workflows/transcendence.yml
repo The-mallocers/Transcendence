@@ -65,8 +65,11 @@ jobs:
     - name: Display .env file (for debugging)
       run: cat .env
 
-    - name: Build and start Docker Compose services
-      run: docker compose up
+    - name: Build Docker Compose services
+      run: docker compose build
+
+    - name: Start Docker Compose services
+      run: docker compose up --no-attach mailhog --no-attach alertmanager --no-attach grafana --no-attach django-web
 
     - name: Wait for Django to be ready
       run: |
