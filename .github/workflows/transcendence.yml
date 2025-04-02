@@ -115,13 +115,13 @@ jobs:
       - name: Start Docker Compose services with GHCR images
         run: docker compose -f docker-compose.yml up -d
 
-      - name: Wait for Django to be ready
-        run: |
-          until [ "$(curl -k -s -o /dev/null -w '%{http_code}' https://localhost:8000/)" -eq 200 ]; do
-            echo "Waiting for Django to start..."
-            sleep 5
-          done
-          echo "Django is ready!"
+#      - name: Wait for Django to be ready
+#        run: |
+#          until [ "$(curl -k -s -o /dev/null -w '%{http_code}' https://localhost:8000/)" -eq 200 ]; do
+#            echo "Waiting for Django to start..."
+#            sleep 5
+#          done
+#          echo "Django is ready!"
 
       - name: Run Django tests
         run: docker compose -f docker-compose.yml exec -T django-web python manage.py test > test_results.txt
