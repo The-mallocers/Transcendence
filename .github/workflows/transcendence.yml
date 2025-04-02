@@ -112,16 +112,24 @@ jobs:
       - name: Copy override file to root
         run: cp .github/docker-compose.override.yml ./docker-compose.override.yml
 
+      - name: Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('docker/django/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Cache Docker images
+        uses: actions/cache@v4
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-docker-${{ hashFiles('**/Dockerfile') }}
+          restore-keys: |
+            ${{ runner.os }}-docker-
+
       - name: Start Docker Compose services with GHCR images
         run: docker compose -f docker-compose.yml up -d
-
-#      - name: Wait for Django to be ready
-#        run: |
-#          until [ "$(curl -k -s -o /dev/null -w '%{http_code}' https://localhost:8000/)" -eq 200 ]; do
-#            echo "Waiting for Django to start..."
-#            sleep 5
-#          done
-#          echo "Django is ready!"
 
       - name: Run Django tests
         run: docker compose -f docker-compose.yml exec -T django-web python manage.py test > test_results.txt
