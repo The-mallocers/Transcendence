@@ -63,6 +63,7 @@ class RequestAction(str, Enum):
     SEND_FRIEND_REQUEST: str = "send_friend_request"
     ACCEPT_FRIEND_REQUEST: str = "accept_friend_request"
     REFUSE_FRIEND_REQUEST: str = "refuse_friend_request"
+    DELETE_FRIEND: str = "delete_friend"
     
 
 
@@ -98,6 +99,8 @@ class ResponseAction(str, Enum):
     ACK_ACCEPT_FRIEND_REQUEST: str = "acknowledge_accept_friend_request"
     ACK_ACCEPT_FRIEND_REQUEST_HOST: str = "acknowledge_accept_friend_request_host"
     ACK_REFUSE_FRIEND_REQUEST: str = "acknowledge_refuse_friend_request"
+    ACK_DELETE_FRIEND: str = "ack_delete_friend"
+    ACK_FRIEND_DELETED_HOST: str = "ack_friend_deleted_host"
 
     NOTIF_TEST = "notification_test"
     
@@ -129,6 +132,8 @@ class ResponseError(str, Enum):
     USER_NOT_FOUND: str = 'User not found'
     USER_ALREADY_MY_FRIEND: str = 'User already my friend'
     USER_ALREADY_FRIEND_OR_NOT_PENDING_FRIEND: str = 'User already friend or not in pending list'
+    NOT_FRIEND: str = "not_friend"
+    INTERNAL_ERROR: str = "internal_error"
 
     # ── Errors ────────────────────────────────────────────────────────────────────────
     PLAYER_NOT_FOUND: str = 'Your player ID does not correspond to a player.'
