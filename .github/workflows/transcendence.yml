@@ -127,7 +127,7 @@ jobs:
     # Create docker-compose-ghcr.yml in the test job too
     - name: Create docker-compose-ghcr.yml
       run: |
-        docker-compose.yml > docker-compose-ghcr.yml
+        cat docker-compose.yml > docker-compose-ghcr.yml
         sed -i '/container_name: django/a\image: ${{ env.REGISTRY }}/${{ env.OWNER }}/django-web:latest' docker-compose-ghcr.yml
         sed -i '/build: docker\/django/c\' docker-compose-ghcr.yml
         
