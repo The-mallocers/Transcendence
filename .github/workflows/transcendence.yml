@@ -147,7 +147,7 @@ jobs:
       run: docker compose -f docker-compose.yml exec -T django-web python manage.py test > test_results.txt
 
     - name: Archive test results
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v2
       with:
         name: test-results
         path: test_results.txt
@@ -159,7 +159,7 @@ jobs:
         cp "$LAST_LOG_FILE" latest_log.txt
 
     - name: Archive latest log file
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v2
       with:
         name: latest-log
         path: latest_log.txt
