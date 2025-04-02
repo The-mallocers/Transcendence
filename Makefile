@@ -23,6 +23,6 @@ dbclean:
 	docker compose down -v
 
 clean: dbclean
-	docker system prune -fa
+	docker compose down --rmi all
 
 re: down up
