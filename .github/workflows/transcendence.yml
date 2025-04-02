@@ -2,7 +2,7 @@ name: Transcendence Docker CI
 
 on:
   push:
-    branches: [ main, 135-feature-create-githubs-actions ]
+    branches: [ main ]
   pull_request:
     branches: [ main ]
   workflow_dispatch:
@@ -117,21 +117,21 @@ jobs:
           docker pull ghcr.io/${{ env.OWNER }}/django-web:latest
           docker pull ghcr.io/${{ env.OWNER }}/nginx:latest
 
-#      - name: Cache pip dependencies
-#        uses: actions/cache@v4
-#        with:
-#          path: ~/.cache/pip
-#          key: ${{ runner.os }}-pip-${{ hashFiles('docker/django/requirements.txt') }}
-#          restore-keys: |
-#            ${{ runner.os }}-pip-
-#
-#      - name: Cache Docker images
-#        uses: actions/cache@v4
-#        with:
-#          path: /tmp/.buildx-cache
-#          key: ${{ runner.os }}-docker-${{ hashFiles('**/Dockerfile') }}
-#          restore-keys: |
-#            ${{ runner.os }}-docker-
+      - name: Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('docker/django/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Cache Docker images
+        uses: actions/cache@v4
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-docker-${{ hashFiles('**/Dockerfile') }}
+          restore-keys: |
+            ${{ runner.os }}-docker-
 
       - name: Start Docker Compose services with GHCR images
         run: docker compose -f docker-compose.yml up -d
