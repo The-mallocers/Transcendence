@@ -27,15 +27,15 @@ class NotificationService(BaseServices):
         friendTargetTable = await target.get_friend_table()
         
         #check if the friend ask is already in my pending list
-        all_pending_friend = client.get_all_pending_request()
-        username = check_client_exists(all_pending_friend, str(client.id))
+        username = await client.Aget_pending_request_by_client(target)
         # if the username exist in my pending list I accept it
         if username is not None:
             friend_request_data = {
                 "event": "notification",
                 "data": {
+                    "action" : "accept_friend_request",
                     "args": {
-                        "target_name": username
+                        "target_name": data['data']['args']['target_name']
                     }
                 }
             }
