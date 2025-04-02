@@ -1,3 +1,3 @@
 urlpatterns = [
-    # path('', views.index_get, name='tournaments')
+    # path('', views.index_get, name='tournaments'),
 ]
