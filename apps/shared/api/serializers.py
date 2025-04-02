@@ -1,4 +1,5 @@
 from django.db import transaction
+from apps.chat.models import Rooms
 from apps.notifications.models import Friend
 from rest_framework import serializers
 
@@ -10,6 +11,7 @@ from apps.player.models import Player, PlayerStats
 from apps.profile.api.serializers import ProfileSerializer
 from apps.profile.models import Profile
 from apps.shared.models import Clients
+from utils.websockets.services.chat import uuid_global_room
 
 
 class ClientSerializer(serializers.ModelSerializer):
@@ -37,7 +39,8 @@ class ClientSerializer(serializers.ModelSerializer):
                 friendrequest = Friend.objects.create(email=profile.email)
                 client = Clients.objects.create(profile=profile, password=passwrod, twoFa=two_fa, rights=right,
                                                 player=player, friendrequest=friendrequest)
-                
+                global_room = Rooms.objects.get(id=uuid_global_room)
+                global_room.clients.add(client)
         except Exception as e:
             raise serializers.ValidationError(f"Error creating client: {str(e)}")
 
