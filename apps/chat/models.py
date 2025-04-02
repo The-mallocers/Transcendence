@@ -72,12 +72,27 @@ class Rooms(models.Model):
             return list(Rooms.objects.filter(clients__id=client_id).values_list('id', flat=True))  
         except Clients.DoesNotExist:
             return []
+        
     @staticmethod
     def get_room_by_client_id(client_id):
         try:
             return list(Rooms.objects.filter(clients__id=client_id))  
         except Clients.DoesNotExist:
             return []
+    
+    
+    @staticmethod
+    @sync_to_async  
+    def Aget_room_by_client_id(client_id):
+        try:
+            with transaction.atomic():
+                return Rooms.objects.filter(clients__id=client_id).first()
+        except Exception as e:
+            print(f"Error getting room by client ID: {e}")
+            return None
+        except Clients.DoesNotExist:
+            return None
+        
     @staticmethod
     @sync_to_async
     def get_usernames_by_room_id(room_id):
@@ -97,7 +112,14 @@ class Rooms(models.Model):
                 return str(client.id)  # Retourne l'ID sous forme de chaîne
         except Clients.DoesNotExist:
             return None
-
+    
+    @sync_to_async
+    def delete_room(self):
+        try:
+            with transaction.atomic():
+                print(self.clients)
+        except Clients.DoesNotExist:
+            return None
             
 
 class Messages(models.Model):

@@ -3,6 +3,7 @@ from apps import notifications
 
 from django.forms import ValidationError
 from apps.shared.models import Clients
+from apps.chat.models import Rooms
 from apps.notifications.admin import check_client_exists
 # from apps.notifications.models import Friend
 from utils.pong.enums import EventType, ResponseAction, ResponseError
@@ -69,21 +70,28 @@ class NotificationService(BaseServices):
             # add the friend from the other person
             friendTable = await target.get_friend_table()
             await friendTable.accept_other_friend(client)
+            await send_group(client.id, EventType.NOTIFICATION, 
+                                    ResponseAction.ACK_ACCEPT_FRIEND_REQUEST_HOST,
+                                    {
+                                        "sender": str(target.id),
+                                        "username": await target.aget_profile_username()
+                                    })
+            
+            await send_group(target.id, EventType.NOTIFICATION, 
+                                    ResponseAction.ACK_ACCEPT_FRIEND_REQUEST,
+                                    {
+                                        "sender": str(client.id),
+                                        "username": await client.aget_profile_username()
+                                    })
+            # Create Room
+            room = await Rooms.create_room()
+            room.admin = client
+            await room.asave()
+            await room.add_client(client)
+            await room.add_client(target)
         except:
             return await send_group_error(client.id, ResponseError.USER_ALREADY_FRIEND_OR_NOT_PENDING_FRIEND)     
-        await send_group(client.id, EventType.NOTIFICATION, 
-                                ResponseAction.ACK_ACCEPT_FRIEND_REQUEST_HOST,
-                                {
-                                    "sender": str(target.id),
-                                    "username": await target.aget_profile_username()
-                                })
-        
-        await send_group(target.id, EventType.NOTIFICATION, 
-                                ResponseAction.ACK_ACCEPT_FRIEND_REQUEST,
-                                {
-                                    "sender": str(client.id),
-                                    "username": await client.aget_profile_username()
-                                })
+
         
     async def _handle_refuse_friend_request(self, data, client):
         print(f"Refuse friend request and searching for username: '{data['data']['args']['target_name']}'")
@@ -94,15 +102,14 @@ class NotificationService(BaseServices):
             # refuse the pending friend request
             friendTable = await client.get_friend_table()
             await friendTable.refuse_pending_friend(target)
-
+            await send_group(client.id, EventType.NOTIFICATION, 
+                                    ResponseAction.ACK_REFUSE_FRIEND_REQUEST,
+                                    {
+                                        "sender": str(target.id),
+                                        "username": await target.aget_profile_username()
+                                    })
         except:
             return await send_group_error(client.id, ResponseError.USER_ALREADY_FRIEND_OR_NOT_PENDING_FRIEND, )        
-        await send_group(client.id, EventType.NOTIFICATION, 
-                                ResponseAction.ACK_REFUSE_FRIEND_REQUEST,
-                                {
-                                    "sender": str(target.id),
-                                    "username": await target.aget_profile_username()
-                                })
         
     async def _handle_delete_friend(self, data, client):
         print(f"Deleting friend and searching for username: '{data['data']['args']['target_name']}'")
@@ -116,27 +123,34 @@ class NotificationService(BaseServices):
             
             target_friend_table = await target.get_friend_table()
             await target_friend_table.remove_friend(client)
+            await send_group(client.id, 
+                            EventType.NOTIFICATION, 
+                            ResponseAction.ACK_DELETE_FRIEND,
+                            {
+                                "sender": str(target.id),
+                                "username": await target.aget_profile_username()
+                            })
+            
+            await send_group(target.id, 
+                            EventType.NOTIFICATION, 
+                            ResponseAction.ACK_FRIEND_DELETED_HOST,
+                            {
+                                "sender": str(client.id),
+                                "username": await client.aget_profile_username()
+                            })
+            print("ca delete pas")
+            room = await Rooms.Aget_room_by_client_id(client.id)
+            print(room)
+            print("ca delete")
+            if room is None:
+                return
+            await room.delete_room()
         except ValidationError:
             return await send_group_error(client.id, ResponseError.NOT_FRIEND)
         except Exception as e:
             print(f"Error in delete friend operation: {e}")
             return await send_group_error(client.id, ResponseError.INTERNAL_ERROR)
         
-        await send_group(client.id, 
-                        EventType.NOTIFICATION, 
-                        ResponseAction.ACK_DELETE_FRIEND,
-                        {
-                            "sender": str(target.id),
-                            "username": await target.aget_profile_username()
-                        })
-        
-        await send_group(target.id, 
-                        EventType.NOTIFICATION, 
-                        ResponseAction.ACK_FRIEND_DELETED_HOST,
-                        {
-                            "sender": str(client.id),
-                            "username": await client.aget_profile_username()
-                        })
         
     
     async def handle_disconnect(self, client):
