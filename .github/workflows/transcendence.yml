@@ -1,4 +1,4 @@
-name: Django Docker CI
+name: Transcendence Docker CI
 
 on:
   push:
@@ -66,7 +66,7 @@ jobs:
       run: cat .env
 
     - name: Build and start Docker Compose services
-      run: docker compose up -d
+      run: docker compose up
 
     - name: Wait for Django to be ready
       run: |
