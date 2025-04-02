@@ -109,6 +109,3 @@ jobs:
     - name: Stop containers
       if: always()
       run: docker compose down
-````
-
-This update includes the `postgres:latest` image in the tagging and pushing step. Please update the workflow file with these changes and re-run the GitHub Action to verify that the issue is fixed.
