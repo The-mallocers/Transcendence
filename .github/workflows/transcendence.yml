@@ -54,7 +54,6 @@ jobs:
         echo "DATABASE_USERNAME=${{ vars.DATABASE_USERNAME }}" >> .env
         echo "DATABASE_HOST=${{ vars.DATABASE_HOST }}" >> .env
         echo "DATABASE_PORT=${{ vars.DATABASE_PORT }}" >> .env
-        echo "DATABASE_START_PERIOD=${{ vars.DATABASE_START_PERIOD }}" >> .env
         echo "JWT_EXP_ACCESS_TOKEN=${{ vars.JWT_EXP_ACCESS_TOKEN }}" >> .env
         echo "JWT_EXP_REFRESH_TOKEN=${{ vars.JWT_EXP_REFRESH_TOKEN }}" >> .env
         echo "REDIS_HOST=${{ vars.REDIS_HOST }}" >> .env
@@ -69,7 +68,7 @@ jobs:
       run: docker compose build
 
     - name: Start Docker Compose services
-      run: docker compose up --no-attach mailhog --no-attach alertmanager --no-attach grafana --no-attach django-web
+      run: docker compose up
 
     - name: Wait for Django to be ready
       run: |
