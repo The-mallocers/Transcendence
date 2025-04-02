@@ -1,5 +1,7 @@
 import logging
 from apps import notifications
+
+from django.forms import ValidationError
 from apps.shared.models import Clients
 from apps.notifications.admin import check_client_exists
 # from apps.notifications.models import Friend
@@ -101,6 +103,41 @@ class NotificationService(BaseServices):
                                     "sender": str(target.id),
                                     "username": await target.aget_profile_username()
                                 })
+        
+    async def _handle_delete_friend(self, data, client):
+        print(f"Deleting friend and searching for username: '{data['data']['args']['target_name']}'")
+        target = await Clients.ASget_client_by_username(data['data']['args']['target_name'])
+        if target is None:
+            return await send_group_error(client.id, ResponseError.USER_NOT_FOUND)
+        
+        try:
+            client_friend_table = await client.get_friend_table()
+            await client_friend_table.remove_friend(target)
+            
+            target_friend_table = await target.get_friend_table()
+            await target_friend_table.remove_friend(client)
+        except ValidationError:
+            return await send_group_error(client.id, ResponseError.NOT_FRIEND)
+        except Exception as e:
+            print(f"Error in delete friend operation: {e}")
+            return await send_group_error(client.id, ResponseError.INTERNAL_ERROR)
+        
+        await send_group(client.id, 
+                        EventType.NOTIFICATION, 
+                        ResponseAction.ACK_DELETE_FRIEND,
+                        {
+                            "sender": str(target.id),
+                            "username": await target.aget_profile_username()
+                        })
+        
+        await send_group(target.id, 
+                        EventType.NOTIFICATION, 
+                        ResponseAction.ACK_FRIEND_DELETED_HOST,
+                        {
+                            "sender": str(client.id),
+                            "username": await client.aget_profile_username()
+                        })
+        
     
     async def handle_disconnect(self, client):
         pass

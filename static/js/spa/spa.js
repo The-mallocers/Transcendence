@@ -396,7 +396,24 @@ notifSocket.onmessage = (event) => {
             buttonToDelete.remove();
         }
     }
-}
+    else if(message.data.action == "ACK_DELETE_FRIEND") {
+        const friendElements = document.querySelectorAll('.friends_group li');
+        friendElements.forEach(elem => {
+            const usernameElement = elem.querySelector('div:first-child');
+            if (usernameElement && usernameElement.textContent.trim() === message.data.content.username) {
+                elem.remove();
+            }
+        });
+    }
+    else if(message.data.action == "ACK_FRIEND_DELETED_HOST") {
+        const friendElements = document.querySelectorAll('.friends_group li');
+        friendElements.forEach(elem => {
+            const usernameElement = elem.querySelector('div:first-child');
+            if (usernameElement && usernameElement.textContent.trim() === message.data.content.username) {
+                elem.remove();
+            }
+        });
+}}
 
 document.addEventListener("click", function(event) {
     const routeElement = event.target.closest('.friendrequest');
@@ -429,13 +446,13 @@ document.addEventListener("click", function(event) {
         const message = create_message("refuse_friend_request", targetUser);
         notifSocket.send(JSON.stringify(message));
     }
-    // else if(deleteFriend)
-    // {
-    //     const targetUser = deleteFriend.dataset.username;
-    //     this.value = ""; // Clear the input field after handling
-    //     const message = create_message("accept_friend_request", targetUser)
-    //     notifSocket.send(JSON.stringify(message));
-    // }
+    else if(deleteFriend)
+    {
+        const targetUser = deleteFriend.dataset.username;
+        this.value = ""; // Clear the input field after handling
+        const message = create_message("delete_friend", targetUser);
+        notifSocket.send(JSON.stringify(message));
+    }
 });
 
 function create_message(action, targetUser)

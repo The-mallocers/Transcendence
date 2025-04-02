@@ -72,6 +72,17 @@ class Friend(models.Model):
         except:
             raise ValidationError("Friend not in pending")   
                 
+    @sync_to_async
+    def remove_friend(self, client):
+        try:
+            with transaction.atomic():
+                if not self.friends.filter(id=client.id).exists():
+                    raise ValidationError("Not friend with this user")
+                self.friends.remove(client)
+                self.save()
+        except Exception as e:
+            print(f"Error removing friend: {e}")
+            raise ValidationError("Failed to remove friend")
             
 
 
