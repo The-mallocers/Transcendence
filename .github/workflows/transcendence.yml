@@ -71,13 +71,26 @@ jobs:
 
     - name: Tag and Push Docker Images
       run: |
-        for service in $(docker compose config --services); do
-          if [ "$service" != "db" ]; then
-            image="ghcr.io/the-mallocers/transcendence/${service}:latest"
-            docker tag "${service}:latest" "${image}"
-            docker push "${image}"
-          fi
-        done
+        docker tag django-web:latest ghcr.io/the-mallocers/transcendence/django-web:latest
+        docker tag nginx:latest ghcr.io/the-mallocers/transcendence/nginx:latest
+        docker tag redis:latest ghcr.io/the-mallocers/transcendence/redis:latest
+        docker tag prometheus:latest ghcr.io/the-mallocers/transcendence/prometheus:latest
+        docker tag node-exporter:latest ghcr.io/the-mallocers/transcendence/node-exporter:latest
+        docker tag postgresql-exporter:latest ghcr.io/the-mallocers/transcendence/postgresql-exporter:latest
+        docker tag mailhog:latest ghcr.io/the-mallocers/transcendence/mailhog:latest
+        docker tag alertmanager:latest ghcr.io/the-mallocers/transcendence/alertmanager:latest
+        docker tag grafana:latest ghcr.io/the-mallocers/transcendence/grafana:latest
+        docker tag postgres:latest ghcr.io/the-mallocers/transcendence/postgres:latest
+        docker push ghcr.io/the-mallocers/transcendence/django-web:latest
+        docker push ghcr.io/the-mallocers/transcendence/nginx:latest
+        docker push ghcr.io/the-mallocers/transcendence/redis:latest
+        docker push ghcr.io/the-mallocers/transcendence/prometheus:latest
+        docker push ghcr.io/the-mallocers/transcendence/node-exporter:latest
+        docker push ghcr.io/the-mallocers/transcendence/postgresql-exporter:latest
+        docker push ghcr.io/the-mallocers/transcendence/mailhog:latest
+        docker push ghcr.io/the-mallocers/transcendence/alertmanager:latest
+        docker push ghcr.io/the-mallocers/transcendence/grafana:latest
+        docker push ghcr.io/the-mallocers/transcendence/postgres:latest
 
     - name: Start Docker Compose services
       run: docker compose up -d
@@ -96,3 +109,6 @@ jobs:
     - name: Stop containers
       if: always()
       run: docker compose down
+````
+
+This update includes the `postgres:latest` image in the tagging and pushing step. Please update the workflow file with these changes and re-run the GitHub Action to verify that the issue is fixed.
