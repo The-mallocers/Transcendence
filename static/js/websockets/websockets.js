@@ -65,6 +65,8 @@ export const WebSocketManager = {
   }
 };
 
+console.log("in the websocket function");
+
 // async function getClientId() {
 //   if (client_id !== null) return client_id; // Avoid multiple calls
 

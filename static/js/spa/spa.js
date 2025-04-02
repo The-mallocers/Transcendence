@@ -1,7 +1,8 @@
 import { WebSocketManager } from "../websockets/websockets.js"
 import { isGameOver } from "../apps/game/VarGame.js"
 
-
+// let notifSocket = null;
+// let clientId = null;
 class Router {
     constructor(routes) {
         this.routes = routes;
@@ -15,10 +16,12 @@ class Router {
 
     async handleLocation() {
         
+        // clientId = await getClientId();
+        // notifSocket = await WebSocketManager.initNotifSocket(clientId);
         const path = window.location.pathname;
 
-        console.log(window.location.search);
-        console.log("looking for the path: ", path)
+        // console.log(window.location.search);
+        // console.log("looking for the path: ", path)
         const route = this.routes.find(r => r.path === path);
 
         if (!route) {
@@ -61,7 +64,6 @@ class Router {
     }
 
     navigate(path) { 
-        
         
         let splitedPath = path.split("/") 
         console.log(splitedPath)
@@ -252,7 +254,7 @@ document.addEventListener('click', async (e) => {
     const routeElement = e.target.closest('[data-route]');
     if (routeElement) {
         const route = routeElement.dataset.route;
-        console.log("in data route :", route);
+        // console.log("in data route :", route);
         navigateTo(route);
     }
 });
@@ -301,33 +303,13 @@ const pongRoute = new Route(
     
 )
 
-//create socker for notifications
+//create socket for notifications
 let client_id = null;
+// let notifSocket = null;
+// if(window.location.pathname != "/auth/login")
+// {
 const clientId = await getClientId();
-// const notifSocket = new WebSocket(`wss://${window.location.host}/ws/notification/?id=${clientId}`);
 const notifSocket = await WebSocketManager.initNotifSocket(clientId);
-async function getClientId() {
-    // if (client_id !== null) return client_id;
-    console.log("Getting client ID")
-    try {
-        const response = await fetch("/api/auth/getId/", {
-            method: "GET",
-            credentials: "include",
-        });
-        const data = await response.json();
-
-        if (data.client_id) {
-            client_id = data.client_id;
-            return client_id;
-        } else {
-            throw new Error(data.error);
-        }
-    } catch (error) {
-        console.error("Erreur lors de la récupération de l'ID :", error);
-        return null;
-    }
-}
-
 notifSocket.onmessage = (event) => {
     console.log(event.data);
     const message = JSON.parse(event.data);
@@ -364,8 +346,8 @@ notifSocket.onmessage = (event) => {
         const friendElement = doc.body.firstChild;
         friends_group.appendChild(friendElement);
         const buttonToDelete = document.querySelector(`li.pending_item#${message.data.content.username}`);
-        console.log(buttonToDelete);
-        console.log(message.data.content.username);
+        // console.log(buttonToDelete);
+        // console.log(message.data.content.username);
         if(buttonToDelete)
         {
             buttonToDelete.remove();
@@ -389,8 +371,8 @@ notifSocket.onmessage = (event) => {
     }
     else if(message.data.action == "ACK_REFUSE_FRIEND_REQUEST") {
         const buttonToDelete = document.querySelector(`li.pending_item#${message.data.content.username}`);
-        console.log(buttonToDelete);
-        console.log(message.data.content.username);
+        // console.log(buttonToDelete);
+        // console.log(message.data.content.username);
         if(buttonToDelete)
         {
             buttonToDelete.remove();
@@ -414,6 +396,29 @@ notifSocket.onmessage = (event) => {
             }
         });
 }}
+// const notifSocket = new WebSocket(`wss://${window.location.host}/ws/notification/?id=${clientId}`);
+async function getClientId() {
+    // if (client_id !== null) return client_id;
+    // console.log("Getting client ID")
+    try {
+        const response = await fetch("/api/auth/getId/", {
+            method: "GET",
+            credentials: "include",
+        });
+        const data = await response.json();
+
+        if (data.client_id) {
+            client_id = data.client_id;
+            return client_id;
+        } else {
+            throw new Error(data.error);
+        }
+    } catch (error) {
+        console.error("Erreur lors de la récupération de l'ID :", error);
+        return null;
+    }
+}
+
 
 document.addEventListener("click", function(event) {
     const routeElement = event.target.closest('.friendrequest');
@@ -424,16 +429,16 @@ document.addEventListener("click", function(event) {
     const urlParams = new URLSearchParams(window.location.search);
     if (routeElement) {
         const targetUser = urlParams.get('username');
-        console.log("the firend to add is " + targetUser)
+        // console.log("the firend to add is " + targetUser)
         this.value = ""; // Clear the input field after handling
         const message = create_message("send_friend_request", targetUser);
-        console.log(message);
+        // console.log(message);
         notifSocket.send(JSON.stringify(message));
         navigateTo('/')
     }
     else if(acceptFriend)
     {
-        console.log("accept friend");
+        // console.log("accept friend");
         const targetUser = acceptFriend.dataset.username;
         this.value = ""; // Clear the input field after handling
         const message = create_message("accept_friend_request", targetUser)
@@ -471,7 +476,7 @@ function create_message(action, targetUser)
 
 document.addEventListener("keypress", function(event) {
     const routeElement = event.target.closest('.searchBar');
-    console.log(routeElement);
+    // console.log(routeElement);
     if (event.key === "Enter")
     {
         if (routeElement)
