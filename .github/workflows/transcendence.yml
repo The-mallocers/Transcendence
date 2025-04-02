@@ -146,7 +146,7 @@ jobs:
       run: cp .github/workflows/docker-compose.override.yml ./docker-compose.override.yml
 
     - name: Start Docker Compose services with GHCR images
-      run: docker compose -f docker-compose-ghcr.yaml up -d
+      run: docker compose -f docker-compose-ghcr.yml up -d
 
     - name: Wait for Django to be ready
       run: |
@@ -159,8 +159,8 @@ jobs:
 
 
     - name: Run Django tests
-      run: docker compose -f docker-compose-ghcr.yaml exec -T django-web python manage.py test
+      run: docker compose -f docker-compose-ghcr.yml exec -T django-web python manage.py test
 
     - name: Stop containers
       if: always()
-      run: docker compose -f docker-compose-ghcr.yaml down
+      run: docker compose -f docker-compose-ghcr.yml down
