@@ -71,7 +71,8 @@ jobs:
 
     - name: Tag and Push Docker Images
       run: |
-        docker tag django-web:latest ghcr.io/the-mallocers/transcendence/django-web:latest
+        docker tag postgres:latest ghcr.io/the-mallocers/transcendence/postgres:latest
+        docker tag django:latest ghcr.io/the-mallocers/transcendence/django:latest
         docker tag nginx:latest ghcr.io/the-mallocers/transcendence/nginx:latest
         docker tag redis:latest ghcr.io/the-mallocers/transcendence/redis:latest
         docker tag prometheus:latest ghcr.io/the-mallocers/transcendence/prometheus:latest
@@ -80,7 +81,7 @@ jobs:
         docker tag mailhog:latest ghcr.io/the-mallocers/transcendence/mailhog:latest
         docker tag alertmanager:latest ghcr.io/the-mallocers/transcendence/alertmanager:latest
         docker tag grafana:latest ghcr.io/the-mallocers/transcendence/grafana:latest
-        docker tag postgres:latest ghcr.io/the-mallocers/transcendence/postgres:latest
+        docker push ghcr.io/the-mallocers/transcendence/postgres:latest
         docker push ghcr.io/the-mallocers/transcendence/django-web:latest
         docker push ghcr.io/the-mallocers/transcendence/nginx:latest
         docker push ghcr.io/the-mallocers/transcendence/redis:latest
@@ -90,7 +91,6 @@ jobs:
         docker push ghcr.io/the-mallocers/transcendence/mailhog:latest
         docker push ghcr.io/the-mallocers/transcendence/alertmanager:latest
         docker push ghcr.io/the-mallocers/transcendence/grafana:latest
-        docker push ghcr.io/the-mallocers/transcendence/postgres:latest
 
     - name: Start Docker Compose services
       run: docker compose up -d
