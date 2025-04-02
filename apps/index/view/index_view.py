@@ -6,7 +6,6 @@ from apps.game.manager import GameManager
 from apps.shared.models import Clients
 
 def get(req):
-    print("bahahahahahhahahah")
     print(req.get_full_path())
     client = Clients.get_client_by_request(req)
     if client is not None:
@@ -28,9 +27,6 @@ def get(req):
         
         friends_list = client.get_all_friends()
         friends_pending = client.get_all_pending_request()
-        
-        print("friends list", friends_list)
-        print("pending_list", friends_pending)
         
         context = {
             "client": client,

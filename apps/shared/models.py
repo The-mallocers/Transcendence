@@ -205,7 +205,6 @@ class Clients(models.Model):
             for friend in self.friendrequest.friends.all():
                 friend_list.append({"client": friend,
                                     "username": friend.profile.username})
-            print("here")
             return friend_list
         except Exception as e:
             print(f"Error retrieving client: {e}")
@@ -217,7 +216,6 @@ class Clients(models.Model):
             for friend in self.friendrequest.pending_friends.all():
                 pending_list.append({"client": friend,
                                     "username": friend.profile.username})
-            print("here1")
             return pending_list
         except Exception as e:
             print(f"Error retrieving client: {e}")

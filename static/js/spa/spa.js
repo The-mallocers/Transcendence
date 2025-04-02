@@ -405,11 +405,12 @@ document.addEventListener("click", function(event) {
     const deleteFriend = event.target.closest('.delete_friend');
 
     const urlParams = new URLSearchParams(window.location.search);
-    // console.log(routeElement);
     if (routeElement) {
         const targetUser = urlParams.get('username');
+        console.log("the firend to add is " + targetUser)
         this.value = ""; // Clear the input field after handling
         const message = create_message("send_friend_request", targetUser);
+        console.log(message);
         notifSocket.send(JSON.stringify(message));
         navigateTo('/')
     }

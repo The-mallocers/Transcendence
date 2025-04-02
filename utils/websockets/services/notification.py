@@ -1,6 +1,8 @@
 import logging
+from apps import notifications
 from apps.shared.models import Clients
-from apps.notifications.models import Friend
+from apps.notifications.admin import check_client_exists
+# from apps.notifications.models import Friend
 from utils.pong.enums import EventType, ResponseAction, ResponseError
 from utils.websockets.channel_send import send_group, send_group_error
 from utils.websockets.services.services import BaseServices
@@ -15,16 +17,32 @@ class NotificationService(BaseServices):
     # When i add a friend I put the client is to pending friend of the target person
     async def _handle_send_friend_request(self, data, client):
         print(f"Searching for username: '{data['data']['args']['target_name']}'")
+        print("the person that ask the friendship ", client.id)
         # target is the client that I want to add
         target = await Clients.ASget_client_by_username(data['data']['args']['target_name'])
         if target is None:
             return await send_group_error(client.id, ResponseError.USER_NOT_FOUND)
         friendTargetTable = await target.get_friend_table()
+        
+        #check if the friend ask is already in my pending list
+        all_pending_friend = client.get_all_pending_request()
+        username = check_client_exists(all_pending_friend, str(client.id))
+        # if the username exist in my pending list I accept it
+        if username is not None:
+            friend_request_data = {
+                "event": "notification",
+                "data": {
+                    "args": {
+                        "target_name": username
+                    }
+                }
+            }
+            return await self._handle_accept_friend_request(friend_request_data, client)       
+        
         askfriend = await friendTargetTable.add_pending_friend(client)
         # if I am already his friend 
         if askfriend is None:
             return await send_group_error(client.id, ResponseError.USER_ALREADY_MY_FRIEND)
-            
         await send_group(target.id, 
                                 EventType.NOTIFICATION, 
                                 ResponseAction.ACK_SEND_FRIEND_REQUEST,
@@ -38,6 +56,7 @@ class NotificationService(BaseServices):
     # target is the friend pending
     async def _handle_accept_friend_request(self, data, client):
         print(f"Accept friend and searching for username: '{data['data']['args']['target_name']}'")
+        print("the person that ask the friendship ", client.id)
         target = await Clients.ASget_client_by_username(data['data']['args']['target_name'])
         if target is None:
             return await send_group_error(client.id, ResponseError.USER_NOT_FOUND)
@@ -82,7 +101,6 @@ class NotificationService(BaseServices):
                                     "sender": str(target.id),
                                     "username": await target.aget_profile_username()
                                 })
-        
     
     async def handle_disconnect(self, client):
         pass
