@@ -68,7 +68,7 @@ jobs:
       run: docker compose build
 
     - name: Start Docker Compose services
-      run: docker compose up
+      run: docker compose up -d
 
     - name: Wait for Django to be ready
       run: |
