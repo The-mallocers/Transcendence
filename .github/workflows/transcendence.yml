@@ -66,15 +66,16 @@ jobs:
         echo "ADMIN_EMAIL=${{ vars.ADMIN_EMAIL }}" >> .env
         echo "ADMIN_USERNAME=${{ vars.ADMIN_USERNAME }}" >> .env
 
-    - name: Pull and Build Docker Compose services
-      run: |
-        docker pull ghcr.io/${{ github.repository }}/django-web:latest || true
-        docker compose build
+    - name: Build Docker Compose services
+      run: docker compose build
 
-    - name: Push Docker Compose services
+    - name: Tag and Push Docker Images
       run: |
-        docker tag django-web:latest ghcr.io/${{ github.repository }}/django-web:latest
-        docker push ghcr.io/${{ github.repository }}/django-web:latest
+        for service in $(docker compose config --services); do
+          image="ghcr.io/the-mallocers/transcendence/${service}:latest"
+          docker tag "${service}:latest" "${image}"
+          docker push "${image}"
+        done
 
     - name: Start Docker Compose services
       run: docker compose up -d
