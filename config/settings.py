@@ -77,7 +77,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'middleware.jwt_middleware.JWTMiddleware',
+    'utils.middleware.jwt_middleware.JWTMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -149,7 +149,6 @@ JWT_EXP_REFRESH_TOKEN = os.environ.get('JWT_EXP_REFRESH_TOKEN', default=30)  # 3
 JWT_ALGORITH = 'HS256'
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ DATABASE SETTINGS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
