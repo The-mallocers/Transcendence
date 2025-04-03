@@ -86,7 +86,6 @@
         <div class="col-6 col-md-6">
             <div class="box">
                 <h4>Friends List</h4>
-                <div class="lastPlayerContainer mt-4">
                     {% if show_friend_request %}
                         <button type="button" class="type-intra-green friendrequest" >Friend Request</button>
                     {%endif%}
@@ -100,8 +99,7 @@
                                 </div>
                             </li>
                         {% endfor %}
-                      </ul>
-                </div>
+                    </ul>
             </div>
         </div>
         <div class="col-6 col-md-6">
@@ -125,4 +123,4 @@
     </div>
 </div>
 
-<script type="module" src="{% static '/js/apps/profile/profile.js' %}"></script>
+<script type="module" src="{% static '/js/apps/profile/profile.js' %}" defer></script>

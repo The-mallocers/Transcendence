@@ -143,7 +143,12 @@ async function displayRooms(rooms){
     for (let i = 0; i < rooms.length; i++) {
         const parser = new DOMParser();
         if(rooms[i].player.length > 1)
-            htmlString = `<button class="roomroom" id="${rooms[i].room}">chat global</button>`;
+        {
+            htmlString = `<div id="${rooms[i].room}" class="roomroom container d-flex align-items-center gap-3">
+            <img src="/static/assets/imgs/profile/default.png">
+            <div>chat global</div>
+        </div>`
+        }
         else
         {
             let player = rooms[i].player[0];

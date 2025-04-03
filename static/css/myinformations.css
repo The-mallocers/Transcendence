@@ -22,9 +22,7 @@
     background-color: #373C48;
     color: white;
     border: 1px solid #9198AD;
-
     border-radius: 5px;
-    
 }
 
 [data-status="on"]{
@@ -105,20 +103,13 @@
     fill: #FFA042 !important;
 }
 
-.list-group-item{
+ul.friends_group .list-group-item{
     background-color: white;
     border-color: #007d7f;
     color: #00babc;
+    margin-bottom: 10px;
     border: 1px solid;
 }
-
-/* .list-group-item:nth-child(odd){
-    background-color: #31343b
-}
-
-.list-group-item:nth-child(even){
-    background-color: #3a3c41
-} */
 
 .type-intra-green, .type-intra-white{
     padding-left: 10px;

@@ -99,6 +99,7 @@ notifSocket.onmessage = (event) => {
             }
         });
 }}
+
 async function getClientId() {
     // if (client_id !== null) return client_id;
     // console.log("Getting client ID")
@@ -120,7 +121,6 @@ async function getClientId() {
         return null;
     }
 }
-
 
 document.addEventListener("click", function(event) {
     const routeElement = event.target.closest('.friendrequest');
