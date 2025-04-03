@@ -84,9 +84,13 @@ class Rooms(models.Model):
     @staticmethod
     @sync_to_async  
     def Aget_room_by_client_id(client_id):
+        global_room = "00000000-0000-0000-0000-000000000000"
         try:
             with transaction.atomic():
-                return Rooms.objects.filter(clients__id=client_id).first()
+                query = Rooms.objects.filter(clients__id=client_id)
+                if query is not None:
+                    query = query.exclude(id=global_room)
+                return query.first()
         except Exception as e:
             print(f"Error getting room by client ID: {e}")
             return None
@@ -114,11 +118,24 @@ class Rooms(models.Model):
             return None
     
     @sync_to_async
-    def delete_room(self):
+    def Adelete_room(self):
         try:
             with transaction.atomic():
-                print(self.clients)
+                print("delete room")
+                self.delete()
         except Clients.DoesNotExist:
+            return None
+        
+    @staticmethod
+    @sync_to_async
+    def Adelete_all_user_by_room_id(roomId):
+        try:
+            with transaction.atomic():
+                room = Rooms.objects.get(id=roomId)
+                # Clear all related clients (this removes the relationship, not the clients themselves)
+                room.clients.clear()
+            return True
+        except Exception:
             return None
             
 
@@ -134,8 +151,15 @@ class Messages(models.Model):
         return f'Messages: {self.content}'
 
     @staticmethod
-    @sync_to_async
     def get_message_by_room(room):
+        try:
+            return list(Messages.objects.filter(room__id=room.id))
+        except Rooms.DoesNotExist:
+            return []
+
+    @staticmethod
+    @sync_to_async
+    def Aget_message_by_room(room):
         try:
             with transaction.atomic():
                 return list(Messages.objects.filter(room__id=room.id))
@@ -150,5 +174,16 @@ class Messages(models.Model):
         except Exception:
             return None
 
+    @staticmethod
+    @sync_to_async
+    def Adelete_all_messages_by_room_id(roomId):
+        try:
+            with transaction.atomic():
+                print("deleting messages...")
+                Messages.objects.filter(room_id=roomId).delete()
+                return True
+        except Exception:
+            return None
+    
 
 

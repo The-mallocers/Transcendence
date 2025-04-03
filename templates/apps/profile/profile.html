@@ -89,7 +89,6 @@
                 <div class="lastPlayerContainer mt-4">
                     {% if show_friend_request %}
                         <button type="button" class="type-intra-green friendrequest" >Friend Request</button>
-                        {% comment %} <div class="friendrequest" id="friendrequest" >Friend Request</div> {% endcomment %}
                     {%endif%}
                     <ul class="friends_group list-group">
                         {% for friend in friends_list %}
@@ -114,7 +113,7 @@
                             <li class="list-group-item pending_item d-flex justify-content-between align-items-center" id="{{friend_pending.username}}">
                                 {{friend_pending.username}}
                                 <div class="btn-group d-grid gap-2 d-md-flex justify-content-md-end"  role="group" aria-label="Basic example">
-                                    <button type="button" class="type-intra-green accept_friend" data-username="{{friend_pending.username}}">accept</button>
+                                    <button type="button" class="type-intra-green accept_friend" data-username="{{friend_pending.username}}" id="{{friend_pending.client}}">accept</button>
                                     <button type="button" class="type-intra-white refuse_friend" data-username="{{friend_pending.username}}">refuse</button>
                                 </div>
                             </li>
@@ -125,3 +124,5 @@
         </div>
     </div>
 </div>
+
+<script type="module" src="{% static '/js/apps/profile/profile.js' %}"></script>

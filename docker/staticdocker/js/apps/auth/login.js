@@ -5,8 +5,6 @@ console.log("Login has been loaded")
 function login(e) {
 
     e.preventDefault(); 
-
-
     const form = document.querySelector("form");
     const formData = new FormData(form);
     const errorDiv = document.getElementById("error-message")

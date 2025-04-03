@@ -1,9 +1,7 @@
 // window.addEventListener('load', onPageLoad);
 import { WebSocketManager } from "../../websockets/websockets.js"
 
-
 let client_id = null;
-
 let room_id = null; 
 
 
@@ -14,7 +12,6 @@ function scrollToBottom(element){
 const clientId = await getClientId();
 console.log("Got client ID :", clientId);
 const chatSocket = await WebSocketManager.initChatSocket(clientId);
-// const chatSocket = new WebSocket('wss://' + window.location.host + '/ws/chat/?id=' + clientId);
 
 chatSocket.addEventListener("open", (event) => {
     console.log("WebSocket is open now.");
@@ -120,7 +117,6 @@ async function getClientId() {
     }
 }
 
-
 async function displayHistory(message){
     console.log("Displaying history");
     let chatHistory = document.querySelector('.chatHistory');
@@ -139,28 +135,18 @@ async function displayHistory(message){
 
 async function displayRooms(rooms){
     console.log("Displaying rooms");
+    console.log("the length: " + rooms.length)
     let chatRooms = document.querySelector('.chatRooms');
     chatRooms.innerHTML = "";
     let htmlString;
     
     for (let i = 0; i < rooms.length; i++) {
-        // let roomName = rooms[i].player.length > 1 ? "Chat Global" : rooms[i].player[0];
-        // let isActive = room_id === rooms[i].room ? "active" : "";
-        
-        // const htmlString = `
-        //     <button class="roomroom ${isActive}" id="${rooms[i].room}">
-        //         <span class="room-name">${roomName}</span>
-        //         ${rooms[i].unread_count > 0 ? `<span class="unread-badge">${rooms[i].unread_count}</span>` : ''}
-        //     </button>
-        // `;
-        
         const parser = new DOMParser();
         if(rooms[i].player.length > 1)
             htmlString = `<button class="roomroom" id="${rooms[i].room}">chat global</button>`;
         else
         {
             let player = rooms[i].player[0];
-            let div
             if(player == undefined)
                 player = "delete user";
             htmlString = `<div id="${rooms[i].room}" class="roomroom container d-flex align-items-center gap-3">
@@ -172,6 +158,5 @@ async function displayRooms(rooms){
         const roomElement = doc.body.firstChild;
         chatRooms.appendChild(roomElement);
     }
-    
     scrollToBottom(chatRooms);
 }

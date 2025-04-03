@@ -30,7 +30,9 @@ class ChatService(BaseServices):
 
             # Initial checks (target does not exist or same ID)
             if target is None:
-                return await send_group_error(admin.id, ResponseError.TARGET_NOT_FOUND)
+                target = Clients.ASget_client_by_username(data['data']['args']['target'])
+                if target is None:
+                    return await send_group_error(admin.id, ResponseError.TARGET_NOT_FOUND)
             
             if admin.id == target.id:
                 return await send_group_error(admin.id, ResponseError.SAME_ID)
@@ -119,7 +121,7 @@ class ChatService(BaseServices):
                 await send_group_error(client.id, ResponseError.ROOM_NOT_FOUND)
                 return
 
-            messages = await Messages.get_message_by_room(room)
+            messages = await Messages.Aget_message_by_room(room)
             if not messages:
                 await send_group_error(client.id, ResponseError.NO_HISTORY)
                 return

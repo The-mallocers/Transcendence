@@ -3,7 +3,7 @@ from apps import notifications
 
 from django.forms import ValidationError
 from apps.shared.models import Clients
-from apps.chat.models import Rooms
+from apps.chat.models import Rooms, Messages
 from apps.notifications.admin import check_client_exists
 # from apps.notifications.models import Friend
 from utils.pong.enums import EventType, ResponseAction, ResponseError
@@ -89,6 +89,14 @@ class NotificationService(BaseServices):
             await room.asave()
             await room.add_client(client)
             await room.add_client(target)
+            
+            #return all rooms to the target to update his messages rooms
+            all_rooms = Rooms.get_room_by_client_id(target)
+            print("all rooms: ", all_rooms)
+            await send_group(target.id, EventType.CHAT, 
+                        ResponseAction.ALL_ROOM_RECEIVED,
+                        {"rooms": all_rooms})
+            
         except:
             return await send_group_error(client.id, ResponseError.USER_ALREADY_FRIEND_OR_NOT_PENDING_FRIEND)     
 
@@ -138,20 +146,22 @@ class NotificationService(BaseServices):
                                 "sender": str(client.id),
                                 "username": await client.aget_profile_username()
                             })
-            print("ca delete pas")
+            #get the room to delete
             room = await Rooms.Aget_room_by_client_id(client.id)
             print(room)
-            print("ca delete")
             if room is None:
                 return
-            await room.delete_room()
+            # First delete all messages corresponding to the two users
+            await Messages.Adelete_all_messages_by_room_id(room)
+            # Then delete the two user from the room
+            await Rooms.Adelete_all_user_by_room_id(room)
+            # Then delete the room
+            await room.Adelete_room()
         except ValidationError:
             return await send_group_error(client.id, ResponseError.NOT_FRIEND)
         except Exception as e:
             print(f"Error in delete friend operation: {e}")
             return await send_group_error(client.id, ResponseError.INTERNAL_ERROR)
         
-        
-    
     async def handle_disconnect(self, client):
         pass
