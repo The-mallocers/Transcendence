@@ -77,7 +77,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'utils.middleware.jwt_middleware.JWTMiddleware',
+    'utils.jwt.JWTMiddleware.JWTMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -122,20 +122,19 @@ SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 
 # Protected paths configuration
-PROTECTED_PATHS = ['/*']
 EXCLUDED_PATHS = [
-    '/api/auth/login',
-    '/api/*',
+    # '/api/auth/login',
+    # '/api/*',
     '/pages/auth/login',
     '/auth/login',
-    '/auth/register',
-    '/auth/grafana',
-    '/pages/auth/register',
-    '/',
-    '/pages/',
-    '/pages/error/',
-    '/auth/2fa',
-    '/pages/auth/2fa',
+    # '/auth/register',
+    # '/auth/grafana',
+    # '/pages/auth/register',
+    # '/',
+    # '/pages/',
+    # '/pages/error/',
+    # '/auth/2fa',
+    # '/pages/auth/2fa',
 ]
 ROLE_PROTECTED_PATHS = {
     '/admin/*': ['admin']
@@ -147,6 +146,7 @@ JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY')
 JWT_EXP_ACCESS_TOKEN = os.environ.get('JWT_EXP_ACCESS_TOKEN', default=10)  # 30 minutes
 JWT_EXP_REFRESH_TOKEN = os.environ.get('JWT_EXP_REFRESH_TOKEN', default=30)  # 30 days
 JWT_ALGORITH = 'HS256'
+JWT_ISS = 'https://localhost:8000'
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ DATABASE SETTINGS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
 DATABASES = {

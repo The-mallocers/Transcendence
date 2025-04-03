@@ -3,7 +3,8 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from utils.jwt.JWT import JWTType
+from utils.enums import JWTType
+from utils.jwt.JWT import extract_token
 from utils.jwt.JWTGenerator import JWTGenerator
 from utils.serializers.client import ClientSerializer
 
@@ -23,7 +24,7 @@ class ClientApiView(APIView):
 
 class GetClientIdApiView(APIView):
     def get(self, request: HttpRequest, *args, **kwargs):
-        token = JWTGenerator.extract_token(request, JWTType.ACCESS)
+        token = extract_token(request.COOKIES, JWTType.ACCESS)
 
         return Response({
             "client_id": token.SUB

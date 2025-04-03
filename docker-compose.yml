@@ -40,12 +40,6 @@ services:
     environment:
       REDIS_HOST: 'redis'
       REDIS_POST: '6380'
-    #    healthcheck:
-    #      test: [ "CMD", "curl", "-k", "-f", "https://localhost:8000" ]
-    #      interval: 10s
-    #      retries: 5
-    #      start_period: 5s
-    #      timeout: 5s
     restart: always
 
   nginx:
@@ -65,7 +59,7 @@ services:
     restart: always
 
   redis:
-    image: redis/redis-stack:latest
+    image: redis/redis-stack-server:latest
     container_name: redis
     command: redis-stack-server --port 6380
     ports:

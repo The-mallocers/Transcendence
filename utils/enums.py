@@ -147,3 +147,8 @@ class Ranks(str, Enum):
     PLATINUM: str = 'platinum'
     DIAMOND: str = 'diamond'
     CHAMPION: str = 'champion'
+
+
+class JWTType(str, Enum):
+    ACCESS: str = 'access'
+    REFRESH: str = 'refresh'

@@ -5,7 +5,8 @@ from django.conf import settings
 from django.http import JsonResponse, HttpRequest, HttpResponseRedirect
 
 from apps.client.models import Clients
-from utils.jwt.JWTGenerator import JWTType, JWT, JWTGenerator
+from utils.enums import JWTType
+from utils.jwt.JWT import JWT
 
 
 class JWTMiddleware:
@@ -13,24 +14,16 @@ class JWTMiddleware:
         self.get_response = get_response
         self.secret_key = getattr(settings, 'JWT_SECRET_KEY')
         self.algorithm = getattr(settings, 'JWT_ALGORITH')
-        self.protected_paths = getattr(settings, 'PROTECTED_PATHS')
-        self.excluded_paths = getattr(settings, 'EXCLUDED_PATHS')
-        self.role_protected_paths = getattr(settings, 'ROLE_PROTECTED_PATHS')
 
-    def _should_check_path(self, path: str) -> bool:
-        if path.startswith('/pages/') == False and path.startswith('/api/') == False:
-            return False
-        for excluded in self.excluded_paths:
+    def _in_excluded_path(self, path: str) -> bool:
+        for excluded in settings.EXCLUDED_PATHS:
             if self._path_matches(excluded, path):
-                return False
-
-        for protected in self.protected_paths:
-            if self._path_matches(protected, path):
                 return True
         return False
 
     def _get_required_roles(self, path: str):
-        for pattern, roles in self.role_protected_paths.items():
+        protected_paths = settings.ROLE_PROTECTED_PATHS
+        for pattern, roles in protected_paths.items():
             if self._path_matches(pattern, path):
                 return roles
         return None
@@ -66,8 +59,8 @@ class JWTMiddleware:
             request.access_token = access.token
 
             response = self.get_response(request)
-            response = access.set_cookie(response)
-            response = refresh.set_cookie(response)
+            response = set_cookie(access.token, response)
+            response = set_cookie(refresh.token, response)
 
             return response
         except jwt.ExpiredSignatureError as e:
@@ -77,20 +70,23 @@ class JWTMiddleware:
 
     def __call__(self, request: HttpRequest):
         path = request.path_info
+        print(path)
 
-        if not self._should_check_path(path):
+        if self._in_excluded_path(path):
+            print('excluded path')
             return self.get_response(request)
 
         try:
-            token_key: str = self._extract_access_token(request)
-            token: JWT = JWTGenerator.validate_token(token_key, JWTType.ACCESS)
-
-            request.access_token = token
+            print('try to extract token')
+            access_token: JWT = JWT.extract_token(request, JWTType.ACCESS)
+            request.access_token = access_token
+            print('success extract token')
 
             required_roles = self._get_required_roles(path)
             if required_roles:
-                if not any(role in token.ROLES for role in required_roles):
-                    return HttpResponseRedirect('/')
+                if not any(role in access_token.ROLES for role in required_roles):
+                    return HttpResponseRedirect('/')  # redirect with json response
+
             return self.get_response(request)
         except jwt.ExpiredSignatureError:
             try:
@@ -104,7 +100,7 @@ class JWTMiddleware:
             return JsonResponse({
                 'status': 'unauthorized',
                 'redirect': '/auth/login',
-                'message': 'Invalid authentication'}, status=302)
+                'message': 'Session expired'}, status=302)
         except Exception as e:
             return JsonResponse(
                 {'error': f'Internal server error: {str(e)}'},

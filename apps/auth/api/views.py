@@ -5,8 +5,8 @@ from rest_framework.views import APIView
 
 from apps.auth.models import Password
 from apps.client.models import Clients
-from utils.jwt.JWT import JWTType
-from utils.jwt.JWTGenerator import JWTGenerator
+from utils.enums import JWTType
+from utils.jwt.JWT import JWT
 from utils.serializers.auth import PasswordSerializer
 from utils.serializers.client import ClientSerializer
 from utils.serializers.permissions.auth import PasswordPermission
@@ -87,8 +87,8 @@ class LoginApiView(APIView):
                 response = Response({
                     'message': 'Login successful'
                 }, status=status.HTTP_200_OK)
-                JWTGenerator(client, JWTType.ACCESS).set_cookie(response)
-                JWTGenerator(client, JWTType.REFRESH).set_cookie(response)
+                JWT(client, JWTType.ACCESS).set_cookie(response)
+                JWT(client, JWTType.REFRESH).set_cookie(response)
             return response
 
 
@@ -180,10 +180,8 @@ def post_twofa_code(req):
             if not client.twoFa.scanned:
                 client.twoFa.update("scanned", True)
             response = formulate_json_response(True, 200, "Login Successful", "/")
-            JWTGenerator(client, JWTType.ACCESS).set_cookie(
-                response=response)
-            JWTGenerator(client, JWTType.REFRESH).set_cookie(
-                response=response)
+            JWT(client, JWTType.ACCESS).set_cookie(response)
+            JWT(client, JWTType.REFRESH).set_cookie(response)
             return response
     response = formulate_json_response(False, 400, "No email match this request", "/auth/login")
     return response
