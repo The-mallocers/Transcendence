@@ -72,6 +72,11 @@ class JWTMiddleware:
         path = request.path_info
         print(path)
 
+        #We only want to check if the request starts with pages (aka our spa did the fetch)
+        #If it doesnt start with pages, it will just load base.html, and thats what we want
+        if not path.startswith('/pages/'):
+            return self.get_response(request)
+
         if self._in_excluded_path(path):
             print('excluded path')
             return self.get_response(request)

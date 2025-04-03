@@ -72,7 +72,7 @@ class JWT:
             'kid': 'key-id-123'
         }
         payload = self.get_payload()
-        token = jwt.encode(payload, settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM, headers=header)
+        token = jwt.encode(payload, settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITH, headers=header)
         return token
 
     def set_cookie(self, response: HttpResponse) -> HttpResponse:
