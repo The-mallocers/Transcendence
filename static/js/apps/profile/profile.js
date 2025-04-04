@@ -1,6 +1,6 @@
 import { WebSocketManager } from "../../websockets/websockets.js";
 import { navigateTo } from "../../spa/spa.js";
-
+// import {chatSocket} from "../chat/chat.js";
 
 let client_id = null;
 const clientId = await getClientId();
@@ -19,8 +19,8 @@ notifSocket.onmessage = (event) => {
             `<li class="list-group-item pending_item d-flex justify-content-between align-items-center" id="${message.data.content.username}">
                 ${message.data.content.username}
                 <div class="btn-group d-grid gap-2 d-md-flex justify-content-md-end"  role="group" aria-label="Basic example">
-                    <button type="button" class="type-intra-green accept_friend" data-username="${message.data.content.username}" id="${message.data.content.sender}">accept</button>
-                    <button type="button" class="type-intra-white refuse_friend" data-username="${message.data.content.username}">refuse</button>
+                    <button type="button" class="type-intra-green accept_friend" onclick="handleAcceptFriend(this.dataset.username)" data-username="${message.data.content.username}" id="${message.data.content.sender}">accept</button>
+                    <button type="button" class="type-intra-white refuse_friend" onclick="handleRefuseFriend(this.dataset.username)" data-username="${message.data.content.username}">refuse</button>
                 </div>
             </li>
             `
@@ -38,7 +38,7 @@ notifSocket.onmessage = (event) => {
             `<li class="list-group-item d-flex justify-content-between align-items-center">
                 <div>${message.data.content.username}</div>
                 <div class="d-flex align-items-center">
-                    <button type="button" class="type-intra-green delete_friend me-4" data-username="${message.data.content.username}" >delete</button>
+                    <button type="button" class="type-intra-green delete_friend me-4" onclick="handleDeleteFriend(this.dataset.username)" data-username="${message.data.content.username}" >delete</button>
                     <span>14</span>
                 </div>
             </li>
@@ -47,8 +47,6 @@ notifSocket.onmessage = (event) => {
             const friendElement = doc.body.firstChild;
             friends_group.appendChild(friendElement);
             const buttonToDelete = document.querySelector(`li.pending_item#${message.data.content.username}`);
-            // console.log(buttonToDelete);
-            // console.log(message.data.content.username);
             if(buttonToDelete)
             {
                 buttonToDelete.remove();
@@ -62,9 +60,9 @@ notifSocket.onmessage = (event) => {
             const parser = new DOMParser();
             const add_to_friend = 
             `<li class="list-group-item d-flex justify-content-between align-items-center">
-            <div>${message.data.content.username}</div>
+                <div>${message.data.content.username}</div>
                 <div class="d-flex align-items-center">
-                    <button type="button" class="type-intra-green delete_friend me-4" data-username="${message.data.content.username}" >delete</button>
+                    <button type="button" class="type-intra-green delete_friend me-4" onclick="handleDeleteFriend(this.dataset.username)" data-username="${message.data.content.username}" >delete</button>
                     <span>14</span>
                 </div>
             </li>
@@ -72,6 +70,21 @@ notifSocket.onmessage = (event) => {
             const doc = parser.parseFromString(add_to_friend, "text/html");
             const friendElement = doc.body.firstChild;
             friends_group.appendChild(friendElement);
+        }
+
+        //add the new chat
+        const newChat = document.querySelector('.chatRooms');
+        if(newChat)
+        {
+            const parser = new DOMParser();
+            const htmlChat = 
+            `<div id="${message.data.content.room}" class="roomroom container d-flex align-items-center gap-3">
+                    <img src="/static/assets/imgs/profile/default.png">
+                    <div>${message.data.content.username}</div>
+            </div>`
+            const doc = parser.parseFromString(htmlChat, "text/html");
+            const chatElement = doc.body.firstChild;
+            newChat.appendChild(chatElement);
         }
     }
     else if(message.data.action == "ACK_REFUSE_FRIEND_REQUEST") {
@@ -98,11 +111,10 @@ notifSocket.onmessage = (event) => {
                 elem.remove();
             }
         });
-}}
+    }
+}
 
 async function getClientId() {
-    // if (client_id !== null) return client_id;
-    // console.log("Getting client ID")
     try {
         const response = await fetch("/api/auth/getId/", {
             method: "GET",
@@ -122,45 +134,28 @@ async function getClientId() {
     }
 }
 
-document.addEventListener("click", function(event) {
-    const routeElement = event.target.closest('.friendrequest');
-    const acceptFriend = event.target.closest('.accept_friend');
-    const refuseFriend = event.target.closest('.refuse_friend');
-    const deleteFriend = event.target.closest('.delete_friend');
+// Define the functions in the global scope (window)
+window.handleAskFriend = function(username) {
+    console.log("the friend to add is " + username);
+    const message = create_message_notif("send_friend_request", username);
+    notifSocket.send(JSON.stringify(message));
+    navigateTo('/');
+};
 
-    const urlParams = new URLSearchParams(window.location.search);
-    if (routeElement) {
-        const targetUser = urlParams.get('username');
-        console.log("the firend to add is " + targetUser)
-        this.value = ""; // Clear the input field after handling
-        const message = create_message_notif("send_friend_request", targetUser);
-        // console.log(message);
-        notifSocket.send(JSON.stringify(message));
-        navigateTo('/')
-    }
-    else if(acceptFriend)
-    {
-        // console.log("accept friend");
-        let targetUser = acceptFriend.dataset.username;
-        this.value = ""; // Clear the input field after handling
-        let message = create_message_notif("accept_friend_request", targetUser)
-        notifSocket.send(JSON.stringify(message));
-    }
-    else if(refuseFriend)
-    {
-        const targetUser = refuseFriend.dataset.username;
-        this.value = ""; // Clear the input field after handling
-        const message = create_message_notif("refuse_friend_request", targetUser);
-        notifSocket.send(JSON.stringify(message));
-    }
-    else if(deleteFriend)
-    {
-        const targetUser = deleteFriend.dataset.username;
-        this.value = ""; // Clear the input field after handling
-        const message = create_message_notif("delete_friend", targetUser);
-        notifSocket.send(JSON.stringify(message));
-    }
-});
+window.handleAcceptFriend = function(username) {
+    const message = create_message_notif("accept_friend_request", username);
+    notifSocket.send(JSON.stringify(message));
+};
+
+window.handleRefuseFriend = function(username) {
+    const message = create_message_notif("refuse_friend_request", username);
+    notifSocket.send(JSON.stringify(message));
+};
+
+window.handleDeleteFriend = function(username) {
+    const message = create_message_notif("delete_friend", username);
+    notifSocket.send(JSON.stringify(message));
+};
 
 function create_message_notif(action, targetUser)
 {
@@ -172,20 +167,6 @@ function create_message_notif(action, targetUser)
                 "target_name": targetUser,
             }
         } 
-    }
-    return message;
-}
-
-function create_message_chat(action, targetUser)
-{
-    let message = {
-        "event": "chat",
-        "data": {
-            "action": action,
-            "args": {
-                "target": targetUser
-            }
-        }
     }
     return message;
 }

@@ -67,9 +67,26 @@ class NotificationService(BaseServices):
             # add the pending friend
             friendTable = await client.get_friend_table()
             await friendTable.accept_pending_friend(target)
+            print("accepting pending friend")
             # add the friend from the other person
             friendTable = await target.get_friend_table()
             await friendTable.accept_other_friend(client)
+            print("accept friend")
+            # Create Room
+            room = await Rooms.create_room()
+            room.admin = client
+            await room.asave()
+            await room.add_client(client)
+            await room.add_client(target)
+            
+            print("created the new room")
+            #return all rooms to the target to update his messages rooms
+            # all_rooms = Rooms.get_room_by_client_id(target)
+            # print("all rooms: ", all_rooms)
+            # await send_group(target.id, EventType.CHAT, 
+            #             ResponseAction.ALL_ROOM_RECEIVED,
+            #             {"rooms": all_rooms})
+            
             await send_group(client.id, EventType.NOTIFICATION, 
                                     ResponseAction.ACK_ACCEPT_FRIEND_REQUEST_HOST,
                                     {
@@ -81,21 +98,9 @@ class NotificationService(BaseServices):
                                     ResponseAction.ACK_ACCEPT_FRIEND_REQUEST,
                                     {
                                         "sender": str(client.id),
-                                        "username": await client.aget_profile_username()
+                                        "username": await client.aget_profile_username(),
+                                        "room": str(room.id)
                                     })
-            # Create Room
-            room = await Rooms.create_room()
-            room.admin = client
-            await room.asave()
-            await room.add_client(client)
-            await room.add_client(target)
-            
-            #return all rooms to the target to update his messages rooms
-            all_rooms = Rooms.get_room_by_client_id(target)
-            print("all rooms: ", all_rooms)
-            await send_group(target.id, EventType.CHAT, 
-                        ResponseAction.ALL_ROOM_RECEIVED,
-                        {"rooms": all_rooms})
             
         except:
             return await send_group_error(client.id, ResponseError.USER_ALREADY_FRIEND_OR_NOT_PENDING_FRIEND)     

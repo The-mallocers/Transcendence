@@ -11,7 +11,7 @@ function scrollToBottom(element){
 
 const clientId = await getClientId();
 console.log("Got client ID :", clientId);
-const chatSocket = await WebSocketManager.initChatSocket(clientId);
+export const chatSocket = await WebSocketManager.initChatSocket(clientId);
 
 chatSocket.addEventListener("open", (event) => {
     console.log("WebSocket is open now.");

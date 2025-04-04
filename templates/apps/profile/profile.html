@@ -87,14 +87,14 @@
             <div class="box">
                 <h4>Friends List</h4>
                     {% if show_friend_request %}
-                        <button type="button" class="type-intra-green friendrequest" >Friend Request</button>
+                        <button type="button" class="type-intra-green friendrequest" onclick="handleAskFriend(new URLSearchParams(window.location.search).get('username'))">Friend Request</button>
                     {%endif%}
                     <ul class="friends_group list-group">
                         {% for friend in friends_list %}
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 <div>{{friend.username}}</div>
                                 <div class="d-flex align-items-center">
-                                    <button type="button" class="type-intra-green delete_friend me-4" data-username="{{friend.username}}" >delete</button>
+                                    <button type="button" class="type-intra-green delete_friend me-4" onclick="handleDeleteFriend(this.dataset.username)" data-username="{{friend.username}}" >delete</button>
                                     <span>14</span>
                                 </div>
                             </li>
@@ -111,8 +111,8 @@
                             <li class="list-group-item pending_item d-flex justify-content-between align-items-center" id="{{friend_pending.username}}">
                                 {{friend_pending.username}}
                                 <div class="btn-group d-grid gap-2 d-md-flex justify-content-md-end"  role="group" aria-label="Basic example">
-                                    <button type="button" class="type-intra-green accept_friend" data-username="{{friend_pending.username}}" id="{{friend_pending.client}}">accept</button>
-                                    <button type="button" class="type-intra-white refuse_friend" data-username="{{friend_pending.username}}">refuse</button>
+                                    <button type="button" class="type-intra-green accept_friend" onclick="handleAcceptFriend(this.dataset.username)" data-username="{{friend_pending.username}}" id="{{friend_pending.client}}">accept</button>
+                                    <button type="button" class="type-intra-white refuse_friend" onclick="handleRefuseFriend(this.dataset.username)" data-username="{{friend_pending.username}}">refuse</button>
                                 </div>
                             </li>
                         {% endfor %}
