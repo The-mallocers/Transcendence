@@ -123,12 +123,12 @@ CSRF_COOKIE_SECURE = True
 
 # Protected paths configuration
 EXCLUDED_PATHS = [
-    '/api/auth/login/',
-    '/api/auth/register/',
+    '/api/auth/login',
+    '/api/auth/register',
     '/pages/auth/login',
     '/pages/auth/register',
     '/pages/auth/2fa',
-    '/pages/error/404/',
+    '/pages/error/404',
 ]
 ROLE_PROTECTED_PATHS = {
     '/admin/*': ['admin']
