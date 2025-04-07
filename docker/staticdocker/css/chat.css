@@ -8,20 +8,22 @@
 .row {
     display: flex;
     height: 100%;
+    background-color: #2e313d;
 }
 
 .friends {
     width: 33.33%;
     height: 100%;
-    border-right: #2e313d solid 1px;
+    margin: 10px;
+    background-color: #F5F5F5;
     overflow-y: auto;
 }
 
 .friend {
     padding: 1rem 2rem;
-    color: aliceblue;
+    color: rgb(7, 12, 17);
     background-color: #181a22;
-    border-bottom: #2e313d solid 1px;
+    /* border-bottom: #2e313d solid 1px; */
     transition: background-color .2s;
 }
 
@@ -40,6 +42,10 @@
     margin-left: 2rem;
 }
 
+.chatRooms{
+    /* padding: 10px; */
+}
+
 /* Chat section - Modifications principales */
 .chatBox {
     width: 66.66%;
@@ -47,6 +53,7 @@
     position: relative;
     display: flex;
     flex-direction: column;
+    /* border: 20px solid rgb(159, 170, 180); */
 }
 
 .chatHistory {
@@ -61,7 +68,9 @@
     -ms-overflow-style: -ms-autohiding-scrollbar;
     display: flex;
     flex-direction: column;
-    gap: 10px; /* Espacement entre les messages */
+    gap: 10px;
+    /* border-bottom: 20px solid rgb(159, 170, 180); */
+    /* border-radius: 100px; */
 }
 
 /* Styles des messages - Modifications clés */
@@ -98,8 +107,8 @@
     height: 60px;
     padding: 10px;
     border: none;
-    border-top: 1px solid #2e313d;
-    background-color: #181a22;
+    border-top: 1px solid #00babc;
+    background-color: #048688;
     color: aliceblue;
 }
 
@@ -116,18 +125,26 @@
 
 .roomroom{
     padding: 1rem 2rem;
+    transition-duration: 0.4s;
+    border: none;
+    color: white;
 }
 
+
 .roomroom:nth-child(odd){
-    background-color: #31343b
+    background-color: #00babc
 }
 
 .roomroom:nth-child(even){
-    background-color: #3a3c41
+    background-color: #0b9799
 }
 
 .roomroom img{
     height: 42px;
     width: 42px;
     border-radius: 100px;
+}
+
+.roomroom:hover{
+    background-color: #045f61;
 }

@@ -100,7 +100,7 @@ class ResponseAction(str, Enum):
     ACK_ACCEPT_FRIEND_REQUEST_HOST: str = "acknowledge_accept_friend_request_host"
     ACK_REFUSE_FRIEND_REQUEST: str = "acknowledge_refuse_friend_request"
     ACK_DELETE_FRIEND: str = "ack_delete_friend"
-    ACK_FRIEND_DELETED_HOST: str = "ack_friend_deleted_host"
+    ACK_DELETE_FRIEND_HOST: str = "ack_delete_friend_host"
 
     NOTIF_TEST = "notification_test"
     

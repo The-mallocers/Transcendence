@@ -86,20 +86,20 @@
         <div class="col-6 col-md-6">
             <div class="box">
                 <h4>Friends List</h4>
+                <ul class="friends_group list-group">
                     {% if show_friend_request %}
                         <button type="button" class="type-intra-green friendrequest" onclick="handleAskFriend(new URLSearchParams(window.location.search).get('username'))">Friend Request</button>
                     {%endif%}
-                    <ul class="friends_group list-group">
-                        {% for friend in friends_list %}
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <div>{{friend.username}}</div>
-                                <div class="d-flex align-items-center">
-                                    <button type="button" class="type-intra-green delete_friend me-4" onclick="handleDeleteFriend(this.dataset.username)" data-username="{{friend.username}}" >delete</button>
-                                    <span>14</span>
-                                </div>
-                            </li>
-                        {% endfor %}
-                    </ul>
+                    {% for friend in friends_list %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>{{friend.username}}</div>
+                            <div class="d-flex align-items-center">
+                                <button type="button" class="type-intra-green delete_friend me-4" onclick="handleDeleteFriend(this.dataset.username)" data-username="{{friend.username}}" >delete</button>
+                                <span>14</span>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
             </div>
         </div>
         <div class="col-6 col-md-6">
@@ -122,5 +122,6 @@
         </div>
     </div>
 </div>
+  
 
 <script type="module" src="{% static '/js/apps/profile/profile.js' %}" defer></script>

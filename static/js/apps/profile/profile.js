@@ -28,6 +28,7 @@ notifSocket.onmessage = (event) => {
             const pendingElement = doc.body.firstChild;
             pending_group.appendChild(pendingElement);
         }
+        toasts(`New friend request from ${message.data.content.username}`);
     }
     else if(message.data.action == "ACK_ACCEPT_FRIEND_REQUEST_HOST") {
         let friends_group = document.querySelector('.friends_group');
@@ -71,17 +72,15 @@ notifSocket.onmessage = (event) => {
             const friendElement = doc.body.firstChild;
             friends_group.appendChild(friendElement);
         }
-
-        //add the new chat
         const newChat = document.querySelector('.chatRooms');
         if(newChat)
         {
             const parser = new DOMParser();
             const htmlChat = 
-            `<div id="${message.data.content.room}" class="roomroom container d-flex align-items-center gap-3">
+            `<button id="${message.data.content.room}" class="roomroom chat-${message.data.content.username} container d-flex align-items-center gap-3">
                     <img src="/static/assets/imgs/profile/default.png">
                     <div>${message.data.content.username}</div>
-            </div>`
+            </button>`
             const doc = parser.parseFromString(htmlChat, "text/html");
             const chatElement = doc.body.firstChild;
             newChat.appendChild(chatElement);
@@ -94,7 +93,7 @@ notifSocket.onmessage = (event) => {
             buttonToDelete.remove();
         }
     }
-    else if(message.data.action == "ACK_DELETE_FRIEND") {
+    else if(message.data.action == "ACK_DELETE_FRIEND_HOST") {
         const friendElements = document.querySelectorAll('.friends_group li');
         friendElements.forEach(elem => {
             const usernameElement = elem.querySelector('div:first-child');
@@ -103,7 +102,7 @@ notifSocket.onmessage = (event) => {
             }
         });
     }
-    else if(message.data.action == "ACK_FRIEND_DELETED_HOST") {
+    else if(message.data.action == "ACK_DELETE_FRIEND") {
         const friendElements = document.querySelectorAll('.friends_group li');
         friendElements.forEach(elem => {
             const usernameElement = elem.querySelector('div:first-child');
@@ -111,6 +110,23 @@ notifSocket.onmessage = (event) => {
                 elem.remove();
             }
         });
+        
+        const chatElement = document.querySelector(`.chat-${message.data.content.username}`);
+        if(chatElement)
+            chatElement.remove();
+        
+        // const addFriendement = document.querySelector(".friends_group")
+        // if(addFriendement)
+        // {
+        //     const parser = new DOMParser();
+        //     const htmlAddElement = 
+        //     `{% if show_friend_request %}
+        //         <button type="button" class="type-intra-green friendrequest" onclick="handleAskFriend(new URLSearchParams(window.location.search).get('username'))">Friend Request</button>
+        //     {%endif%}`
+        //     const doc = parser.parseFromString(htmlAddElement, "text/html");
+        //     const pendingFriendElement = doc.body.firstChild;
+        //     addFriendement.appendChild(pendingFriendElement);
+        // }
     }
 }
 
@@ -171,17 +187,36 @@ function create_message_notif(action, targetUser)
     return message;
 }
 
-document.addEventListener("keypress", function(event) {
-    const routeElement = event.target.closest('.searchBar');
-    // console.log(routeElement);
-    if (event.key === "Enter")
-    {
-        if (routeElement)
-        {
-            event.preventDefault();
-            const inputElement = routeElement.querySelector('input');
-            let query = inputElement.value;
-            navigateTo('/profile/?username=' + query)
-        }
+function toasts(message){
+    const date = new Date();
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    const time = `${hours}:${minutes}`;
+    
+    const toastHtml = `
+    <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+            <img src="/static/assets/imgs/chat.png" class="rounded me-2" alt="..." style="width: 20px; height: 20px; object-fit: contain;">
+            <strong class="me-auto">Friend Notification</strong>
+            <small>${time}</small>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">${message}</div>
+    </div>`;
+    
+    let toastContainer = document.querySelector('.toast-container');
+    if (!toastContainer) {
+        toastContainer = document.createElement('div');
+        toastContainer.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+        document.body.appendChild(toastContainer);
     }
-})
+    toastContainer.innerHTML += toastHtml;
+    
+    const newToast = toastContainer.lastChild;
+    const toastBootstrap = new bootstrap.Toast(newToast);
+    toastBootstrap.show();
+    
+    newToast.addEventListener('hidden.bs.toast', function() {
+        this.remove();
+    });
+}

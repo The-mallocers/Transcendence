@@ -144,20 +144,22 @@ async function displayRooms(rooms){
         const parser = new DOMParser();
         if(rooms[i].player.length > 1)
         {
-            htmlString = `<div id="${rooms[i].room}" class="roomroom container d-flex align-items-center gap-3">
-            <img src="/static/assets/imgs/profile/default.png">
-            <div>chat global</div>
-        </div>`
+            htmlString = 
+            `<button id="${rooms[i].room}" class="roomroom container d-flex align-items-center gap-3">
+                <img src="/static/assets/imgs/profile/default.png">
+                <div>chat global</div>
+            </button>`
         }
         else
         {
             let player = rooms[i].player[0];
             if(player == undefined)
                 player = "delete user";
-            htmlString = `<div id="${rooms[i].room}" class="roomroom container d-flex align-items-center gap-3">
-                    <img src="/static/assets/imgs/profile/default.png">
-                    <div>${player}</div>
-                </div>`
+            htmlString = 
+            `<button id="${rooms[i].room}" class="roomroom chat-${player} container d-flex align-items-center gap-3">
+                <img src="/static/assets/imgs/profile/default.png">
+                <div>${player}</div>
+            </button>`
         }
         const doc = parser.parseFromString(htmlString, "text/html");
         const roomElement = doc.body.firstChild;

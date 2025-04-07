@@ -138,7 +138,7 @@ class NotificationService(BaseServices):
             await target_friend_table.remove_friend(client)
             await send_group(client.id, 
                             EventType.NOTIFICATION, 
-                            ResponseAction.ACK_DELETE_FRIEND,
+                            ResponseAction.ACK_DELETE_FRIEND_HOST,
                             {
                                 "sender": str(target.id),
                                 "username": await target.aget_profile_username()
@@ -146,7 +146,7 @@ class NotificationService(BaseServices):
             
             await send_group(target.id, 
                             EventType.NOTIFICATION, 
-                            ResponseAction.ACK_FRIEND_DELETED_HOST,
+                            ResponseAction.ACK_DELETE_FRIEND,
                             {
                                 "sender": str(client.id),
                                 "username": await client.aget_profile_username()
