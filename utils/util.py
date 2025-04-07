@@ -1,4 +1,5 @@
 import random
+import uuid
 
 from django.core.exceptions import ValidationError
 
@@ -17,6 +18,14 @@ def create_tournament_id():
         code = random.randint(0000, 9999)
         if not Tournaments.objects.filter(id=code).exists():
             return code
+
+
+def create_jti_id():
+    while True:
+        id = uuid.uuid4()
+        from apps.auth.models import InvalidatedToken
+        if not InvalidatedToken.objects.filter(jti=id).exists():
+            return id
 
 
 def validate_even(value):

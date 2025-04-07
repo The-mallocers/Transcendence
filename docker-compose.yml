@@ -39,7 +39,7 @@ services:
       - Tnetwork
     environment:
       REDIS_HOST: 'redis'
-      REDIS_POST: '6380'
+      REDIS_PORT: '6380'
     restart: always
 
   nginx:
@@ -61,9 +61,9 @@ services:
   redis:
     image: redis/redis-stack-server:latest
     container_name: redis
-    command: redis-stack-server --port 6380
+    command: 'redis-stack-server --port ${REDIS_PORT}'
     ports:
-      - "6380:6380"
+      - "${REDIS_PORT}:${REDIS_PORT}"
     networks:
       - Tnetwork
     restart: unless-stopped

@@ -3,6 +3,8 @@ import uuid
 import bcrypt
 import pyotp
 from django.db import models
+from django.db.models.fields import UUIDField, DateTimeField
+from django.utils import timezone
 
 
 class Password(models.Model):
@@ -58,3 +60,17 @@ class TwoFA(models.Model):
 
     class Meta:
         db_table = 'client_auth_2fa'
+
+
+class InvalidatedToken(models.Model):
+    class Meta:
+        db_table = 'auth_invalidated_tokens'
+
+    jti = UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    exp = DateTimeField()
+
+    @classmethod
+    def delete_expired_token(cls):
+        now = timezone.now()
+        deleted, _ = cls.objects.filter(exp__lt=now).delete()
+        return deleted

@@ -122,6 +122,10 @@ SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 
 # Protected paths configuration
+PROTECTED_PATHS = [
+    '/pages/*',
+    '/api/*'
+]
 EXCLUDED_PATHS = [
     '/api/auth/login',
     '/api/auth/register',
@@ -131,7 +135,8 @@ EXCLUDED_PATHS = [
     '/pages/error/404',
 ]
 ROLE_PROTECTED_PATHS = {
-    '/admin/*': ['admin']
+    '/pages/profile/settings': ['client'],
+    '/pages/admin/*': ['admin']
 }
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ JWT SETTINGS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
@@ -157,7 +162,7 @@ DATABASES = {
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ REDIS SETTINGS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
 
 REDIS_HOST = os.environ.get('REDIS_HOST', default='redis')
-REDIS_PORT = os.environ.get('REDIS_POST', default='6380')
+REDIS_PORT = os.environ.get('REDIS_PORT', default='6380')
 
 REDIS_CONNECTIONS = {
     'default': {

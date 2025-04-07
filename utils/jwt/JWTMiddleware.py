@@ -1,8 +1,10 @@
-import re
+import fnmatch
+import traceback
 
 import jwt
 from django.conf import settings
-from django.http import JsonResponse, HttpRequest, HttpResponseRedirect
+from django.http import JsonResponse, HttpRequest
+from rest_framework import status
 
 from apps.client.models import Clients
 from utils.enums import JWTType
@@ -16,98 +18,104 @@ class JWTMiddleware:
         self.algorithm = getattr(settings, 'JWT_ALGORITH')
 
     def _in_excluded_path(self, path: str) -> bool:
-        for excluded in settings.EXCLUDED_PATHS:
-            if self._path_matches(excluded, path):
-                return True
+        if self.is_path_matching(path, settings.EXCLUDED_PATHS):
+            return True
         return False
 
     def _get_required_roles(self, path: str):
         protected_paths = settings.ROLE_PROTECTED_PATHS
         for pattern, roles in protected_paths.items():
-            if self._path_matches(pattern, path):
+            if self.is_path_matching(path, [pattern]):
                 return roles
         return None
 
-    def _path_matches(self, pattern, path: str) -> bool:
-        regex_pattern = pattern.replace('*', '.*')
-        return bool(re.match(f'^{regex_pattern}$', path))
+    @staticmethod
+    def is_path_matching(path, path_list):
+        path = path.rstrip('/') if path != '/' else path
+        normalized_path_list = [pattern.rstrip('/') for pattern in path_list]
 
-    def _extract_access_token(self, request: HttpRequest) -> str:
-        token_key: str = request.COOKIES.get('access_token')
-        if token_key is None:
-            raise jwt.InvalidKeyError(f'Token missing')
-        return token_key
+        for pattern in normalized_path_list:
+            if fnmatch.fnmatch(path, pattern) or fnmatch.fnmatch(path + '/', pattern):
+                return True
+        return False
 
-    def _extract_refresh_token(self, request: HttpRequest) -> str:
-        token_key: str = request.COOKIES.get('refresh_token')
-        if token_key is None:
-            raise jwt.InvalidKeyError(f'Token missing')
-        return token_key
-
-    def _refresh_token(self, request: HttpRequest):
+    def _update_tokens(self, request: HttpRequest, access_token: JWT = None):
         try:
-            refresh_token: JWT = JWTGenerator.validate_token(
-                self._extract_refresh_token(request), JWTType.REFRESH)
-
+            refresh_token: JWT = JWT.extract_token(request, JWTType.REFRESH)
             client: Clients = Clients.get_client_by_id(refresh_token.SUB)
 
-            access = JWTGenerator(client, JWTType.ACCESS)
-            refresh = JWTGenerator(client, JWTType.REFRESH)
-
-            request.COOKIES['access_token'] = access.token_key
-            request.COOKIES['refresh_token'] = refresh.token_key
-            request.access_token = access.token
-
             response = self.get_response(request)
-            response = set_cookie(access.token, response)
-            response = set_cookie(refresh.token, response)
+            refresh_token.invalidate_token()
+            if access_token is not None:
+                access_token.invalidate_token()
+
+            access_token = JWT(client, JWTType.ACCESS)
+            refresh_token = JWT(client, JWTType.REFRESH)
+            request.COOKIES['access_token'] = access_token.encode_token()
+            request.COOKIES['refresh_token'] = refresh_token.encode_token()
+            request.access_token = access_token
+
+            response = access_token.set_cookie(response)
+            response = refresh_token.set_cookie(response)
 
             return response
         except jwt.ExpiredSignatureError as e:
             raise jwt.ExpiredSignatureError(f'{str(e)}')
         except jwt.InvalidTokenError as e:
             raise jwt.InvalidTokenError(f'{str(e)}')
+        except jwt.InvalidKeyError as e:
+            raise jwt.InvalidKeyError(f'{str(e)}')
 
     def __call__(self, request: HttpRequest):
         path = request.path_info
-        print(path)
 
-        #We only want to check if the request starts with pages (aka our spa did the fetch)
-        #If it doesnt start with pages, it will just load base.html, and thats what we want
-        if not path.startswith('/pages/'):
+        # on veux checker uniquement les /pages/* car c'est elles qui load le spa.js et on veux checker '/api/*' pour
+        # eviter de faire des call a l'api si on est pas connecter
+        if self.is_path_matching(path, settings.PROTECTED_PATHS):
+            if self._in_excluded_path(path):
+                return self.get_response(request)
+            else:
+                print(f'Path is {path} --------')
+                try:
+                    print('extract access')
+                    request.access_token = JWT.extract_token(request, JWTType.ACCESS)
+                    print('after extraxt access')
+
+                    required_roles = self._get_required_roles(path)
+                    if required_roles:
+                        if not any(role in request.access_token.ROLES for role in required_roles):
+                            return JsonResponse({
+                                'status': 'unauthorized',
+                                'redirect': '/',
+                                'message': "You don't have permission"}, status=status.HTTP_401_UNAUTHORIZED)
+                    # a ce moment tout les token sont bon, on invalide et recreer les 2 token pour porlonger leur
+                    # durer de vie
+                    print('before update token in normal')
+                    return self._update_tokens(request, request.access_token)
+                except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):
+                    try:
+                        print('update token in invalid token error')
+                        response = self._update_tokens(request)
+                        print('return after update')
+                        return response
+                    except (jwt.ExpiredSignatureError, jwt.InvalidTokenError, jwt.InvalidKeyError) as e:
+                        return JsonResponse({
+                            'status': 'unauthorized',
+                            'redirect': '/auth/login',
+                            'message': str(e)}, status=status.HTTP_302_FOUND)
+                except jwt.InvalidKeyError:
+                    return JsonResponse({
+                        'status': 'unauthorized',
+                        'redirect': '/auth/login',
+                        'message': 'Invalid token'}, status=status.HTTP_302_FOUND)
+                except Exception as e:
+                    traceback.print_exc()
+                    return JsonResponse(
+                        {'error': f'Internal server error: {str(e)}'},
+                        status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                    )
+        else:
             return self.get_response(request)
 
-        if self._in_excluded_path(path):
-            print('excluded path')
-            return self.get_response(request)
 
-        try:
-            print('try to extract token')
-            access_token: JWT = JWT.extract_token(request, JWTType.ACCESS)
-            request.access_token = access_token
-            print('success extract token')
 
-            required_roles = self._get_required_roles(path)
-            if required_roles:
-                if not any(role in access_token.ROLES for role in required_roles):
-                    return HttpResponseRedirect('/')  # redirect with json response
-
-            return self.get_response(request)
-        except jwt.ExpiredSignatureError:
-            try:
-                return self._refresh_token(request)
-            except (jwt.ExpiredSignatureError, jwt.InvalidTokenError, jwt.InvalidKeyError):
-                return JsonResponse({
-                    'status': 'unauthorized',
-                    'redirect': '/auth/login',
-                    'message': 'Session expired'}, status=302)
-        except (jwt.InvalidTokenError, jwt.InvalidKeyError):
-            return JsonResponse({
-                'status': 'unauthorized',
-                'redirect': '/auth/login',
-                'message': 'Session expired'}, status=302)
-        except Exception as e:
-            return JsonResponse(
-                {'error': f'Internal server error: {str(e)}'},
-                status=500
-            )

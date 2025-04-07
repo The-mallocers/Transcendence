@@ -25,7 +25,6 @@ def get(req):
         winrate = ghistory = rivals = None
         if client is not None:
             winrate = get_winrate(client, games_played)
-            print('winrate: ', winrate)
             # ghistory = get_last_matches(client, Games_played)
             # rivals = get_rivals(client, Games_played)
         context = {
@@ -48,7 +47,6 @@ def get(req):
 
 def get_winrate(client, games_played) -> int:
     wins = games_played.filter(winner__client=client).count()
-    print("wins:", wins)
 
     total_games = games_played.count()
     if total_games == 0:

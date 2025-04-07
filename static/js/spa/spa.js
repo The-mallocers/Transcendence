@@ -120,15 +120,17 @@ async function fetchRoute(path) {
         return data.html;
     } else if (response.status === 302) {
         //redirection
-        // return navigateTo('/auth/login/')
-        path = '/pages/auth/login'
-        const response = await fetch(path, {
-            headers: header,
-            credentials: 'include'
-        });
-        const data = await response.json();
-        window.history.pushState({}, '', '/auth/login');
-        return data.html
+        navigateTo(data.redirect)
+        // path = '/pages/auth/login'
+        // const response = await fetch(path, {
+        //     headers: header,
+        //     credentials: 'include'
+        // });
+        // const data = await response.json();
+        // window.history.pushState({}, '', '/auth/login');
+        // return data.html
+    } else if (response.status === 401) {
+        return navigateTo(data.redirect)
     } else if (response.status >= 400 && response.status < 500) {
         return data.html;
 
