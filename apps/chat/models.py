@@ -1,17 +1,16 @@
-import django.core.exceptions
-from django.db import models, transaction
 import uuid
+
+from asgiref.sync import sync_to_async
+from django.db import models
+from django.db import transaction
 from django.forms import ValidationError
 from django.utils import timezone
-from django.db import models
-from asgiref.sync import sync_to_async
 
-from apps.player.models import Player
-from apps.shared.models import Clients
-from apps.error.views import error
+from apps.client.models import Clients
+
 
 class Rooms(models.Model):
-    #Primary key
+    # Primary key
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False,
                           null=False)
     clients = models.ManyToManyField(Clients, related_name="rooms")
@@ -36,7 +35,7 @@ class Rooms(models.Model):
             return await sync_to_async(Rooms.objects.create)(id=id)
         except Exception as e:
             raise Exception(f"Erreur lors de la création de la salle : {e}")
-        
+
     @staticmethod
     @sync_to_async
     def get_room_by_id(id: uuid.UUID):
@@ -56,22 +55,45 @@ class Rooms(models.Model):
                 return room.id
         except Rooms.DoesNotExist:
             return None
-        
+
     @staticmethod
     @sync_to_async
     def ASget_room_id_by_client_id(client_id):
         try:
             with transaction.atomic():
-                return list(Rooms.objects.filter(clients__id=client_id).values_list('id', flat=True))  
+                return list(Rooms.objects.filter(clients__id=client_id).values_list('id', flat=True))
         except Clients.DoesNotExist:
             return []
-        
+
     @staticmethod
     def get_room_id_by_client_id(client_id):
         try:
-            return list(Rooms.objects.filter(clients__id=client_id).values_list('id', flat=True))  
+            return list(Rooms.objects.filter(clients__id=client_id).values_list('id', flat=True))
         except Clients.DoesNotExist:
             return []
+    @staticmethod
+    def get_room_by_client_id(client_id):
+        try:
+            return list(Rooms.objects.filter(clients__id=client_id))  
+        except Clients.DoesNotExist:
+            return []
+    
+    
+    @staticmethod
+    @sync_to_async  
+    def Aget_room_by_client_id(client_id):
+        global_room = "00000000-0000-0000-0000-000000000000"
+        try:
+            with transaction.atomic():
+                query = Rooms.objects.filter(clients__id=client_id)
+                if query is not None:
+                    query = query.exclude(id=global_room)
+                return query.first()
+        except Exception as e:
+            print(f"Error getting room by client ID: {e}")
+            return None
+        except Clients.DoesNotExist:
+            return None
         
     @staticmethod
     def get_room_by_client_id(client_id):
@@ -102,7 +124,8 @@ class Rooms(models.Model):
     def get_usernames_by_room_id(room_id):
         try:
             with transaction.atomic():
-                username_list = list(Clients.objects.filter(rooms__id=room_id).values_list('profile__username', flat=True))
+                username_list = list(
+                    Clients.objects.filter(rooms__id=room_id).values_list('profile__username', flat=True))
                 return username_list
         except Rooms.DoesNotExist:
             return []
@@ -165,7 +188,7 @@ class Messages(models.Model):
                 return list(Messages.objects.filter(room__id=room.id))
         except Rooms.DoesNotExist:
             return []
-        
+
     @sync_to_async
     def get_sender_id(self):
         try:

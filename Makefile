@@ -1,4 +1,4 @@
-DOCKER_COMPOSE_FILE=docker-compose.yaml
+DOCKER_COMPOSE_FILE=docker-compose.yml
 
 up:
 	rm -rf ./docker/staticdocker
@@ -7,22 +7,19 @@ up:
 down:
 	docker compose -f ./$(DOCKER_COMPOSE_FILE) down
 
+
 logs:
 	docker compose -f ./$(DOCKER_COMPOSE_FILE) logs
 
 status:
 	docker compose -f ./$(DOCKER_COMPOSE_FILE) ps && docker volume ls && docker image ls
 
-restart:
-	down up
+restart: down up
 
-dbclean: down
-	docker volume prune -f
+dbclean:
+	docker compose down -v
 
 clean: dbclean
-	docker system prune -fa
+	docker compose down --rmi all
 
-volume:
-	docker volume rm transcendence_grafana-data &&\
-	docker volume rm transcendence_postgres-data &&\
-	docker volume rm transcendence_prometheus-data
+re: down up

@@ -3,9 +3,9 @@ from django.http import HttpRequest
 from rest_framework.authentication import BaseAuthentication
 from rest_framework.exceptions import AuthenticationFailed
 
-from apps.shared.models import Clients
-from utils.jwt.JWT import JWTType, JWT
-from utils.jwt.JWTGenerator import JWTGenerator
+from apps.client.models import Clients
+from utils.enums import JWTType
+from utils.jwt.JWT import JWT
 
 
 class JWTAuthentication(BaseAuthentication):
@@ -17,7 +17,7 @@ class JWTAuthentication(BaseAuthentication):
         jwt_key = auth_header.split(" ")[1]
 
         try:
-            jwt_token: JWT = JWTGenerator.validate_token(jwt_key, JWTType.ACCESS)
+            jwt_token: JWT = JWT.validate_token(jwt_key, JWTType.ACCESS)
         except jwt.ExpiredSignatureError:
             raise AuthenticationFailed("Token has expired")
         except jwt.InvalidTokenError:

@@ -1,0 +1,68 @@
+{% load static %}
+<style>
+
+
+    .arenaPage {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        position: relative;
+    }
+
+    #pongCanvas {
+        border: 1px white solid;
+    }
+
+    .nickname {
+        position: absolute;
+        font-size: 6rem;
+        color: #1d212b;
+    }
+
+    #lnick {
+        top: 52%;
+        left: 33%;
+        transform: translate(-50%, -50%);
+    }
+
+    #rnick {
+        top: 52%;
+        right: 33%;
+        transform: translate(50%, -50%);
+    }
+
+    .score {
+        position: absolute;
+        font-size: 6rem;
+        color: #6d7892;
+    }
+
+    #scoreLeft {
+        top: 52%;
+        left: 10%;
+        transform: translate(-50%, -50%);
+    }
+
+    #scoreRight {
+        top: 52%;
+        right: 10%;
+        transform: translate(50%, -50%);
+    }
+</style>
+
+<div class="arenaPage">
+
+
+    <div id="scoreLeft" class="score">0</div>
+    <div id="scoreRight" class="score">0</div>
+
+    <div id="lusername" class="username">ez2c</div>
+    <div id="rusername" class="username">tfreydie</div>
+    <canvas id="pongCanvas" width="1000" height="500">
+    </canvas>
+</div>
+
+
+<script type="module" src="{% static '/js/apps/game/pong.js' %}"></script>
+

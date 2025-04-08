@@ -16,13 +16,13 @@
     }
 
 
-    .loginPage .container{
+    .loginPage .container {
         max-width: 42rem;
         height: 100%;
 
     }
 
-    .loginPage form{
+    .loginPage form {
         position: relative;
         flex-direction: column;
         display: flex;
@@ -32,23 +32,24 @@
     }
 
 
-    .loginPage form .myBtn{
+    .loginPage form .myBtn {
         border: none;
         background-color: transparent;
     }
-    .loginPage form .gbtn{
+
+    .loginPage form .gbtn {
         background-color: #DB4437;
         border: 2px solid #d03f32;
 
     }
 
-    .loginPage form .ibtn{
+    .loginPage form .ibtn {
         border: 2px solid #06a1a1;
-        
+
         background-color: #00BABB;
     }
 
-    .loginPage img{
+    .loginPage img {
         position: relative;
 
 
@@ -61,13 +62,13 @@
 
     }
 
-    .loginPage form button{
+    .loginPage form button {
         background-color: #00BABB;
         border: none;
         color: white;
     }
 
-    .loginPage form input{
+    .loginPage form input {
         border: #00BABB solid 2px;
         border-radius: 2px;
         background-color: rgba(44, 44, 44, 0.383);
@@ -80,7 +81,7 @@
         text-decoration: underline;
     }
 
-    .loginPage .myBtn{
+    .loginPage .myBtn {
         width: 100%;
     }
 
@@ -89,26 +90,27 @@
 <div class="loginPage" style="background-image: url('{% static 'assets/imgs/loginBackground.jpg' %}');">
     <div class="container">
         <img class="bgrImg" src="{% static 'assets/imgs/42_logo.svg' %}" alt="">
-        <form id="register-form" enctype="multipart/form-data" action="{% url 'login' %}" >
+        <form id="register-form" enctype="multipart/form-data" action="{% url 'login' %}">
             <div id="error-message" style="color: red;"></div>
             {% csrf_token %}
-                <input class="p-3" type="email" id="email" name="email" placeholder="Entrez votre e-mail" required>
-                <input class="mt-4 p-3" type="password" id="password" name="password" placeholder="Entrez votre mot de passe" required>
-    
+            <input class="p-3" type="email" id="email" name="email" placeholder="Entrez votre e-mail" required>
+            <input class="mt-4 p-3" type="password" id="password" name="password"
+                   placeholder="Entrez votre mot de passe" required>
+
             <button class="p-3 mt-5 btn" id="login-btn" type="submit">Se connecter</button>
             <div data-route="/auth/register" class="mt-2 registerBtn text-center">Je n'ai pas encore de compte</div>
             <div class="mt-5 text-center">OR</div>
 
             <div class="container mt-5">
                 <div class="row">
-                  <div class="col p-1">
-                    <div class="btn btn-primary myBtn gbtn p-3">Google</div>
-                  </div>
-                  <div class="col p-0">
-                    <div class="btn btn-primary myBtn ibtn p-3">Intra42</div>
-                  </div>
+                    <div class="col p-1">
+                        <div class="btn btn-primary myBtn gbtn p-3">Google</div>
+                    </div>
+                    <div class="col p-0">
+                        <div class="btn btn-primary myBtn ibtn p-3">Intra42</div>
+                    </div>
                 </div>
-              </div>
+            </div>
         </form>
     </div>
 </div>

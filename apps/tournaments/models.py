@@ -1,12 +1,11 @@
 from datetime import timedelta
 
 from django.db import models
-from django.db.models import IntegerField, ManyToManyField, DateTimeField, \
+from django.db.models import IntegerField, DateTimeField, \
     CharField, DurationField, JSONField
 from django.utils import timezone
 
-from apps.game.models import Game
-from utils.pong.enums import TournamentStatus
+from utils.enums import TournamentStatus
 from utils.util import create_tournament_id, validate_even
 
 
@@ -28,5 +27,5 @@ class Tournaments(models.Model):
     timer = DurationField(default=timedelta(minutes=0), editable=False,
                           null=True)
     max_players = IntegerField(default=8, validators=[validate_even])
-    games = ManyToManyField(Game, related_name='games')
+    # games = ManyToManyField('shared.Game', related_name='games')
     scoreboards = JSONField(default=list)

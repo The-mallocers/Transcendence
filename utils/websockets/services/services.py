@@ -3,7 +3,7 @@ import traceback
 from abc import ABC, abstractmethod
 from typing import Dict, Any
 
-from utils.pong.enums import RequestAction
+from utils.enums import RequestAction
 from utils.redis import RedisConnectionPool
 
 
@@ -12,6 +12,7 @@ class ServiceError(Exception):
         self.message = message
         self.code = code
         super().__init__(f'{message}')
+
 
 class BaseServices(ABC):
     def __init__(self):
@@ -49,4 +50,3 @@ class BaseServices(ABC):
 
         except ServiceError as e:
             raise e
-

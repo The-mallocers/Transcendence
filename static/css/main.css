@@ -16,7 +16,7 @@ nav {
 
     position: fixed;
 
-    padding-top: 1rem ;
+    padding-top: 1rem;
 
     top: 0;
     left: 0;
@@ -30,13 +30,13 @@ nav {
 
 }
 
-.navElement{
+.navElement {
     /* padding: 15px; */
     height: 3rem;
     width: 3rem;
 }
 
-.navElement:not(:first-child){
+.navElement:not(:first-child) {
     padding: 8px;
 }
 
@@ -54,7 +54,7 @@ svg:hover path {
     fill: white;
 }
 
-.searchBar{
+.searchBar {
     padding: 0 2rem;
     height: 70px;
     margin-left: 80px;
@@ -125,7 +125,7 @@ main {
     /* width: 150px; */
 }
 
-.avatar img{
+.avatar img {
     height: 150px;
     width: 150px;
     object-fit: cover;
@@ -149,7 +149,7 @@ main {
     /* min-height: 18rem; */
 }
 
-.box .minibox{
+.box .minibox {
 
     display: flex;
     align-items: center;
@@ -161,12 +161,12 @@ main {
     color: aliceblue;
 }
 
-.trophee{
+.trophee {
     width: 120px;
 }
 
 
-.infos{
+.infos {
     padding-left: 8rem;
 }
 
@@ -176,14 +176,14 @@ main {
     display: flex;
     align-items: center;
     justify-content: center;
-    flex-direction: column; 
+    flex-direction: column;
 }
 
 .progressBarContainer > h6 {
     align-self: flex-start;
 }
 
-.progressBar{
+.progressBar {
     width: 100%;
     height: 1rem;
     border-radius: 20px;
@@ -191,7 +191,7 @@ main {
     background-color: aliceblue;
 }
 
-.filler{
+.filler {
     width: 60%;
     height: 100%;
     background-color: #FFA042;
@@ -234,7 +234,7 @@ main {
     margin-bottom: 11px;
 }
 
-.lastPlayer{
+.lastPlayer {
     padding: 1rem;
 }
 
@@ -251,7 +251,7 @@ main {
 
 }
 
-.lastPlayerContainer .fullName{
+.lastPlayerContainer .fullName {
     color: #FFA042;
     margin: 0;
 }
@@ -273,6 +273,7 @@ main {
 .lastGames .win {
     color: #5CB85B;
 }
+
 .lastGames .loss {
     color: #E5292D;
 }
@@ -285,16 +286,16 @@ main {
 }
 
 .scores {
-    font-size: 1.5rem ;
+    font-size: 1.5rem;
     font-weight: bold;
 }
 
-.myScore{
+.myScore {
     margin-right: 1rem;
     color: #5CB85B;
 }
 
-.enemyScore{
+.enemyScore {
     margin-left: 1rem;
     color: #E5292D;
 }

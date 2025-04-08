@@ -30,7 +30,7 @@ chatSocket.onmessage = (event) => {
     const message = JSON.parse(event.data);
     console.log("message send");
 
-    if(message.data.action == "HISTORY_RECEIVED") {
+    if (message.data.action == "HISTORY_RECEIVED") {
         displayHistory(message.data.content.messages);
     }
     else if(message.data.action == "NO_HISTORY")
@@ -39,22 +39,21 @@ chatSocket.onmessage = (event) => {
     }
     else if(message.data.action == "ALL_ROOM_RECEIVED") {
         displayRooms(message.data.content.rooms);
-    }
-    else if(message.data.action == "MESSAGE_RECEIVED") {
+    } else if (message.data.action == "MESSAGE_RECEIVED") {
         let chatHistory = document.querySelector('.chatHistory');
-    
+
         const parser = new DOMParser();
         const htmlString = `<div class="msg ${clientId == message.data.content.sender ? "me align-self-end" : "you align-self-start"}">${message.data.content.message}</div>`;
         const doc = parser.parseFromString(htmlString, "text/html");
         const msgElement = doc.body.firstChild; // Get the actual <div> element
-    
+
         chatHistory.appendChild(msgElement);
         scrollToBottom(chatHistory);
         //Do things to show the new message on the front
     }
 }
 
-document.getElementById("messageInput").addEventListener("keydown", function(event) {
+document.getElementById("messageInput").addEventListener("keydown", function (event) {
     if (event.key === "Enter") {
         event.preventDefault(); // Prevents the default action (like form submission)
         let message = this.value; // Get the entered text
@@ -76,13 +75,12 @@ document.getElementById("messageInput").addEventListener("keydown", function(eve
 });
 
 // Attach event listener to a parent that exists before buttons are created
-document.addEventListener("click", function(event) {
-    if (event.target.classList.contains("roomroom")) { 
-        console.log("chatSocket = ", chatSocket);
+document.addEventListener("click", function (event) {
+    if (event.target.classList.contains("roomroom")) {
         const id = event.target.id;
         room_id = id;
         console.log("Clicked on room", id);
-        
+
         const message = {
             "event": "chat",
             "data": {
@@ -121,7 +119,7 @@ async function getClientId() {
     }
 }
 
-async function displayHistory(message){
+async function displayHistory(message) {
     console.log("Displaying history");
     let chatHistory = document.querySelector('.chatHistory');
     chatHistory.innerHTML = "";
@@ -136,7 +134,7 @@ async function displayHistory(message){
     scrollToBottom(chatHistory);
 }
 
-async function displayRooms(rooms){
+async function displayRooms(rooms) {
     console.log("Displaying rooms");
     console.log("the length: " + rooms.length)
     let chatRooms = document.querySelector('.chatRooms');

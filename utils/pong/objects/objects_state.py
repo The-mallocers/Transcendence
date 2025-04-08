@@ -14,33 +14,33 @@ class GameState:
         self.score_pR = score_pR
 
     @classmethod
-    def create_copy(cls, game):
+    def create_copy(cls, logic):
         ball_copy = Ball()
-        ball_copy.radius = game.ball.radius
-        ball_copy.x = game.ball.x
-        ball_copy.y = game.ball.y
-        ball_copy.dx = game.ball.dx
-        ball_copy.dy = game.ball.dy
+        ball_copy.radius = logic.ball.radius
+        ball_copy.x = logic.ball.x
+        ball_copy.y = logic.ball.y
+        ball_copy.dx = logic.ball.dx
+        ball_copy.dy = logic.ball.dy
 
         paddle_pL_copy = Paddle()
-        paddle_pL_copy.width = game.paddle_pL.width
-        paddle_pL_copy.height = game.paddle_pL.height
-        paddle_pL_copy.x = game.paddle_pL.x
-        paddle_pL_copy.y = game.paddle_pL.y
-        paddle_pL_copy.speed = game.paddle_pL.speed
+        paddle_pL_copy.width = logic.paddle_pL.width
+        paddle_pL_copy.height = logic.paddle_pL.height
+        paddle_pL_copy.x = logic.paddle_pL.x
+        paddle_pL_copy.y = logic.paddle_pL.y
+        paddle_pL_copy.speed = logic.paddle_pL.speed
 
         paddle_pR_copy = Paddle()
-        paddle_pR_copy.width = game.paddle_pR.width
-        paddle_pR_copy.height = game.paddle_pR.height
-        paddle_pR_copy.x = game.paddle_pR.x
-        paddle_pR_copy.y = game.paddle_pR.y
-        paddle_pR_copy.speed = game.paddle_pR.speed
+        paddle_pR_copy.width = logic.paddle_pR.width
+        paddle_pR_copy.height = logic.paddle_pR.height
+        paddle_pR_copy.x = logic.paddle_pR.x
+        paddle_pR_copy.y = logic.paddle_pR.y
+        paddle_pR_copy.speed = logic.paddle_pR.speed
 
         score_pL_copy = Score()
-        score_pL_copy.score = game.score_pL.score
+        score_pL_copy.score = logic.score_pL.score
 
         score_pR_copy = Score()
-        score_pR_copy.score = game.score_pR.score
+        score_pR_copy.score = logic.score_pR.score
 
         return cls(ball_copy, paddle_pL_copy, paddle_pR_copy, score_pL_copy, score_pR_copy)
 

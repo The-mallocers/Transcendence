@@ -11,16 +11,16 @@
 }
 
 
-.gamemodesContainer h1{
+.gamemodesContainer h1 {
     text-align: center;
 }
 
-.gamemodeCardContainer{
+.gamemodeCardContainer {
     padding: 1rem;
-    
+
 }
 
-.gamemodeCard{
+.gamemodeCard {
     background-color: #323642;
     height: 20rem;
 

@@ -3,14 +3,19 @@ import uuid
 import bcrypt
 import pyotp
 from django.db import models
+from django.db.models import CharField
+from django.db.models.fields import UUIDField, DateTimeField
+from django.utils import timezone
+
+from utils.enums import JWTType
 
 
 class Password(models.Model):
-    #Primary key
+    # Primary key
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False,
                           null=False)
 
-    #Secondary key
+    # Secondary key
     password = models.CharField(max_length=512, null=False, editable=True)
     old_password = models.CharField(max_length=521, null=True, editable=True)
 
@@ -41,7 +46,7 @@ class TwoFA(models.Model):
     enable = models.BooleanField(default=False, editable=True)
     scanned = models.BooleanField(default=False, editable=True)
     qrcode = models.ImageField(upload_to='2fa_qrcodes/', null=True, blank=True)
-    
+
     def update(self, data, value) -> None:
         match data:
             case "key":
@@ -55,8 +60,22 @@ class TwoFA(models.Model):
             case _:
                 return None
         self.save()
-    
-    
-    
+
     class Meta:
         db_table = 'client_auth_2fa'
+
+
+class InvalidatedToken(models.Model):
+    class Meta:
+        db_table = 'auth_invalidated_tokens'
+
+    jti = UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    token = CharField(max_length=500, null=True)
+    exp = DateTimeField()
+    type = CharField(max_length=20, choices=[(jwt_type.name, jwt_type.value) for jwt_type in JWTType], null=True)
+
+    @classmethod
+    def delete_expired_token(cls):
+        now = timezone.now()
+        deleted, _ = cls.objects.filter(exp__lt=now).delete()
+        return deleted

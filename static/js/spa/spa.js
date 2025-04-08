@@ -1,5 +1,5 @@
-import { WebSocketManager } from "../websockets/websockets.js"
-import { isGameOver } from "../apps/game/VarGame.js"
+import {WebSocketManager} from "../websockets/websockets.js"
+import {isGameOver} from "../apps/game/VarGame.js"
 
 // let notifSocket = null;
 // let clientId = null;
@@ -9,6 +9,7 @@ class Router {
         this.rootElement = document.getElementById('app');
         this.init();
     }
+
     //Claude said the above method is better than : document.querySelector('#app');
     init() {
         window.addEventListener('popstate', () => this.handleLocation());
@@ -26,8 +27,7 @@ class Router {
 
         if (!route) {
             navigateTo("/error/404/");
-        }
-        else {
+        } else {
             try {
                 // console.log("About to try the route template of the route :", route);
                 const content = await route.template(window.location.search ? window.location.search : "");
@@ -44,7 +44,7 @@ class Router {
         console.log("scripts = ", scripts)
         scripts.forEach(oldScript => {
             const newScript = document.createElement('script');
-            
+
             // Copy src or inline content
             if (oldScript.src) {
                 newScript.src = oldScript.src + "?t=" + new Date().getTime();
@@ -57,35 +57,36 @@ class Router {
                     newScript.setAttribute(attr.name, attr.value);
                 }
             });
-            
-            // console.log(oldScript)
+
+            console.log(oldScript)
             oldScript.parentNode.replaceChild(newScript, oldScript);
         });
     }
 
-    navigate(path) { 
-        
-        let splitedPath = path.split("/") 
-        // console.log(splitedPath)
-        if( splitedPath.includes("pong")) {
-            WebSocketManager.closeChatSocket();
-        }
-        else {
+    navigate(path) {
+
+        let splitedPath = path.split("/")
+        console.log(splitedPath)
+        if (splitedPath.includes("pong")) {
+            WebSocketManager.closeChatSocket()
+        } else {
             WebSocketManager.closeAllSockets(); //for now we close all
         }
-        if (window.location.pathname == path) {return ;}
-        
+        if (window.location.pathname == path) {
+            return;
+        }
+
         isGameOver.gameIsOver = true;
         //In the future, we will have to do some better logics with the path to decide if we want to close
         //a websocket or not.
-        
+
         window.history.pushState({}, '', path);
         this.handleLocation();
     }
 }
 
-window.onload = async ()=>{
-    // console.log(pongRoute.possibleRoutes)
+window.onload = async () => {
+    console.log(pongRoute.possibleRoutes)
     // console.log(window.location.pathname
 
     //Add the creation of the websocket here
@@ -101,7 +102,6 @@ export function reloadScriptsSPA() {
 export function navigateTo(path) {
     router.navigate(path);
 }
-
 
 
 // Example route definitions
@@ -121,29 +121,27 @@ async function fetchRoute(path) {
     if (response.ok) {
         console.log("response is A ok")
         return data.html;
-    }
-    else if (response.status === 302) {
+    } else if (response.status === 302) {
         //redirection
-        path = '/pages/auth/login'
-        const response = await fetch(path, {
-            headers: header,
-            credentials: 'include'
-        });
-        const data = await response.json();
-        window.history.pushState({}, '', '/auth/login');
-        return data.html
-    }
-    else if (response.status >= 400 && response.status < 500) 
-    {
+        return navigateTo(data.redirect)
+        // path = '/pages/auth/login'
+        // const response = await fetch(path, {
+        //     headers: header,
+        //     credentials: 'include'
+        // });
+        // const data = await response.json();
+        // window.history.pushState({}, '', '/auth/login');
+        // return data.html
+    } else if (response.status === 401) {
+        return navigateTo(data.redirect)
+    } else if (response.status >= 400 && response.status < 500) {
         return data.html;
 
-    }
-    else if (response.status == 500) {
+    } else if (response.status == 500) {
         //do something special
-    }
-    else {
+    } else {
         console.log("error, this isnt a valid error handling, but what do you want me to do")
-    } 
+    }
 }
 
 const routes = [
@@ -225,8 +223,8 @@ const routes = [
         template: async () => {
             return await fetchRoute('/pages/auth/2fa');
         },
-    
-    },    
+
+    },
     {
         path: '/pong/gameover/',
         template: async (query) => {
@@ -262,14 +260,14 @@ document.addEventListener('click', async (e) => {
 
 const router = new Router(routes);
 
-class Route{
-    constructor(route, directSubRoutes){
+class Route {
+    constructor(route, directSubRoutes) {
         this.route = route
         this.directSubRoutes = directSubRoutes.map(sub => new Route(sub.route, sub.directSubRoutes))
     }
 
 
-    get possibleRoutes(){
+    get possibleRoutes() {
         let routes = [this.route];
         for (let subRoute of this.directSubRoutes) {
             const subRoutes = subRoute.possibleRoutes.map(r => this.route + r);
@@ -285,12 +283,12 @@ const pongRoute = new Route(
     [
         {
             route: '/test1',
-            directSubRoutes : []
+            directSubRoutes: []
         },
         {
             route: '/test2',
             directSubRoutes : []
-        },        {
+        }, {
             route: '/test3',
             directSubRoutes : [
                 {
@@ -300,7 +298,6 @@ const pongRoute = new Route(
             ]
         }
     ]
-    
 )
 
 document.addEventListener("keypress", function(event) {

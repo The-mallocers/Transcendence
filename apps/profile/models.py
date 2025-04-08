@@ -1,9 +1,11 @@
 from django.db import models
+
+
 class Profile(models.Model):
-    #Primary key
+    # Primary key
     email = models.EmailField(primary_key=True, null=False, editable=True)
 
-    #Secondary key
+    # Secondary key
     username = models.CharField(null=False, max_length=50, editable=True)
     first_name = models.CharField(null=True, max_length=50, editable=True)
     last_name = models.CharField(null=True, max_length=50, editable=True)
@@ -27,4 +29,3 @@ class Profile(models.Model):
             return Profile.objects.filter(email=email).first()
         except Profile.DoesNotExist:
             return None
-

@@ -100,7 +100,7 @@ class RedisConnectionPool:
                 connection = redis.from_url(url, **params)
             else:
                 host = params.pop('host', 'localhost')
-                port = params.pop('port',6380)
+                port = params.pop('port', 6380)
                 db = params.pop('db', 0)
                 password = params.pop('password', None)
 

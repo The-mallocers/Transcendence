@@ -94,4 +94,4 @@ my_fixture.json
 transcendence.sqlite3
 test_db.sqlite3
 staticfiles
-
+docker/staticdocker

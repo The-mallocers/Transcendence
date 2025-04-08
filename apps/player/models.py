@@ -1,67 +1,78 @@
-import uuid
+import json
 
-from asgiref.sync import sync_to_async
-from channels.db import database_sync_to_async
 from django.db import models, transaction
-from django.db.models import ManyToManyField, ForeignKey, \
-    OneToOneField
-from django.db.models.fields import CharField, IntegerField, BooleanField, \
-    DateTimeField
-from django.utils import timezone
+from django.db.models import ForeignKey
+from django.db.models.fields import IntegerField
 
-from utils.pong.enums import Side, Ranks
+from utils.redis import RedisConnectionPool
 
 
 class Player(models.Model):
     class Meta:
-        db_table = 'players_list'
+        db_table = 'pong_players'
 
-    # ━━ PRIMARY FIELD ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, null=False)
+    # ═══════════════════════════════ Database Fields ════════════════════════════════ #
 
-    # ━━ PLAYER INFOS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
-    nickname = CharField(max_length=20, null=True, editable=False)
-    stats = ForeignKey('player.PlayerStats', on_delete=models.CASCADE, null=True)
-    # friends = ManyToManyField('self', symmetrical=False, blank=True, related_name='friends_with')
-    # friends_requests = ManyToManyField('self', symmetrical=False, blank=True, related_name='invited_by')
-    # friends_invitations = ManyToManyField('self', symmetrical=False, blank=True, related_name='requested_by')
+    # ━━ PRIMARY FIELD ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
+    game = ForeignKey('game.Game', on_delete=models.SET_NULL, null=True)
+    client = ForeignKey('client.Clients', on_delete=models.SET_NULL, null=True)
 
-    # ── Custom ──────────────────────────────────────────────────────────────────────── #
-    skin_ball = CharField(max_length=100, null=True) #A voir quel field il faut mettre
-    skin_paddle = CharField(max_length=100, null=True)
-
-    def __str__(self):
-        return f"{self.nickname} with id: {self.id}"
-
-class PlayerGame(models.Model):
-    class Meta:
-        db_table = 'players_games'
-        unique_together = ('player', 'game')
-
-    # ── Links ─────────────────────────────────────────────────────────────────────────
-    player = ForeignKey(Player, on_delete=models.CASCADE)
-    game = ForeignKey('game.Game', on_delete=models.CASCADE)
-
-    # ── Informations ──────────────────────────────────────────────────────────────────
-    side = CharField(max_length=5, null=True, choices=[(side.name, side.value) for side in Side], default=None)
+    # ━━ PLAYER INFOS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
     score = IntegerField(default=0)
-    joined_at = DateTimeField(default=timezone.now)
-    is_ready = BooleanField(default=False)
+
+    # ═════════════════════════════════ Local Fields ═════════════════════════════════ #
+    def __init__(self, client_id=None, *args, **kwargs):
+        from apps.client.models import Clients
+        super().__init__(*args, **kwargs)
+        self.class_client = Clients.get_client_by_id(client_id)
+        self.client_id = client_id
+        self.redis = RedisConnectionPool.get_sync_connection(self.__class__.__name__)
 
     def __str__(self):
-        return self.player.nickname
+        return f'Player with client id: {self.client_id}'
 
+    def leave_queue(self):
+        self.redis.hdel('matchmaking_queue', str(self.client_id))
 
+    # ━━ GETTER / SETTER ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
 
-class PlayerStats(models.Model):
-    class Meta:
-        db_table = 'players_stats'
+    # ── Setter ────────────────────────────────────────────────────────────────────── #
 
-    # ── Informations ──────────────────────────────────────────────────────────────────
-    total_game = IntegerField(default=0, blank=True)
-    wins = IntegerField(default=0, blank=True)
-    losses = IntegerField(default=0, blank=True)
-    mmr = IntegerField(default=50, blank=True)
-    # rank = ForeignKey('pong.Rank', on_delete=models.SET_NULL, null=True, blank=True, default=Ranks.BRONZE.value)
-    rank = CharField(default=Ranks.BRONZE.value, max_length=100, blank=True)
-    #I am like so sure this doesnt work because it doesnt know where pong.rank is
+    # ── Getter ────────────────────────────────────────────────────────────────────── #
+    @staticmethod
+    def get_player_by_client(client_id):
+        from apps.client.models import Clients
+        try:
+            with transaction.atomic():
+                return Player.objects.get(client__id=client_id)
+        except Clients.DoesNotExist:
+            return None
+
+    @staticmethod
+    def get_player_side(player_id, game_key, redis):
+        if redis is None:
+            return None
+        game_state_str = redis.json().get(game_key)
+
+        # Parse the JSON string if it's a string
+        if isinstance(game_state_str, str):
+            game_state = json.loads(game_state_str)
+        else:
+            game_state = game_state_str
+
+        # Ensure game_state is a list
+        if not isinstance(game_state, list):
+            game_state = [game_state]
+
+        # Iterate through the game state
+        for game in game_state:
+            # Check player_left
+            if game.get('player_left', {}).get('id') == player_id:
+                return 'left'
+
+            # Check player_right
+            if game.get('player_right', {}).get('id') == player_id:
+                return 'right'
+
+        # Return None if player not found
+        return None

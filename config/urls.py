@@ -13,9 +13,10 @@ urlpatterns = [
     path('pages/', include("config.pages")),  # Html view path
     path('api/auth/', include('apps.auth.api.urls')),  # Api path
 
-    *static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT), #I need this before the catch all so I can correctly serve media files (QRcode for two FA), its not "production ready", too bad !
+    *static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT),
+    # I need this before the catch all so I can correctly serve media files (QRcode for two FA), its not "production ready", too bad !
     re_path(r'^.*$', TemplateView.as_view(template_name='base.html')),
-    #Default view
+    # Default view
 ]
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ WEBSOCKET ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
