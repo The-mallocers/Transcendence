@@ -73,10 +73,11 @@ class Clients(models.Model):
     def get_client_by_request(request: HttpRequest):
         from utils.jwt.JWT import JWT
         from utils.enums import JWTType
-        token = JWT.extract_token(request, JWTType.ACCESS)
-        if token is not None:
+        try:
+            token = JWT.extract_token(request, JWTType.ACCESS)
             return Clients.get_client_by_id(token.SUB)
-        return None
+        except:
+            return None
 
     @staticmethod
     @sync_to_async

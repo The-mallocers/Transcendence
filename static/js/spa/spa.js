@@ -120,7 +120,7 @@ async function fetchRoute(path) {
         return data.html;
     } else if (response.status === 302) {
         //redirection
-        navigateTo(data.redirect)
+        return navigateTo(data.redirect)
         // path = '/pages/auth/login'
         // const response = await fetch(path, {
         //     headers: header,

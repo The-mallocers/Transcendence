@@ -3,8 +3,11 @@ import uuid
 import bcrypt
 import pyotp
 from django.db import models
+from django.db.models import CharField
 from django.db.models.fields import UUIDField, DateTimeField
 from django.utils import timezone
+
+from utils.enums import JWTType
 
 
 class Password(models.Model):
@@ -67,7 +70,9 @@ class InvalidatedToken(models.Model):
         db_table = 'auth_invalidated_tokens'
 
     jti = UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    token = CharField(max_length=500, null=True)
     exp = DateTimeField()
+    type = CharField(max_length=20, choices=[(jwt_type.name, jwt_type.value) for jwt_type in JWTType], null=True)
 
     @classmethod
     def delete_expired_token(cls):

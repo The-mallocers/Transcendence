@@ -1,5 +1,5 @@
 import uuid
-from datetime import timezone, datetime, timedelta
+from datetime import timedelta, datetime, timezone
 
 import jwt
 from django.conf import settings
@@ -32,10 +32,10 @@ class JWT:
 
         if token_type == JWTType.ACCESS:
             self.EXP = now + timedelta(
-                seconds=int(settings.JWT_EXP_ACCESS_TOKEN))
+                minutes=int(settings.JWT_EXP_ACCESS_TOKEN))
         elif token_type == JWTType.REFRESH:
             self.EXP = now + timedelta(
-                minutes=int(settings.JWT_EXP_REFRESH_TOKEN))
+                days=int(settings.JWT_EXP_REFRESH_TOKEN))
 
         self.ROLES: list[str] = ['client']
         if self.client.rights.is_admin:
@@ -54,12 +54,13 @@ class JWT:
             httponly=True,
             secure=True,
             samesite='Lax',
-            # expires=self.EXP
+            expires=self.EXP
         )
         return response
 
     def invalidate_token(self):
-        InvalidatedToken.objects.create(jti=self.JTI, exp=datetime.fromtimestamp(self.EXP, tz=timezone.utc))
+        InvalidatedToken.objects.get_or_create(jti=self.JTI, token=self.encode_token(), exp=datetime.fromtimestamp(self.EXP, tz=timezone.utc),
+                                               type=self.TYPE)
 
     @staticmethod
     def validate_token(token_key: str, token_type: JWTType):
@@ -67,21 +68,21 @@ class JWT:
             payload = JWT._decode_token(token_key)
             token = JWT._get_token(payload)
             if InvalidatedToken.objects.filter(jti=token.JTI).exists():
-                raise jwt.InvalidTokenError('Token has been invalidated')
+                print('roken is invalid')
+                raise jwt.InvalidKeyError('Token has been invalidated')
             if token.TYPE != token_type:
-                raise jwt.InvalidKeyError(f'Invalid token type: {token.TYPE}')
+                raise jwt.InvalidTokenError(f'Validating token with type {token.TYPE} failed due to invalide token type.')
             return token
         except jwt.ExpiredSignatureError as e:
-            raise jwt.ExpiredSignatureError(f'Token {token_type} expired: {str(e)}')
-        except jwt.InvalidTokenError as e:
-            raise jwt.InvalidTokenError(f'Invalid {token_type} token: {str(e)}')
+            raise jwt.ExpiredSignatureError(f'Validating token with type {token_type.value} failed due to expired signature. {str(e)}')
+        except (jwt.InvalidTokenError, jwt.DecodeError) as e:
+            raise jwt.InvalidTokenError(f'Validating token with type {token_type.value} failed due to invalid token. {str(e)}')
         except jwt.InvalidKeyError as e:
-            raise jwt.InvalidKeyError(f'{str(e)}')
+            raise jwt.InvalidKeyError(f'Validating token with type {token_type.value} failed due to invalid key. {str(e)}')
 
     @staticmethod
     def extract_token(request: HttpRequest, token_type: JWTType):
         token_key = request.COOKIES.get(token_type.value + '_token')
-        print(f'Token de type {token_type.value} avec la key "{token_key}"')
         return JWT.validate_token(token_key, token_type)
 
     def encode_token(self):
@@ -120,15 +121,8 @@ class JWT:
 
     @staticmethod
     def _decode_token(token: str):
-        try:
-            payload = jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITH])
-            return payload
-        except jwt.ExpiredSignatureError as e:
-            raise jwt.ExpiredSignatureError(f'Token expired: {str(e)}')
-        except jwt.InvalidTokenError as e:
-            raise jwt.InvalidTokenError(f'Invalid token: {e}')
-        except jwt.InvalidKeyError as e:
-            raise jwt.InvalidKeyError(f'{str(e)}')
+        payload = jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITH])
+        return payload
 
     @staticmethod
     def _get_token(data: dict):

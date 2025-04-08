@@ -25,10 +25,15 @@ def get(req):
         "urlpostgres": urlpostgres,
     })
 
-    return JsonResponse({
+    response = JsonResponse({
         'html': html_content,
         'users': list(users.values())
     })
+
+    response.delete_cookie('access_token')
+    response.delete_cookie('refresh_token')
+
+    return response
 
 
 def authenticate_grafana_user():
