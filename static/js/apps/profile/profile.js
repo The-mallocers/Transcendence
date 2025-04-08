@@ -1,6 +1,5 @@
 import { WebSocketManager } from "../../websockets/websockets.js";
 import { navigateTo } from "../../spa/spa.js";
-// import {chatSocket} from "../chat/chat.js";
 
 let client_id = null;
 const clientId = await getClientId();
@@ -40,7 +39,6 @@ notifSocket.onmessage = (event) => {
                 <div>${message.data.content.username}</div>
                 <div class="d-flex align-items-center">
                     <button type="button" class="type-intra-green delete_friend me-4" onclick="handleDeleteFriend(this.dataset.username)" data-username="${message.data.content.username}" >delete</button>
-                    <span>14</span>
                 </div>
             </li>
             `
@@ -64,7 +62,6 @@ notifSocket.onmessage = (event) => {
                 <div>${message.data.content.username}</div>
                 <div class="d-flex align-items-center">
                     <button type="button" class="type-intra-green delete_friend me-4" onclick="handleDeleteFriend(this.dataset.username)" data-username="${message.data.content.username}" >delete</button>
-                    <span>14</span>
                 </div>
             </li>
             `

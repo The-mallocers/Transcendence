@@ -15,7 +15,13 @@ def pong(request):
     })
 
 def gamemodes(request):
-    html_content = render_to_string("pong/gamemodes.html", {"csrf_token": get_token(request)})
+    client = Clients.get_client_by_request(request)
+    friends_list = client.get_all_friends()
+    html_content = render_to_string("pong/gamemodes.html", 
+                                    {
+                                        "csrf_token": get_token(request),
+                                        "friends_list" : friends_list
+                                    })
     return JsonResponse({
         'html': html_content,
     })

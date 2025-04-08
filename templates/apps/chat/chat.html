@@ -5,6 +5,7 @@
     {% csrf_token %}
     <div class="row g-0">
         <div class="col-4 friends">
+            <h4>Messages</h4>
             <div class="chatRooms d-flex flex-column">
                 {% comment %} putting all the rooms from the js {% endcomment %}
             </div>
@@ -20,6 +21,6 @@
             <input type="text" id="messageInput" placeholder="message">
         </div>
     </div>
-</div>
+</div>  
 
 <script type="module" src="{% static 'js/apps/chat/chat.js' %}" defer></script>

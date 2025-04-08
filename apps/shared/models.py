@@ -31,7 +31,7 @@ class Clients(models.Model):
     twoFa = models.ForeignKey(TwoFA, on_delete=models.CASCADE)
     rights = models.ForeignKey('admin.Rights', on_delete=models.CASCADE, null=True)
     player = models.ForeignKey(Player, on_delete=models.CASCADE, null=True)
-    friendrequest = models.ForeignKey('notifications.Friend', on_delete=models.CASCADE, null=True)
+    friend = models.ForeignKey('notifications.Friend', on_delete=models.CASCADE, null=True)
     
     class Meta:
         db_table = 'client_list'
@@ -196,14 +196,14 @@ class Clients(models.Model):
     def get_friend_table(self):
         try:
             with transaction.atomic():
-                return self.friendrequest
+                return self.friend
         except Exception as e:
             print(f"Error retrieving friend request: {e}")
             return None
 
     def is_friend_by_id(self, client):
         try:
-            return self.friendrequest.friends.filter(id=client.id).exists()
+            return self.friend.friends.filter(id=client.id).exists()
         except Exception as e:
             print(f"Error retrieving client: {e}")
             return None
@@ -211,7 +211,7 @@ class Clients(models.Model):
     def get_all_friends(self):
         try:
             friend_list = []
-            for friend in self.friendrequest.friends.all():
+            for friend in self.friend.friends.all():
                 friend_list.append({"client": friend,
                                     "username": friend.profile.username})
             return friend_list
@@ -222,7 +222,7 @@ class Clients(models.Model):
     def get_all_pending_request(self):
         try:
             pending_list = []
-            for friend in self.friendrequest.pending_friends.all():
+            for friend in self.friend.pending_friends.all():
                 pending_list.append({"client": friend,
                                     "username": friend.profile.username})
             return pending_list
@@ -234,7 +234,7 @@ class Clients(models.Model):
     def Aget_all_pending_request(self):
         try:
             pending_list = []
-            for friend in self.friendrequest.pending_friends.all():
+            for friend in self.friend.pending_friends.all():
                 pending_list.append({"client": friend,
                                     "username": friend.profile.username})
             return pending_list
@@ -245,7 +245,7 @@ class Clients(models.Model):
     @sync_to_async
     def Aget_pending_request_by_client(self, target):
         try:
-            for friend in self.friendrequest.pending_friends.all():
+            for friend in self.friend.pending_friends.all():
                 if friend.id == target.id:
                     return friend
             return None

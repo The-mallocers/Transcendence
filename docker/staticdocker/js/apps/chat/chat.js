@@ -33,6 +33,10 @@ chatSocket.onmessage = (event) => {
     if(message.data.action == "HISTORY_RECEIVED") {
         displayHistory(message.data.content.messages);
     }
+    else if(message.data.action == "NO_HISTORY")
+    {
+        displayHistory([])
+    }
     else if(message.data.action == "ALL_ROOM_RECEIVED") {
         displayRooms(message.data.content.rooms);
     }
@@ -128,9 +132,8 @@ async function displayHistory(message){
         const msgElement = doc.body.firstChild; // Get the actual <div> element
 
         chatHistory.appendChild(msgElement);
-
-        scrollToBottom(chatHistory);
     }
+    scrollToBottom(chatHistory);
 }
 
 async function displayRooms(rooms){

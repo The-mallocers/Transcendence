@@ -38,7 +38,7 @@ class ClientSerializer(serializers.ModelSerializer):
                 right = Rights.objects.create()
                 friendrequest = Friend.objects.create(email=profile.email)
                 client = Clients.objects.create(profile=profile, password=passwrod, twoFa=two_fa, rights=right,
-                                                player=player, friendrequest=friendrequest)
+                                                player=player, friend=friendrequest)
                 global_room = Rooms.objects.get(id=uuid_global_room)
                 global_room.clients.add(client)
         except Exception as e:

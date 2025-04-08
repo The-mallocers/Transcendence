@@ -27,7 +27,7 @@ def get(req):
         
         friends_list = client.get_all_friends()
         friends_pending = client.get_all_pending_request()
-        
+        print("la list d'amis", friends_list, client)
         context = {
             "client": client,
             "clients": Clients.objects.all(),

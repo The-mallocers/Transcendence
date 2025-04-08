@@ -58,7 +58,7 @@ class Router {
                 }
             });
             
-            console.log(oldScript)
+            // console.log(oldScript)
             oldScript.parentNode.replaceChild(newScript, oldScript);
         });
     }
@@ -66,7 +66,7 @@ class Router {
     navigate(path) { 
         
         let splitedPath = path.split("/") 
-        console.log(splitedPath)
+        // console.log(splitedPath)
         if( splitedPath.includes("pong")) {
             WebSocketManager.closeChatSocket();
         }
@@ -85,7 +85,7 @@ class Router {
 }
 
 window.onload = async ()=>{
-    console.log(pongRoute.possibleRoutes)
+    // console.log(pongRoute.possibleRoutes)
     // console.log(window.location.pathname
 
     //Add the creation of the websocket here

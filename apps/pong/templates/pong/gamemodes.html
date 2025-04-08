@@ -1,4 +1,3 @@
-
 {% load static %}
 
 <div class="gamemodesPage">
@@ -15,8 +14,8 @@
                     </div>
                 </div>
                 <div class="col-md-6">
-                    <div class="gamemodeCardContainer" data-route="/pong/matchmaking/">
-                        <div class="d-flex flex-column align-items-center justify-content-center gamemodeCard  front">
+                    <div class="gamemodeCardContainer" onclick="choose_duel_friend()">
+                        <div class="d-flex flex-column align-items-center justify-content-center gamemodeCard  front duel-friend">
                             <h2>Duel Friend</h2>
                             <img src="{% static '/assets/imgs/duel.png' %}" alt="">
                         </div>
@@ -34,3 +33,28 @@
         </div>
     </div>
 </div>
+
+<!-- Friend Selection Modal -->
+<div class="modal fade" id="friendSelectionModal" tabindex="-1" aria-labelledby="friendSelectionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="friendSelectionModalLabel">Select a Friend to Duel</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <ul class="friends_group list-group">
+                    {% for friend in friends_list %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>{{friend.username}}</div>
+                            <div class="d-flex align-items-center">
+                                <button type="button" class="type-intra-green delete_friend me-4" data-route="/pong/duel/?id={{friend.id}}" data-username="{{friend.username}}" id="{{friend.id}}">Duel</button>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+        </div>
+    </div>
+</div>
+
+<script type="module" src="{% static '/js/apps/game/gamemode.js' %}" defer></script>
