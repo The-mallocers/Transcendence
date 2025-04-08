@@ -57,8 +57,6 @@ class JWTMiddleware:
         return response
 
     def __call__(self, request: HttpRequest):
-        # on veux checker uniquement les /pages/* car c'est elles qui load le spa.js et on veux checker '/api/*' pour
-        # eviter de faire des call a l'api si on est pas connecter
         if not self.is_path_matching(request.path_info, settings.PROTECTED_PATHS):
             return self.get_response(request)
 
@@ -77,7 +75,7 @@ class JWTMiddleware:
                         'redirect': '/auth/login',
                         'message': str(e)}, status=status.HTTP_302_FOUND)
 
-                except (jwt.InvalidTokenError, jwt.ExpiredSignatureError) as e:
+                except (jwt.InvalidTokenError, jwt.ExpiredSignatureError):
                     try:
                         return self._update_tokens(request)
                     except (jwt.ExpiredSignatureError, jwt.InvalidTokenError, jwt.InvalidKeyError) as e:

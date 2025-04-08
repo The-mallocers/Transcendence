@@ -24,11 +24,6 @@ class JWT:
         self.JTI: uuid.UUID = create_jti_id()
         self.IAT = now
         self.TYPE: JWTType = token_type
-        self.DEVICE_ID: str = ''
-        self.IP_ADDRESS: str = ''
-        self.USER_AGENT: str = ''
-        self.DEVICE_FINGERPRINT: str = ''
-        self.TOKEN_VERSION: int = 0
 
         if token_type == JWTType.ACCESS:
             self.EXP = now + timedelta(
@@ -105,17 +100,10 @@ class JWT:
             'iat': self.IAT,
             'exp': self.EXP,
             'type': self.TYPE,
-            'device_id': self.DEVICE_ID
         }
 
         if self.TYPE == JWTType.ACCESS:
             token_dict['roles'] = self.ROLES
-            token_dict['ip_address'] = self.IP_ADDRESS
-            token_dict['user_agent'] = self.USER_AGENT
-
-        if self.TYPE == JWTType.REFRESH:
-            token_dict['device_fingerprint'] = self.DEVICE_FINGERPRINT
-            token_dict['token_version'] = self.TOKEN_VERSION
 
         return token_dict
 
