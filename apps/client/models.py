@@ -71,11 +71,13 @@ class Clients(models.Model):
 
     @staticmethod
     def get_client_by_request(request: HttpRequest):
-        from utils.jwt.TokenGenerator import TokenGenerator, TokenType
-        token = TokenGenerator.extract_token(request, TokenType.ACCESS)
-        if token is not None:
+        from utils.jwt.JWT import JWT
+        from utils.enums import JWTType
+        try:
+            token = JWT.extract_token(request, JWTType.ACCESS)
             return Clients.get_client_by_id(token.SUB)
-        return None
+        except:
+            return None
 
     @staticmethod
     @sync_to_async
@@ -104,19 +106,6 @@ class Clients(models.Model):
             return None
         client = Clients.objects.filter(profile=profile).first()
         return client
-
-    @staticmethod
-    def get_client_by_request(request: HttpRequest):
-        from utils.jwt.JWT import JWTType
-        from utils.jwt.JWTGenerator import JWTGenerator
-
-        if 'access_token' in request.COOKIES:
-            token = JWTGenerator.extract_token(request, JWTType.ACCESS)
-            if not token:
-                return None
-            return Clients.get_client_by_id(token.SUB)
-
-        return None
 
     @staticmethod
     def get_client_by_player(player_id):

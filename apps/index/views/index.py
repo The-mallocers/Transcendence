@@ -8,47 +8,39 @@ from apps.client.models import Clients
 # I will fix the stats later.
 def get(req):
     client = Clients.get_client_by_request(req)
+    games_played = client.stats.games.all().order_by('-created_at')
+
+    # debug stuff that no longer should trigger
+    # faulty_games = False
+    # for game in Games_played:
+    #     if game.winner == None:
+    #         faulty_games = True
+    #         print("WARNING : Somehow, You have created a game without a winner, this is bad !")
+
+    # if faulty_games == True:
+    #     print("Removing the faulty games, fix your code !")
+    #     Games_played = [game for game in Games_played if game.winner is not None]
+
+    winrate = ghistory = rivals = None
     if client is not None:
-        games_played = client.stats.games.all().order_by('-created_at')
-
-        # debug stuff that no longer should trigger
-        # faulty_games = False
-        # for game in Games_played:
-        #     if game.winner == None:
-        #         faulty_games = True
-        #         print("WARNING : Somehow, You have created a game without a winner, this is bad !")
-
-        # if faulty_games == True:
-        #     print("Removing the faulty games, fix your code !")
-        #     Games_played = [game for game in Games_played if game.winner is not None]
-
-        winrate = ghistory = rivals = None
-        if client is not None:
-            winrate = get_winrate(client, games_played)
-            print('winrate: ', winrate)
-            # ghistory = get_last_matches(client, Games_played)
-            # rivals = get_rivals(client, Games_played)
-        context = {
-            "client": client,
-            "clients": Clients.objects.all(),
-            "gamesHistory": ghistory,
-            "winrate": winrate,
-            "winrate_angle": 42,  # int((winrate / 100) * 360),
-            "rivals": rivals,
-            "csrf_token": get_token(req)
-        }
-        html_content = render_to_string("apps/profile/profile.html", context)
-        return JsonResponse({'html': html_content})
-    else:
-        html_content = render_to_string("apps/auth/login.html", {"csrf_token": get_token(req)})
-        return JsonResponse({
-            'html': html_content,
-        })
+        winrate = get_winrate(client, games_played)
+        # ghistory = get_last_matches(client, Games_played)
+        # rivals = get_rivals(client, Games_played)
+    context = {
+        "client": client,
+        "clients": Clients.objects.all(),
+        "gamesHistory": ghistory,
+        "winrate": winrate,
+        "winrate_angle": 42,  # int((winrate / 100) * 360),
+        "rivals": rivals,
+        "csrf_token": get_token(req)
+    }
+    html_content = render_to_string("apps/profile/profile.html", context)
+    return JsonResponse({'html': html_content})
 
 
 def get_winrate(client, games_played) -> int:
     wins = games_played.filter(winner__client=client).count()
-    print("wins:", wins)
 
     total_games = games_played.count()
     if total_games == 0:

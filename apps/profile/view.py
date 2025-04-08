@@ -10,7 +10,6 @@ def profile_get(req):
 
 @require_http_methods(["GET"])
 def settings_get(req):
-    print('huuuh')
     return get_settings(req)
 
 
