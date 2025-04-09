@@ -1,20 +1,21 @@
 // window.addEventListener('load', onPageLoad);
-
+import { WebSocketManager } from "../../websockets/websockets.js"
 
 let client_id = null;
+let room_id = null; 
 
-let room_id = null;
+
+function scrollToBottom(element){
+    element.scrollTop = element.scrollHeight;
+}
 
 const clientId = await getClientId();
-// if (clientId == null) {
-//     return ;
-// }
 console.log("Got client ID :", clientId);
-const chatSocket = new WebSocket('wss://' + window.location.host + '/ws/chat/?id=' + clientId);
+export const chatSocket = await WebSocketManager.initChatSocket(clientId);
 
-chatSocket.onopen = function () {
+chatSocket.addEventListener("open", (event) => {
     console.log("WebSocket is open now.");
-
+        
     const message = {
         "event": "chat",
         "data": {
@@ -22,16 +23,21 @@ chatSocket.onopen = function () {
             "args": {}
         }
     };
-
     chatSocket.send(JSON.stringify(message));
-};
+});
 
 chatSocket.onmessage = (event) => {
     const message = JSON.parse(event.data);
+    console.log("message send");
 
     if (message.data.action == "HISTORY_RECEIVED") {
         displayHistory(message.data.content.messages);
-    } else if (message.data.action == "ALL_ROOM_RECEIVED") {
+    }
+    else if(message.data.action == "NO_HISTORY")
+    {
+        displayHistory([])
+    }
+    else if(message.data.action == "ALL_ROOM_RECEIVED") {
         displayRooms(message.data.content.rooms);
     } else if (message.data.action == "MESSAGE_RECEIVED") {
         let chatHistory = document.querySelector('.chatHistory');
@@ -42,6 +48,7 @@ chatSocket.onmessage = (event) => {
         const msgElement = doc.body.firstChild; // Get the actual <div> element
 
         chatHistory.appendChild(msgElement);
+        scrollToBottom(chatHistory);
         //Do things to show the new message on the front
     }
 }
@@ -63,6 +70,7 @@ document.getElementById("messageInput").addEventListener("keydown", function (ev
                 }
             }
         }
+        console.log("message_send: " + message.data);
         chatSocket.send(JSON.stringify(message));
     }
 });
@@ -83,7 +91,10 @@ document.addEventListener("click", function (event) {
                 }
             }
         };
-        chatSocket.send(JSON.stringify(message));
+        //Dirty fucking hack because for some reason it tried to send the message twice.
+        if(chatSocket.readyState === WebSocket.OPEN) {
+            chatSocket.send(JSON.stringify(message));
+        }
     }
 });
 
@@ -121,22 +132,40 @@ async function displayHistory(message) {
 
         chatHistory.appendChild(msgElement);
     }
+    scrollToBottom(chatHistory);
 }
 
 async function displayRooms(rooms) {
     console.log("Displaying rooms");
+    console.log("the length: " + rooms.length)
     let chatRooms = document.querySelector('.chatRooms');
     chatRooms.innerHTML = "";
+    let htmlString;
+    
     for (let i = 0; i < rooms.length; i++) {
-        let htmlString;
         const parser = new DOMParser();
-        if (rooms[i].player.length > 1)
-            htmlString = `<button class="roomroom" id="${rooms[i].room}">chat global</button>`;
+        if(rooms[i].player.length > 1)
+        {
+            htmlString = 
+            `<button id="${rooms[i].room}" class="roomroom container d-flex align-items-center gap-3">
+                <img src="/static/assets/imgs/profile/default.png">
+                <div>chat global</div>
+            </button>`
+        }
         else
-            htmlString = `<button class="roomroom" id="${rooms[i].room}">${rooms[i].player[0]}</button>`;
+        {
+            let player = rooms[i].player[0];
+            if(player == undefined)
+                player = "delete user";
+            htmlString = 
+            `<button id="${rooms[i].room}" class="roomroom chat-${player} container d-flex align-items-center gap-3">
+                <img src="/static/assets/imgs/profile/default.png">
+                <div>${player}</div>
+            </button>`
+        }
         const doc = parser.parseFromString(htmlString, "text/html");
-        const roomElement = doc.body.firstChild; // Get the actual <div> element
-
+        const roomElement = doc.body.firstChild;
         chatRooms.appendChild(roomElement);
     }
+    scrollToBottom(chatRooms);
 }

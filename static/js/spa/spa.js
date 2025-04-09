@@ -1,7 +1,8 @@
 import {WebSocketManager} from "../websockets/websockets.js"
 import {isGameOver} from "../apps/game/VarGame.js"
 
-
+// let notifSocket = null;
+// let clientId = null;
 class Router {
     constructor(routes) {
         this.routes = routes;
@@ -15,11 +16,13 @@ class Router {
     }
 
     async handleLocation() {
-
+        
+        // clientId = await getClientId();
+        // notifSocket = await WebSocketManager.initNotifSocket(clientId);
         const path = window.location.pathname;
 
-        console.log(window.location.search);
-        console.log("looking for the path: ", path)
+        // console.log(window.location.search);
+        // console.log("looking for the path: ", path)
         const route = this.routes.find(r => r.path === path);
 
         if (!route) {
@@ -114,7 +117,7 @@ async function fetchRoute(path) {
         credentials: 'include'
     });
     const data = await response.json();
-    console.log("testing redirect, data is :", data)
+    // console.log("testing redirect, data is :", data)
     if (response.ok) {
         console.log("response is A ok")
         return data.html;
@@ -229,6 +232,19 @@ const routes = [
             return await fetchRoute(`/pages/pong/gameover/${query}`);
         },
     },
+    {
+        path: '/admin/monitoring/',
+        template: async (query) => {
+            console.log(`/pages/profile/${query}`)
+            return await fetchRoute(`/pages/admin/monitoring/`);
+        },
+    },
+    {
+        path: '/chat/friendrequest/',
+        template: async () => {
+            return await fetchRoute(`/pages/chat/friendrequest/`);
+        },
+    },
 ];
 
 //Need to do this so that the event listerner also listens to the dynamic html
@@ -236,7 +252,7 @@ document.addEventListener('click', async (e) => {
     const routeElement = e.target.closest('[data-route]');
     if (routeElement) {
         const route = routeElement.dataset.route;
-        console.log("in data route :", route);
+        // console.log("in data route :", route);
         navigateTo(route);
     }
 });
@@ -271,26 +287,30 @@ const pongRoute = new Route(
         },
         {
             route: '/test2',
-            directSubRoutes: []
+            directSubRoutes : []
         }, {
-        route: '/test3',
-        directSubRoutes: [
-            {
-                route: '/meow',
-                directSubRoutes: []
-            }
-        ]
-    }
+            route: '/test3',
+            directSubRoutes : [
+                {
+                    route: '/meow',
+                    directSubRoutes : []
+                }
+            ]
+        }
     ]
 )
 
-/// routes
-
-/*
-    example objects skeleton: {
-        route: -------,
-        directSubRoutes: [{route object}]
+document.addEventListener("keypress", function(event) {
+    const routeElement = event.target.closest('.searchBar');
+    if (event.key === "Enter")
+    {
+        if (routeElement)
+        {
+            event.preventDefault();
+            const inputElement = routeElement.querySelector('input');
+            let query = inputElement.value;
+            navigateTo('/profile/?username=' + query)
+            inputElement.value = '';
+        }
     }
-*/
-
-
+})

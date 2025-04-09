@@ -2,27 +2,29 @@
 
 <div class="myinformationsPage">
     {% csrf_token %}
-    <div class="container-fluid ">
-        <div class="row align-items-start">
+    <div class="container-fluid main">
+        <div class="row align-items-start box">
             <div class="col-7">
                 <div class="content">
                     <h2 class="text-center">Personal informations</h2>
                     <div class=" d-flex flex-column align-items-center justify-content-center inputs">
-                        <label class="w-50 mt-5" for="email">Email</label>
-                        <input class="p-3 mt-1 w-50" type="text" placeholder="email" id="email">
+                        <label class="w-50 mt-4 title-personal-info" for="email">Email</label>
+                        <input class="p-2 mt-1 w-50" type="text" placeholder="email" id="email">
 
-                        <label class="w-50 mt-4" for="nickname">Nickname</label>
-                        <input class="p-3 mt-1 w-50" type="text" placeholder="nickname" id="nickname">
+                        <label class="w-50 mt-4 title-personal-info" for="nickname">Nickname</label>
+                        <input class="p-2 mt-1 w-50" type="text" placeholder="nickname" id="nickname">
+                        
+                        <label class="w-50 mt-4 title-personal-info" for="changepw">Change password</label>
+                        <input class="p-2 mt-1 w-50" type="password" placeholder="change password" id="changepw">
 
-                        <label class="w-50 mt-4" for="changepw">Change password</label>
-                        <input class="p-3 mt-1 w-50" type="password" placeholder="change password" id="changepw">
+                        <label class="w-50 mt-4 title-personal-info" for="changepwconf">Confirm password</label>
+                        <input class="p-2 mt-1 w-50" type="password" placeholder="change password" id="changepwconf">
 
-                        <label class="w-50 mt-4" for="changepwconf">Confirm password</label>
-                        <input class="p-3 mt-1 w-50" type="password" placeholder="change password" id="changepwconf">
-
-                        <div class="btn w-50 mt-5 p-3" id="logout-btn">send modifications (and also log out lol)</div>
-
+                        <div class="type-intra-green mt-4" id="logout-btn">send modifications (and also log out lol)</div>
                     </div>
+                    {% if isAdmin %}
+                        <div class="type-intra-green mt-4" data-route="/admin/monitoring/">Monitoring</div>
+                    {%endif%}
                 </div>
             </div>
             <div class="col-5">
@@ -32,7 +34,6 @@
                               d="M46.009 0.27625L14.5877 9.02375V11.0687C14.5877 22.0438 7.9441 17.275 1.98196 19.4575L0.00250072 20.1838L0 22.0438V67.92C0 83.7687 7.92035 98.5875 22.902 110.772C34.1035 119.884 45.195 124.29 45.6626 124.474L47.0006 125L48.3386 124.475C48.805 124.293 59.8953 119.885 71.0993 110.774C86.0809 98.5888 94 83.7688 94 67.9212V20.1863L92.018 19.4587C86.0547 17.275 79.4123 22.0438 79.4123 11.07V9.02375L47.0006 0L46.009 0.27625Z "/>
                     </svg>
                     <h2 class="text-center mt-5">Enable 2-FA</h2>
-
                     <div class="switch mt-3" data-status="off" onclick="switchToggle(this)"></div>
 
                     <script>
@@ -41,11 +42,11 @@
                             let bool_2fa = false;
                             // Target the SVG using its class name and change the fill color
                             if (e.dataset.status === 'on') {
-                                document.querySelector(".shieldPath").classList.add("fillOrange");
+                                document.querySelector(".shieldPath").classList.add("fillGreen");
                                 bool_2fa = true;
                             } else {
                                 bool_2fa = false;
-                                document.querySelector(".shieldPath").classList.remove("fillOrange");
+                                document.querySelector(".shieldPath").classList.remove("fillGreen");
                             }
                             console.log("crsf token is : ", document.querySelector('[name=csrfmiddlewaretoken]').value)
                             const response = await fetch("/api/auth/change_two_fa", {

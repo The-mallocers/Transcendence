@@ -13,8 +13,6 @@ from utils.jwt.JWT import JWT
 class JWTMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
-        self.secret_key = getattr(settings, 'JWT_SECRET_KEY')
-        self.algorithm = getattr(settings, 'JWT_ALGORITH')
 
     def _in_excluded_path(self, path: str) -> bool:
         if self.is_path_matching(path, settings.EXCLUDED_PATHS):

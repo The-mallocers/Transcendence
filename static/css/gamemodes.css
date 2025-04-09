@@ -37,5 +37,6 @@
 }
 
 .gamemodeCard:hover {
-    background-color: #E5292D;
+    background-color: #007d7f;
+    cursor: pointer;
 }

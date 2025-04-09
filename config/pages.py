@@ -2,7 +2,6 @@ from django.urls import path, include
 
 urlpatterns = [
     path('', include('apps.index.urls')),
-    path('new', include("apps.index.urls")),
     path('account/', include("apps.profile.urls")),
     path('auth/', include("apps.auth.urls")),
     path('pong/', include('apps.game.urls')),

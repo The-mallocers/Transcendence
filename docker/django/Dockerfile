@@ -21,8 +21,6 @@ RUN pip install --upgrade pip
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r ./requirements.txt
 RUN pip install uvicorn[standard] gunicorn
-# RUN pip install djangorestframework
-# RUN pip install django-extensions
 RUN pip install psycopg2 gunicorn
 
 # copy project

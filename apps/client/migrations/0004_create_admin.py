@@ -39,7 +39,7 @@ def remove_client(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('client', '0002_initial'),
+        ('client', '0003_clients_friend'),
     ]
 
     operations = [

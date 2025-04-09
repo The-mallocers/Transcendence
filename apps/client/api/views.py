@@ -5,7 +5,6 @@ from rest_framework.views import APIView
 
 from utils.enums import JWTType
 from utils.jwt.JWT import extract_token
-from utils.jwt.JWTGenerator import JWTGenerator
 from utils.serializers.client import ClientSerializer
 
 

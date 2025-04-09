@@ -64,8 +64,13 @@ class WsConsumer(AsyncWebsocketConsumer):
                 await self.service.process_action(data, self.client)
 
             if self.event_type is EventType.TOURNAMENT:
+                player = await PlayerManager.get_player_from_client_db_async(
+                    self.client.id)
+                await self.service.process_action(data, player)
+            
+            if self.event_type is EventType.NOTIFICATION:
                 await self.service.process_action(data, self.client)
-
+            
         except json.JSONDecodeError as e:
             self._logger.error(e)
             await asend_group_error(self.client.id, ResponseError.JSON_ERROR)

@@ -71,7 +71,54 @@ class Rooms(models.Model):
             return list(Rooms.objects.filter(clients__id=client_id).values_list('id', flat=True))
         except Clients.DoesNotExist:
             return []
-
+    @staticmethod
+    def get_room_by_client_id(client_id):
+        try:
+            return list(Rooms.objects.filter(clients__id=client_id))  
+        except Clients.DoesNotExist:
+            return []
+    
+    
+    @staticmethod
+    @sync_to_async  
+    def Aget_room_by_client_id(client_id):
+        global_room = "00000000-0000-0000-0000-000000000000"
+        try:
+            with transaction.atomic():
+                query = Rooms.objects.filter(clients__id=client_id)
+                if query is not None:
+                    query = query.exclude(id=global_room)
+                return query.first()
+        except Exception as e:
+            print(f"Error getting room by client ID: {e}")
+            return None
+        except Clients.DoesNotExist:
+            return None
+        
+    @staticmethod
+    def get_room_by_client_id(client_id):
+        try:
+            return list(Rooms.objects.filter(clients__id=client_id))  
+        except Clients.DoesNotExist:
+            return []
+    
+    
+    @staticmethod
+    @sync_to_async  
+    def Aget_room_by_client_id(client_id):
+        global_room = "00000000-0000-0000-0000-000000000000"
+        try:
+            with transaction.atomic():
+                query = Rooms.objects.filter(clients__id=client_id)
+                if query is not None:
+                    query = query.exclude(id=global_room)
+                return query.first()
+        except Exception as e:
+            print(f"Error getting room by client ID: {e}")
+            return None
+        except Clients.DoesNotExist:
+            return None
+        
     @staticmethod
     @sync_to_async
     def get_usernames_by_room_id(room_id):
@@ -92,7 +139,28 @@ class Rooms(models.Model):
                 return str(client.id)  # Retourne l'ID sous forme de chaîne
         except Clients.DoesNotExist:
             return None
-
+    
+    @sync_to_async
+    def Adelete_room(self):
+        try:
+            with transaction.atomic():
+                print("delete room")
+                self.delete()
+        except Clients.DoesNotExist:
+            return None
+        
+    @staticmethod
+    @sync_to_async
+    def Adelete_all_user_by_room_id(roomId):
+        try:
+            with transaction.atomic():
+                room = Rooms.objects.get(id=roomId)
+                # Clear all related clients (this removes the relationship, not the clients themselves)
+                room.clients.clear()
+            return True
+        except Exception:
+            return None
+            
 
 class Messages(models.Model):
     id = models.BigAutoField(primary_key=True)
@@ -106,8 +174,15 @@ class Messages(models.Model):
         return f'Messages: {self.content}'
 
     @staticmethod
-    @sync_to_async
     def get_message_by_room(room):
+        try:
+            return list(Messages.objects.filter(room__id=room.id))
+        except Rooms.DoesNotExist:
+            return []
+
+    @staticmethod
+    @sync_to_async
+    def Aget_message_by_room(room):
         try:
             with transaction.atomic():
                 return list(Messages.objects.filter(room__id=room.id))
@@ -121,3 +196,17 @@ class Messages(models.Model):
                 return self.sender.id
         except Exception:
             return None
+
+    @staticmethod
+    @sync_to_async
+    def Adelete_all_messages_by_room_id(roomId):
+        try:
+            with transaction.atomic():
+                print("deleting messages...")
+                Messages.objects.filter(room_id=roomId).delete()
+                return True
+        except Exception:
+            return None
+    
+
+

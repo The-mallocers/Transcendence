@@ -32,11 +32,13 @@ class BaseServices(ABC):
 
     async def process_action(self, data: Dict[str, Any], *args):
         try:
+            handler_method = None
             if not self._initialized:
                 self._initialized = await self.init(*args)
             request_action = RequestAction(data['data']['action'])
-            handler_method = getattr(self, f"_handle_{request_action.value}", None)
-
+            print(request_action)
+            if request_action:
+                handler_method = getattr(self, f"_handle_{request_action.value}", None)
             if not handler_method or not callable(handler_method):
                 raise ServiceError(f"Handler not found for this action : {request_action.value}")
             else:

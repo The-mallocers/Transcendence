@@ -4,9 +4,8 @@
     margin: 0;
 }
 
-
 body {
-    background-color: #12141A;
+    background-color: #F5F5F5;
 }
 
 nav {
@@ -59,7 +58,7 @@ svg:hover path {
     padding: 0 2rem;
     height: 70px;
     margin-left: 80px;
-    background-color: #1F212A;
+    background-color: #ffffff;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -68,8 +67,7 @@ svg:hover path {
 
 .searchBar input {
     color: #757575;
-
-    background-color: #1F212A;
+    background-color: #ffffff;
     padding: 1rem 2rem;
     height: 100%;
     width: 100%;
@@ -88,8 +86,7 @@ main {
     width: calc(100% - 80px);
     /* margin-top: 80px; */
     /* background-color: aliceblue; */
-    background-color: #21252900;
-
+    /* background-color: #21252900; */
 }
 
 
@@ -139,13 +136,11 @@ main {
 .row {
     justify-content: center;
     align-items: center;
-
 }
 
 .box {
     color: aliceblue;
     padding: 5px;
-
 }
 
 .informationsContainer .box {
@@ -162,9 +157,7 @@ main {
     flex-direction: column;
     height: 100%;
     background-color: hsla(229, 15%, 14%, .95);
-
     border-radius: 5px;
-
     color: aliceblue;
 }
 
@@ -204,27 +197,42 @@ main {
     background-color: #FFA042;
 }
 
-
 .main {
     /* padding: 0 2rem; */
+    background: transparent;
+    background-color: #F5F5F5;
 }
 
 .main .box {
-    padding-top: 1rem;
+    /* padding-top: 1rem;
     border: 1px solid #2D313C;
-    background-color: #1E2028;
-    height: 23rem;
+    background-color: #1E2028; */
+
+    background-color: #ffffff;
+    border: 1px solid #f7f7f7;
+    min-height: 23rem;
     border-radius: 5px;
+    padding: 20px 25px 25px;
+    font-family: 'futura-pt', 'Noto Sans', 'Arial', 'Helvetica', 'Sans serif';
 }
 
-
-.main .box h3 {
-    text-align: center;
+.main .box h4{
+    text-transform: uppercase;
+    font-weight: bold;
+    color: #202026;
+    font-size: 0.9em;
+    margin-bottom: 25px;
 }
 
-
-/* .lastPlayerContainer:first-child {
-} */
+.main .box h2{
+    font-family: "futura-pt", "Helvetica", "Sans serif";
+    text-transform: uppercase;
+    font-size: 20px;
+    font-weight: bold;
+    color: #2c2c34;
+    margin-top: 11px;
+    margin-bottom: 11px;
+}
 
 .lastPlayer {
     padding: 1rem;
@@ -257,7 +265,6 @@ main {
 .lastPlayer:hover {
     background-color: #292D39;
 }
-
 
 .lastGames {
     padding: 1rem;

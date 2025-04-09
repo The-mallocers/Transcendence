@@ -30,8 +30,10 @@ class ChatService(BaseServices):
 
             # Initial checks (target does not exist or same ID)
             if target is None:
-                return await asend_group_error(admin.id, ResponseError.TARGET_NOT_FOUND)
-
+                target = Clients.ASget_client_by_username(data['data']['args']['target'])
+                if target is None:
+                    return await asend_group_error(admin.id, ResponseError.TARGET_NOT_FOUND)
+            
             if admin.id == target.id:
                 return await asend_group_error(admin.id, ResponseError.SAME_ID)
 
@@ -40,8 +42,9 @@ class ChatService(BaseServices):
             rooms_target = await Rooms.ASget_room_id_by_client_id(target.id)
 
             common_rooms = set(rooms_admin) & set(rooms_target)  # Optimized set intersection
+            
             common_rooms.remove(uuid_global_room)
-
+                
             if common_rooms:
                 # Use an existing common room
                 room = await Rooms.get_room_by_id(next(iter(common_rooms)))
@@ -118,7 +121,7 @@ class ChatService(BaseServices):
                 await asend_group_error(client.id, ResponseError.ROOM_NOT_FOUND)
                 return
 
-            messages = await Messages.get_message_by_room(room)
+            messages = await Messages.Aget_message_by_room(room)
             if not messages:
                 await asend_group_error(client.id, ResponseError.NO_HISTORY)
                 return

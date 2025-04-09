@@ -11,8 +11,7 @@ class ChatConsumer(WsConsumer):
     async def connect(self):
         await super().connect()
         if self.client:
-            await self.channel_layer.group_add(str(uuid_global_room),
-                                               self.channel_name)
+            await self.channel_layer.group_add(str(uuid_global_room), self.channel_name)
             rooms = await Rooms.ASget_room_id_by_client_id(self.client.id)
             for room in rooms:
                 await self.channel_layer.group_add(str(room), self.channel_name)

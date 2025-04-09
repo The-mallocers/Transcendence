@@ -63,7 +63,6 @@ class JWT:
             payload = JWT._decode_token(token_key)
             token = JWT._get_token(payload)
             if InvalidatedToken.objects.filter(jti=token.JTI).exists():
-                print('roken is invalid')
                 raise jwt.InvalidKeyError('Token has been invalidated')
             if token.TYPE != token_type:
                 raise jwt.InvalidTokenError(f'Validating token with type {token.TYPE} failed due to invalide token type.')

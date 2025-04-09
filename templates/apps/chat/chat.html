@@ -5,18 +5,9 @@
     {% csrf_token %}
     <div class="row g-0">
         <div class="col-4 friends">
-            {% for i in my_range %}
-                <div class="friend d-flex align-items-center">
-                    <img class="pic" src="{% static 'assets/imgs/matboyer.jpg' %}">
-                    <div class="nickname">EZ2C</div>
-                </div>
-            {% endfor %}
-            <div class="chatRooms">
-                {% for room in rooms %}
-                    <div class="room">
-                        <div class="roomName">{{ room }}</div>
-                    </div>
-                {% endfor %}
+            <h4>Messages</h4>
+            <div class="chatRooms d-flex flex-column">
+                {% comment %} putting all the rooms from the js {% endcomment %}
             </div>
         </div>
         <div class="col-8 chatBox">
@@ -30,6 +21,6 @@
             <input type="text" id="messageInput" placeholder="message">
         </div>
     </div>
-</div>
+</div>  
 
 <script type="module" src="{% static 'js/apps/chat/chat.js' %}" defer></script>
