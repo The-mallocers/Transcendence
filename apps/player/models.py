@@ -4,7 +4,7 @@ from django.db import models, transaction
 from django.db.models import ForeignKey
 from django.db.models.fields import IntegerField
 
-from utils.enums import PlayerSide
+from utils.enums import PlayerSide, RTables
 from utils.redis import RedisConnectionPool
 
 
@@ -33,7 +33,7 @@ class Player(models.Model):
         return f'Player with client id: {self.client_id}'
 
     def leave_queue(self):
-        self.redis.hdel('matchmaking_queue', str(self.client_id))
+        self.redis.hdel(RTables.HASH_G_MATCHMAKING, str(self.client_id))
 
     # ━━ GETTER / SETTER ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
 

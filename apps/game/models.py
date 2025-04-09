@@ -11,7 +11,7 @@ from redis.commands.json.path import Path
 
 from apps.player.models import Player
 from apps.tournaments.models import Tournaments
-from utils.enums import EventType, ResponseAction, Ranks, RTables
+from utils.enums import EventType, ResponseAction, Ranks, RTables, PlayerSide
 from utils.enums import GameStatus
 from utils.redis import RedisConnectionPool
 from utils.serializers.player import PlayersRedisSerializer
@@ -54,7 +54,7 @@ class Game(models.Model):
         super().__init__(*args, **kwargs)
         self.redis = RedisConnectionPool.get_sync_connection()
         self.game_id = create_game_id()
-        self.game_key = f'game:{self.game_id}'
+        self.game_key = RTables.JSON_GAME(self.game_id)
         self.pL: Player = None
         self.pR: Player = None
 
@@ -64,32 +64,31 @@ class Game(models.Model):
     def create_redis_game(self):
         from utils.serializers.game import GameSerializer
         serializer = GameSerializer(self, context={'id': self.game_id})
-        self.redis.json().set(RTables.JSON_GAME(self.game_key), Path.root_path(), serializer.data)
+        self.redis.json().set(self.game_key, Path.root_path(), serializer.data)
 
     def init_players(self):
         # On ajoute a la db de redis , a l'id de la game, les infos des deux joueurs
         players_serializer = PlayersRedisSerializer(instance={PlayerSide.LEFT: self.pL, PlayerSide.RIGHT: self.pR})
-        existing_data = self.redis.json().get(RTables.JSON_GAME(self.game_key))
+        existing_data = self.redis.json().get(self.game_key)
         existing_data.update(players_serializer.data)
-        self.redis.json().set(RTables.JSON_GAME(self.game_key), Path.root_path(), existing_data)
+        self.redis.json().set(self.game_key, Path.root_path(), existing_data)
 
         # getting channel layer
         channel_layer = get_channel_layer()
 
         # Add two player in group of the new game
-        channel_name_pL = self.redis.hget(name="consumers_channels", key=str(self.pL.client_id))
-        async_to_sync(channel_layer.group_add)(str(self.game_id), channel_name_pL)
-        channel_name_pR = self.redis.hget(name="consumers_channels", key=str(self.pR.client_id))
-        async_to_sync(channel_layer.group_add)(str(self.game_id), channel_name_pR)
+        channel_name_pL = self.redis.hget(name=RTables.HASH_CONSUMERS, key=str(self.pL.client_id))
+        async_to_sync(channel_layer.group_add)(RTables.GROUP_GAME(self.game_id), channel_name_pL)
+        channel_name_pR = self.redis.hget(name=RTables.HASH_CONSUMERS, key=str(self.pR.client_id))
+        async_to_sync(channel_layer.group_add)(RTables.GROUP_GAME(self.game_id), channel_name_pR)
 
-        # Add the players in player_game redis table
-        self.redis.hset(name="current_matches", key=str(self.pL.client_id), value=str(self.game_id))
-        self.redis.hset(name="current_matches", key=str(self.pR.client_id), value=str(self.game_id))
+        self.redis.hset(name=RTables.HASH_MATCHES, key=str(self.pL.client_id), value=str(self.game_id))
+        self.redis.hset(name=RTables.HASH_MATCHES, key=str(self.pR.client_id), value=str(self.game_id))
 
         self.pL.leave_queue()
         self.pR.leave_queue()
 
-        send_group(self.game_id, EventType.GAME, ResponseAction.JOIN_GAME)
+        send_group(RTables.GROUP_GAME(self.game_id), EventType.GAME, ResponseAction.JOIN_GAME)
 
     def error_game(self):
         self.rset_status(GameStatus.ERROR)
@@ -101,13 +100,13 @@ class Game(models.Model):
 
     def rset_status(self, status):
         if self.rget_status() != status:
-            self.redis.json().set(RTables.JSON_GAME(self.game_key), Path('status'), status)
+            self.redis.json().set(self.game_key, Path('status'), status)
 
     # ── Getter ────────────────────────────────────────────────────────────────────── #
 
     def rget_status(self) -> GameStatus | None:
         try:
-            status = self.redis.json().get(RTables.JSON_GAME(self.game_key), Path('status'))
+            status = self.redis.json().get(self.game_key, Path('status'))
             if status:
                 return GameStatus(status)
             else:

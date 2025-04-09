@@ -4,6 +4,7 @@ from redis.asyncio import Redis
 from redis.commands.json.path import Path
 
 from apps.player.models import Player
+from utils.enums import RTables
 
 
 @dataclass
@@ -22,18 +23,18 @@ class Score:
         self.score = self.get_score()
 
     def get_score(self):
-        return self.redis.json().get(RTables.JSON_GAME(self.game_key), Path(f'player_{self.player_side}.score'))
+        return self.redis.json().get(self.game_key, Path(f'player_{self.player_side}.score'))
 
     def add_score(self):
         current = self.get_score()
-        self.redis.json().set(RTables.JSON_GAME(self.game_key), Path(f'player_{self.player_side}.score'), current + 1)
+        self.redis.json().set(self.game_key, Path(f'player_{self.player_side}.score'), current + 1)
         self.score += 1
 
     def del_score(self):
         current = self.get_score()
-        self.redis.json().set(RTables.JSON_GAME(self.game_key), Path(f'player_{self.player_side}.score'), current - 1)
+        self.redis.json().set(self.game_key, Path(f'player_{self.player_side}.score'), current - 1)
         self.score -= 1
 
     def set_score(self, score):
-        self.redis.json().set(RTables.JSON_GAME(self.game_key), Path(f'player_{self.player_side}.score'), score)
+        self.redis.json().set(self.game_key, Path(f'player_{self.player_side}.score'), score)
         self.score = score

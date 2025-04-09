@@ -3,7 +3,7 @@ import traceback
 
 from apps.game.models import Game
 from utils.enums import GameStatus, EventType, ResponseAction, \
-    ResponseError, PlayerSide
+    ResponseError, PlayerSide, RTables
 from utils.pong.logic import PongLogic
 from utils.serializers.player import PlayerInformationSerializer
 from utils.threads.threads import Threads
@@ -32,7 +32,7 @@ class GameThread(Threads):
             self._logger.error(e)
             traceback.print_exc()
             self.game.rset_status(GameStatus.ERROR)
-            send_group_error(self.game_id, ResponseError.EXCEPTION, close=True)
+            send_group_error(RTables.GROUP_GAME(self.game_id), ResponseError.EXCEPTION, close=True)
             self.stop()
 
     def game_is_running(self) -> bool:
@@ -42,10 +42,11 @@ class GameThread(Threads):
     def cleanup(self):
         self._logger.info("Cleaning up game...")
 
-        self.redis.delete(f'game:{self.game_id}')
-        self.redis.hdel('current_matches', str(self.game.pL.client_id))
-        self.redis.hdel('current_matches', str(self.game.pR.client_id))
-        self.redis.delete(f'channels::group:{self.game_id}')
+        self.redis.delete(RTables.JSON_GAME(self.game_id))
+        self.redis.hdel(RTables.HASH_MATCHES, str(self.game.pL.client_id))
+        self.redis.hdel(RTables.HASH_MATCHES, str(self.game.pR.client_id))
+        self.redis.expire(f'channels:group:{RTables.GROUP_GAME(self.game_id)}', 0)
+
         # RedisConnectionPool.close_connection(self.__class__.__name__)
 
         self._logger.info("Cleanup of game complete")
@@ -54,10 +55,10 @@ class GameThread(Threads):
 
     def _starting(self):
         if self.game.rget_status() is GameStatus.STARTING:
-            send_group(self.game_id, EventType.GAME, ResponseAction.STARTING)
+            send_group(RTables.GROUP_GAME(self.game_id), EventType.GAME, ResponseAction.STARTING)
             pL_serializer = PlayerInformationSerializer(self.game.pL, context={'side': PlayerSide.LEFT})
             pR_serializer = PlayerInformationSerializer(self.game.pR, context={'side': PlayerSide.RIGHT})
-            send_group(self.game_id, EventType.GAME, ResponseAction.PLAYER_INFOS, {
+            send_group(RTables.GROUP_GAME(self.game_id), EventType.GAME, ResponseAction.PLAYER_INFOS, {
                 'left': pL_serializer.data,
                 'right': pR_serializer.data
             })
@@ -75,16 +76,16 @@ class GameThread(Threads):
         if self.game.rget_status() is GameStatus.ENDING:
             if self.logic.score_pL.get_score() == self.game.points_to_win or self.logic.score_pR.get_score() == self.game.points_to_win:
                 self.logic.set_result()
-                send_group(self.game_id, EventType.GAME, ResponseAction.GAME_ENDING, self.game_id)
+                send_group(RTables.GROUP_GAME(self.game_id), EventType.GAME, ResponseAction.GAME_ENDING, self.game_id)
             else:  # ya eu une erreur, genre client deco ou erreur sur le server
                 self.logic.set_result(disconnect=True)
-                send_group_error(self.game_id, ResponseError.OPPONENT_LEFT, close=True)
+                send_group_error(RTables.GROUP_GAME(self.game_id), ResponseError.OPPONENT_LEFT, close=True)
 
             self._stop_event.set()
             self._stopping()
 
     def _stopping(self):
         self.game.rset_status(GameStatus.FINISHED)
-        self.redis.hdel('player_game', self.game.pL.client_id, self.game.pR.client_id)
+        self.redis.hdel(RTables.HASH_MATCHES, self.game.pL.client_id, self.game.pR.client_id)
         time.sleep(1)
         self.stop()

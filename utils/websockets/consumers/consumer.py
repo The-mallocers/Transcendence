@@ -32,7 +32,8 @@ class WsConsumer(AsyncWebsocketConsumer):
         await self.accept()
         if self.client is None:
             await self.channel_layer.group_add(RTables.GROUP_ERROR, self.channel_name)
-            await asend_group_error(RTables.GROUP_ERROR, ResponseError.PLAYER_NOT_FOUND, close=True)
+            await asend_group_error(RTables.GROUP_ERROR, ResponseError.PLAYER_NOT_FOUND, close=True, code=4004)
+            await self.channel_layer.group_discard(RTables.GROUP_ERROR, self.channel_name)
             return
         else:
             await self.channel_layer.group_add(RTables.GROUP_CLIENT(self.client.id), self.channel_name)
@@ -40,8 +41,10 @@ class WsConsumer(AsyncWebsocketConsumer):
 
     async def disconnect(self, close_code):
         logging.getLogger('websocket.client').info(f'WebSocket disconnected with code {close_code}')
-        await self._redis.hdel(RTables.HASH_CONSUMERS, str(self.client.id))
-        await self.channel_layer.group_discard(RTables.GROUP_CLIENT(self.client.id), self.channel_name)
+        await self.channel_layer.group_discard(RTables.GROUP_ERROR, self.channel_name)
+        if self.client:
+            await self._redis.hdel(RTables.HASH_CONSUMERS, str(self.client.id))
+            await self.channel_layer.group_discard(RTables.GROUP_CLIENT(self.client.id), self.channel_name)
 
     async def receive(self, text_data=None, bytes_data=None):
         try:

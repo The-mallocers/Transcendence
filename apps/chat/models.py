@@ -104,8 +104,8 @@ class Rooms(models.Model):
     
     
     @staticmethod
-    @sync_to_async  
-    def Aget_room_by_client_id(client_id):
+    @sync_to_async
+    def aget_room_by_client_id(client_id):
         global_room = "00000000-0000-0000-0000-000000000000"
         try:
             with transaction.atomic():
@@ -141,7 +141,7 @@ class Rooms(models.Model):
             return None
     
     @sync_to_async
-    def Adelete_room(self):
+    def adelete_room(self):
         try:
             with transaction.atomic():
                 print("delete room")
@@ -151,7 +151,7 @@ class Rooms(models.Model):
         
     @staticmethod
     @sync_to_async
-    def Adelete_all_user_by_room_id(roomId):
+    def adelete_all_user_by_room_id(roomId):
         try:
             with transaction.atomic():
                 room = Rooms.objects.get(id=roomId)
@@ -199,7 +199,7 @@ class Messages(models.Model):
 
     @staticmethod
     @sync_to_async
-    def Adelete_all_messages_by_room_id(roomId):
+    def adelete_all_messages_by_room_id(roomId):
         try:
             with transaction.atomic():
                 print("deleting messages...")

@@ -4,7 +4,7 @@ import traceback
 
 from apps.game.models import Game
 from apps.player.models import Player
-from utils.enums import GameStatus, ResponseError
+from utils.enums import GameStatus, ResponseError, RTables
 from utils.threads.game import GameThread
 from utils.threads.threads import Threads
 from utils.websockets.channel_send import send_group_error
@@ -39,10 +39,10 @@ class MatchmakingThread(Threads):
                 if game:
                     game.error_game()
                 if game.pL:
-                    send_group_error(game.pL.id, ResponseError.MATCHMAKING_ERROR)
+                    send_group_error(RTables.GROUP_CLIENT(game.pL.id), ResponseError.MATCHMAKING_ERROR)
                     game.pL.leave_queue()
                 if game.pR:
-                    send_group_error(game.pR.id, ResponseError.MATCHMAKING_ERROR)
+                    send_group_error(RTables.GROUP_CLIENT(game.pR.id), ResponseError.MATCHMAKING_ERROR)
                     game.pR.leave_queue()
 
     def cleanup(self):
@@ -52,9 +52,9 @@ class MatchmakingThread(Threads):
         for key in game_keys:
             self.redis.delete(key)
 
-        self.redis.delete("consumers_channels")
-        self.redis.delete("matchmaking_queue")
-        self.redis.delete("current_matches")
+        self.redis.delete(RTables.HASH_CONSUMERS)
+        self.redis.delete(RTables.HASH_G_MATCHMAKING)
+        self.redis.delete(RTables.HASH_MATCHES)
 
         # RedisConnectionPool.close_connection(self.__class__.__name__)
 
@@ -63,7 +63,7 @@ class MatchmakingThread(Threads):
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ FUNCTIONS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
     def select_players(self, game):
-        players_queue = self.redis.hgetall('matchmaking_queue')
+        players_queue = self.redis.hgetall(RTables.HASH_G_MATCHMAKING)
         players = [player.decode('utf-8') for player in players_queue]
         if len(players) >= 2:  # il faudra ce base sur les mmr
             selected_players = players[:2]  # this gets the first 2 players of the list

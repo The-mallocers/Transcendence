@@ -86,6 +86,11 @@ class Clients(models.Model):
         except ValidationError:
             return None
 
+    @sync_to_async
+    def aget_mmr(self):
+        return self.stats.mmr
+
+
     @staticmethod
     @sync_to_async
     def get_client_by_player_id_async(player_id):
@@ -234,7 +239,7 @@ class Clients(models.Model):
             return None
     
     @sync_to_async
-    def Aget_pending_request_by_client(self, target):
+    def aget_pending_request_by_client(self, target):
         try:
             for friend in self.friend.pending_friends.all():
                 if friend.id == target.id:

@@ -41,6 +41,8 @@ class RequestAction(str, Enum):
     # ── Matchmaking Actions ───────────────────────────────────────────────────────────
     JOIN_QUEUE: str = 'join_queue'
     LEAVE_QUEUE: str = 'leave_queue'
+    JOIN_DUEL: str = 'join_duel'
+    LEAVE_DUEL: str = 'leave_duel'
 
     # ── Game Actions ──────────────────────────────────────────────────────────────────
     JOIN_GAME: str = 'join_game'
@@ -113,10 +115,11 @@ class ResponseAction(str, Enum):
 # All the error messages sent to the client
 class ResponseError(str, Enum):
     # ── Matchmaking ───────────────────────────────────────────────────────────────────
-    ALREADY_IN_QUEUE: str = 'You are already in the queue.'
+    ALREADY_IN_QUEUE: str = 'You are already on a queue.'
     ALREAY_IN_GAME: str = 'You are already in game.'
     NOT_IN_QUEUE: str = 'You are not currently in the queue.'
     MATCHMAKING_ERROR: str = 'Leaving matchmaking due to an error.'
+    ALREADY_CONNECTED: str = 'You are already connected.'
 
     # ── Game ──────────────────────────────────────────────────────────────────────────
     GAME_FULL: str = 'The game is currently full.'
@@ -125,15 +128,18 @@ class ResponseError(str, Enum):
     JOINING_ERROR: str = 'Error occurred while trying to join.'
     OPPONENT_LEFT: str = 'Your opponent has left the game.'
     NOT_READY_TO_START: str = 'The game is not ready to start yet.'
-    NO_GAME: str = 'There is no active game'
+    NO_GAME: str = 'There is no active game.'
 
     # ── Chat ──────────────────────────────────────────────────────────────────────────
     NO_HISTORY: str = 'There are no messages in this room.'
-    
+    ROOM_NOT_FOUND: str = 'Room does not exist.'
+    NOT_ALLOWED: str = 'You are not allowed to send message.'
+    SAME_ID: str = 'You can\'t create room with yourself.'
+
     # ── Notification ──────────────────────────────────────────────────────────────────────────
-    USER_NOT_FOUND: str = 'User not found'
-    USER_ALREADY_MY_FRIEND: str = 'User already my friend'
-    USER_ALREADY_FRIEND_OR_NOT_PENDING_FRIEND: str = 'User already friend or not in pending list'
+    USER_NOT_FOUND: str = 'User not found.'
+    USER_ALREADY_MY_FRIEND: str = 'User already my friend.'
+    USER_ALREADY_FRIEND_OR_NOT_PENDING_FRIEND: str = 'User already friend or not in pending list.'
     NOT_FRIEND: str = "not_friend"
     INTERNAL_ERROR: str = "internal_error"
 
@@ -142,15 +148,12 @@ class ResponseError(str, Enum):
     JSON_ERROR: str = 'There is an error in JSON decoding.'
     EXCEPTION: str = 'An error has occurred.'
     SERVICE_ERROR: str = 'An error occurred in the service.'
+    TARGET_NOT_FOUND: str = 'Target not found.'
 
     # INTERNAL_ERROR = "Internal server error"
     # INVALID_ID: str = 'Player does not exist'
     # NOT_READY: str = 'Players are not ready'
     # NOT_IN_GAME: str = 'Player is not in the game'
-    ROOM_NOT_FOUND: str = 'Room does not exist'
-    NOT_ALLOWED: str = 'You are not allowed to send message'
-    TARGET_NOT_FOUND: str = 'Target not found'
-    SAME_ID: str = 'You can\'t create room with yourself'
 
 
 class RTables(str, Enum):
@@ -163,19 +166,18 @@ class RTables(str, Enum):
     # ── Hash Tables ───────────────────────────────────────────────────────────────── #
     HASH_CONSUMERS: str = 'client_channels'
     HASH_MATCHES: str = 'current_matches'
+    HASH_MATCHMAKING: str = 'matchmaking_{}'
+    HASH_G_MATCHMAKING: str = HASH_MATCHMAKING.format('global')
 
     # ── Json ──────────────────────────────────────────────────────────────────────── #
     JSON_GAME: str = 'game_{}'
     JSON_DUEL: str = 'duel_{}'
 
-    PLAYER_GAME: str = 'player_game'
-    MATCHMAKING: str = 'matchmaking:{}'
-    MATCHMAKING_GLOBAL: str = MATCHMAKING.format('global')
 
     def __str__(self, *args) -> str:
         if '{}' in self.value:  # Si la chaîne contient un placeholder
             raise ValueError(
-                f"L'élément '{self.name}' nécessite des arguments et doit être utilisé avec la méthode `format()`."
+                f"L'élément '{self.name}' nécessite des arguments."
             )
         return str(self.value)
 
