@@ -10,7 +10,6 @@ from utils.threads.threads import Threads
 from utils.websockets.channel_send import send_group_error
 
 
-# Game Will be the new game manager !
 class MatchmakingThread(Threads):
     def main(self):
         game: Game = Game()

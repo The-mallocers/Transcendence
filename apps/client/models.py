@@ -11,6 +11,7 @@ from apps.player.models import Player
 from apps.profile.models import Profile
 from utils.enums import Ranks
 
+
 class Stats(models.Model):
     class Meta:
         db_table = 'client_stats'
@@ -53,10 +54,11 @@ class Clients(models.Model):
 
     @staticmethod
     def get_client_by_id(id: uuid.UUID):
-        if id is None:
+        try:
+            client = Clients.objects.get(id=id)
+            return client
+        except:
             return None
-        client = Clients.objects.get(id=id)
-        return client
         
     @staticmethod
     def get_client_by_username(username: str):
