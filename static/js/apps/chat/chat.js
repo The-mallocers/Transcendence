@@ -70,6 +70,7 @@ document.getElementById("messageInput").addEventListener("keydown", function (ev
                 }
             }
         }
+        console.log("message_send: " + message.data);
         chatSocket.send(JSON.stringify(message));
     }
 });

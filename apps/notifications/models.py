@@ -6,7 +6,7 @@ import uuid
 import logging
 from asgiref.sync import sync_to_async
 
-from apps.shared.models import Clients
+from apps.client.models import Clients
 
 class Friend(models.Model):
     # id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)

@@ -25,7 +25,7 @@ def delete_global_room(apps, schema_editor):
 class Migration(migrations.Migration):
     dependencies = [
         ('chat', '0002_initial'),
-        ('client', '0003_create_admin')
+        ('client', '0002_initial')
     ]
 
     operations = [
