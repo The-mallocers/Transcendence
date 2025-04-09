@@ -153,9 +153,39 @@ class ResponseError(str, Enum):
     SAME_ID: str = 'You can\'t create room with yourself'
 
 
-class Side(str, Enum):
-    LEFT: str = 'left'
-    RIGHT: str = 'right'
+class RTables(str, Enum):
+    # ── Groups ────────────────────────────────────────────────────────────────────── #
+    GROUP_ERROR: str = 'error'
+    GROUP_CLIENT: str = 'client_{}'
+    GROUP_CHAT: str = 'chat_{}'
+    GROUP_GAME: str = 'game_{}'
+
+    # ── Hash Tables ───────────────────────────────────────────────────────────────── #
+    HASH_CONSUMERS: str = 'client_channels'
+    HASH_MATCHES: str = 'current_matches'
+
+    # ── Json ──────────────────────────────────────────────────────────────────────── #
+    JSON_GAME: str = 'game_{}'
+    JSON_DUEL: str = 'duel_{}'
+
+    PLAYER_GAME: str = 'player_game'
+    MATCHMAKING: str = 'matchmaking:{}'
+    MATCHMAKING_GLOBAL: str = MATCHMAKING.format('global')
+
+    def __str__(self, *args) -> str:
+        if '{}' in self.value:  # Si la chaîne contient un placeholder
+            raise ValueError(
+                f"L'élément '{self.name}' nécessite des arguments et doit être utilisé avec la méthode `format()`."
+            )
+        return str(self.value)
+
+    def __call__(self, *args, **kwargs) -> str:
+        return str(self.value.format(str(*args), **kwargs))
+
+
+class PlayerSide(str, Enum):
+    LEFT: str = 'player_left'
+    RIGHT: str = 'player_right'
 
 
 class PaddleMove(str, Enum):

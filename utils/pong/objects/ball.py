@@ -17,7 +17,7 @@ class Ball:
 
         # ── Utils ─────────────────────────────────────────────────────────────────────────    
         self.redis = redis
-        self.game_key = f'game:{game_id}'
+        self.game_key = RTables.JSON_GAME(game_id)
 
     def update(self):
         self.radius = self.get_radius()
@@ -29,36 +29,36 @@ class Ball:
     # ── Getter ────────────────────────────────────────────────────────────────────────
 
     def get_radius(self):
-        return self.redis.json().get(self.game_key, Path('ball.radius'))
+        return self.redis.json().get(RTables.JSON_GAME(self.game_key), Path('ball.radius'))
 
     def get_x(self):
-        return self.redis.json().get(self.game_key, Path('ball.x'))
+        return self.redis.json().get(RTables.JSON_GAME(self.game_key), Path('ball.x'))
 
     def get_y(self):
-        return self.redis.json().get(self.game_key, Path('ball.y'))
+        return self.redis.json().get(RTables.JSON_GAME(self.game_key), Path('ball.y'))
 
     def get_dx(self):
-        return self.redis.json().get(self.game_key, Path('ball.dx'))
+        return self.redis.json().get(RTables.JSON_GAME(self.game_key), Path('ball.dx'))
 
     def get_dy(self):
-        return self.redis.json().get(self.game_key, Path('ball.dy'))
+        return self.redis.json().get(RTables.JSON_GAME(self.game_key), Path('ball.dy'))
 
     # ── Setter ────────────────────────────────────────────────────────────────────────
 
     def set_radius(self, radius):
-        self.redis.json().set(self.game_key, Path('ball.radius'), radius)
+        self.redis.json().set(RTables.JSON_GAME(self.game_key), Path('ball.radius'), radius)
 
     def set_x(self, x):
-        self.redis.json().set(self.game_key, Path('ball.x'), x)
+        self.redis.json().set(RTables.JSON_GAME(self.game_key), Path('ball.x'), x)
 
     def set_y(self, y):
-        self.redis.json().set(self.game_key, Path('ball.y'), y)
+        self.redis.json().set(RTables.JSON_GAME(self.game_key), Path('ball.y'), y)
 
     def set_dx(self, dx):
-        self.redis.json().set(self.game_key, Path('ball.dx'), dx)
+        self.redis.json().set(RTables.JSON_GAME(self.game_key), Path('ball.dx'), dx)
 
     def set_dy(self, dy):
-        self.redis.json().set(self.game_key, Path('ball.dy'), dy)
+        self.redis.json().set(RTables.JSON_GAME(self.game_key), Path('ball.dy'), dy)
 
     # ── Helper Methods for Incrementing/Decrementing ─────────────────────────────────
 

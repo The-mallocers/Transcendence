@@ -3,7 +3,7 @@ import traceback
 
 from apps.game.models import Game
 from utils.enums import GameStatus, EventType, ResponseAction, \
-    ResponseError, Side
+    ResponseError, PlayerSide
 from utils.pong.logic import PongLogic
 from utils.serializers.player import PlayerInformationSerializer
 from utils.threads.threads import Threads
@@ -55,8 +55,8 @@ class GameThread(Threads):
     def _starting(self):
         if self.game.rget_status() is GameStatus.STARTING:
             send_group(self.game_id, EventType.GAME, ResponseAction.STARTING)
-            pL_serializer = PlayerInformationSerializer(self.game.pL, context={'side': Side.LEFT})
-            pR_serializer = PlayerInformationSerializer(self.game.pR, context={'side': Side.RIGHT})
+            pL_serializer = PlayerInformationSerializer(self.game.pL, context={'side': PlayerSide.LEFT})
+            pR_serializer = PlayerInformationSerializer(self.game.pR, context={'side': PlayerSide.RIGHT})
             send_group(self.game_id, EventType.GAME, ResponseAction.PLAYER_INFOS, {
                 'left': pL_serializer.data,
                 'right': pR_serializer.data

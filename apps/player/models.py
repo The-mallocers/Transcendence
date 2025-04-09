@@ -4,6 +4,7 @@ from django.db import models, transaction
 from django.db.models import ForeignKey
 from django.db.models.fields import IntegerField
 
+from utils.enums import PlayerSide
 from utils.redis import RedisConnectionPool
 
 
@@ -67,11 +68,11 @@ class Player(models.Model):
         # Iterate through the game state
         for game in game_state:
             # Check player_left
-            if game.get('player_left', {}).get('id') == player_id:
+            if game.get(PlayerSide.LEFT, {}).get('id') == player_id:
                 return 'left'
 
             # Check player_right
-            if game.get('player_right', {}).get('id') == player_id:
+            if game.get(PlayerSide.RIGHT, {}).get('id') == player_id:
                 return 'right'
 
         # Return None if player not found

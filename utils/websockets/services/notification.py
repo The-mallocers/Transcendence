@@ -1,10 +1,7 @@
-import logging
-from apps import notifications
-
 from django.forms import ValidationError
-from apps.client.models import Clients
+
 from apps.chat.models import Rooms, Messages
-from apps.notifications.admin import check_client_exists
+from apps.client.models import Clients
 # from apps.notifications.models import Friend
 from utils.enums import EventType, ResponseAction, ResponseError
 from utils.websockets.channel_send import asend_group, asend_group_error
@@ -22,7 +19,7 @@ class NotificationService(BaseServices):
         print(f"Searching for username: '{data['data']['args']['target_name']}'")
         print("the person that ask the friendship ", client.id)
         # target is the client that I want to add
-        target = await Clients.ASget_client_by_username(data['data']['args']['target_name'])
+        target = await Clients.aget_client_by_username(data['data']['args']['target_name'])
         if target is None:
             return await asend_group_error(client.id, ResponseError.USER_NOT_FOUND)
         friendTargetTable = await target.get_friend_table()
@@ -60,7 +57,7 @@ class NotificationService(BaseServices):
     async def _handle_accept_friend_request(self, data, client):
         print(f"Accept friend and searching for username: '{data['data']['args']['target_name']}'")
         print("the person that ask the friendship ", client.id)
-        target = await Clients.ASget_client_by_username(data['data']['args']['target_name'])
+        target = await Clients.aget_client_by_username(data['data']['args']['target_name'])
         if target is None:
             return await asend_group_error(client.id, ResponseError.USER_NOT_FOUND)
         try:
@@ -108,7 +105,7 @@ class NotificationService(BaseServices):
         
     async def _handle_refuse_friend_request(self, data, client):
         print(f"Refuse friend request and searching for username: '{data['data']['args']['target_name']}'")
-        target = await Clients.ASget_client_by_username(data['data']['args']['target_name'])
+        target = await Clients.aget_client_by_username(data['data']['args']['target_name'])
         if target is None:
             return await asend_group_error(client.id, ResponseError.USER_NOT_FOUND)
         try:
@@ -126,7 +123,7 @@ class NotificationService(BaseServices):
         
     async def _handle_delete_friend(self, data, client):
         print(f"Deleting friend and searching for username: '{data['data']['args']['target_name']}'")
-        target = await Clients.ASget_client_by_username(data['data']['args']['target_name'])
+        target = await Clients.aget_client_by_username(data['data']['args']['target_name'])
         if target is None:
             return await asend_group_error(client.id, ResponseError.USER_NOT_FOUND)
         

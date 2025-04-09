@@ -245,7 +245,7 @@ class Clients(models.Model):
             return None
         
     @staticmethod
-    async def ASget_client_by_username(username: str):
+    async def aget_client_by_username(username: str):
         try:
             return await Clients.objects.aget(profile__username=username)
         except :

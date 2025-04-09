@@ -11,7 +11,7 @@ from redis.commands.json.path import Path
 
 from apps.player.models import Player
 from apps.tournaments.models import Tournaments
-from utils.enums import EventType, ResponseAction, Ranks
+from utils.enums import EventType, ResponseAction, Ranks, RTables
 from utils.enums import GameStatus
 from utils.redis import RedisConnectionPool
 from utils.serializers.player import PlayersRedisSerializer
@@ -64,14 +64,14 @@ class Game(models.Model):
     def create_redis_game(self):
         from utils.serializers.game import GameSerializer
         serializer = GameSerializer(self, context={'id': self.game_id})
-        self.redis.json().set(self.game_key, Path.root_path(), serializer.data)
+        self.redis.json().set(RTables.JSON_GAME(self.game_key), Path.root_path(), serializer.data)
 
     def init_players(self):
         # On ajoute a la db de redis , a l'id de la game, les infos des deux joueurs
-        players_serializer = PlayersRedisSerializer(instance={'player_left': self.pL, 'player_right': self.pR})
-        existing_data = self.redis.json().get(self.game_key)
+        players_serializer = PlayersRedisSerializer(instance={PlayerSide.LEFT: self.pL, PlayerSide.RIGHT: self.pR})
+        existing_data = self.redis.json().get(RTables.JSON_GAME(self.game_key))
         existing_data.update(players_serializer.data)
-        self.redis.json().set(self.game_key, Path.root_path(), existing_data)
+        self.redis.json().set(RTables.JSON_GAME(self.game_key), Path.root_path(), existing_data)
 
         # getting channel layer
         channel_layer = get_channel_layer()
@@ -101,13 +101,13 @@ class Game(models.Model):
 
     def rset_status(self, status):
         if self.rget_status() != status:
-            self.redis.json().set(self.game_key, Path('status'), status)
+            self.redis.json().set(RTables.JSON_GAME(self.game_key), Path('status'), status)
 
     # ── Getter ────────────────────────────────────────────────────────────────────── #
 
     def rget_status(self) -> GameStatus | None:
         try:
-            status = self.redis.json().get(self.game_key, Path('status'))
+            status = self.redis.json().get(RTables.JSON_GAME(self.game_key), Path('status'))
             if status:
                 return GameStatus(status)
             else:

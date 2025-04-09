@@ -186,7 +186,7 @@ CHANNEL_LAYERS = {
             "capacity": 1500,
             "expiry": 10,
             "group_expiry": 86400,
-            "prefix": "channels:",
+            "prefix": "channels",
         },
     },
 }

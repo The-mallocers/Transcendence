@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from apps.player.models import Player
-from utils.enums import Side
+from utils.enums import PlayerSide
 from utils.pong.objects import PADDLE_WIDTH, CANVAS_WIDTH, OFFSET_PADDLE
 from utils.pong.objects.paddle import Paddle
 
@@ -69,9 +69,9 @@ class PlayerInformationSerializer(serializers.ModelSerializer):
         return PaddleSerializer(paddle).data
 
     def _get_paddle_x(self, side):
-        if side is Side.LEFT:
+        if side is PlayerSide.LEFT:
             return OFFSET_PADDLE
-        elif side is Side.RIGHT:
+        elif side is PlayerSide.RIGHT:
             return CANVAS_WIDTH - OFFSET_PADDLE - PADDLE_WIDTH
         return None  # or a default value
 
@@ -87,11 +87,11 @@ class PlayersRedisSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         paddle_left = Paddle(x=OFFSET_PADDLE)
         paddle_right = Paddle(x=CANVAS_WIDTH - OFFSET_PADDLE - PADDLE_WIDTH)
-        pl = instance.get('player_left')
-        pr = instance.get('player_right')
+        pl = instance.get(PlayerSide.LEFT)
+        pr = instance.get(PlayerSide.RIGHT)
         return {
-            'player_left': PlayerSerializer(pl, context={'paddle': paddle_left, 'id': str(pl.client_id)}).data,
-            'player_right': PlayerSerializer(pr, context={'paddle': paddle_right, 'id': str(pr.client_id)}).data
+            PlayerSide.LEFT: PlayerSerializer(pl, context={'paddle': paddle_left, 'id': str(pl.client_id)}).data,
+            PlayerSide.RIGHT: PlayerSerializer(pr, context={'paddle': paddle_right, 'id': str(pr.client_id)}).data
         }
 
 

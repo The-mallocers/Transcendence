@@ -7,7 +7,7 @@ from django.conf import settings
 from redis.asyncio import Redis
 
 from apps.client.models import Clients
-from utils.enums import EventType, ResponseError
+from utils.enums import EventType, ResponseError, RTables
 from utils.websockets.channel_send import asend_group_error
 from utils.websockets.services.services import ServiceError, BaseServices
 
@@ -31,17 +31,17 @@ class WsConsumer(AsyncWebsocketConsumer):
 
         await self.accept()
         if self.client is None:
-            await self.channel_layer.group_add('consumer_error', self.channel_name)
-            await asend_group_error('consumer_error', ResponseError.PLAYER_NOT_FOUND, close=True)
+            await self.channel_layer.group_add(RTables.GROUP_ERROR, self.channel_name)
+            await asend_group_error(RTables.GROUP_ERROR, ResponseError.PLAYER_NOT_FOUND, close=True)
             return
         else:
-            await self.channel_layer.group_add(str(self.client.id), self.channel_name)
-            await self._redis.hset(name="consumers_channels", key=str(self.client.id), value=str(self.channel_name))
+            await self.channel_layer.group_add(RTables.GROUP_CLIENT(self.client.id), self.channel_name)
+            await self._redis.hset(name=RTables.HASH_CONSUMERS, key=str(self.client.id), value=str(self.channel_name))
 
     async def disconnect(self, close_code):
         logging.getLogger('websocket.client').info(f'WebSocket disconnected with code {close_code}')
-        await self._redis.hdel('consumers_channels', str(self.client.id))
-        await self.channel_layer.group_discard(str(self.client.id), self.channel_name)
+        await self._redis.hdel(RTables.HASH_CONSUMERS, str(self.client.id))
+        await self.channel_layer.group_discard(RTables.GROUP_CLIENT(self.client.id), self.channel_name)
 
     async def receive(self, text_data=None, bytes_data=None):
         try:
@@ -64,20 +64,18 @@ class WsConsumer(AsyncWebsocketConsumer):
                 await self.service.process_action(data, self.client)
 
             if self.event_type is EventType.TOURNAMENT:
-                player = await PlayerManager.get_player_from_client_db_async(
-                    self.client.id)
-                await self.service.process_action(data, player)
+                await self.service.process_action(data, self.client)
             
             if self.event_type is EventType.NOTIFICATION:
                 await self.service.process_action(data, self.client)
             
         except json.JSONDecodeError as e:
             self._logger.error(e)
-            await asend_group_error(self.client.id, ResponseError.JSON_ERROR)
+            await asend_group_error(RTables.GROUP_CLIENT(self.client.id), ResponseError.JSON_ERROR)
 
         except ServiceError as e:
             self._logger.error(e)
-            await asend_group_error(self.client.id, ResponseError.SERVICE_ERROR, content=str(e))
+            await asend_group_error(RTables.GROUP_CLIENT(self.client.id), ResponseError.SERVICE_ERROR, content=str(e))
 
     async def send_channel(self, event):
         message = event['message']

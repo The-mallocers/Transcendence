@@ -58,7 +58,7 @@ class Rooms(models.Model):
 
     @staticmethod
     @sync_to_async
-    def ASget_room_id_by_client_id(client_id):
+    def aget_room_id_by_client_id(client_id):
         try:
             with transaction.atomic():
                 return list(Rooms.objects.filter(clients__id=client_id).values_list('id', flat=True))
@@ -182,7 +182,7 @@ class Messages(models.Model):
 
     @staticmethod
     @sync_to_async
-    def Aget_message_by_room(room):
+    def aget_message_by_room(room):
         try:
             with transaction.atomic():
                 return list(Messages.objects.filter(room__id=room.id))

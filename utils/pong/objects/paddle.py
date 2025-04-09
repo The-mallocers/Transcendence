@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from redis.commands.json.path import Path
 
 from apps.player.models import Player
-from utils.enums import PaddleMove
+from utils.enums import PaddleMove, RTables
 from utils.pong.objects import PADDLE_WIDTH, PADDLE_HEIGHT, PADDLE_SPEED, CANVAS_HEIGHT
 
 
@@ -19,7 +19,7 @@ class Paddle:
 
         # ── Utils ─────────────────────────────────────────────────────────────────────────    
         self.redis = redis
-        self.game_key = f'game:{game_id}'
+        self.game_key = RTables.JSON_GAME(game_id)
         self.player_id = player_id
         self.move: PaddleMove = PaddleMove.IDLE
         self.player_side = Player.get_player_side(self.player_id, self.game_key, self.redis)
@@ -37,47 +37,47 @@ class Paddle:
     # ── Getter ────────────────────────────────────────────────────────────────────────
 
     def get_width(self):
-        return self.redis.json().get(self.game_key, Path(f'player_{self.player_side}.paddle.width'))
+        return self.redis.json().get(RTables.JSON_GAME(self.game_key), Path(f'player_{self.player_side}.paddle.width'))
 
     def get_height(self):
-        return self.redis.json().get(self.game_key, Path(f'player_{self.player_side}.paddle.height'))
+        return self.redis.json().get(RTables.JSON_GAME(self.game_key), Path(f'player_{self.player_side}.paddle.height'))
 
     def get_x(self):
-        return self.redis.json().get(self.game_key, Path(f'player_{self.player_side}.paddle.x'))
+        return self.redis.json().get(RTables.JSON_GAME(self.game_key), Path(f'player_{self.player_side}.paddle.x'))
 
     def get_y(self):
-        return self.redis.json().get(self.game_key, Path(f'player_{self.player_side}.paddle.y'))
+        return self.redis.json().get(RTables.JSON_GAME(self.game_key), Path(f'player_{self.player_side}.paddle.y'))
 
     def get_speed(self):
-        return self.redis.json().get(self.game_key, Path(f'player_{self.player_side}.paddle.speed'))
+        return self.redis.json().get(RTables.JSON_GAME(self.game_key), Path(f'player_{self.player_side}.paddle.speed'))
 
     def get_move(self):
-        return self.redis.json().get(self.game_key, Path(f'player_{self.player_side}.paddle.move'))
+        return self.redis.json().get(RTables.JSON_GAME(self.game_key), Path(f'player_{self.player_side}.paddle.move'))
 
     # ── Setter ────────────────────────────────────────────────────────────────────────
 
     def set_width(self, width):
-        self.redis.json().set(self.game_key, Path(f'player_{self.player_side}.paddle.width'), width)
+        self.redis.json().set(RTables.JSON_GAME(self.game_key), Path(f'player_{self.player_side}.paddle.width'), width)
         self.width = width
 
     def set_height(self, height):
-        self.redis.json().set(self.game_key, Path(f'player_{self.player_side}.paddle.height'), height)
+        self.redis.json().set(RTables.JSON_GAME(self.game_key), Path(f'player_{self.player_side}.paddle.height'), height)
         self.height = height
 
     def set_x(self, x):
-        self.redis.json().set(self.game_key, Path(f'player_{self.player_side}.paddle.x'), x)
+        self.redis.json().set(RTables.JSON_GAME(self.game_key), Path(f'player_{self.player_side}.paddle.x'), x)
         self.x = x
 
     def set_y(self, y):
-        self.redis.json().set(self.game_key, Path(f'player_{self.player_side}.paddle.y'), y)
+        self.redis.json().set(RTables.JSON_GAME(self.game_key), Path(f'player_{self.player_side}.paddle.y'), y)
         self.y = y
 
     def set_speed(self, speed):
-        self.redis.json().set(self.game_key, Path(f'player_{self.player_side}.paddle.speed'), speed)
+        self.redis.json().set(RTables.JSON_GAME(self.game_key), Path(f'player_{self.player_side}.paddle.speed'), speed)
         self.speed = speed
 
     def set_move(self, move):
-        self.redis.json().set(self.game_key, Path(f'player_{self.player_side}.paddle.move'), move)
+        self.redis.json().set(RTables.JSON_GAME(self.game_key), Path(f'player_{self.player_side}.paddle.move'), move)
         self.move = move
 
     # ── Helper Methods for Incrementing/Decrementing ─────────────────────────────────

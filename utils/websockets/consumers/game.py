@@ -1,6 +1,6 @@
 from json import JSONDecodeError, loads
 
-from utils.enums import EventType, ResponseError
+from utils.enums import EventType, ResponseError, RTables
 from utils.websockets.channel_send import asend_group_error
 from utils.websockets.consumers.consumer import WsConsumer
 from utils.websockets.services.game import GameService
@@ -23,7 +23,7 @@ class GameConsumer(WsConsumer):
 
         except JSONDecodeError as e:
             self._logger.error(f'Json error: {e}')
-            await asend_group_error(self.client.id, ResponseError.JSON_ERROR)
+            await asend_group_error(RTables.GROUP_CLIENT(self.client.id), ResponseError.JSON_ERROR)
 
     async def disconnect(self, close_code):
         await super().disconnect(close_code)
