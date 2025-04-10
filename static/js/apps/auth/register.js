@@ -10,6 +10,7 @@ function register(event) {
     const username = document.getElementById('username').value;
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
+    const passwordcheck = document.getElementById('password_check').value;
 
     const data = {
         profile: {
@@ -17,10 +18,8 @@ function register(event) {
             email: email
         },
         password: {
-            password: password
-        },
-        player: {
-            nickname: username
+            password: password,
+            passwordcheck: passwordcheck
         }
     }
     console.log(data);
@@ -67,3 +66,13 @@ let element = document.querySelector("#register-btn");
 element.addEventListener("click", (e) => {
     register(e)
 })
+
+// function isPasswordcheckValid() {
+//     if (password === passwordcheck) {
+//         return true
+//     }
+//     else {
+//         //Update a div to say its wrong.
+//         return False
+//     }
+// }

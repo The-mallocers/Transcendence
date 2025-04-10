@@ -16,7 +16,15 @@ class ClientSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Clients
-        fields = ['profile', 'password']
+        fields = ['profile', 'password', 'passwordcheck']
+        
+    def validate(self, data):
+        password = data['password']['password']
+        passwordcheck = data['password']['passwordcheck']
+        
+        if password != passwordcheck:
+            raise serializers.ValidationError("Passwords do not match.")
+        return data
 
     def create(self, validated_data):
         profile_data = validated_data.pop('profile')
