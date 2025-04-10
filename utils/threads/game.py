@@ -1,8 +1,6 @@
 import time
 import traceback
 
-from channels.layers import get_channel_layer
-
 from apps.game.models import Game
 from utils.enums import GameStatus, EventType, ResponseAction, \
     ResponseError, PlayerSide, RTables
@@ -47,12 +45,7 @@ class GameThread(Threads):
         self.redis.delete(RTables.JSON_GAME(self.game_id))
         self.redis.hdel(RTables.HASH_MATCHES, str(self.game.pL.client_id))
         self.redis.hdel(RTables.HASH_MATCHES, str(self.game.pR.client_id))
-        channel_pl = self.redis.hget(name=RTables.HASH_CLIENT(self.game.pL.client_id), key=str(EventType.GAME.value))
-        channel_pr = self.redis.hget(name=RTables.HASH_CLIENT(self.game.pR.client_id), key=str(EventType.GAME.value))
-        channel_layer = get_channel_layer()
-        channel_layer.group_discard(RTables.GROUP_GAME(self.game_id), channel_pl)
-        channel_layer.group_discard(RTables.GROUP_GAME(self.game_id), channel_pr)
-        # self.redis.expire(f'channels:group:{RTables.GROUP_GAME(self.game_id)}', 0)
+        self.redis.expire(f'channels:group:{RTables.GROUP_GAME(self.game_id)}', 0)
 
         # RedisConnectionPool.close_connection(self.__class__.__name__)
 

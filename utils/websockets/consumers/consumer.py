@@ -55,12 +55,26 @@ class WsConsumer(AsyncWebsocketConsumer):
 
     async def receive(self, text_data=None, bytes_data=None):
         try:
+            data = json.loads(text_data)
+            self.event_type = EventType(data['event'])
+
             if not self.client:
                 raise ServiceError("Client is not connected")
 
-            data = json.loads(text_data)
+            if self.event_type is EventType.MATCHMAKING:
+                await self.service.process_action(data, self.client)
 
-            await self.service.process_action(data, self.client)
+            if self.event_type is EventType.GAME:
+                await self.service.process_action(data, self.client)
+
+            if self.event_type is EventType.CHAT:
+                await self.service.process_action(data, self.client)
+
+            if self.event_type is EventType.TOURNAMENT:
+                await self.service.process_action(data, self.client)
+
+            if self.event_type is EventType.NOTIFICATION:
+                await self.service.process_action(data, self.client)
 
         except json.JSONDecodeError as e:
             self._logger.error(e)

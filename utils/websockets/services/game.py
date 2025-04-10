@@ -10,9 +10,9 @@ class GameService(BaseServices):
     async def init(self, client: Clients) -> bool:
         await super().init()
         game_id_bytes = await self.redis.hget(name=RTables.HASH_MATCHES, key=str(client.id))
-        game_id = game_id_bytes.decode('utf-8')
 
-        if game_id:
+        if game_id_bytes:
+            game_id = game_id_bytes.decode('utf-8')
             self.game_key = RTables.JSON_GAME(game_id)
             self.pL = await self.redis.json().get(self.game_key, Path(PlayerSide.LEFT))
             self.pR = await self.redis.json().get(self.game_key, Path(PlayerSide.RIGHT))

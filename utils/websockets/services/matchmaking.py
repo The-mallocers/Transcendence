@@ -21,6 +21,7 @@ class MatchmakingService(BaseServices):
     async def _handle_leave_queue(self, data, client: Clients):
         if await self.redis.hget(name=RTables.HASH_G_QUEUE, key=str(client.id)) is not None:
             await self.redis.hdel(RTables.HASH_G_QUEUE, str(client.id))
+            await self.redis.hdel(RTables.HASH_CLIENT(client.id), str(EventType.GAME.value))
             await asend_group(RTables.GROUP_CLIENT(client.id), EventType.MATCHMAKING, ResponseAction.LEFT_QUEUE)
         else:
             await asend_group_error(RTables.GROUP_CLIENT(client.id), ResponseError.NOT_IN_QUEUE)
