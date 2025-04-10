@@ -1,6 +1,8 @@
 import time
 import traceback
 
+from channels.layers import get_channel_layer
+
 from apps.game.models import Game
 from utils.enums import GameStatus, EventType, ResponseAction, \
     ResponseError, PlayerSide, RTables
@@ -45,7 +47,12 @@ class GameThread(Threads):
         self.redis.delete(RTables.JSON_GAME(self.game_id))
         self.redis.hdel(RTables.HASH_MATCHES, str(self.game.pL.client_id))
         self.redis.hdel(RTables.HASH_MATCHES, str(self.game.pR.client_id))
-        self.redis.expire(f'channels:group:{RTables.GROUP_GAME(self.game_id)}', 0)
+        channel_pl = self.redis.hget(name=RTables.HASH_CLIENT(self.game.pL.client_id), key=str(EventType.GAME.value))
+        channel_pr = self.redis.hget(name=RTables.HASH_CLIENT(self.game.pR.client_id), key=str(EventType.GAME.value))
+        channel_layer = get_channel_layer()
+        channel_layer.group_discard(RTables.GROUP_GAME(self.game_id), channel_pl)
+        channel_layer.group_discard(RTables.GROUP_GAME(self.game_id), channel_pr)
+        # self.redis.expire(f'channels:group:{RTables.GROUP_GAME(self.game_id)}', 0)
 
         # RedisConnectionPool.close_connection(self.__class__.__name__)
 
@@ -76,7 +83,7 @@ class GameThread(Threads):
         if self.game.rget_status() is GameStatus.ENDING:
             if self.logic.score_pL.get_score() == self.game.points_to_win or self.logic.score_pR.get_score() == self.game.points_to_win:
                 self.logic.set_result()
-                send_group(RTables.GROUP_GAME(self.game_id), EventType.GAME, ResponseAction.GAME_ENDING, self.game_id)
+                send_group(RTables.GROUP_GAME(self.game_id), EventType.GAME, ResponseAction.GAME_ENDING, self.game_id, close=True)
             else:  # ya eu une erreur, genre client deco ou erreur sur le server
                 self.logic.set_result(disconnect=True)
                 send_group_error(RTables.GROUP_GAME(self.game_id), ResponseError.OPPONENT_LEFT, close=True)

@@ -10,11 +10,11 @@ class GameSerializer(serializers.ModelSerializer):
     ball = serializers.SerializerMethodField()
     status = serializers.SerializerMethodField()
     game_id = serializers.SerializerMethodField()
+    is_duel = serializers.SerializerMethodField()
 
     class Meta:
         model = Game
-        fields = ['game_id', 'status', 'ball']
-        # fields = ['id', 'players', 'ball', 'status', 'timer']
+        fields = ['game_id', 'status', 'is_duel', 'ball']
 
     def get_ball(self, obj):
         ball = Ball()
@@ -23,6 +23,10 @@ class GameSerializer(serializers.ModelSerializer):
     def get_status(self, obj):
         status = GameStatus(GameStatus.CREATING)
         return status
+
+    def get_is_duel(self, obj):
+        is_duel = self.context.get('is_duel')
+        return is_duel
 
     def get_game_id(self, obj):
         game_id = self.context.get('id')

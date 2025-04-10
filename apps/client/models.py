@@ -25,12 +25,13 @@ class Stats(models.Model):
     rank = models.CharField(default=Ranks.BRONZE.value, max_length=100, blank=True)
     games = models.ManyToManyField('game.Game', blank=True)
 
+
 class Clients(models.Model):
-    #Primary key
+    # Primary key
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False,
                           null=False)
 
-    #Joined tables
+    # Joined tables
     password = models.ForeignKey(Password, on_delete=models.CASCADE)
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
     twoFa = models.ForeignKey(TwoFA, on_delete=models.CASCADE)
@@ -59,12 +60,12 @@ class Clients(models.Model):
             return client
         except:
             return None
-        
+
     @staticmethod
     def get_client_by_username(username: str):
         try:
             return Clients.objects.get(profile__username=username)
-        except :
+        except:
             return None  # Or handle the error appropriately
 
     @staticmethod
@@ -74,10 +75,10 @@ class Clients(models.Model):
         if token is not None:
             return Clients.get_client_by_id(token.SUB)
         return None
-    
+
     @staticmethod
     @sync_to_async
-    def get_client_by_id_async(id: uuid.UUID):
+    def aget_client_by_id(id: uuid.UUID):
         try:
             with transaction.atomic():
                 return Clients.objects.get(id=id)
@@ -89,16 +90,6 @@ class Clients(models.Model):
     @sync_to_async
     def aget_mmr(self):
         return self.stats.mmr
-
-
-    @staticmethod
-    @sync_to_async
-    def get_client_by_player_id_async(player_id):
-        try:
-            with transaction.atomic():
-                return Clients.objects.get(player_id=player_id)
-        except Clients.DoesNotExist:
-            return None
 
     @staticmethod
     def get_client_by_email(email: Profile.email):
@@ -178,7 +169,7 @@ class Clients(models.Model):
             return Clients.objects.select_related('player').get(id=client_id)
         except Clients.DoesNotExist:
             return None
-        
+
     @sync_to_async
     def aget_profile_username(self):
         try:
@@ -187,7 +178,7 @@ class Clients(models.Model):
         except Exception as e:
             print(f"Error retrieving username: {e}")
             return None
-        
+
     @sync_to_async
     def get_friend_table(self):
         try:
@@ -203,7 +194,7 @@ class Clients(models.Model):
         except Exception as e:
             print(f"Error retrieving client: {e}")
             return None
-    
+
     def get_all_friends(self):
         try:
             friend_list = []
@@ -220,24 +211,24 @@ class Clients(models.Model):
             pending_list = []
             for friend in self.friend.pending_friends.all():
                 pending_list.append({"client": friend,
-                                    "username": friend.profile.username})
+                                     "username": friend.profile.username})
             return pending_list
         except Exception as e:
             print(f"Error retrieving client: {e}")
             return None
-        
+
     @sync_to_async
     def Aget_all_pending_request(self):
         try:
             pending_list = []
             for friend in self.friend.pending_friends.all():
                 pending_list.append({"client": friend,
-                                    "username": friend.profile.username})
+                                     "username": friend.profile.username})
             return pending_list
         except Exception as e:
             print(f"Error retrieving client: {e}")
             return None
-    
+
     @sync_to_async
     def aget_pending_request_by_client(self, target):
         try:
@@ -248,17 +239,17 @@ class Clients(models.Model):
         except Exception as e:
             print(f"Error retrieving target: {e}")
             return None
-        
+
     @staticmethod
     async def aget_client_by_username(username: str):
         try:
             return await Clients.objects.aget(profile__username=username)
-        except :
+        except:
             return None
-        
+
     @staticmethod
     async def ASget_client_by_ID(client_id: uuid.UUID):
         try:
             return await Clients.objects.aget(id=client_id)
-        except :
-            return None 
+        except:
+            return None

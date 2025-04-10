@@ -15,8 +15,8 @@ class Tournaments(models.Model):
         db_table = 'pong_tournaments'
 
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ PRIMARY FIEDLS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
-    id = IntegerField(primary_key=True, editable=False, null=False,
-                      default=create_tournament_id, unique=True)
+    id = CharField(primary_key=True, editable=False, null=False,
+                   default=create_tournament_id, unique=True, max_length=5)
 
     # ── Tournaments Informations ───────────────────────────────────────────────────────────── #
     created_at = DateTimeField(default=timezone.now)

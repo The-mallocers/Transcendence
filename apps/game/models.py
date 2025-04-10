@@ -1,10 +1,8 @@
-import traceback
-
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 from django.db import models
 from django.db.models import IntegerField, ForeignKey, CharField, ImageField
-from django.db.models.fields import DateTimeField
+from django.db.models.fields import DateTimeField, BooleanField
 from django.utils import timezone
 from redis import DataError
 from redis.commands.json.path import Path
@@ -37,7 +35,7 @@ class Game(models.Model):
     # ═══════════════════════════════ Database Fields ════════════════════════════════ #
 
     # ━━ PRIMARY FIELD ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
-    id = IntegerField(primary_key=True, editable=False, null=False, unique=True)
+    id = CharField(primary_key=True, editable=False, null=False, unique=True, max_length=5)
 
     # ━━ Game informations ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
     winner = ForeignKey(Player, on_delete=models.SET_NULL, related_name='winner', null=True)
@@ -45,6 +43,7 @@ class Game(models.Model):
     tournament_id = ForeignKey(Tournaments, on_delete=models.SET_NULL,
                                null=True, related_name='tournament', blank=True)
     created_at = DateTimeField(default=timezone.now)
+    is_duel = BooleanField(default=False)
 
     # ━━ Game setings ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
     points_to_win = IntegerField(default=3)
@@ -61,9 +60,9 @@ class Game(models.Model):
     def __str__(self):
         return f'Game with id: {self.game_id}'
 
-    def create_redis_game(self):
+    def create_redis_game(self, is_duel):
         from utils.serializers.game import GameSerializer
-        serializer = GameSerializer(self, context={'id': self.game_id})
+        serializer = GameSerializer(self, context={'id': self.game_id, 'is_duel': is_duel})
         self.redis.json().set(self.game_key, Path.root_path(), serializer.data)
 
     def init_players(self):
@@ -77,9 +76,9 @@ class Game(models.Model):
         channel_layer = get_channel_layer()
 
         # Add two player in group of the new game
-        channel_name_pL = self.redis.hget(name=RTables.HASH_CONSUMERS, key=str(self.pL.client_id))
+        channel_name_pL = self.redis.hget(name=RTables.HASH_CLIENT(self.pL.client_id), key=str(EventType.GAME.value))
         async_to_sync(channel_layer.group_add)(RTables.GROUP_GAME(self.game_id), channel_name_pL)
-        channel_name_pR = self.redis.hget(name=RTables.HASH_CONSUMERS, key=str(self.pR.client_id))
+        channel_name_pR = self.redis.hget(name=RTables.HASH_CLIENT(self.pR.client_id), key=str(EventType.GAME.value))
         async_to_sync(channel_layer.group_add)(RTables.GROUP_GAME(self.game_id), channel_name_pR)
 
         self.redis.hset(name=RTables.HASH_MATCHES, key=str(self.pL.client_id), value=str(self.game_id))
@@ -107,10 +106,13 @@ class Game(models.Model):
     def rget_status(self) -> GameStatus | None:
         try:
             status = self.redis.json().get(self.game_key, Path('status'))
-            if status:
-                return GameStatus(status)
-            else:
-                return None
+            return GameStatus(status)
         except DataError:
-            traceback.print_exc()
+            return None
+
+    def rget_is_duel(self) -> bool | None:
+        try:
+            status = self.redis.json().get(self.game_key, Path('is_duel'))
+            return bool(status)
+        except DataError:
             return None

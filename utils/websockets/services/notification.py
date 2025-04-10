@@ -20,35 +20,34 @@ class NotificationService(BaseServices):
         if target is None:
             return await asend_group_error(RTables.GROUP_CLIENT(client.id), ResponseError.USER_NOT_FOUND)
         friendTargetTable = await target.get_friend_table()
-        
-        #check if the friend ask is already in my pending list
+
+        # check if the friend ask is already in my pending list
         username = await client.aget_pending_request_by_client(target)
         # if the username exist in my pending list I accept it
         if username is not None:
             friend_request_data = {
                 "event": "notification",
                 "data": {
-                    "action" : "accept_friend_request",
+                    "action": "accept_friend_request",
                     "args": {
                         "target_name": data['data']['args']['target_name']
                     }
                 }
             }
-            return await self._handle_accept_friend_request(friend_request_data, client)       
-        
+            return await self._handle_accept_friend_request(friend_request_data, client)
+
         askfriend = await friendTargetTable.add_pending_friend(client)
         # if I am already his friend 
         if askfriend is None:
             return await asend_group_error(RTables.GROUP_CLIENT(client.id), ResponseError.USER_ALREADY_MY_FRIEND)
         await asend_group(RTables.GROUP_CLIENT(target.id),
-                                EventType.NOTIFICATION, 
-                                ResponseAction.ACK_SEND_FRIEND_REQUEST,
-                                {
-                                    "sender": str(client.id),
-                                    "username": await client.aget_profile_username()
-                                })
-    
-        
+                          EventType.NOTIFICATION,
+                          ResponseAction.ACK_SEND_FRIEND_REQUEST,
+                          {
+                              "sender": str(client.id),
+                              "username": await client.aget_profile_username()
+                          })
+
     # client is the client that want to add the friend from his pending list
     # target is the friend pending
     async def _handle_accept_friend_request(self, data, client):
@@ -67,24 +66,23 @@ class NotificationService(BaseServices):
             await room.add_client(target)
 
             await asend_group(RTables.GROUP_CLIENT(client.id), EventType.NOTIFICATION,
-                                    ResponseAction.ACK_ACCEPT_FRIEND_REQUEST_HOST,
-                                    {
-                                        "sender": str(target.id),
-                                        "username": await target.aget_profile_username()
-                                    })
+                              ResponseAction.ACK_ACCEPT_FRIEND_REQUEST_HOST,
+                              {
+                                  "sender": str(target.id),
+                                  "username": await target.aget_profile_username()
+                              })
 
             await asend_group(RTables.GROUP_CLIENT(target.id), EventType.NOTIFICATION,
-                                    ResponseAction.ACK_ACCEPT_FRIEND_REQUEST,
-                                    {
-                                        "sender": str(client.id),
-                                        "username": await client.aget_profile_username(),
-                                        "room": str(room.id)
-                                    })
-            
+                              ResponseAction.ACK_ACCEPT_FRIEND_REQUEST,
+                              {
+                                  "sender": str(client.id),
+                                  "username": await client.aget_profile_username(),
+                                  "room": str(room.id)
+                              })
+
         except:
             return await asend_group_error(RTables.GROUP_CLIENT(client.id), ResponseError.USER_ALREADY_FRIEND_OR_NOT_PENDING_FRIEND)
 
-        
     async def _handle_refuse_friend_request(self, data, client):
         target = await Clients.aget_client_by_username(data['data']['args']['target_name'])
         if target is None:
@@ -94,41 +92,41 @@ class NotificationService(BaseServices):
             friendTable = await client.get_friend_table()
             await friendTable.refuse_pending_friend(target)
             await asend_group(RTables.GROUP_CLIENT(client.id), EventType.NOTIFICATION,
-                                    ResponseAction.ACK_REFUSE_FRIEND_REQUEST,
-                                    {
-                                        "sender": str(target.id),
-                                        "username": await target.aget_profile_username()
-                                    })
+                              ResponseAction.ACK_REFUSE_FRIEND_REQUEST,
+                              {
+                                  "sender": str(target.id),
+                                  "username": await target.aget_profile_username()
+                              })
         except:
             return await asend_group_error(RTables.GROUP_CLIENT(client.id), ResponseError.USER_ALREADY_FRIEND_OR_NOT_PENDING_FRIEND, )
-        
+
     async def _handle_delete_friend(self, data, client):
         target = await Clients.aget_client_by_username(data['data']['args']['target_name'])
         if target is None:
             return await asend_group_error(RTables.GROUP_CLIENT(client.id), ResponseError.USER_NOT_FOUND)
-        
+
         try:
             client_friend_table = await client.get_friend_table()
             await client_friend_table.remove_friend(target)
-            
+
             target_friend_table = await target.get_friend_table()
             await target_friend_table.remove_friend(client)
             await asend_group(RTables.GROUP_CLIENT(client.id),
-                            EventType.NOTIFICATION, 
-                            ResponseAction.ACK_DELETE_FRIEND_HOST,
-                            {
-                                "sender": str(target.id),
-                                "username": await target.aget_profile_username()
-                            })
+                              EventType.NOTIFICATION,
+                              ResponseAction.ACK_DELETE_FRIEND_HOST,
+                              {
+                                  "sender": str(target.id),
+                                  "username": await target.aget_profile_username()
+                              })
 
             await asend_group(RTables.GROUP_CLIENT(target.id),
-                            EventType.NOTIFICATION, 
-                            ResponseAction.ACK_DELETE_FRIEND,
-                            {
-                                "sender": str(client.id),
-                                "username": await client.aget_profile_username()
-                            })
-            #get the room to delete
+                              EventType.NOTIFICATION,
+                              ResponseAction.ACK_DELETE_FRIEND,
+                              {
+                                  "sender": str(client.id),
+                                  "username": await client.aget_profile_username()
+                              })
+            # get the room to delete
             room = await Rooms.aget_room_by_client_id(client.id)
             if room is None:
                 return
@@ -142,6 +140,6 @@ class NotificationService(BaseServices):
             return await asend_group_error(RTables.GROUP_CLIENT(client.id), ResponseError.NOT_FRIEND)
         except Exception as e:
             return await asend_group_error(RTables.GROUP_CLIENT(client.id), ResponseError.INTERNAL_ERROR)
-        
+
     async def handle_disconnect(self, client):
         pass

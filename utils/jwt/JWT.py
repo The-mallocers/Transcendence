@@ -36,7 +36,6 @@ class JWT:
         if self.client.rights.is_admin:
             self.ROLES.append('admin')
 
-
     def __str__(self):
         return f"{self.TYPE}_token expired in {self.EXP}, issue a {self.IAT}"
 

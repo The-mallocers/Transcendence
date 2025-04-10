@@ -33,7 +33,7 @@ class Player(models.Model):
         return f'Player with client id: {self.client_id}'
 
     def leave_queue(self):
-        self.redis.hdel(RTables.HASH_G_MATCHMAKING, str(self.client_id))
+        self.redis.hdel(RTables.HASH_G_QUEUE, str(self.client_id))
 
     # ━━ GETTER / SETTER ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
 

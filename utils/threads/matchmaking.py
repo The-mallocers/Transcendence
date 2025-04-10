@@ -22,7 +22,7 @@ class MatchmakingThread(Threads):
 
                 matched = self.select_players(game)
                 if matched:
-                    game.create_redis_game()
+                    game.create_redis_game(is_duel=False)
                     self._logger.info(f"Found match: {game.pL} vs {game.pR}")
                     game.rset_status(GameStatus.MATCHMAKING)
 
@@ -52,8 +52,8 @@ class MatchmakingThread(Threads):
         for key in game_keys:
             self.redis.delete(key)
 
-        self.redis.delete(RTables.HASH_CONSUMERS)
-        self.redis.delete(RTables.HASH_G_MATCHMAKING)
+        # self.redis.delete(RTables.HASH_CLIENT)
+        self.redis.delete(RTables.HASH_G_QUEUE)
         self.redis.delete(RTables.HASH_MATCHES)
 
         # RedisConnectionPool.close_connection(self.__class__.__name__)
@@ -63,7 +63,7 @@ class MatchmakingThread(Threads):
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ FUNCTIONS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
     def select_players(self, game):
-        players_queue = self.redis.hgetall(RTables.HASH_G_MATCHMAKING)
+        players_queue = self.redis.hgetall(RTables.HASH_G_QUEUE)
         players = [player.decode('utf-8') for player in players_queue]
         if len(players) >= 2:  # il faudra ce base sur les mmr
             selected_players = players[:2]  # this gets the first 2 players of the list

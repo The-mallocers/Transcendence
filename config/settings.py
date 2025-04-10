@@ -321,7 +321,7 @@ LOGGING = {
             'propagate': False,
         },
         'utils.redis': {
-            'handlers': ['console', 'redis_file'],
+            'handlers': ['console', 'redis_file', 'latest_file'],
             'level': 'DEBUG',
             'propagate': False,
         },

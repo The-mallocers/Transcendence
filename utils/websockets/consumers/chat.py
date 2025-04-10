@@ -16,3 +16,10 @@ class ChatConsumer(WsConsumer):
             rooms = await Rooms.aget_room_id_by_client_id(self.client.id)
             for room in rooms:
                 await self.channel_layer.group_add(RTables.GROUP_CHAT(room), self.channel_name)
+
+    async def disconnect(self, close_code):
+        await self.channel_layer.group_discard(RTables.GROUP_CHAT(uuid_global_room), self.channel_name)
+        rooms = await Rooms.aget_room_id_by_client_id(self.client.id)
+        for room in rooms:
+            await self.channel_layer.group_discard(RTables.GROUP_CHAT(room), self.channel_name)
+        return await super().disconnect(close_code)

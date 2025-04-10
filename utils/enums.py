@@ -41,6 +41,9 @@ class RequestAction(str, Enum):
     # ── Matchmaking Actions ───────────────────────────────────────────────────────────
     JOIN_QUEUE: str = 'join_queue'
     LEAVE_QUEUE: str = 'leave_queue'
+
+    # ── Duels ─────────────────────────────────────────────────────────────────────── #
+    CREATE_DUEL: str = 'create_duel'
     JOIN_DUEL: str = 'join_duel'
     LEAVE_DUEL: str = 'leave_duel'
 
@@ -64,7 +67,7 @@ class RequestAction(str, Enum):
     LEAVE_TOURNAMENT: str = 'leave_tournament'
     START_TOURNAMENT: str = 'start_tournement'
     LIST_TOURNAMENT: str = 'list_tournament'
-    
+
     # ── Notification Actions ──────────────────────────────────────────────────────────────────
     SEND_FRIEND_REQUEST: str = "send_friend_request"
     ACCEPT_FRIEND_REQUEST: str = "accept_friend_request"
@@ -77,6 +80,11 @@ class ResponseAction(str, Enum):
     # ── Matchmaking Actions ───────────────────────────────────────────────────────────
     JOIN_QUEUE: str = 'You have successfully joined the queue'
     LEFT_QUEUE: str = 'You have successfully left the queue'
+
+    # ── Duels ─────────────────────────────────────────────────────────────────────── #
+    DUEL_CREATED: str = 'You have successfully create the duel'
+    DUEL_JOIN: str = 'You have successfully joined the duel'
+    DUEL_LEFT: str = 'You have successfully left the duel'
 
     # ── Game Actions ──────────────────────────────────────────────────────────────────
     JOIN_GAME: str = 'You have successfully joined the game'
@@ -98,7 +106,7 @@ class ResponseAction(str, Enum):
     MESSAGE_RECEIVED = "New message received"
     HISTORY_RECEIVED = "history_received"
     ALL_ROOM_RECEIVED = "all_room_received"
-    
+
     # ── NOTIFICATION ACTION ───────────────────────────────────────────────────────────
     ACK_SEND_FRIEND_REQUEST: str = "acknowledge_send_friend_request"
     ACK_ACCEPT_FRIEND_REQUEST: str = "acknowledge_accept_friend_request"
@@ -106,7 +114,7 @@ class ResponseAction(str, Enum):
     ACK_REFUSE_FRIEND_REQUEST: str = "acknowledge_refuse_friend_request"
     ACK_DELETE_FRIEND: str = "ack_delete_friend"
     ACK_DELETE_FRIEND_HOST: str = "ack_delete_friend_host"
-    
+
     NOTIF_TEST = "notification_test"
 
     TEST: str = 'test'
@@ -120,6 +128,9 @@ class ResponseError(str, Enum):
     NOT_IN_QUEUE: str = 'You are not currently in the queue.'
     MATCHMAKING_ERROR: str = 'Leaving matchmaking due to an error.'
     ALREADY_CONNECTED: str = 'You are already connected.'
+
+    # ── Duels ─────────────────────────────────────────────────────────────────────── #
+    DUEL_HIMSELF: str = 'You cannot duel yourself.'
 
     # ── Game ──────────────────────────────────────────────────────────────────────────
     GAME_FULL: str = 'The game is currently full.'
@@ -164,15 +175,15 @@ class RTables(str, Enum):
     GROUP_GAME: str = 'game_{}'
 
     # ── Hash Tables ───────────────────────────────────────────────────────────────── #
-    HASH_CONSUMERS: str = 'client_channels'
+    HASH_CLIENT: str = 'client_{}'
     HASH_MATCHES: str = 'current_matches'
-    HASH_MATCHMAKING: str = 'matchmaking_{}'
-    HASH_G_MATCHMAKING: str = HASH_MATCHMAKING.format('global')
+    HASH_QUEUE: str = 'queue_{}'
+    HASH_G_QUEUE: str = HASH_QUEUE.format('global')
+    HASH_DUEL_QUEUE: str = HASH_QUEUE.format("duel_{}")
 
     # ── Json ──────────────────────────────────────────────────────────────────────── #
     JSON_GAME: str = 'game_{}'
     JSON_DUEL: str = 'duel_{}'
-
 
     def __str__(self, *args) -> str:
         if '{}' in self.value:  # Si la chaîne contient un placeholder

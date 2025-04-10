@@ -16,7 +16,7 @@ class ChatService(BaseServices):
     async def init(self, client: Clients):
         await super().init()
         self.channel_layer = get_channel_layer()
-        self.channel_name = await self.redis.hget(name=RTables.HASH_CONSUMERS, key=str(client.id))
+        self.channel_name = await self.redis.hget(name=RTables.HASH_CLIENT(client.id), key=str(EventType.CHAT.value))
 
     async def process_action(self, data, *args):
         if 'room_id' in data['data']['args'] and data['data']['args']['room_id'] == 'global':
@@ -26,14 +26,14 @@ class ChatService(BaseServices):
     async def _handle_create_room(self, data, admin: Clients):
         try:
             # Retrieve the target client
-            target = await Clients.get_client_by_id_async(data['data']['args']['target'])
+            target = await Clients.aget_client_by_id(data['data']['args']['target'])
 
             # Initial checks (target does not exist or same ID)
             if target is None:
                 target = Clients.aget_client_by_username(data['data']['args']['target'])
                 if target is None:
                     return await asend_group_error(RTables.GROUP_CLIENT(admin.id), ResponseError.TARGET_NOT_FOUND)
-            
+
             if admin.id == target.id:
                 return await asend_group_error(RTables.GROUP_CLIENT(admin.id), ResponseError.SAME_ID)
 
@@ -42,9 +42,9 @@ class ChatService(BaseServices):
             rooms_target = await Rooms.aget_room_id_by_client_id(target.id)
 
             common_rooms = set(rooms_admin) & set(rooms_target)  # Optimized set intersection
-            
+
             common_rooms.remove(uuid_global_room)
-                
+
             if common_rooms:
                 # Use an existing common room
                 room = await Rooms.get_room_by_id(next(iter(common_rooms)))
@@ -61,7 +61,7 @@ class ChatService(BaseServices):
             # Add both admin and target to the chat group
             await self.channel_layer.group_add(RTables.GROUP_CHAT(room_id), self.channel_name.decode('utf-8'))
 
-            target_channel_name = await self.redis.hget(name=RTables.HASH_CONSUMERS, key=str(target.id))
+            target_channel_name = await self.redis.hget(name=RTables.HASH_CLIENT(target.id), key=str(EventType.CHAT.value))
             if target_channel_name:
                 await self.channel_layer.group_add(RTables.GROUP_CHAT(room_id), target_channel_name.decode('utf-8'))
 
