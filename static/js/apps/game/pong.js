@@ -25,13 +25,6 @@ lusername.innerHTML = window.GameState.left.username
 rusername.innerHTML = window.GameState.right.username
 console.log('meowmeowmeow', window.GameState)
 
-socket.onclose = (e) => {
-    isGameOver.gameIsOver = true;
-    WebSocketManager.closeGameSocket();
-    navigateTo("/"); //Maybe redirect to an error page idk.
-}
-
-
 socket.onmessage = (e) => {
     const jsonData = JSON.parse(e.data);
     console.log("received the message below");
