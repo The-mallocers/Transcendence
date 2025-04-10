@@ -127,7 +127,8 @@ async function fetchRoute(path) {
             credentials: 'include'
         });
         const data = await response.json();
-        window.history.pushState({}, '', '/auth/login');
+        console.log(data)
+        navigateTo(response.redirect)
         return data.html
     }
     else if (response.status >= 400 && response.status < 500) 
@@ -229,6 +230,13 @@ const routes = [
         template: async (query) => {
             console.log(`/pages/profile/${query}`)
             return await fetchRoute(`/pages/pong/gameover/${query}`);
+        },
+    },
+    {
+        path: '/auth/auth42',
+        template: async (query) => {
+            console.log(`/pages/auth/auth42`)
+            return await fetchRoute(`/pages/auth/auth42${query}`);
         },
     },
 ];

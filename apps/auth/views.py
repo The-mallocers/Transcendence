@@ -4,6 +4,7 @@ from apps.auth.view.login import get as get_login
 from apps.auth.view.register import get
 
 from apps.auth.view.twofa import view_two_fa
+from apps.auth.view.auth42 import auth42
 
 
 @require_http_methods(["GET"])
@@ -18,7 +19,6 @@ def login_get(req):
 def twofa_get(req):
     return view_two_fa(req)
 
-
-
-
-
+@require_http_methods(["GET"])
+def exchange_42_token(req):
+    return auth42(req)
