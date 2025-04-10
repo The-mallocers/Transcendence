@@ -18,10 +18,11 @@ class PasswordSerializer(serializers.ModelSerializer):
     ])
 
     old_password = serializers.CharField(required=False, allow_blank=False)
+    passwordcheck = serializers.CharField(write_only=True)
 
     class Meta:
         model = Password
-        fields = ['id', 'password', 'old_password']
+        fields = ['id', 'password', 'old_password', 'passwordcheck']
         write_only_fields = ['password', 'old_password']
 
     def validate_password(self, value):
@@ -31,9 +32,13 @@ class PasswordSerializer(serializers.ModelSerializer):
         return value
 
     # Object level validation (validate password field)
-    def validate(self, attrs):
-        self.validate_password(attrs.get('password'))
-        return attrs
+    def validate(self, data):
+        self.validate_password(data.get('password'))
+        password = data.get('password', None)
+        passwordcheck = data.get('passwordcheck', None)
+        if password != passwordcheck:
+            raise serializers.ValidationError("Passwords do not match.")
+        return data
 
     # Update custom object function
     def update(self, instance, validated_data):

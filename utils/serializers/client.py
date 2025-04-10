@@ -21,6 +21,10 @@ class ClientSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         profile_data = validated_data.pop('profile')
         password_data = validated_data.pop('password')
+        
+        # Removing passwordcheck since its not longer useful
+        if 'passwordcheck' in password_data:
+            password_data.pop('passwordcheck')
 
         try:
             with transaction.atomic():
