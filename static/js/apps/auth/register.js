@@ -12,6 +12,8 @@ function register(event) {
     const password = document.getElementById('password').value;
     const passwordcheck = document.getElementById('password_check').value;
 
+    console.log("password check is:", passwordcheck)
+
     const data = {
         profile: {
             username: username,
@@ -22,8 +24,6 @@ function register(event) {
             passwordcheck: passwordcheck
         }
     }
-    console.log(data);
-    console.log()
 
     fetch(form.action, {
         method: "POST",
@@ -39,23 +39,13 @@ function register(event) {
             } else {
                 console.log("we registered badly")
                 console.log(response);
-                response.json().then(data => {
-                    console.log("Error data:", data);
-                    error.textContent = data[0];
+                response.json().then(errorData => {
+                    console.log(errorData);
+                    error.textContent = "Error registering";
+                    handleErrorFront(errorData);
                 });
             }
         })
-        // .then(data => {
-        //     if (data.ok) {
-        //         console.log("we registered succesfully")
-        //         // window.location.href = '/';
-        //         navigateTo("/");
-        //     } else {
-        //         console.log("we registered badly")
-        //         console.log(data);
-        //         error.textContent = "You typed either a shit email OR a shit password (shit usernames are allowed"
-        // }
-        // })
         .catch(error => {
             console.error("There was an error with the fetch operation:", error);
         });
@@ -64,15 +54,74 @@ function register(event) {
 let element = document.querySelector("#register-btn");
 
 element.addEventListener("click", (e) => {
-    register(e)
+    if (isPasswordcheckValid()) {
+        register(e)
+    }
 })
 
-// function isPasswordcheckValid() {
-//     if (password === passwordcheck) {
-//         return true
-//     }
-//     else {
-//         //Update a div to say its wrong.
-//         return False
-//     }
-// }
+//This is a frontend check to avoid needing to ask the backend for validation, even if we still do.
+function isPasswordcheckValid() {
+    if (password === passwordcheck) {
+        return true
+    }
+    else {
+        displayErrorMessage('password', "Passwords do not match.");
+        displayErrorMessage('password_check', "Passwords do not match.");
+        return False
+    }
+}
+
+function handleErrorFront(errorData) {
+    clearAllErrorMessages();
+    
+    if ("profile" in errorData) {
+        if ("username" in errorData['profile']) {
+            displayErrorMessage('username', errorData['profile']['username']);
+        }
+        if ("email" in errorData['profile']) {
+            displayErrorMessage('email', errorData['profile']['email']);
+        }
+    }
+    console.log("Hello, error data is:", errorData);
+    if ("password" in errorData) {
+        if ("password" in errorData['password']) {
+                displayErrorMessage('password', errorData['password']['password']);
+        }
+        if ("passwordcheck" in errorData['password']) {
+            displayErrorMessage('password_check', errorData['password']['passwordcheck']);
+        }
+        if ("non_field_errors" in errorData["password"] ) {
+            console.log("Here we go")
+            displayErrorMessage('password', errorData["password"]["non_field_errors"]);
+            displayErrorMessage('password_check', errorData["password"]["non_field_errors"]);
+        }
+    }
+}
+
+
+function displayErrorMessage(fieldId, message) {
+    const field = document.getElementById(fieldId);
+    if (!field) return;
+    
+    // Create error message element
+    const errorElement = document.createElement('div');
+    errorElement.className = 'error-message';
+    errorElement.textContent = message;
+    errorElement.style.color = 'red';
+    errorElement.style.fontSize = '0.8rem';
+    errorElement.style.marginTop = '4px';
+    
+    field.parentNode.insertBefore(errorElement, field.nextSibling);
+    
+    field.addEventListener('focus', function() {
+        const errorMsg = this.parentNode.querySelector('.error-message');
+        if (errorMsg) {
+            errorMsg.remove();
+        }
+    }, { once: true });
+}
+
+function clearAllErrorMessages() {
+    const errorMessages = document.querySelectorAll('.error-message');
+    errorMessages.forEach(msg => msg.remove());
+}

@@ -16,19 +16,15 @@ class ClientSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Clients
-        fields = ['profile', 'password', 'passwordcheck']
-        
-    def validate(self, data):
-        password = data['password']['password']
-        passwordcheck = data['password']['passwordcheck']
-        
-        if password != passwordcheck:
-            raise serializers.ValidationError("Passwords do not match.")
-        return data
+        fields = ['profile', 'password']
 
     def create(self, validated_data):
         profile_data = validated_data.pop('profile')
         password_data = validated_data.pop('password')
+        
+        # Removing passwordcheck since its not longer useful
+        if 'passwordcheck' in password_data:
+            password_data.pop('passwordcheck')
 
         try:
             with transaction.atomic():
