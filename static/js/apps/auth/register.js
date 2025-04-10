@@ -12,8 +12,6 @@ function register(event) {
     const password = document.getElementById('password').value;
     const passwordcheck = document.getElementById('password_check').value;
 
-    console.log("password check is:", passwordcheck)
-
     const data = {
         profile: {
             username: username,
@@ -24,7 +22,8 @@ function register(event) {
             passwordcheck: passwordcheck
         }
     }
-
+    if (!isPasswordcheckValid(password, passwordcheck)) {return ;}
+    
     fetch(form.action, {
         method: "POST",
         body: JSON.stringify(data),
@@ -54,20 +53,19 @@ function register(event) {
 let element = document.querySelector("#register-btn");
 
 element.addEventListener("click", (e) => {
-    if (isPasswordcheckValid()) {
-        register(e)
-    }
+    register(e)
 })
 
 //This is a frontend check to avoid needing to ask the backend for validation, even if we still do.
-function isPasswordcheckValid() {
+function isPasswordcheckValid(password, passwordcheck) {
     if (password === passwordcheck) {
         return true
     }
     else {
+        clearAllErrorMessages();
         displayErrorMessage('password', "Passwords do not match.");
         displayErrorMessage('password_check', "Passwords do not match.");
-        return False
+        return false
     }
 }
 
