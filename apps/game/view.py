@@ -29,3 +29,8 @@ def arena_get(req):
 def gameover_get(req):
     from apps.game.views.gameover import get
     return get(req)
+
+@require_http_methods(["GET"])
+def duel_get(req):
+    from apps.game.views.duel import get
+    return get(req)

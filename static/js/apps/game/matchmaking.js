@@ -16,7 +16,6 @@ const paddleHeight = 100;
 
 let paddleDefaultPos = 250 - (paddleHeight / 2)
 
-
 window.GameState = {
     ballY: height / 2,
     ballX: width / 2,

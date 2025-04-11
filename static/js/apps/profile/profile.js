@@ -27,7 +27,7 @@ notifSocket.onmessage = (event) => {
             const pendingElement = doc.body.firstChild;
             pending_group.appendChild(pendingElement);
         }
-        toasts(`New friend request from ${message.data.content.username}`);
+        toasts(`New friend request from ${message.data.content.username}`, message.data);
     }
     else if(message.data.action == "ACK_ACCEPT_FRIEND_REQUEST_HOST") {
         let friends_group = document.querySelector('.friends_group');
@@ -156,11 +156,17 @@ window.handleAskFriend = function(username) {
 };
 
 window.handleAcceptFriend = function(username) {
+    const toast = document.querySelector(".toast");
+    if(toast)
+        toast.remove();
     const message = create_message_notif("accept_friend_request", username);
     notifSocket.send(JSON.stringify(message));
 };
 
 window.handleRefuseFriend = function(username) {
+    const toast = document.querySelector(".toast");
+    if(toast)
+        toast.remove();
     const message = create_message_notif("refuse_friend_request", username);
     notifSocket.send(JSON.stringify(message));
 };
@@ -184,7 +190,7 @@ function create_message_notif(action, targetUser)
     return message;
 }
 
-function toasts(message){
+function toasts(message, data){
     const date = new Date();
     const hours = date.getHours().toString().padStart(2, '0');
     const minutes = date.getMinutes().toString().padStart(2, '0');
@@ -199,6 +205,10 @@ function toasts(message){
             <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
         </div>
         <div class="toast-body">${message}</div>
+        <div class="mt-2 pt-2 border-top d-flex justify-content-end">
+            <button type="button" class="btn type-intra-green me-2" onclick="handleAcceptFriend(this.dataset.username)" data-username=${data.content.username}>Accept</button>
+            <button type="button" class="btn type-intra-white" onclick="handleRefuseFriend(this.dataset.username)" data-username=${data.content.username}>Refuse</button>
+        </div>
     </div>`;
     
     let toastContainer = document.querySelector('.toast-container');

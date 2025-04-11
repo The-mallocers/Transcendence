@@ -1,4 +1,3 @@
-import { WebSocketManager } from "../../websockets/websockets.js";
 import { navigateTo } from "../../spa/spa.js";
 
 window.choose_duel_friend = function()
@@ -7,7 +6,8 @@ window.choose_duel_friend = function()
     friendSelectionModal.show();
 }
 
-window.launch_duel = function(){
-    console.log("c'est le fight");
-    
+window.hide_modal = function(){
+    const modal = bootstrap.Modal.getInstance(document.getElementById('friendSelectionModal'));
+    modal.hide();
+    navigateTo("/pong/duel");
 }

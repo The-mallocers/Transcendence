@@ -1,0 +1,50 @@
+{% load static %}
+
+<link rel="stylesheet" href="{% static 'css/pong/duel.css' %}">
+
+<div class="container d-flex align-items-center justify-content-center">
+    <div class="box-duel col-6">
+        <h2 class="duel-title">DUEL</h2>
+        <!-- <div class="row align-items-center"> -->
+            <!-- <div class="col-md-4 d-flex justify-content-evenly align-items-center player-box"> -->
+            <div class="player-box d-flex align-items-center justify-content-between">
+                <div class="player-card d-flex align-items-center">
+                    <img src="{% static 'assets/imgs/pong-player.png' %}" alt="Player 1" class="player-photo">
+                    <h2 class="player-name">{{client.profile.username}}</h2>
+                </div>
+                <div class="state-connected">Connected</div>
+            </div>
+            
+            <!-- <div class="col-md-2 d-flex justify-content-center"> -->
+                <div class="vs-container">
+                    <div class="vs-logo">
+                        <svg width="60" height="60" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M14.5 17.5L19 13L4.5 3.5L6.5 6.5L14.5 17.5Z" stroke="#333" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <circle cx="4" cy="4" r="1" fill="#333"/>
+                            <path d="M9.5 17.5L5 13L19.5 3.5L17.5 6.5L9.5 17.5Z" stroke="#333" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <circle cx="20" cy="4" r="1" fill="#333"/>
+                        </svg>
+                    </div>
+                </div>
+            <!-- </div> -->
+            
+            <!-- <div class="col-md-4 d-flex justify-content-evenly align-items-center player-box"> -->
+            <div class="player-box d-flex align-items-center justify-content-between">
+                <div class="player-card d-flex align-items-center">
+                    <img src="{% static 'assets/imgs/pong-player.png' %}" alt="Player 2" class="player-photo">
+                    <h2 class="player-name">Player Two</h2>
+                </div>
+                <div class="state-of-player">
+                    Pending<span class="dot-animation"></span>
+                </div>
+            </div>
+        <!-- </div> -->
+        <!-- <div class="row"> -->
+            <div class="col-12 d-flex justify-content-center">
+                <div class="start-button-container">
+                    <button class="btn type-intra-white" id="start-game">Start Game</button>
+                </div>
+            </div>
+        <!-- </div> -->
+    </div>
+</div>
