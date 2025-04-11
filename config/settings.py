@@ -134,6 +134,7 @@ EXCLUDED_PATHS = [
     '/pages/auth/register',
     '/pages/auth/2fa',
     '/pages/error/404',
+    '/pages/auth/auth42',
 ]
 ROLE_PROTECTED_PATHS = {
     '/pages/profile/settings': ['client'],

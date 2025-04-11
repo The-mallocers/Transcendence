@@ -69,10 +69,13 @@ class Router {
         console.log(splitedPath)
         if (splitedPath.includes("pong")) {
             WebSocketManager.closeChatSocket()
+            console.log("test ?? aaaaaaaaa")
         } else {
             WebSocketManager.closeAllSockets(); //for now we close all
+            console.log("test ?? bbbbbbbbb")
         }
         if (window.location.pathname == path) {
+            console.log("test ?? ccccccccc")
             return;
         }
 
@@ -81,6 +84,7 @@ class Router {
         //a websocket or not.
 
         window.history.pushState({}, '', path);
+        console.log("test ??", path)
         this.handleLocation();
     }
 }
@@ -123,6 +127,7 @@ async function fetchRoute(path) {
         return data.html;
     } else if (response.status === 302) {
         //redirection
+        console.log(data, response)
         return navigateTo(data.redirect)
         // path = '/pages/auth/login'
         // const response = await fetch(path, {
@@ -233,6 +238,14 @@ const routes = [
         },
     },
     {
+        path: '/auth/auth42',
+        template: async (query) => {
+            console.log(`/pages/auth/auth42`, query)
+            console.log("gigaMEOOOWWWWWW")
+            return await fetchRoute(`/pages/auth/auth42${query}`);
+        },
+    },
+    {
         path: '/admin/monitoring/',
         template: async (query) => {
             console.log(`/pages/profile/${query}`)
@@ -244,7 +257,7 @@ const routes = [
         template: async () => {
             return await fetchRoute(`/pages/chat/friendrequest/`);
         },
-    },
+    }
 ];
 
 //Need to do this so that the event listerner also listens to the dynamic html

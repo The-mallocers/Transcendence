@@ -159,6 +159,7 @@ def get_qrcode(user):
 
 
 def formulate_json_response(state, status, message, redirect):
+    print("what the heellll")
     return (JsonResponse({
         "success": state,
         "message": message,
