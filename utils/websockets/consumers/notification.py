@@ -6,4 +6,3 @@ class NotificationfConsumer(WsConsumer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.service = NotificationService()
-    

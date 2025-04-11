@@ -4,6 +4,7 @@ from redis.asyncio import Redis
 from redis.commands.json.path import Path
 
 from apps.player.models import Player
+from utils.enums import RTables
 
 
 @dataclass
@@ -14,7 +15,7 @@ class Score:
 
         # ── Utils ─────────────────────────────────────────────────────────────────────────    
         self.redis: Redis = redis
-        self.game_key = f'game:{game_id}'
+        self.game_key = RTables.JSON_GAME(game_id)
         self.player_id = player_id
         self.player_side = Player.get_player_side(self.player_id, self.game_key, self.redis)
 

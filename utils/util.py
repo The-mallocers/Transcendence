@@ -1,4 +1,5 @@
 import random
+import string
 import uuid
 
 from django.core.exceptions import ValidationError
@@ -7,7 +8,7 @@ from django.core.exceptions import ValidationError
 def create_game_id():
     from apps.game.models import Game
     while True:
-        code = f"{random.randint(0, 9999):04d}"  # Génère un nombre et le formate sur 4 chiffres
+        code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=5))  # Génère un code aléatoire de 5 caractères
         if not Game.objects.filter(id=code).exists():
             return code
 
@@ -15,7 +16,7 @@ def create_game_id():
 def create_tournament_id():
     from apps.tournaments.models import Tournaments
     while True:
-        code = random.randint(0000, 9999)
+        code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=5))  # Génère un code aléatoire de 5 caractères
         if not Tournaments.objects.filter(id=code).exists():
             return code
 

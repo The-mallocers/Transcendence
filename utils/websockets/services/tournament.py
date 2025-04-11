@@ -20,5 +20,5 @@ class TournamentService(BaseServices):
     async def _handle_start_tournament(self, data, player):
         pass
 
-    async def handle_disconnect(self, client):
+    async def disconnect(self, client):
         pass

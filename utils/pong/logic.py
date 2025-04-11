@@ -6,7 +6,7 @@ import time
 from apps.client.models import Clients
 from apps.game.models import Game
 from apps.player.models import Player
-from utils.enums import EventType, ResponseAction
+from utils.enums import EventType, ResponseAction, RTables
 from utils.enums import GameStatus
 from utils.enums import PaddleMove
 from utils.pong.objects import FPS, CANVAS_HEIGHT, CANVAS_WIDTH, BALL_SPEED, OFFSET_PADDLE, PADDLE_WIDTH
@@ -28,10 +28,9 @@ class PongLogic:
 
         # ── Objects ───────────────────────────────────────────────────────────────────
         self.ball: Ball = Ball(game_id=self.game_id, redis=redis)
-        self.paddle_pL: Paddle = Paddle(game_id=self.game_id, redis=redis, player_id=self.game.pL.client_id,
-                                        x=OFFSET_PADDLE)
-        self.paddle_pR: Paddle = Paddle(game_id=self.game_id, redis=redis, player_id=self.game.pR.client_id,
-                                        x=CANVAS_WIDTH - OFFSET_PADDLE - PADDLE_WIDTH)
+        self.paddle_pL: Paddle = Paddle(game_id=self.game_id, redis=redis, player_id=self.game.pL.client_id, x=OFFSET_PADDLE)
+        self.paddle_pR: Paddle = Paddle(game_id=self.game_id, redis=redis, player_id=self.game.pR.client_id, x=CANVAS_WIDTH - OFFSET_PADDLE -
+                                                                                                               PADDLE_WIDTH)
         self.score_pL: Score = Score(game_id=self.game_id, redis=redis, player_id=self.game.pL.client_id)
         self.score_pR: Score = Score(game_id=self.game_id, redis=redis, player_id=self.game.pR.client_id)
         self.points_to_win = self.game.points_to_win
@@ -127,26 +126,26 @@ class PongLogic:
     def _game_update(self, changes):
         if changes['ball']:
             self.ball.update()
-            send_group(self.game_id, EventType.UPDATE, ResponseAction.BALL_UPDATE, BallSerializer(self.ball).data)
+            send_group(RTables.GROUP_GAME(self.game_id), EventType.UPDATE, ResponseAction.BALL_UPDATE, BallSerializer(self.ball).data)
 
         if changes['paddle_pL']:
             self.paddle_pL.update()
-            send_group(self.game_id, EventType.UPDATE, ResponseAction.PADDLE_LEFT_UPDATE,
+            send_group(RTables.GROUP_GAME(self.game_id), EventType.UPDATE, ResponseAction.PADDLE_LEFT_UPDATE,
                        PaddleSerializer(self.paddle_pL).data)
 
         if changes['paddle_pR']:
             self.paddle_pR.update()
-            send_group(self.game_id, EventType.UPDATE, ResponseAction.PADDLE_RIGHT_UPDATE,
+            send_group(RTables.GROUP_GAME(self.game_id), EventType.UPDATE, ResponseAction.PADDLE_RIGHT_UPDATE,
                        PaddleSerializer(self.paddle_pR).data)
 
         if changes['score_pL']:
             self.score_pL.update()
-            send_group(self.game_id, EventType.UPDATE, ResponseAction.SCORE_LEFT_UPDATE,
+            send_group(RTables.GROUP_GAME(self.game_id), EventType.UPDATE, ResponseAction.SCORE_LEFT_UPDATE,
                        self.score_pL.get_score())
 
         if changes['score_pR']:
             self.score_pR.update()
-            send_group(self.game_id, EventType.UPDATE, ResponseAction.SCORE_RIGHT_UPDATE,
+            send_group(RTables.GROUP_GAME(self.game_id), EventType.UPDATE, ResponseAction.SCORE_RIGHT_UPDATE,
                        self.score_pR.get_score())
 
     def _reset_ball(self, ball):
@@ -160,10 +159,10 @@ class PongLogic:
         loser = Player()
 
         if disconnect is True:
-            if self.redis.hget(name="consumers_channels", key=str(self.game.pL.id)) is None:
+            if self.redis.hget(name=RTables.HASH_CLIENT(self.game.pL.id), key=str(EventType.GAME.value)) is None:
                 self.score_pL.set_score(0)
                 self.score_pR.set_score(self.game.points_to_win)
-            if self.redis.hget(name="consumers_channels", key=str(self.game.pR.id)) is None:
+            if self.redis.hget(name=RTables.HASH_CLIENT(self.game.pR.id), key=str(EventType.GAME.value)) is None:
                 self.score_pR.set_score(0)
                 self.score_pL.set_score(self.game.points_to_win)
             # self.score_pL.set_score(0) if self.redis.hget(name="consumers_channels", key=str(self.game.pL.id)) is None else self.score_pR.get_score(0)
@@ -182,8 +181,8 @@ class PongLogic:
 
         loser.save()
         winner.save()
-        finished_game = Game.objects.create(id=self.game.game_id, winner=winner, loser=loser,
-                                            points_to_win=self.game.points_to_win)
+        finished_game = Game.objects.create(id=self.game.game_id, winner=winner, loser=loser, points_to_win=self.game.points_to_win,
+                                            is_duel=self.game.rget_is_duel())
         self.save_player_info(loser, finished_game)
         self.save_player_info(winner, finished_game)
 
