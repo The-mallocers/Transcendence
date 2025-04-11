@@ -7,6 +7,7 @@ from django.utils import timezone
 from redis import DataError
 from redis.commands.json.path import Path
 
+from apps.client.models import Clients
 from apps.player.models import Player
 from apps.tournaments.models import Tournaments
 from utils.enums import EventType, ResponseAction, Ranks, RTables, PlayerSide
@@ -60,9 +61,9 @@ class Game(models.Model):
     def __str__(self):
         return f'Game with id: {self.game_id}'
 
-    def create_redis_game(self, is_duel):
+    def create_redis_game(self):
         from utils.serializers.game import GameSerializer
-        serializer = GameSerializer(self, context={'id': self.game_id, 'is_duel': is_duel})
+        serializer = GameSerializer(self, context={'id': self.game_id, 'is_duel': self.is_duel})
         self.redis.json().set(self.game_key, Path.root_path(), serializer.data)
 
     def init_players(self):
@@ -84,8 +85,8 @@ class Game(models.Model):
         self.redis.hset(name=RTables.HASH_MATCHES, key=str(self.pL.client_id), value=str(self.game_id))
         self.redis.hset(name=RTables.HASH_MATCHES, key=str(self.pR.client_id), value=str(self.game_id))
 
-        self.pL.leave_queue()
-        self.pR.leave_queue()
+        self.pL.leave_queue(self.game_id, self.is_duel)
+        self.pR.leave_queue(self.game_id, self.is_duel)
 
         send_group(RTables.GROUP_GAME(self.game_id), EventType.GAME, ResponseAction.JOIN_GAME)
 

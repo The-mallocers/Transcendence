@@ -32,8 +32,11 @@ class Player(models.Model):
     def __str__(self):
         return f'Player with client id: {self.client_id}'
 
-    def leave_queue(self):
-        self.redis.hdel(RTables.HASH_G_QUEUE, str(self.client_id))
+    def leave_queue(self, game_id, is_duel):
+        if is_duel is True:
+            self.redis.hdel(RTables.HASH_DUEL_QUEUE(game_id), str(self.client_id))
+        if is_duel is False:
+            self.redis.hdel(RTables.HASH_G_QUEUE, str(self.client_id))
 
     # ━━ GETTER / SETTER ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
 

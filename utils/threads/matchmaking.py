@@ -1,4 +1,5 @@
 import random
+import re
 import time
 import traceback
 
@@ -22,7 +23,7 @@ class MatchmakingThread(Threads):
 
                 matched = self.select_players(game)
                 if matched:
-                    game.create_redis_game(is_duel=False)
+                    game.create_redis_game()
                     self._logger.info(f"Found match: {game.pL} vs {game.pR}")
                     game.rset_status(GameStatus.MATCHMAKING)
 
@@ -40,10 +41,10 @@ class MatchmakingThread(Threads):
                     game.error_game()
                 if game.pL:
                     send_group_error(RTables.GROUP_CLIENT(game.pL.id), ResponseError.MATCHMAKING_ERROR)
-                    game.pL.leave_queue()
+                    game.pL.leave_queue(game.game_id, game.is_duel)
                 if game.pR:
                     send_group_error(RTables.GROUP_CLIENT(game.pR.id), ResponseError.MATCHMAKING_ERROR)
-                    game.pR.leave_queue()
+                    game.pR.leave_queue(game.game_id, game.is_duel)
 
     def cleanup(self):
         self._logger.info("Cleaning up unfinished games from previous session...")
@@ -64,13 +65,30 @@ class MatchmakingThread(Threads):
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ FUNCTIONS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
     def select_players(self, game):
+        # First we check the global queue
         players_queue = self.redis.hgetall(RTables.HASH_G_QUEUE)
         players = [player.decode('utf-8') for player in players_queue]
         if len(players) >= 2:  # il faudra ce base sur les mmr
             selected_players = players[:2]  # this gets the first 2 players of the list
             random.shuffle(selected_players)
+            game.is_duel = False
             game.pL = Player(selected_players[0])
             game.pR = Player(selected_players[1])
             if game.pL is not None and game.pR is not None:
+                return True
+        # second we check the duel for start game
+        cursor = 0
+        cursor, duels = self.redis.scan(cursor=cursor, match=RTables.HASH_DUEL_QUEUE('*'))
+        for duel in duels:
+            players = list(self.redis.hgetall(duel).items())
+            random.shuffle(players)
+            player_1, stat_p1 = players[0]
+            player_2, stat_p2 = players[1]
+            if stat_p1.decode('utf-8') == 'True' and stat_p2.decode('utf-8') == 'True':
+                game.is_duel = True
+                game.game_id = re.search(rf'{RTables.HASH_DUEL_QUEUE("")}(\w+)$', duel.decode('utf-8')).group(1)
+                game.game_key = RTables.JSON_GAME(game.game_id)
+                game.pL = Player(player_1.decode('utf-8'))
+                game.pR = Player(player_2.decode('utf-8'))
                 return True
         return False
