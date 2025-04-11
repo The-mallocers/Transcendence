@@ -1,8 +1,6 @@
 import json
 import uuid
 
-from channels.layers import get_channel_layer
-
 from apps.chat.models import Messages, Rooms
 from apps.client.models import Clients
 from utils.enums import EventType, ResponseAction, ResponseError, RTables
@@ -15,8 +13,15 @@ uuid_global_room = uuid.UUID('00000000-0000-0000-0000-000000000000')
 class ChatService(BaseServices):
     async def init(self, client: Clients):
         await super().init()
-        self.channel_layer = get_channel_layer()
         self.channel_name = await self.redis.hget(name=RTables.HASH_CLIENT(client.id), key=str(EventType.CHAT.value))
+        self.channel_name = self.channel_name.decode('utf-8')
+
+        await self.channel_layer.group_add(RTables.GROUP_CHAT(uuid_global_room), self.channel_name)
+        rooms = await Rooms.aget_room_id_by_client_id(client.id)
+        for room in rooms:
+            await self.channel_layer.group_add(RTables.GROUP_CHAT(room), self.channel_name)
+
+
 
     async def process_action(self, data, *args):
         if 'room_id' in data['data']['args'] and data['data']['args']['room_id'] == 'global':
@@ -153,5 +158,8 @@ class ChatService(BaseServices):
             formatted_messages.append({"room": str(room), "player": players})
         await asend_group(RTables.GROUP_CLIENT(client.id), EventType.CHAT, ResponseAction.ALL_ROOM_RECEIVED, {"rooms": formatted_messages})
 
-    async def handle_disconnect(self, client):
-        pass
+    async def disconnect(self, client):
+        await self.channel_layer.group_discard(RTables.GROUP_CHAT(uuid_global_room), self.channel_name)
+        rooms = await Rooms.aget_room_id_by_client_id(client.id)
+        for room in rooms:
+            await self.channel_layer.group_discard(RTables.GROUP_CHAT(room), self.channel_name)

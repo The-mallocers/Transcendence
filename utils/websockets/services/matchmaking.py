@@ -9,6 +9,8 @@ class MatchmakingService(BaseServices):
     async def init(self, client: Clients):
         return await super().init()
 
+    # ════════════════════════════════════ Online ════════════════════════════════════ #
+
     async def _handle_join_queue(self, data, client: Clients):
         if await self.redis.hget(name=RTables.HASH_G_QUEUE, key=str(client.id)) is not None:
             await asend_group_error(RTables.GROUP_CLIENT(client.id), ResponseError.ALREADY_IN_QUEUE)
@@ -26,12 +28,21 @@ class MatchmakingService(BaseServices):
         else:
             await asend_group_error(RTables.GROUP_CLIENT(client.id), ResponseError.NOT_IN_QUEUE)
 
+    # ════════════════════════════════════ Duels ═════════════════════════════════════ #
+
     async def _handle_create_duel(self, data, client: Clients):
+        # ── Target Check ──────────────────────────────────────────────────────────── #
         target = await Clients.aget_client_by_id(data['data']['args']['target'])
         if target is None:
             await asend_group_error(RTables.GROUP_CLIENT(client.id), ResponseError.TARGET_NOT_FOUND)
         if target is client:
             await asend_group_error(RTables.GROUP_CLIENT(client.id), ResponseError.DUEL_HIMSELF)
+        # ── Client Check ──────────────────────────────────────────────────────────── #
+        print(Clients.acheck_in_queue(client, self.redis))
+        if await self.redis.hget(name=RTables.HASH_G_QUEUE, key=str(client.id)) is not None:
+            await asend_group_error(RTables.GROUP_CLIENT(client.id), ResponseError.ALREADY_IN_QUEUE)
+        if await self.redis.hget(name=RTables.HASH_MATCHES, key=str(client.id)) is not None:
+            await asend_group_error(RTables.GROUP_CLIENT(client.id), ResponseError.ALREAY_IN_GAME)
         else:
             duel_code = create_game_id()
             await self.redis.hset(name=RTables.HASH_DUEL_QUEUE(duel_code), key=str(client.id), value=str(True))
@@ -46,7 +57,6 @@ class MatchmakingService(BaseServices):
     async def _handle_leave_duel(self, data, client: Clients):
         pass
 
-    async def handle_disconnect(self, client):
-        if self.redis:
-            await self.redis.hdel(RTables.HASH_G_QUEUE, str(client.id))
+    async def disconnect(self, client):
+        await self.redis.hdel(RTables.HASH_G_QUEUE, str(client.id))
         await asend_group(RTables.GROUP_CLIENT(client.id), EventType.MATCHMAKING, ResponseAction.LEFT_QUEUE)

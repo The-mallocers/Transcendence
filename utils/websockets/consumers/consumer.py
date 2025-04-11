@@ -37,44 +37,39 @@ class WsConsumer(AsyncWebsocketConsumer):
             else:
                 await self.channel_layer.group_add(RTables.GROUP_CLIENT(self.client.id), self.channel_name)
                 await self._redis.hset(name=RTables.HASH_CLIENT(self.client.id), key=str(self.event_type.value), value=str(self.channel_name))
+                return True
         except AttributeError:
             await self.channel_layer.group_add(RTables.GROUP_ERROR, self.channel_name)
-            await asend_group_error(RTables.GROUP_ERROR, ResponseError.PLAYER_NOT_FOUND, close=True)
+            await asend_group_error(RTables.GROUP_ERROR, ResponseError.CLIENT_NOT_FOUND, close=True)
+            return False
         except ValueError:
             await self.channel_layer.group_add(RTables.GROUP_ERROR, self.channel_name)
             await asend_group_error(RTables.GROUP_ERROR, ResponseError.SERVICE_ERROR, content="Service is not available", close=True)
+            return False
         except ServiceError:
             await self.channel_layer.group_add(RTables.GROUP_ERROR, self.channel_name)
             await asend_group_error(RTables.GROUP_ERROR, ResponseError.ALREADY_CONNECTED, close=True)
+            return False
 
     async def disconnect(self, close_code):
         logging.getLogger('websocket.client').info(f'WebSocket disconnected with code {close_code}')
-        await self._redis.hdel(RTables.HASH_CLIENT(self.client.id), str(self.event_type.value))
+        await self.service.handle_disconnect(self.client)
         await self.channel_layer.group_discard(RTables.GROUP_ERROR, self.channel_name)
-        await self.channel_layer.group_discard(RTables.GROUP_CLIENT(self.client.id), self.channel_name)
+        if self.client:
+            redis_chan_name = await self._redis.hget(RTables.HASH_CLIENT(self.client.id), str(self.event_type.value))
+            if redis_chan_name.decode('utf-8') == self.channel_name:
+                await self._redis.hdel(RTables.HASH_CLIENT(self.client.id), str(self.event_type.value))
+            await self.channel_layer.group_discard(RTables.GROUP_CLIENT(self.client.id), self.channel_name)
 
     async def receive(self, text_data=None, bytes_data=None):
         try:
-            data = json.loads(text_data)
-            self.event_type = EventType(data['event'])
-
             if not self.client:
                 raise ServiceError("Client is not connected")
 
-            if self.event_type is EventType.MATCHMAKING:
-                await self.service.process_action(data, self.client)
+            data = json.loads(text_data)
+            self.event_type = EventType(data['event'])
 
-            if self.event_type is EventType.GAME:
-                await self.service.process_action(data, self.client)
-
-            if self.event_type is EventType.CHAT:
-                await self.service.process_action(data, self.client)
-
-            if self.event_type is EventType.TOURNAMENT:
-                await self.service.process_action(data, self.client)
-
-            if self.event_type is EventType.NOTIFICATION:
-                await self.service.process_action(data, self.client)
+            await self.service.process_action(data, self.client)
 
         except json.JSONDecodeError as e:
             self._logger.error(e)

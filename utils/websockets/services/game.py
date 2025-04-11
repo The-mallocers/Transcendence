@@ -50,5 +50,5 @@ class GameService(BaseServices):
             if str(client.id) == self.pR['id']:
                 await self.redis.json().set(self.game_key, Path('player_right.paddle.move'), data['data']['args'])
 
-    async def handle_disconnect(self, client):
+    async def disconnect(self, client):
         await self.redis.json().set(self.game_key, Path('status'), GameStatus.ENDING)

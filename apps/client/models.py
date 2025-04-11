@@ -9,7 +9,7 @@ from django.http import HttpRequest
 from apps.auth.models import Password, TwoFA
 from apps.player.models import Player
 from apps.profile.models import Profile
-from utils.enums import Ranks
+from utils.enums import Ranks, RTables
 
 
 class Stats(models.Model):
@@ -98,18 +98,6 @@ class Clients(models.Model):
             return None
         client = Clients.objects.filter(profile=profile).first()
         return client
-
-    @staticmethod
-    def get_client_by_request(request: HttpRequest):
-        from utils.jwt.JWT import JWTType, JWT
-
-        if 'access_token' in request.COOKIES:
-            token = JWT.extract_token(request, JWTType.ACCESS)
-            if not token:
-                return None
-            return Clients.get_client_by_id(token.SUB)
-
-        return None
 
     @staticmethod
     def get_client_by_player(player_id):
@@ -218,7 +206,7 @@ class Clients(models.Model):
             return None
 
     @sync_to_async
-    def Aget_all_pending_request(self):
+    def aget_all_pending_request(self):
         try:
             pending_list = []
             for friend in self.friend.pending_friends.all():
@@ -248,8 +236,22 @@ class Clients(models.Model):
             return None
 
     @staticmethod
-    async def ASget_client_by_ID(client_id: uuid.UUID):
+    async def aget_client_by_ID(client_id: uuid.UUID):
         try:
             return await Clients.objects.aget(id=client_id)
         except:
             return None
+
+    @staticmethod
+    async def acheck_in_queue(client, redis) -> bool:
+        cursor = 0
+        if await redis.hget(name=RTables.HASH_G_QUEUE, key=str(client.id)) is not None:
+            return True
+        while True:
+            cursor, keys = redis.scan(cursor=cursor, match=RTables.HASH_DUEL_QUEUE('*'))
+            for key in keys:
+                if redis.hexists(key, client.id):
+                    return True
+            if cursor == 0:
+                break
+        return False

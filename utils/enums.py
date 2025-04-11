@@ -155,7 +155,7 @@ class ResponseError(str, Enum):
     INTERNAL_ERROR: str = "internal_error"
 
     # ── Errors ────────────────────────────────────────────────────────────────────────
-    PLAYER_NOT_FOUND: str = 'Your player ID does not correspond to a player.'
+    CLIENT_NOT_FOUND: str = 'Your client ID does not correspond to a client.'
     JSON_ERROR: str = 'There is an error in JSON decoding.'
     EXCEPTION: str = 'An error has occurred.'
     SERVICE_ERROR: str = 'An error occurred in the service.'
