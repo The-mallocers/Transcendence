@@ -60,3 +60,6 @@ class BaseServices(ABC):
 
         except ServiceError as e:
             raise e
+
+        except Exception as e:
+            raise e

@@ -54,6 +54,7 @@ class MatchmakingThread(Threads):
 
         # self.redis.delete(RTables.HASH_CLIENT)
         self.redis.delete(RTables.HASH_G_QUEUE)
+        self.redis.delete(RTables.HASH_DUEL_QUEUE('*'))
         self.redis.delete(RTables.HASH_MATCHES)
 
         # RedisConnectionPool.close_connection(self.__class__.__name__)

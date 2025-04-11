@@ -243,15 +243,16 @@ class Clients(models.Model):
             return None
 
     @staticmethod
-    async def acheck_in_queue(client, redis) -> bool:
+    async def acheck_in_queue(client, redis):
         cursor = 0
         if await redis.hget(name=RTables.HASH_G_QUEUE, key=str(client.id)) is not None:
-            return True
+            return RTables.HASH_G_QUEUE
         while True:
-            cursor, keys = redis.scan(cursor=cursor, match=RTables.HASH_DUEL_QUEUE('*'))
+            cursor, keys = await redis.scan(cursor=cursor, match=RTables.HASH_DUEL_QUEUE('*'))
             for key in keys:
-                if redis.hexists(key, client.id):
-                    return True
+                ready = await redis.hget(key, str(client.id))
+                if ready.decode('utf-8') == 'True':
+                    return key
             if cursor == 0:
                 break
-        return False
+        return None

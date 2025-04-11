@@ -131,6 +131,10 @@ class ResponseError(str, Enum):
 
     # ── Duels ─────────────────────────────────────────────────────────────────────── #
     DUEL_HIMSELF: str = 'You cannot duel yourself.'
+    ALREADY_INVITED: str = 'You create a duel with a customer who has already invited you.'
+    DUEL_NOT_EXIST: str = 'Duel you try to join not exist.'
+    NOT_INVITED: str = 'You are not invited to this duel.'
+    ALREADY_JOIN_DUEL: str = 'You try to join duel already joined.'
 
     # ── Game ──────────────────────────────────────────────────────────────────────────
     GAME_FULL: str = 'The game is currently full.'

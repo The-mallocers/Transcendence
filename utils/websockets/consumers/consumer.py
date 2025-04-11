@@ -1,5 +1,6 @@
 import json
 import logging
+import traceback
 from urllib.parse import parse_qs
 
 from channels.generic.websocket import AsyncWebsocketConsumer
@@ -55,6 +56,7 @@ class WsConsumer(AsyncWebsocketConsumer):
         logging.getLogger('websocket.client').info(f'WebSocket disconnected with code {close_code}')
         await self.service.handle_disconnect(self.client)
         await self.channel_layer.group_discard(RTables.GROUP_ERROR, self.channel_name)
+        self.event_type = EventType.GAME if self.event_type is EventType.MATCHMAKING else self.event_type
         if self.client:
             redis_chan_name = await self._redis.hget(RTables.HASH_CLIENT(self.client.id), str(self.event_type.value))
             if redis_chan_name.decode('utf-8') == self.channel_name:
@@ -78,6 +80,10 @@ class WsConsumer(AsyncWebsocketConsumer):
         except ServiceError as e:
             self._logger.error(e)
             await asend_group_error(RTables.GROUP_CLIENT(self.client.id), ResponseError.SERVICE_ERROR, content=str(e))
+
+        except Exception as e:
+            traceback.print_exc()
+            await asend_group_error(RTables.GROUP_CLIENT(self.client.id), ResponseError.EXCEPTION, content=str(e), close=True)
 
     async def send_channel(self, event):
         message = event['message']
