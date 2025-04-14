@@ -21,7 +21,7 @@ class ClientSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         profile_data = validated_data.pop('profile')
         password_data = validated_data.pop('password')
-        is_admin = self.context.get('is_admin', False)
+        is_admin = self.context.get('is_admin')
 
         # Removing passwordcheck since its not longer useful
         if 'passwordcheck' in password_data:
@@ -32,7 +32,7 @@ class ClientSerializer(serializers.ModelSerializer):
                 profile = Profile.objects.create(**profile_data)
                 password = Password.objects.create(**password_data)
                 two_fa = TwoFA.objects.create()
-                right = Rights.objects.create(is_admin=is_admin)
+                right = Rights.objects.create(is_admin=bool(is_admin))
                 friend = Friend.objects.create()
                 stats = Stats.objects.create()
                 client = Clients.objects.create(profile=profile, password=password, twoFa=two_fa, rights=right, friend=friend, stats=stats)

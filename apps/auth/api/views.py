@@ -45,7 +45,7 @@ class RegisterApiView(APIView):
         if serializer.is_valid():
             try:
                 client = serializer.save()  # this can fail so we added a catch
-                print("\n\nSave successful!\n\n")
+                logger.info(f'Client create successfully: {client}')
                 return Response(ClientSerializer(client).data, status=status.HTTP_201_CREATED)
             except Exception as e:
                 import traceback
