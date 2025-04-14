@@ -20,11 +20,11 @@ def create_admin(apps, schema_editor):
             },
             'password': {
                 'password': settings.ADMIN_PWD,
-            },
-            'is_admin': True
+                'passwordcheck': settings.ADMIN_PWD
+            }
         }
 
-        serializer = ClientSerializer(data=data)
+        serializer = ClientSerializer(data=data, context={'is_admin': True})
         if serializer.is_valid():
             serializer.save()
         else:
