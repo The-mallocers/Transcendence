@@ -16,7 +16,7 @@ class Router {
     }
 
     async handleLocation() {
-        
+
         // clientId = await getClientId();
         // notifSocket = await WebSocketManager.initNotifSocket(clientId);
         const path = window.location.pathname;
@@ -293,25 +293,23 @@ const pongRoute = new Route(
         },
         {
             route: '/test2',
-            directSubRoutes : []
+            directSubRoutes: []
         }, {
-            route: '/test3',
-            directSubRoutes : [
-                {
-                    route: '/meow',
-                    directSubRoutes : []
-                }
-            ]
-        }
+        route: '/test3',
+        directSubRoutes: [
+            {
+                route: '/meow',
+                directSubRoutes: []
+            }
+        ]
+    }
     ]
 )
 
-document.addEventListener("keypress", function(event) {
+document.addEventListener("keypress", function (event) {
     const routeElement = event.target.closest('.searchBar');
-    if (event.key === "Enter")
-    {
-        if (routeElement)
-        {
+    if (event.key === "Enter") {
+        if (routeElement) {
             event.preventDefault();
             const inputElement = routeElement.querySelector('input');
             let query = inputElement.value;

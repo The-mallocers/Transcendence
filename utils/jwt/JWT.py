@@ -36,7 +36,6 @@ class JWT:
         if self.client.rights.is_admin:
             self.ROLES.append('admin')
 
-
     def __str__(self):
         return f"{self.TYPE}_token expired in {self.EXP}, issue a {self.IAT}"
 
@@ -73,6 +72,8 @@ class JWT:
             raise jwt.InvalidTokenError(f'Validating token with type {token_type.value} failed due to invalid token. {str(e)}')
         except jwt.InvalidKeyError as e:
             raise jwt.InvalidKeyError(f'Validating token with type {token_type.value} failed due to invalid key. {str(e)}')
+        except Clients.DoesNotExist as e:
+            raise jwt.InvalidKeyError('Token link to a non-existent user')
 
     @staticmethod
     def extract_token(request: HttpRequest, token_type: JWTType):
@@ -114,6 +115,8 @@ class JWT:
     @staticmethod
     def _get_token(data: dict):
         client = Clients.get_client_by_id(data['sub'])
+        if client is None:
+            raise Clients.DoesNotExist()
         token = JWT(client=client, token_type=data['type'])
         token.EXP = data.get('exp')
         token.JTI = uuid.UUID(data['jti'])
