@@ -1,0 +1,63 @@
+.pongbotContainer {
+    padding: 2rem;
+}
+
+.pongbotContainer .box{
+    padding: 1rem;
+    background-color: white;
+    color: #141414;
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+}
+
+
+.pongbotContainer .levelSelection, .pongbotContainer .levels, .pongbotContainer .points, .pongbotContainer .counter{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    font-size: 1.5rem;
+}
+
+.pongbotContainer .levels {
+    gap: 1rem;
+}
+
+.pongbotContainer .minus, .pongbotContainer .score, .pongbotContainer .plus {
+    padding: 1rem;
+}
+
+
+.pongbotContainer .levelSelection, .pongbotContainer .points {
+
+    gap: 4rem;
+    justify-content: space-between;
+
+    padding: 0 10rem;
+}
+
+
+
+.pongbotContainer .minus, .pongbotContainer .plus{
+    background-color: #00BABB;
+    color: white;
+    cursor: pointer;
+}
+
+.pongbotContainer .minus {
+    border-radius: 5px 0 0 5px;
+}
+
+.pongbotContainer .score{
+    background-color: #fcfcfc;
+}
+.pongbotContainer .plus {
+    border-radius: 0 5px 5px 0;
+
+}
+
+.pongbotContainer .startBtn {
+    background-color: #00BABB;
+    color: white;
+    align-self: center;
+}

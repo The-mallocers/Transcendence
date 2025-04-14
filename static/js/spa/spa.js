@@ -257,6 +257,12 @@ const routes = [
         template: async () => {
             return await fetchRoute(`/pages/chat/friendrequest/`);
         },
+    },
+    {
+        path: '/pong/bot/',
+        template: async () => {
+            return await fetchRoute(`/pages/pong/bot/`);
+        },
     }
 ];
 

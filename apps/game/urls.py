@@ -4,6 +4,7 @@ from apps.game import view
 
 urlpatterns = [
     path('gamemodes/', view.gamemodes_get, name='gamemodes'),
+    path('bot/', view.bot_get, name='bot'),
     path('matchmaking/', view.matchmaking_get, name='matchmaking'),
     path('arena/', view.arena_get, name='arena'),
     path('', view.pong_get, name='pong'),
