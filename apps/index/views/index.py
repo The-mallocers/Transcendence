@@ -13,6 +13,7 @@ def get(req):
     friends_list = client.get_all_friends()
     friends_pending = client.get_all_pending_request()
     # rivals = get_rivals()
+    # ghistory = get_last_matches(client, games_played)
     if client is not None:
         winrate = get_winrate(client, games_played)
     context = {
@@ -47,15 +48,16 @@ def get_last_matches(client, games_played) -> list:
         myPoints = 0
         enemyPoints = 0
         oponnent = ""
-        print(client.player.id, game.winner.id)
-        if (client.player.id == game.winner.id):
-            myPoints = game.winner_score
-            enemyPoints = game.loser_score
-            oponnent = game.loser.nickname
+        if (client.id == game.winner.id):
+            myPoints = game.winner.score
+            enemyPoints = game.loser.score
+            oponnent = "Larry"
+            # oponnent = game.loser.nickname
         else:
-            myPoints = game.loser_score
-            enemyPoints = game.winner_score
-            oponnent = game.winner.nickname
+            myPoints = game.loser.score
+            enemyPoints = game.winner.score
+            oponnent = "Not Larry"
+            # oponnent = game.winner.nickname
 
         ghistory.append({
             "opponent": oponnent,

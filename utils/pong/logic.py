@@ -185,14 +185,15 @@ class PongLogic:
         finished_game = Game.objects.create(id=self.game.game_id, winner=winner, loser=loser,
                                             points_to_win=self.game.points_to_win)
         
+        #mmr gain would happen here.
         winner.client.stats.wins = F('wins') + 1
         loser.client.stats.losses = F('losses') + 1
         self.save_player_info(loser, finished_game)
-
         self.save_player_info(winner, finished_game)
 
     def save_player_info(self, player, finished_game):
         player.game = finished_game
         player.client.stats.games.add(finished_game)
+        player.client.stats.total_game = F('total_game') + 1
         player.client.stats.save()
         player.save()
