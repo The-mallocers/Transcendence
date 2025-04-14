@@ -61,7 +61,7 @@ def get_last_matches(client, games_played) -> list:
 
         ghistory.append({
             "opponent": oponnent,
-            "won": client.player.id == game.winner.id,
+            "won": client.id == game.winner.id,
             "myPoints": myPoints,
             "enemyPoints": enemyPoints,
             "when": game.created_at
