@@ -30,12 +30,12 @@ class ClientSerializer(serializers.ModelSerializer):
         try:
             with transaction.atomic():
                 profile = Profile.objects.create(**profile_data)
-                passwrod = Password.objects.create(**password_data)
+                password = Password.objects.create(**password_data)
                 two_fa = TwoFA.objects.create()
                 right = Rights.objects.create(is_admin=is_admin)
                 friend = Friend.objects.create()
                 stats = Stats.objects.create()
-                client = Clients.objects.create(profile=profile, password=passwrod, twoFa=two_fa, rights=right, friend=friend, stats=stats)
+                client = Clients.objects.create(profile=profile, password=password, twoFa=two_fa, rights=right, friend=friend, stats=stats)
 
         except Exception as e:
             raise serializers.ValidationError(f"Error creating client: {str(e)}")
