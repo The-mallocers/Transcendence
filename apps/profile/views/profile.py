@@ -8,6 +8,7 @@ from apps.profile.models import Profile
 
 
 def get(req):
+    print("Salut les bebous")
     requestUsername = req.GET.get("username", "minimeow")
     # print(requestUsername)
     target = Clients.get_client_by_username(requestUsername)

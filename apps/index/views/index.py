@@ -5,12 +5,14 @@ from django.template.loader import render_to_string
 from apps.client.models import Clients
 
 def get(req):
+    print("in index")
     client = Clients.get_client_by_request(req)
     games_played = client.stats.games.all().order_by('-created_at')
     
     winrate = ghistory = rivals = None
     friends_list = client.get_all_friends()
     friends_pending = client.get_all_pending_request()
+    # rivals = get_rivals()
     if client is not None:
         winrate = get_winrate(client, games_played)
     context = {
@@ -32,18 +34,8 @@ def get_winrate(client, games_played) -> int:
     wins = games_played.filter(winner__client=client).count()
 
     total_games = games_played.count()
-    if total_games == 0:
-        return 0
-
-    # TFREYDIE Note -> If someone can explain to me why the code below doesnt work I will love you 4 ever.
-    # for game in games_played:
-    #     print("game is:", game)
-    #     # print("in get winrate, winner is :", game.winner)
-    #     if game.winner == None :
-    #         print("UUHHH")
-    #     elif client.id == game.winner.client.id:
-    #         won_games += 1
-    # print("won games:", won_games)
+    if total_games == 0: 
+        return 0 #We dont want to divide by zero
     return int((wins / games_played.count()) * 100)
 
 def get_last_matches(client, games_played) -> list:

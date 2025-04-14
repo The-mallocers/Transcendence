@@ -16,7 +16,7 @@ from utils.pong.objects.paddle import Paddle
 from utils.pong.objects.score import Score
 from utils.serializers.game import PaddleSerializer, BallSerializer
 from utils.websockets.channel_send import send_group
-
+from django.db.models import F
 
 class PongLogic:
     def __init__(self, game: Game, redis):  # ball, paddle_pL, paddle_pR, score_pL, score_pR):
@@ -184,7 +184,11 @@ class PongLogic:
         winner.save()
         finished_game = Game.objects.create(id=self.game.game_id, winner=winner, loser=loser,
                                             points_to_win=self.game.points_to_win)
+        
+        winner.client.stats.wins = F('wins') + 1
+        loser.client.stats.losses = F('losses') + 1
         self.save_player_info(loser, finished_game)
+
         self.save_player_info(winner, finished_game)
 
     def save_player_info(self, player, finished_game):
