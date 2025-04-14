@@ -186,7 +186,7 @@ CHANNEL_LAYERS = {
             "capacity": 1500,
             "expiry": 10,
             "group_expiry": 86400,
-            "prefix": "channels:",
+            "prefix": "channels",
         },
     },
 }
@@ -321,7 +321,7 @@ LOGGING = {
             'propagate': False,
         },
         'utils.redis': {
-            'handlers': ['console', 'redis_file'],
+            'handlers': ['console', 'redis_file', 'latest_file'],
             'level': 'DEBUG',
             'propagate': False,
         },
