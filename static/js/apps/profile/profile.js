@@ -111,19 +111,26 @@ notifSocket.onmessage = (event) => {
         const chatElement = document.querySelector(`.chat-${message.data.content.username}`);
         if(chatElement)
             chatElement.remove();
-        
-        // const addFriendement = document.querySelector(".friends_group")
-        // if(addFriendement)
-        // {
-        //     const parser = new DOMParser();
-        //     const htmlAddElement = 
-        //     `{% if show_friend_request %}
-        //         <button type="button" class="type-intra-green friendrequest" onclick="handleAskFriend(new URLSearchParams(window.location.search).get('username'))">Friend Request</button>
-        //     {%endif%}`
-        //     const doc = parser.parseFromString(htmlAddElement, "text/html");
-        //     const pendingFriendElement = doc.body.firstChild;
-        //     addFriendement.appendChild(pendingFriendElement);
-        // }
+    }
+    else if(message.data.action == "ACK_ASK_DUEL") {
+        let pending_group = document.querySelector('.pending_group');
+        if(pending_group)
+        {
+            const parser = new DOMParser();
+            const htmlString = 
+            `<li class="list-group-item pending_item d-flex justify-content-between align-items-center" id="${message.data.content.username}">
+                ${message.data.content.username} wants to duel
+                <div class="btn-group d-grid gap-2 d-md-flex justify-content-md-end"  role="group" aria-label="Basic example">
+                    <button type="button" class="type-intra-green accept_friend" onclick="handleAcceptDuel(this.dataset.username)" data-username="${message.data.content.username}" id="${message.data.content.sender}">accept</button>
+                    <button type="button" class="type-intra-white refuse_friend" onclick="handleRefuseDuel(this.dataset.username)" data-username="${message.data.content.username}">refuse</button>
+                </div>
+            </li>
+            `
+            const doc = parser.parseFromString(htmlString, "text/html");
+            const pendingElement = doc.body.firstChild;
+            pending_group.appendChild(pendingElement);
+        }
+        toasts(`${message.data.content.username} wants a duel`, message.data);
     }
 }
 
@@ -172,6 +179,17 @@ window.handleRefuseFriend = function(username) {
 };
 
 window.handleDeleteFriend = function(username) {
+    const message = create_message_notif("delete_friend", username);
+    notifSocket.send(JSON.stringify(message));
+};
+
+window.handleAcceptDuel = function(username) {
+    navigateTo(`/pong/duel/?target=${username}`)
+    // const message = create_message_notif("delete_friend", username);
+    // notifSocket.send(JSON.stringify(message));
+};
+
+window.handleRefuseDuel = function(username) {
     const message = create_message_notif("delete_friend", username);
     notifSocket.send(JSON.stringify(message));
 };
@@ -227,3 +245,6 @@ function toasts(message, data){
         this.remove();
     });
 }
+
+export { notifSocket };
+export {create_message_notif}

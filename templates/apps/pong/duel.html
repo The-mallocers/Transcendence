@@ -26,7 +26,7 @@
         <div class="player-box d-flex align-items-center justify-content-between">
             <div class="player-card d-flex align-items-center">
                 <img src="{% static 'assets/imgs/pong-player.png' %}" alt="Player 2" class="player-photo">
-                <h2 class="player-name">Player Two</h2>
+                <h2 class="player-name opponent_player">Player Two</h2>
             </div>
             <div class="state-of-player">
                 Pending<span class="dot-animation"></span>
@@ -39,3 +39,5 @@
         </div>
     </div>
 </div>
+
+<script type="module" src="{% static '/js/apps/game/duel.js' %}"></script>
