@@ -257,7 +257,14 @@ const routes = [
         template: async () => {
             return await fetchRoute(`/pages/chat/friendrequest/`);
         },
-    }
+    },
+    {
+        path: '/pong/tournament/create/',
+        template: async (query) => {
+            console.log(`/pages/profile/${query}`)
+            return await fetchRoute(`/pages/pong/tournament/create/`);
+        },
+    },
 ];
 
 //Need to do this so that the event listerner also listens to the dynamic html
