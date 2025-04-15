@@ -7,8 +7,8 @@ from apps.client.models import Clients
 def get(req):
     print("in index")
     client = Clients.get_client_by_request(req)
+    print(client.stats, "meowmeoowwmeowmeoooooooooowwwwwwww")
     games_played = client.stats.games.all().order_by('-created_at')
-    
     winrate = ghistory = rivals = None
     friends_list = client.get_all_friends()
     friends_pending = client.get_all_pending_request()
