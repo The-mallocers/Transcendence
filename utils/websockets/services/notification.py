@@ -141,5 +141,22 @@ class NotificationService(BaseServices):
         except Exception as e:
             return await asend_group_error(RTables.GROUP_CLIENT(client.id), ResponseError.INTERNAL_ERROR)
 
+    async def _handle_ask_duel(self, data, client):
+        print("in the handle ask duel")
+        target = await Clients.aget_client_by_username(data['data']['args']['target_name'])
+        if target is None:
+            return await asend_group_error(RTables.GROUP_CLIENT(client.id), ResponseError.USER_NOT_FOUND)
+        try:
+            return await asend_group(RTables.GROUP_CLIENT(target.id),
+                                    EventType.NOTIFICATION,
+                                    ResponseAction.ACK_ASK_DUEL,
+                                    {
+                                        "sender": str(client.id),
+                                        "username": await client.aget_profile_username() 
+                                    })
+        except Exception as e:
+            print(repr(e))
+            return await asend_group_error(RTables.GROUP_CLIENT(client.id), ResponseError.INTERNAL_ERROR)
+            
     async def disconnect(self, client):
         pass

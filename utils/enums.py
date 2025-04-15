@@ -46,6 +46,8 @@ class RequestAction(str, Enum):
     CREATE_DUEL: str = 'create_duel'
     JOIN_DUEL: str = 'join_duel'
     LEAVE_DUEL: str = 'leave_duel'
+    ASK_DUEL: str = 'ask_duel'
+    # ACK_ASK_DUEL: str = 'ack_ask_duel'
 
     # ── Game Actions ──────────────────────────────────────────────────────────────────
     JOIN_GAME: str = 'join_game'
@@ -85,6 +87,7 @@ class ResponseAction(str, Enum):
     DUEL_CREATED: str = 'You have successfully create the duel'
     DUEL_JOIN: str = 'You have successfully joined the duel'
     DUEL_LEFT: str = 'You have successfully left the duel'
+    ACK_ASK_DUEL: str = 'Response of asking to join a duel'
 
     # ── Game Actions ──────────────────────────────────────────────────────────────────
     JOIN_GAME: str = 'You have successfully joined the game'

@@ -1,26 +1,25 @@
 {% load static %}
 
 <div id="clientID" data-client-id="{{ client_id }}"></div>
-<div class="container-fluid chatContainer p-0">
+<div class="container-fluid chatContainer d-flex">
     {% csrf_token %}
-    <div class="row g-0">
-        <div class="col-4 friends">
-            <h4>Messages</h4>
-            <div class="chatRooms d-flex flex-column">
-                {% comment %} putting all the rooms from the js {% endcomment %}
-            </div>
-        </div>
-        <div class="col-8 chatBox">
-            <div class="chatHistory">
-                {% for msg in conversation %}
-                    <div class="msg {% if me == msg.sender %} me {% else %} you {% endif %}">
-                        {{ msg.content }}
-                    </div>
-                {% endfor %}
-            </div>
-            <input type="text" id="messageInput" placeholder="message">
+    <div class="col-3 friends">
+        <h4>Messages</h4>
+        <div class="chatRooms d-flex flex-column">
+            {% comment %} putting all the rooms from the js {% endcomment %}
         </div>
     </div>
+    <div class="col-9 chatBox">
+        <div class="chatHistory">
+            {% for msg in conversation %}
+                <div class="msg {% if me == msg.sender %} me {% else %} you {% endif %}">
+                    {{ msg.content }}
+                </div>
+            {% endfor %}
+        </div>
+        <input type="text" id="messageInput" placeholder="message">
+    </div>
+    {% comment %} </div> {% endcomment %}
 </div>  
 
 <script type="module" src="{% static 'js/apps/chat/chat.js' %}" defer></script>

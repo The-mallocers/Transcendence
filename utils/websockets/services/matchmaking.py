@@ -32,6 +32,7 @@ class MatchmakingService(BaseServices):
     # ════════════════════════════════════ Duels ═════════════════════════════════════ #
 
     async def _handle_create_duel(self, data, client: Clients):
+        print("in the function of creating a duel")
         # ── Target Check ──────────────────────────────────────────────────────────── #
         target = await Clients.aget_client_by_id(data['data']['args']['target'])
         if target is None:

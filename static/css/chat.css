@@ -3,21 +3,13 @@
     height: calc(100vh - 70px);
     width: 100%;
     overflow: hidden;
-}
-
-.row.g-0{
-    display: flex;
-    height: 100%;
-    padding: 26px;
-    flex-direction: column;
-    background-color: #ccc;
+    gap: 60px;
+    padding: 30px;
 }
 
 .friends {
-    width: 33.33%;
     height: 100%;
-    margin: 10px;
-    background-color: #F5F5F5;
+    background-color: #ffffff;
     overflow-y: auto;
 }
 
@@ -57,11 +49,12 @@
 /* Chat section - Modifications principales */
 .chatBox {
     height: 100%;
-    width: calc(66.67% - 20px);
+    background-color: #ffffff;
+    /* width: calc(66.67% - 20px); */ 
+    width: calc(75% - 70px);
     position: relative;
     display: flex;
     flex-direction: column;
-    background-color: #F5F5F5;
 }
 
 .chatHistory {

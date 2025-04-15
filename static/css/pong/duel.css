@@ -1,0 +1,157 @@
+.duel-title{
+    text-align: center;
+    font-weight: bold;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+}
+
+.container{
+    height: calc(100vh - 80px);
+}
+
+.box-duel{
+    background-color: white;
+    padding: 2rem;
+}
+
+.player-box{
+    background-color: aliceblue;
+    padding-right: 40px;
+    padding-left: 30px;
+}
+
+.player-card {
+    padding: 20px;
+    text-align: center;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    transition: transform 0.2s;
+}
+
+.player-photo {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 20px;
+}
+
+.player-name {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 0;
+    color: #333;
+}
+
+.vs-logo {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.start-button-container {
+    text-align: center;
+    margin-top: 40px;
+}
+
+.btn-start {
+    background-color: #3d3d3d;
+    color: white;
+    border: none;
+    padding: 10px 40px;
+    font-size: 1.1rem;
+    border-radius: 25px;
+    transition: all 0.3s;
+}
+
+.btn-start:hover {
+    background-color: #2a2a2a;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.state-of-player{
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    white-space: nowrap;
+    padding: 6px 12px;
+    font-size: 16px;
+    line-height: 1.428571429;
+    border-radius: 1px;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    background-color: white;
+    border-color: #007d7f;
+    color: #00babc;
+    font-weight: normal;
+    display: inline-block;
+    margin-bottom: 0;
+    font-weight: normal;
+    text-align: center;
+    vertical-align: middle;
+    touch-action: manipulation;
+    background-image: none;
+    border: 1px solid;
+    width: 7rem;
+}
+
+.state-connected{
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    white-space: nowrap;
+    padding: 6px 12px;
+    font-size: 16px;
+    line-height: 1.428571429;
+    border-radius: 1px;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    color: #fff;
+    background-color: #00babc;
+    border-color: #00babc;
+    display: inline-block;
+    margin-bottom: 0;
+    font-weight: normal;
+    text-align: center;
+    vertical-align: middle;
+    touch-action: manipulation;
+    background-image: none;
+    border: 1px solid transparent;
+    border-top-color: transparent;
+    border-right-color: transparent;
+    border-bottom-color: transparent;
+    border-left-color: transparent;
+    width: 7rem;
+}
+
+.dot-animation {
+    position: relative;
+    display: inline-block;
+}
+
+.dot-animation::after {
+    content: "";
+    animation: dots 1.5s infinite;
+}
+
+@keyframes dots {
+    0% { content: ""; }
+    25% { content: "."; }
+    50% { content: ".."; }
+    75% { content: "..."; }
+    100% { content: ""; }
+}
+
+/* Optional: you can style the state-of-player further */
+.state-of-player {
+    width: 7rem;
+    font-weight: 500;
+    color: #666;
+}
