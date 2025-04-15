@@ -5,6 +5,38 @@ let client_id = null;
 const clientId = await getClientId();
 const notifSocket =  await WebSocketManager.initNotifSocket(clientId);
 
+const items = await getAllfriends();
+const listContainer = document.getElementById("list-container");
+function handleButtonClick(item) {
+    alert(`Vous avez cliqué sur le bouton de : ${item.text}`);
+}
+
+// Génération dynamique de la liste
+items.forEach(item => {
+    // Création de la div principale
+    const itemDiv = document.createElement("div");
+    itemDiv.className = "item";
+
+    // Ajout du texte
+    const itemText = document.createElement("span");
+    itemText.textContent = item.text;
+
+    // Ajout du bouton
+    const itemButton = document.createElement("button");
+    itemButton.textContent = "Cliquez-moi";
+    itemButton.onclick = () => handleButtonClick(item); // Liaison spécifique à l'élément
+
+    // Ajout des éléments à la div principale
+    itemDiv.appendChild(itemText);
+    itemDiv.appendChild(itemButton);
+
+    // Ajout de la div principale au conteneur
+    listContainer.appendChild(itemDiv);
+});
+
+
+
+
 notifSocket.onmessage = (event) => {
     console.log(event.data);
     const message = JSON.parse(event.data);
@@ -244,6 +276,27 @@ function toasts(message, data){
     newToast.addEventListener('hidden.bs.toast', function() {
         this.remove();
     });
+}
+
+export async function getAllfriends() {
+    // if (client_id !== null) return client_id;
+    console.log("Getting client ID")
+    try {
+        const response = await fetch("/api/friends/", {
+            method: "GET",
+            credentials: "include",
+        });
+        const data = await response.json();
+
+        if (data) {
+            // return all the friends
+        } else {
+            throw new Error(data.error);
+        }
+    } catch (error) {
+        console.error("Erreur lors de la récupération de l'ID :", error);
+        return null;
+    }
 }
 
 export { notifSocket };
