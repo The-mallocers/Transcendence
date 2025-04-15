@@ -3,12 +3,15 @@ from django.middleware.csrf import get_token
 from django.template.loader import render_to_string
 
 from apps.client.models import Clients
+from apps.game.models import Game
+
 
 def get(req):
     client = Clients.get_client_by_request(req)
     games_played = client.stats.games.all().order_by('-created_at')
     
     winrate = ghistory = rivals = None
+    ghistory = get_last_matches(client, games_played)
     friends_list = client.get_all_friends()
     friends_pending = client.get_all_pending_request()
     if client is not None:
@@ -52,6 +55,13 @@ def get_last_matches(client, games_played) -> list:
     for game in games_played:
         if (i >= 4):
             break
+        print(game.id)
+        game = Game.objects.get(id=game.id)
+        print(game.winner.score)
+        continue
+
+
+
         myPoints = 0
         enemyPoints = 0
         oponnent = ""
