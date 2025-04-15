@@ -5,37 +5,35 @@ let client_id = null;
 const clientId = await getClientId();
 const notifSocket =  await WebSocketManager.initNotifSocket(clientId);
 
-const items = await getAllfriends();
-const listContainer = document.getElementById("list-container");
-function handleButtonClick(item) {
-    alert(`Vous avez cliqué sur le bouton de : ${item.text}`);
-}
+//Display all friends
+// const friends = await getAllfriends("/api/friends/get_friends");
+const friends = [
+    { id: 1, username: "johndoe" },
+    { id: 2, username: "janedoe" },
+    { id: 3, username: "mikebrown" },
+    { id: 4, username: "sarahsmith" },
+    { id: 5, username: "alexjones" }
+];
+friends.forEach(friend => {
+    const friends_group = document.querySelector('.friends_group');
+    const parser = new DOMParser();
+    const html_friend = 
+    `<li class="list-group-item d-flex justify-content-between align-items-center">
+        <div>${friend.username}</div>
+        <div class="d-flex align-items-center">
+            <button type="button" class="type-intra-green delete_friend me-4" >delete</button>
+        </div>
+    </li>
+    `
+    const doc = parser.parseFromString(html_friend, "text/html");
+    const friendElement = doc.body.firstChild;
 
-// Génération dynamique de la liste
-items.forEach(item => {
-    // Création de la div principale
-    const itemDiv = document.createElement("div");
-    itemDiv.className = "item";
-
-    // Ajout du texte
-    const itemText = document.createElement("span");
-    itemText.textContent = item.text;
-
-    // Ajout du bouton
-    const itemButton = document.createElement("button");
-    itemButton.textContent = "Cliquez-moi";
-    itemButton.onclick = () => handleButtonClick(item); // Liaison spécifique à l'élément
-
-    // Ajout des éléments à la div principale
-    itemDiv.appendChild(itemText);
-    itemDiv.appendChild(itemButton);
-
-    // Ajout de la div principale au conteneur
-    listContainer.appendChild(itemDiv);
+    const deleteButton = friendElement.querySelector('.delete_friend');
+    deleteButton.addEventListener('click', () => {
+        handleDeleteFriend(friend);
+    });
+    friends_group.appendChild(friendElement);
 });
-
-
-
 
 notifSocket.onmessage = (event) => {
     console.log(event.data);
@@ -210,8 +208,14 @@ window.handleRefuseFriend = function(username) {
     notifSocket.send(JSON.stringify(message));
 };
 
-window.handleDeleteFriend = function(username) {
-    const message = create_message_notif("delete_friend", username);
+// window.handleDeleteFriend = function(username) {
+//     const message = create_message_notif("delete_friend", username);
+//     notifSocket.send(JSON.stringify(message));
+// };
+
+window.handleDeleteFriend = function(friend) {
+    console.log(friend);
+    const message = create_message_notif("delete_friend", friend.username);
     notifSocket.send(JSON.stringify(message));
 };
 
@@ -278,18 +282,18 @@ function toasts(message, data){
     });
 }
 
-export async function getAllfriends() {
+export async function apiFriends(endpoint) {
     // if (client_id !== null) return client_id;
     console.log("Getting client ID")
     try {
-        const response = await fetch("/api/friends/", {
+        const response = await fetch(endpoint, {
             method: "GET",
             credentials: "include",
         });
         const data = await response.json();
 
         if (data) {
-            // return all the friends
+            return data;
         } else {
             throw new Error(data.error);
         }

@@ -5,6 +5,36 @@ let client_id = null;
 const clientId = await getClientId();
 const notifSocket =  await WebSocketManager.initNotifSocket(clientId);
 
+//Display all friends
+// const friends = await getAllfriends("/api/friends/get_friends");
+const friends = [
+    { id: 1, username: "johndoe" },
+    { id: 2, username: "janedoe" },
+    { id: 3, username: "mikebrown" },
+    { id: 4, username: "sarahsmith" },
+    { id: 5, username: "alexjones" }
+];
+friends.forEach(friend => {
+    const friends_group = document.querySelector('.friends_group');
+    const parser = new DOMParser();
+    const html_friend = 
+    `<li class="list-group-item d-flex justify-content-between align-items-center">
+        <div>${friend.username}</div>
+        <div class="d-flex align-items-center">
+            <button type="button" class="type-intra-green delete_friend me-4" >delete</button>
+        </div>
+    </li>
+    `
+    const doc = parser.parseFromString(html_friend, "text/html");
+    const friendElement = doc.body.firstChild;
+
+    const deleteButton = friendElement.querySelector('.delete_friend');
+    deleteButton.addEventListener('click', () => {
+        handleDeleteFriend(friend);
+    });
+    friends_group.appendChild(friendElement);
+});
+
 notifSocket.onmessage = (event) => {
     console.log(event.data);
     const message = JSON.parse(event.data);
@@ -178,8 +208,14 @@ window.handleRefuseFriend = function(username) {
     notifSocket.send(JSON.stringify(message));
 };
 
-window.handleDeleteFriend = function(username) {
-    const message = create_message_notif("delete_friend", username);
+// window.handleDeleteFriend = function(username) {
+//     const message = create_message_notif("delete_friend", username);
+//     notifSocket.send(JSON.stringify(message));
+// };
+
+window.handleDeleteFriend = function(friend) {
+    console.log(friend);
+    const message = create_message_notif("delete_friend", friend.username);
     notifSocket.send(JSON.stringify(message));
 };
 
@@ -244,6 +280,27 @@ function toasts(message, data){
     newToast.addEventListener('hidden.bs.toast', function() {
         this.remove();
     });
+}
+
+export async function apiFriends(endpoint) {
+    // if (client_id !== null) return client_id;
+    console.log("Getting client ID")
+    try {
+        const response = await fetch(endpoint, {
+            method: "GET",
+            credentials: "include",
+        });
+        const data = await response.json();
+
+        if (data) {
+            return data;
+        } else {
+            throw new Error(data.error);
+        }
+    } catch (error) {
+        console.error("Erreur lors de la récupération de l'ID :", error);
+        return null;
+    }
 }
 
 export { notifSocket };

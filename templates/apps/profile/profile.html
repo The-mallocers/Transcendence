@@ -91,14 +91,14 @@
                     {% if show_friend_request %}
                         <button type="button" class="type-intra-green friendrequest" onclick="handleAskFriend(new URLSearchParams(window.location.search).get('username'))">Friend Request</button>
                     {%endif%}
-                    {% for friend in friends_list %}
+                    {% comment %} {% for friend in friends_list %}
                         <li class="list-group-item d-flex justify-content-between align-items-center">
                             <div>{{friend.username}}</div>
                             <div class="d-flex align-items-center">
                                 <button type="button" class="type-intra-green delete_friend me-4" onclick="handleDeleteFriend(this.dataset.username)" data-username="{{friend.username}}" >delete</button>
                             </div>
                         </li>
-                    {% endfor %}
+                    {% endfor %} {% endcomment %}
                 </ul>
             </div>
         </div>
@@ -125,3 +125,10 @@
   
 
 <script type="module" src="{% static '/js/apps/profile/profile.js' %}" defer></script>
+
+<li class="list-group-item d-flex justify-content-between align-items-center">
+    <div>${friend.username}</div>
+    <div class="d-flex align-items-center">
+        <button type="button" class="type-intra-green delete_friend me-4" onclick="handleDeleteFriend(${friend})" >delete</button>
+    </div>
+</li>
