@@ -34,3 +34,8 @@ def gameover_get(req):
 def create_tournament_get(req):
     from apps.game.views.tournaments import create_tournament
     return create_tournament(req)
+
+@require_http_methods(["GET"])
+def create_tournament_get(req):
+    from apps.game.views.tournaments import join_tournament
+    return join_tournament(req)
