@@ -248,7 +248,7 @@ class Clients(models.Model):
         if await redis.hget(name=RTables.HASH_G_QUEUE, key=str(client.id)) is not None:
             return RTables.HASH_G_QUEUE
         while True:
-            cursor, keys = await redis.scan(cursor=cursor, match=RTables.HASH_DUEL_QUEUE('*'))
+            cursor, keys = await redis.scan(cursor=cursor, match=RTables.HASH_QUEUE('*'))
             for key in keys:
                 ready = await redis.hget(key, str(client.id))
                 if ready.decode('utf-8') == 'True':

@@ -71,9 +71,6 @@ class MatchmakingService(BaseServices):
                 await self.redis.hset(RTables.HASH_DUEL_QUEUE(code), str(client.id), 'True')
                 await asend_group(RTables.GROUP_CLIENT(client.id), EventType.MATCHMAKING, ResponseAction.DUEL_JOIN)
 
-
-
-
     async def _handle_leave_duel(self, data, client: Clients):
         queues = await Clients.acheck_in_queue(client, self.redis)
         if queues is not RTables.HASH_G_QUEUE.value and queues is not None:

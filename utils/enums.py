@@ -31,9 +31,9 @@ class EventType(str, Enum):
     GAME: str = 'game'
     TOURNAMENT: str = 'tournament'
     UPDATE: str = 'update'
-    ERROR: str = 'error'
     CHAT: str = 'chat'
     NOTIFICATION: str = 'notification'
+    ERROR: str = 'error'
 
 
 # All the actions the client sends to the server
@@ -86,6 +86,11 @@ class ResponseAction(str, Enum):
     DUEL_JOIN: str = 'You have successfully joined the duel'
     DUEL_LEFT: str = 'You have successfully left the duel'
 
+    # ── Tournaments ───────────────────────────────────────────────────────────────── #
+    TOURNAMENT_CREATED: str = 'You have successfully create the tournament'
+    TOURNAMENT_JOIN: str = 'You have successfully joined the tournament'
+    TOURNAMENT_LEFT: str = 'You have successfully left the tournament'
+
     # ── Game Actions ──────────────────────────────────────────────────────────────────
     JOIN_GAME: str = 'You have successfully joined the game'
     LEFT_GAME: str = 'You have successfully left the game'
@@ -136,6 +141,10 @@ class ResponseError(str, Enum):
     NOT_INVITED: str = 'You are not invited to this duel.'
     ALREADY_JOIN_DUEL: str = 'You try to join duel already joined.'
 
+    # ── Tournaments ───────────────────────────────────────────────────────────────── #
+    MISSING_KEY: str = 'Some keys are missing'
+    TOURNAMENT_NOT_CREATE: str = 'There is error when you try to create tournaments.'
+
     # ── Game ──────────────────────────────────────────────────────────────────────────
     GAME_FULL: str = 'The game is currently full.'
     ALREADY_JOINED: str = "You have already joined the game."
@@ -184,6 +193,7 @@ class RTables(str, Enum):
     HASH_QUEUE: str = 'queue_{}'
     HASH_G_QUEUE: str = HASH_QUEUE.format('global')
     HASH_DUEL_QUEUE: str = HASH_QUEUE.format("duel_{}")
+    HASH_TOURNAMENT_QUEUE: str = HASH_QUEUE.format("tournament_{}")
 
     # ── Json ──────────────────────────────────────────────────────────────────────── #
     JSON_GAME: str = 'game_{}'

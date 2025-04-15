@@ -5,6 +5,7 @@ from utils.websockets.channel_send import asend_group_error
 from utils.websockets.consumers.consumer import WsConsumer
 from utils.websockets.services.game import GameService
 from utils.websockets.services.matchmaking import MatchmakingService
+from utils.websockets.services.services import ServiceError
 
 
 class GameConsumer(WsConsumer):
@@ -18,7 +19,13 @@ class GameConsumer(WsConsumer):
             if self.event_type is EventType.MATCHMAKING and data['event'] == EventType.GAME.value:
                 self.event_type = EventType(data['event'])
                 self.service = GameService()
+
+            if data['event'] == EventType.GAME.value and await self._redis.hget(name=RTables.HASH_MATCHES, key=str(self.client.id)) is None:
+                raise ServiceError('You are not in game')
             return await super().receive(text_data, bytes_data)
+
+        except ServiceError as e:
+            await asend_group_error(RTables.GROUP_CLIENT(self.client.id), ResponseError.NO_GAME, str(e))
 
         except JSONDecodeError as e:
             self._logger.error(f'Json error: {e}')
