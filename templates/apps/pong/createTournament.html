@@ -13,5 +13,37 @@
             <input type="checkbox" checked>
         </div>
 
+        <div class="points text-center mt-4">
+            <div>Points to win</div>
+            <div class="counter">
+                <div class="minus">-</div>
+                <div class="score">1</div>
+                <div class="plus">+</div>
+            </div>
+        </div>
+
+        <div class="btn startBtn mt-4">Start Game</div>
     </div>
+
+    <script>    
+        let minus = document.querySelector(".minus")
+        let plus = document.querySelector(".plus")
+        
+
+        function decrease(){
+            let score = document.querySelector(".score")
+            val = parseInt(score.innerHTML)
+            if (val > 1)
+                score.innerHTML = --val
+        }
+
+        function increase(){
+            let score = document.querySelector(".score")
+            val = parseInt(score.innerHTML)
+            score.innerHTML = ++val
+        }
+
+        minus.addEventListener("click", decrease)
+        plus.addEventListener("click", increase)
+    </script>
 </div>
