@@ -62,7 +62,7 @@ socket.onmessage = (e) => {
         console.log("WE GOT AN ERROR"); 
         if (jsonData.data.action == "OPPONENT_LEFT") {
             console.log("Opponent Disconnected");
-            navigateTo("/"); //Later, Redirect to a screen telling your opponent he disconnected.
+            navigateTo("/pong/disconnect/"); //Later, Redirect to a screen telling your opponent he disconnected.
             isGameOver.gameIsOver = true;
             WebSocketManager.closeGameSocket();
         }
