@@ -1,5 +1,5 @@
-import { WebSocketManager } from "../../websockets/websockets.js";
-import { navigateTo } from "../../spa/spa.js";
+import {WebSocketManager} from "../../websockets/websockets.js";
+import {navigateTo} from "../../spa/spa.js";
 
 let client_id = null;
 const clientId = await getClientId();
