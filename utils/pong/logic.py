@@ -59,19 +59,15 @@ class PongLogic:
         elif move == PaddleMove.IDLE:
             pass
 
-    def _is_left_paddle_collision(self):
-        return (self.ball.x - self.ball.radius <= self.paddle_pL.x + self.paddle_pL.width and
-                self.ball.x >= self.paddle_pL.x and
-                self.ball.y >= self.paddle_pL.y and
-                self.ball.y <= self.paddle_pL.y + self.paddle_pL.height)
-    
-    
-    def _is_right_paddle_collision(self):
-        return (self.ball.x + self.ball.radius >= self.paddle_pR.x and
-                self.ball.x <= self.paddle_pR.x + self.paddle_pR.width and
-                self.ball.y >= self.paddle_pR.y and
-                self.ball.y <= self.paddle_pR.y + self.paddle_pR.height)
-        
+    def _is_paddle_collision(self, paddle: Paddle):
+        closest_x = max(paddle.x, min(self.ball.x, paddle.x + paddle.width))
+        closest_y = max(paddle.y, min(self.ball.y, paddle.y + paddle.height))
+       
+        distance_x = self.ball.x - closest_x 
+        distance_y = self.ball.y - closest_y 
+
+        distance_squared = distance_x ** 2 + distance_y ** 2
+        return distance_squared <= self.ball.radius ** 2
 
     def _game_loop(self):
         current_time = time.time()
@@ -100,14 +96,14 @@ class PongLogic:
             self.ball.dy = self.ball.dy * -1
 
         # Left paddle collision
-        if(self._is_left_paddle_collision()):
+        if(self._is_paddle_collision(self.paddle_pL)):
             relative_hit_pos = (self.ball.y - self.paddle_pL.y) / self.paddle_pL.height - 0.5
             self.ball.dy = relative_hit_pos * ANGLE_FACTOR * BALL_SPEED
             self.ball.dx = abs(self.ball.dx)  # Ensure ball moves right
             self.ball.x = self.paddle_pL.x + self.paddle_pL.width + self.ball.radius
 
         # Right paddle collision
-        if(self._is_right_paddle_collision()):
+        if(self._is_paddle_collision(self.paddle_pR)):
             relative_hit_pos = (self.ball.y - self.paddle_pR.y) / self.paddle_pR.height - 0.5
             self.ball.dy = relative_hit_pos * ANGLE_FACTOR * BALL_SPEED
             self.ball.dx = -abs(self.ball.dx)  # Ensure ball moves left
