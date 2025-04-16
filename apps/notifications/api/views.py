@@ -1,5 +1,6 @@
 from django.http import HttpRequest
 from rest_framework import status
+from rest_framework.fields import CharField
 from rest_framework.response import Response
 from rest_framework.serializers import ModelSerializer
 from rest_framework.views import APIView
@@ -8,9 +9,11 @@ from apps.client.models import Clients
 
 
 class FriendSerializer(ModelSerializer):
+    username = CharField(source='profile.username', read_only=True)
+
     class Meta:
         model = Clients
-        fields = ['id']
+        fields = ['id', 'username']
 
 
 class GetFriendsApiView(APIView):
