@@ -4,41 +4,74 @@ import {navigateTo} from "../../spa/spa.js";
 let client_id = null;
 const clientId = await getClientId();
 const notifSocket =  await WebSocketManager.initNotifSocket(clientId);
+const searchParams = new URLSearchParams(window.location.search);
 
-// Display all friends
-// const friends = await apiFriends("/api/friends/get_friends/");
-const friends = [
-    {id: "1", username: "bast"},
-    {id: "2", username: "bastpoy"}
-];
-
-friends.forEach(friend => {
-    const friends_group = document.querySelector('.friends_group');
-    const parser = new DOMParser();
-    const html_friend = 
-    `<li class="list-group-item d-flex justify-content-between align-items-center">
-        <div>${friend.username}</div>
-        <div class="d-flex align-items-center">
-            <button type="button" class="type-intra-green delete_friend me-4" >delete</button>
-        </div>
-    </li>
-    `
-    const doc = parser.parseFromString(html_friend, "text/html");
-    const friendElement = doc.body.firstChild;
-
-    const deleteButton = friendElement.querySelector('.delete_friend');
-    deleteButton.addEventListener('click', () => {
-        handleDeleteFriend(friend);
+if(!searchParams.has('username'))
+{
+    // Display all friends and pending friends
+    const friends = await apiFriends("/api/friends/get_friends/");
+    const pending_friends = await apiFriends("/api/friends/get_pending_friends/")
+    
+    console.log(friends);
+    console.log(pending_friends);
+    
+    friends.forEach(friend => {
+        const friends_group = document.querySelector('.friends_group');
+        const parser = new DOMParser();
+        const html_friend = 
+        `<li class="list-group-item d-flex justify-content-between align-items-center">
+            <div>${friend.username}</div>
+            <div class="d-flex align-items-center">
+                <button type="button" class="type-intra-green delete_friend me-4" >delete</button>
+            </div>
+        </li>
+        `
+        const doc = parser.parseFromString(html_friend, "text/html");
+        const friendElement = doc.body.firstChild;
+    
+        const deleteButton = friendElement.querySelector('.delete_friend');
+        deleteButton.addEventListener('click', () => {
+            handleDeleteFriend(friend);
+        });
+        friends_group.appendChild(friendElement);
     });
-    friends_group.appendChild(friendElement);
-});
+    
+    pending_friends.forEach(pending_friend => {
+        const pending_group = document.querySelector('.pending_group');
+        const parser = new DOMParser();
+        const html_string = 
+                `<li class="list-group-item pending_item d-flex justify-content-between align-items-center" id="${pending_friend.username}">
+                    ${pending_friend.username}
+                    <div class="btn-group d-grid gap-2 d-md-flex justify-content-md-end"  role="group" aria-label="Basic example">
+                        <button type="button" class="type-intra-green accept_friend">accept</button>
+                        <button type="button" class="type-intra-white refuse_friend">refuse</button>
+                    </div>
+                </li>
+                `
+        const doc = parser.parseFromString(html_string, "text/html");
+        const pendingElement = doc.body.firstChild;
+    
+        const acceptButton = pendingElement.querySelector('.accept_friend');
+        acceptButton.addEventListener('click', () => {
+            handleAcceptFriend(pending_friend.username);
+        });
+        
+        const deleteButton = pendingElement.querySelector('.refuse_friend');
+        deleteButton.addEventListener('click', () => {
+            handleRefuseFriend(pending_friend.username);
+        });
+        pending_group.appendChild(pendingElement);
+    });
+}
+
+
 
 notifSocket.onmessage = (event) => {
     console.log(event.data);
     const message = JSON.parse(event.data);
     
     if(message.data.action == "ACK_SEND_FRIEND_REQUEST") {
-        let pending_group = document.querySelector('.pending_group');
+        const pending_group = document.querySelector('.pending_group');
         if(pending_group)
         {
             const parser = new DOMParser();
@@ -46,7 +79,7 @@ notifSocket.onmessage = (event) => {
             `<li class="list-group-item pending_item d-flex justify-content-between align-items-center" id="${message.data.content.username}">
                 ${message.data.content.username}
                 <div class="btn-group d-grid gap-2 d-md-flex justify-content-md-end"  role="group" aria-label="Basic example">
-                    <button type="button" class="type-intra-green accept_friend" id="${message.data.content.sender}">accept</button>
+                    <button type="button" class="type-intra-green accept_friend">accept</button>
                     <button type="button" class="type-intra-white refuse_friend">refuse</button>
                 </div>
             </li>
@@ -126,6 +159,7 @@ notifSocket.onmessage = (event) => {
                     <img src="/static/assets/imgs/profile/default.png">
                     <div>${message.data.content.username}</div>
             </button>`
+            console.log(htmlChat);
             const doc = parser.parseFromString(htmlChat, "text/html");
             const chatElement = doc.body.firstChild;
             newChat.appendChild(chatElement);
@@ -306,8 +340,8 @@ export async function apiFriends(endpoint) {
             method: "GET",
             credentials: "include",
         });
+        console.log(response);
         const data = await response.json();
-
         if (data) {
             return data;
         } else {

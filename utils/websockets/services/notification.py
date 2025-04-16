@@ -157,6 +157,6 @@ class NotificationService(BaseServices):
         except Exception as e:
             print(repr(e))
             return await asend_group_error(RTables.GROUP_CLIENT(client.id), ResponseError.INTERNAL_ERROR)
-            
+
     async def disconnect(self, client):
         pass
