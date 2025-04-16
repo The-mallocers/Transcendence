@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import math
 import random
 import time
 
@@ -17,6 +18,7 @@ from utils.pong.objects.score import Score
 from utils.serializers.game import PaddleSerializer, BallSerializer
 from utils.websockets.channel_send import send_group
 
+MAX_BOUNCE_ANGLE = math.radians(75)
 
 class PongLogic:
     def __init__(self, game: Game, redis):  # ball, paddle_pL, paddle_pR, score_pL, score_pR):
@@ -66,8 +68,24 @@ class PongLogic:
         distance_x = self.ball.x - closest_x 
         distance_y = self.ball.y - closest_y 
 
+        #Word on the street is that this is faster than the regular distance formula
         distance_squared = distance_x ** 2 + distance_y ** 2
         return distance_squared <= self.ball.radius ** 2
+    
+    def _handle_paddle_collision(self, paddle, is_left):
+        if self._is_paddle_collision(paddle):
+            # Calculate how far from the paddle center the ball hit
+            relative_hit_pos = (self.ball.y - paddle.y) / paddle.height - 0.5
+            
+            self.ball.dy = relative_hit_pos * ANGLE_FACTOR * BALL_SPEED
+
+            # Ensure ball moves in the correct direction
+            if is_left:
+                self.ball.dx = abs(self.ball.dx)  # move right
+                self.ball.x = paddle.x + paddle.width + self.ball.radius
+            else:
+                self.ball.dx = -abs(self.ball.dx)  # move left
+                self.ball.x = paddle.x - self.ball.radius
 
     def _game_loop(self):
         current_time = time.time()
@@ -95,19 +113,22 @@ class PongLogic:
             # Reverse ball's vertical direction
             self.ball.dy = self.ball.dy * -1
 
-        # Left paddle collision
-        if(self._is_paddle_collision(self.paddle_pL)):
-            relative_hit_pos = (self.ball.y - self.paddle_pL.y) / self.paddle_pL.height - 0.5
-            self.ball.dy = relative_hit_pos * ANGLE_FACTOR * BALL_SPEED
-            self.ball.dx = abs(self.ball.dx)  # Ensure ball moves right
-            self.ball.x = self.paddle_pL.x + self.paddle_pL.width + self.ball.radius
 
-        # Right paddle collision
-        if(self._is_paddle_collision(self.paddle_pR)):
-            relative_hit_pos = (self.ball.y - self.paddle_pR.y) / self.paddle_pR.height - 0.5
-            self.ball.dy = relative_hit_pos * ANGLE_FACTOR * BALL_SPEED
-            self.ball.dx = -abs(self.ball.dx)  # Ensure ball moves left
-            self.ball.x = self.paddle_pR.x - self.ball.radius
+        self._handle_paddle_collision(self.paddle_pL, is_left=True)
+        self._handle_paddle_collision(self.paddle_pR, is_left=False)
+        # # Left paddle collision
+        # if(self._is_paddle_collision(self.paddle_pL)):
+        #     relative_hit_pos = (self.ball.y - self.paddle_pL.y) / self.paddle_pL.height - 0.5
+        #     self.ball.dy = relative_hit_pos * ANGLE_FACTOR * BALL_SPEED
+        #     self.ball.dx = abs(self.ball.dx)  # Ensure ball moves right
+        #     self.ball.x = self.paddle_pL.x + self.paddle_pL.width + self.ball.radius
+
+        # # Right paddle collision
+        # if(self._is_paddle_collision(self.paddle_pR)):
+        #     relative_hit_pos = (self.ball.y - self.paddle_pR.y) / self.paddle_pR.height - 0.5
+        #     self.ball.dy = relative_hit_pos * ANGLE_FACTOR * BALL_SPEED
+        #     self.ball.dx = -abs(self.ball.dx)  # Ensure ball moves left
+        #     self.ball.x = self.paddle_pR.x - self.ball.radius
 
         # Scoring
         if self.ball.x <= 0:
