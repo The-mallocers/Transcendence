@@ -5,6 +5,7 @@ from typing import Dict, Any
 
 from channels.layers import get_channel_layer
 
+from apps.client.models import Clients
 from utils.enums import RequestAction
 from utils.redis import RedisConnectionPool
 
@@ -23,9 +24,10 @@ class BaseServices(ABC):
 
         self.redis = None
         self.channel_layer = get_channel_layer()
+        self.service_group = None
 
     @abstractmethod
-    async def init(self, *args) -> bool:
+    async def init(self, client: Clients, *args) -> bool:
         self.redis = await RedisConnectionPool.get_async_connection(self.__class__.__name__)
         return True
 

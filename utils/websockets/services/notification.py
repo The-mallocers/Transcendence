@@ -8,8 +8,9 @@ from utils.websockets.services.services import BaseServices
 
 
 class NotificationService(BaseServices):
-    async def init(self, client):
-        await super().init()
+    async def init(self, client, *args):
+        self.service_group = f'{EventType.NOTIFICATION.value}_{client.id}'
+        return await super().init(client)
 
     # Client is the person that want to add a friend to his friend list
     # Target is the friends to add
@@ -18,7 +19,7 @@ class NotificationService(BaseServices):
         # target is the client that I want to add
         target = await Clients.aget_client_by_username(data['data']['args']['target_name'])
         if target is None:
-            return await asend_group_error(RTables.GROUP_CLIENT(client.id), ResponseError.USER_NOT_FOUND)
+            return await asend_group_error(self.service_group, ResponseError.USER_NOT_FOUND)
         friendTargetTable = await target.get_friend_table()
 
         # check if the friend ask is already in my pending list
@@ -39,7 +40,7 @@ class NotificationService(BaseServices):
         askfriend = await friendTargetTable.add_pending_friend(client)
         # if I am already his friend 
         if askfriend is None:
-            return await asend_group_error(RTables.GROUP_CLIENT(client.id), ResponseError.USER_ALREADY_MY_FRIEND)
+            return await asend_group_error(self.service_group, ResponseError.USER_ALREADY_MY_FRIEND)
         await asend_group(RTables.GROUP_CLIENT(target.id),
                           EventType.NOTIFICATION,
                           ResponseAction.ACK_SEND_FRIEND_REQUEST,
@@ -53,7 +54,7 @@ class NotificationService(BaseServices):
     async def _handle_accept_friend_request(self, data, client):
         target = await Clients.aget_client_by_username(data['data']['args']['target_name'])
         if target is None:
-            return await asend_group_error(RTables.GROUP_CLIENT(client.id), ResponseError.USER_NOT_FOUND)
+            return await asend_group_error(self.service_group, ResponseError.USER_NOT_FOUND)
         try:
             friendTable = await client.get_friend_table()
             await friendTable.accept_pending_friend(target)
@@ -65,7 +66,7 @@ class NotificationService(BaseServices):
             await room.add_client(client)
             await room.add_client(target)
 
-            await asend_group(RTables.GROUP_CLIENT(client.id), EventType.NOTIFICATION,
+            await asend_group(self.service_group, EventType.NOTIFICATION,
                               ResponseAction.ACK_ACCEPT_FRIEND_REQUEST_HOST,
                               {
                                   "sender": str(target.id),
@@ -81,29 +82,29 @@ class NotificationService(BaseServices):
                               })
 
         except:
-            return await asend_group_error(RTables.GROUP_CLIENT(client.id), ResponseError.USER_ALREADY_FRIEND_OR_NOT_PENDING_FRIEND)
+            return await asend_group_error(self.service_group, ResponseError.USER_ALREADY_FRIEND_OR_NOT_PENDING_FRIEND)
 
     async def _handle_refuse_friend_request(self, data, client):
         target = await Clients.aget_client_by_username(data['data']['args']['target_name'])
         if target is None:
-            return await asend_group_error(RTables.GROUP_CLIENT(client.id), ResponseError.USER_NOT_FOUND)
+            return await asend_group_error(self.service_group, ResponseError.USER_NOT_FOUND)
         try:
             # refuse the pending friend request
             friendTable = await client.get_friend_table()
             await friendTable.refuse_pending_friend(target)
-            await asend_group(RTables.GROUP_CLIENT(client.id), EventType.NOTIFICATION,
+            await asend_group(self.service_group, EventType.NOTIFICATION,
                               ResponseAction.ACK_REFUSE_FRIEND_REQUEST,
                               {
                                   "sender": str(target.id),
                                   "username": await target.aget_profile_username()
                               })
         except:
-            return await asend_group_error(RTables.GROUP_CLIENT(client.id), ResponseError.USER_ALREADY_FRIEND_OR_NOT_PENDING_FRIEND, )
+            return await asend_group_error(self.service_group, ResponseError.USER_ALREADY_FRIEND_OR_NOT_PENDING_FRIEND, )
 
     async def _handle_delete_friend(self, data, client):
         target = await Clients.aget_client_by_username(data['data']['args']['target_name'])
         if target is None:
-            return await asend_group_error(RTables.GROUP_CLIENT(client.id), ResponseError.USER_NOT_FOUND)
+            return await asend_group_error(self.service_group, ResponseError.USER_NOT_FOUND)
 
         try:
             client_friend_table = await client.get_friend_table()
@@ -111,7 +112,7 @@ class NotificationService(BaseServices):
 
             target_friend_table = await target.get_friend_table()
             await target_friend_table.remove_friend(client)
-            await asend_group(RTables.GROUP_CLIENT(client.id),
+            await asend_group(self.service_group,
                               EventType.NOTIFICATION,
                               ResponseAction.ACK_DELETE_FRIEND_HOST,
                               {
@@ -137,9 +138,24 @@ class NotificationService(BaseServices):
             # Then delete the room
             await room.adelete_room()
         except ValidationError:
-            return await asend_group_error(RTables.GROUP_CLIENT(client.id), ResponseError.NOT_FRIEND)
+            return await asend_group_error(self.service_group, ResponseError.NOT_FRIEND)
         except Exception as e:
-            return await asend_group_error(RTables.GROUP_CLIENT(client.id), ResponseError.INTERNAL_ERROR)
+            return await asend_group_error(self.service_group, ResponseError.INTERNAL_ERROR)
 
+    async def _handle_accept_duel(self, data, client):
+        code = data['data']['args']['code']
+        if await Clients.acheck_in_queue(client, self.redis):
+            return await asend_group_error(self.service_group, ResponseError.ALREADY_IN_QUEUE)
+        if not await self.redis.exists(RTables.HASH_DUEL_QUEUE(code)):
+            return await asend_group_error(self.service_group, ResponseError.DUEL_NOT_EXIST)
+        if await self.redis.hexists(RTables.HASH_DUEL_QUEUE(code), str(client.id)) is False:
+            return await asend_group_error(self.service_group, ResponseError.NOT_INVITED)
+        else:
+            if await self.redis.hget(RTables.HASH_DUEL_QUEUE(code), str(client.id)) == 'True':
+                return await asend_group_error(self.service_group, ResponseError.ALREADY_JOIN_DUEL)
+            else:
+                await self.redis.hset(RTables.HASH_DUEL_QUEUE(code), str(client.id), 'True')
+                await asend_group(self.service_group, EventType.MATCHMAKING, ResponseAction.DUEL_JOIN)
+            
     async def disconnect(self, client):
         pass

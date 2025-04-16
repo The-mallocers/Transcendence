@@ -6,12 +6,14 @@ from apps.client.models import Clients
 from apps.tournaments.models import Tournaments
 from utils.enums import RTables, ResponseError, EventType, ResponseAction
 from utils.websockets.channel_send import asend_group_error, asend_group
+from utils.enums import EventType
 from utils.websockets.services.services import BaseServices
 
 
 class TournamentService(BaseServices):
-    async def init(self, *args) -> bool:
-        return await super().init(*args)
+    async def init(self, client, *args) -> bool:
+        self.service_group = f'{EventType.TOURNAMENT.value}_{client.id}'
+        return await super().init(client)
 
     async def _handle_create_tournament(self, data, client: Clients):
         queues = await Clients.acheck_in_queue(client, self.redis)
