@@ -1,9 +1,11 @@
+from utils.enums import EventType
 from utils.websockets.services.services import BaseServices
 
 
 class TournamentService(BaseServices):
-    async def init(self, *args) -> bool:
-        pass
+    async def init(self, client, *args) -> bool:
+        self.service_group = f'{EventType.TOURNAMENT.value}_{client.id}'
+        return await super().init(client)
 
     async def _handle_create_tournament(self, data, player):
         pass
