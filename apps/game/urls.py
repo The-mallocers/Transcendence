@@ -8,6 +8,7 @@ urlpatterns = [
     path('arena/', view.arena_get, name='arena'),
     path('', view.pong_get, name='pong'),
     path('gameover/', view.gameover_get, name='gameover'),
-    path('tournament/create/', view.create_tournament_get, name='gameover'),
-    path('tournament/join/', view.create_tournament_get, name='gameover'),
+    path('tournament/create/', view.create_tournament_get, name='createTournament'),
+    path('tournament/join/', view.join_tournament_get, name='joinTournament'),
+    path('tournament/', view.inTournamentRoom, name='inRoom'),
 ]
