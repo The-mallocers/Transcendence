@@ -70,33 +70,27 @@ document.getElementById("messageInput").addEventListener("keydown", function (ev
                 }
             }
         }
-        console.log("message_send: " + message.data);
+        console.log("room: " + room_id);
+        console.log("full data: " + JSON.stringify(message))
         chatSocket.send(JSON.stringify(message));
     }
 });
 
-// Attach event listener to a parent that exists before buttons are created
-document.addEventListener("click", function (event) {
-    if (event.target.classList.contains("roomroom")) {
-        const id = event.target.id;
-        room_id = id;
-        console.log("Clicked on room", id);
-
-        const message = {
-            "event": "chat",
-            "data": {
-                "action": "get_history",
-                "args": {
-                    "room_id": id,
-                }
+window.clickRoom = function(room){
+    room_id = room
+    const message = {
+        "event": "chat",
+        "data": {
+            "action": "get_history",
+            "args": {
+                "room_id": room,
             }
-        };
-        //Dirty fucking hack because for some reason it tried to send the message twice.
-        if(chatSocket.readyState === WebSocket.OPEN) {
-            chatSocket.send(JSON.stringify(message));
         }
+    };
+    if(chatSocket.readyState === WebSocket.OPEN) {
+        chatSocket.send(JSON.stringify(message));
     }
-});
+}
 
 async function getClientId() {
     // if (client_id !== null) return client_id;
@@ -147,7 +141,7 @@ async function displayRooms(rooms) {
         if(rooms[i].player.length > 1)
         {
             htmlString = 
-            `<button id="${rooms[i].room}" class="roomroom container d-flex align-items-center gap-3">
+            `<button class="roomroom container d-flex align-items-center gap-3">
                 <img src="/static/assets/imgs/profile/default.png">
                 <div>chat global</div>
             </button>`
@@ -158,13 +152,17 @@ async function displayRooms(rooms) {
             if(player == undefined)
                 player = "delete user";
             htmlString = 
-            `<button id="${rooms[i].room}" class="roomroom chat-${player} container d-flex align-items-center gap-3">
+            `<button class="roomroom chat-${player} container d-flex align-items-center gap-3">
                 <img src="/static/assets/imgs/profile/default.png">
                 <div>${player}</div>
             </button>`
         }
         const doc = parser.parseFromString(htmlString, "text/html");
         const roomElement = doc.body.firstChild;
+        roomElement.addEventListener('click', ()=>{
+            clickRoom(rooms[i].room)
+        })
+
         chatRooms.appendChild(roomElement);
     }
     scrollToBottom(chatRooms);
