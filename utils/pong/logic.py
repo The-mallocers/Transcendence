@@ -48,32 +48,55 @@ class PongLogic:
         except asyncio.CancelledError:
             pass
 
-    def handle_paddle_direction(self, paddle, delta_time):
-        move = paddle.get_move()
+    def _handle_paddle_direction(self, paddle: Paddle, delta_time):
+        move = paddle.move
         if move == PaddleMove.UP:
-            paddle.decrease_y(delta_time)
+            paddle.y = paddle.y - paddle.speed * delta_time
+            paddle.y = self.handle_wall_collision(paddle.y)
         elif move == PaddleMove.DOWN:
-            paddle.increase_y(delta_time)
+            paddle.y = paddle.y + paddle.speed * delta_time
+            paddle.y = self.handle_wall_collision(paddle.y)
         elif move == PaddleMove.IDLE:
-            # Maybe we'll do things when its idle later !
             pass
+
+    def _is_left_paddle_collision(self):
+        return (self.ball.get_x() - self.ball.get_radius() <= self.paddle_pL.get_x() + self.paddle_pL.get_width() and
+                self.ball.get_x() >= self.paddle_pL.get_x() and
+                self.ball.get_y() >= self.paddle_pL.get_y() and
+                self.ball.get_y() <= self.paddle_pL.get_y() + self.paddle_pL.get_height())
+    
+    
+    def _is_right_paddle_collision(self):
+        return (self.ball.get_x() + self.ball.get_radius() >= self.paddle_pR.get_x() and
+                self.ball.get_x() <= self.paddle_pR.get_x() + self.paddle_pR.get_width() and
+                self.ball.get_y() >= self.paddle_pR.get_y() and
+                self.ball.get_y() <= self.paddle_pR.get_y() + self.paddle_pR.get_height())
+        
 
     def _game_loop(self):
         current_time = time.time()
-        # ugly as shit fix but doing properly would require changing the way we are initializing a game.
+        # Hack !
         if self.last_update == -1:
             delta_time = 0
         else:
             delta_time = current_time - self.last_update
 
-        self.ball.multiply_dx(1.001)
-        self.ball.multiply_dy(1.001)
+        #We use this to sync our objects with redis.
+        self.ball.update()
+        self.paddle_pL.update()
+        self.paddle_pR.update()
+        self.score_pL.update()
+        self.score_pR.update()
 
-        self.ball.increase_x(self.ball.get_dx() * delta_time)
-        self.ball.increase_y(self.ball.get_dy() * delta_time)
 
-        self.handle_paddle_direction(self.paddle_pL, delta_time)
-        self.handle_paddle_direction(self.paddle_pR, delta_time)
+        self.ball.dx *= 1.001
+        self.ball.dy *= 1.001
+
+        self.ball.x += self.ball.dx * delta_time
+        self.ball.y += self.ball.gy * delta_time
+
+        self._handle_paddle_direction(self.paddle_pL, delta_time)
+        self._handle_paddle_direction(self.paddle_pR, delta_time)
 
         # Ball collision with top and bottom walls
         if self.ball.get_y() <= self.ball.get_radius() or self.ball.get_y() >= CANVAS_HEIGHT - self.ball.get_radius():
@@ -85,21 +108,21 @@ class PongLogic:
             self.ball.set_dy(self.ball.get_dy() * -1)
 
         # Left paddle collision
-        if (
-                self.ball.get_x() - self.ball.get_radius() <= self.paddle_pL.get_x() + self.paddle_pL.get_width() and
-                self.ball.get_x() >= self.paddle_pL.get_x() and
-                self.ball.get_y() >= self.paddle_pL.get_y() and
-                self.ball.get_y() <= self.paddle_pL.get_y() + self.paddle_pL.get_height()):
+        if(self._is_left_paddle_collision()):
+            relative_hit_pos = (self.ball.get_y() - self.paddle_pL.get_y()) / self.paddle_pL.get_height() - 0.5
+            angle_factor = 2.0
+            new_dy = relative_hit_pos * angle_factor * BALL_SPEED
             self.ball.set_dx(abs(self.ball.get_dx()))  # Ensure ball moves right
-            self.ball.set_x(
-                self.paddle_pL.get_x() + self.paddle_pL.get_width() + self.ball.get_radius())
+            self.ball.set_dy(new_dy)
+            self.ball.set_x(self.paddle_pL.get_x() + self.paddle_pL.get_width() + self.ball.get_radius())
 
         # Right paddle collision
-        if (self.ball.get_x() + self.ball.get_radius() >= self.paddle_pR.get_x() and
-                self.ball.get_x() <= self.paddle_pR.get_x() + self.paddle_pR.get_width() and
-                self.ball.get_y() >= self.paddle_pR.get_y() and
-                self.ball.get_y() <= self.paddle_pR.get_y() + self.paddle_pR.get_height()):
+        if(self._is_right_paddle_collision()):
+            relative_hit_pos = (self.ball.get_y() - self.paddle_pR.get_y()) / self.paddle_pR.get_height() - 0.5
+            angle_factor = 2.0
+            new_dy = relative_hit_pos * angle_factor * BALL_SPEED
             self.ball.set_dx(-abs(self.ball.get_dx()))  # Ensure ball moves left
+            self.ball.set_dy(new_dy)
             self.ball.set_x(self.paddle_pR.get_x() - self.ball.get_radius())
 
         # Scoring
@@ -116,11 +139,7 @@ class PongLogic:
         elif self.score_pR.get_score() >= self.points_to_win:
             self.game.rset_status(GameStatus.ENDING)
 
-        self.ball.update()
-        self.paddle_pL.update()
-        self.paddle_pR.update()
-        self.score_pL.update()
-        self.score_pR.update()
+
 
         self.last_update = current_time
 
@@ -166,8 +185,6 @@ class PongLogic:
             if self.redis.hget(name="consumers_channels", key=str(self.game.pR.id)) is None:
                 self.score_pR.set_score(0)
                 self.score_pL.set_score(self.game.points_to_win)
-            # self.score_pL.set_score(0) if self.redis.hget(name="consumers_channels", key=str(self.game.pL.id)) is None else self.score_pR.get_score(0)
-            # self.score_pL.set_score(self.game.points_to_win) if self.redis.hget(name="consumers_channels", key=str(self.game.pL.id)) is not None else self.score_pR.get_score(self.game.points_to_win)
 
         if self.score_pL.get_score() > self.score_pR.get_score():
             winner.client = Clients.get_client_by_id(self.game.pL.client_id)
