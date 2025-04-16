@@ -30,8 +30,15 @@ class Paddle:
         self.x = self.get_x()
         self.y = self.get_y()
         self.speed = self.get_speed()
-        #Added the update of the move
         self.move = self.get_move()
+    
+    def push_to_redis(self):
+        self.set_width(self.width)
+        self.set_height(self.height)
+        self.set_x(self.x)
+        self.set_y(self.y)
+        self.set_speed(self.speed)
+        self.set_move(self.move)
 
     def __str__(self):
         return f'X: {self.x}, Y: {self.y}'
