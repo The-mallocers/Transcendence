@@ -5,7 +5,7 @@ import traceback
 
 from apps.game.models import Game
 from apps.player.models import Player
-from utils.enums import GameStatus, ResponseError, RTables
+from utils.enums import GameStatus, ResponseError, RTables, EventType
 from utils.threads.game import GameThread
 from utils.threads.threads import Threads
 from utils.websockets.channel_send import send_group_error
@@ -84,6 +84,11 @@ class MatchmakingThread(Threads):
             random.shuffle(players)
             player_1, stat_p1 = players[0]
             player_2, stat_p2 = players[1]
+            channel_p1 = self.redis.hget(name=RTables.HASH_CLIENT(player_1.decode('utf-8')), key=str(EventType.GAME.value))
+            channel_p2 = self.redis.hget(name=RTables.HASH_CLIENT(player_2.decode('utf-8')), key=str(EventType.GAME.value))
+            print(channel_p1, channel_p2)
+            if not channel_p1 or not channel_p2:
+                return False
             if stat_p1.decode('utf-8') == 'True' and stat_p2.decode('utf-8') == 'True':
                 game.is_duel = True
                 game.game_id = re.search(rf'{RTables.HASH_DUEL_QUEUE("")}(\w+)$', duel.decode('utf-8')).group(1)

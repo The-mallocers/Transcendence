@@ -37,6 +37,7 @@ class WsConsumer(AsyncWebsocketConsumer):
                 raise ServiceError('You are already connected')
             else:
                 await self.channel_layer.group_add(RTables.GROUP_CLIENT(self.client.id), self.channel_name)
+                await self.channel_layer.group_add(f'{self.event_type.value}_{self.client.id}', self.channel_name)
                 await self._redis.hset(name=RTables.HASH_CLIENT(self.client.id), key=str(self.event_type.value), value=str(self.channel_name))
                 return True
         except AttributeError:
@@ -58,10 +59,9 @@ class WsConsumer(AsyncWebsocketConsumer):
         await self.channel_layer.group_discard(RTables.GROUP_ERROR, self.channel_name)
         self.event_type = EventType.GAME if self.event_type is EventType.MATCHMAKING else self.event_type
         if self.client:
-            redis_chan_name = await self._redis.hget(RTables.HASH_CLIENT(self.client.id), str(self.event_type.value))
-            if redis_chan_name.decode('utf-8') == self.channel_name:
-                await self._redis.hdel(RTables.HASH_CLIENT(self.client.id), str(self.event_type.value))
             await self.channel_layer.group_discard(RTables.GROUP_CLIENT(self.client.id), self.channel_name)
+            await self.channel_layer.group_discard(f'{self.event_type.value}_{self.client.id}', self.channel_name)
+            await self._redis.hdel(RTables.HASH_CLIENT(self.client.id), str(self.event_type.value))
 
     async def receive(self, text_data=None, bytes_data=None):
         try:

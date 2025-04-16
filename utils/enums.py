@@ -44,9 +44,8 @@ class RequestAction(str, Enum):
 
     # ── Duels ─────────────────────────────────────────────────────────────────────── #
     CREATE_DUEL: str = 'create_duel'
-    JOIN_DUEL: str = 'join_duel'
     LEAVE_DUEL: str = 'leave_duel'
-    ASK_DUEL: str = 'ask_duel'
+    ACCEPT_DUEL: str = 'accept_duel'
     # ACK_ASK_DUEL: str = 'ack_ask_duel'
 
     # ── Game Actions ──────────────────────────────────────────────────────────────────
@@ -167,6 +166,7 @@ class ResponseError(str, Enum):
     EXCEPTION: str = 'An error has occurred.'
     SERVICE_ERROR: str = 'An error occurred in the service.'
     TARGET_NOT_FOUND: str = 'Target not found.'
+    USER_OFFLINE: str = 'User is offline.'
 
     # INTERNAL_ERROR = "Internal server error"
     # INVALID_ID: str = 'Player does not exist'
@@ -180,6 +180,7 @@ class RTables(str, Enum):
     GROUP_CLIENT: str = 'client_{}'
     GROUP_CHAT: str = 'chat_{}'
     GROUP_GAME: str = 'game_{}'
+    GROUP_NOTIF: str = 'notification_{}'
 
     # ── Hash Tables ───────────────────────────────────────────────────────────────── #
     HASH_CLIENT: str = 'client_{}'
