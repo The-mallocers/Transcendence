@@ -76,15 +76,21 @@ class PongLogic:
         if self._is_paddle_collision(paddle):
             # Calculate how far from the paddle center the ball hit
             relative_hit_pos = (self.ball.y - paddle.y) / paddle.height - 0.5
+            max_angle_factor = 0.8
+            relative_hit_pos = max(min(relative_hit_pos, max_angle_factor), -max_angle_factor)
             
-            self.ball.dy = relative_hit_pos * ANGLE_FACTOR * BALL_SPEED
+            current_speed = math.sqrt(self.ball.dx**2 + self.ball.dy**2)
+            self.ball.dy = relative_hit_pos * ANGLE_FACTOR * current_speed
+            
+            dx_squared = current_speed**2 - self.ball.dy**2
+            dx_magnitude = math.sqrt(max(dx_squared, 0.01))
 
             # Ensure ball moves in the correct direction
             if is_left:
-                self.ball.dx = abs(self.ball.dx)  # move right
+                self.ball.dx = dx_magnitude # move right
                 self.ball.x = paddle.x + paddle.width + self.ball.radius
             else:
-                self.ball.dx = -abs(self.ball.dx)  # move left
+                self.ball.dx = -dx_magnitude  # move left
                 self.ball.x = paddle.x - self.ball.radius
 
     def _game_loop(self):
