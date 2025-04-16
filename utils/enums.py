@@ -91,6 +91,7 @@ class ResponseAction(str, Enum):
     # ── Tournaments ───────────────────────────────────────────────────────────────── #
     TOURNAMENT_CREATED: str = 'You have successfully create the tournament'
     TOURNAMENT_JOIN: str = 'You have successfully joined the tournament'
+    TOURNAMENT_PLAYER_JOIN: str = 'Player join the tournament.'
     TOURNAMENT_LEFT: str = 'You have successfully left the tournament'
 
     # ── Game Actions ──────────────────────────────────────────────────────────────────
@@ -146,6 +147,8 @@ class ResponseError(str, Enum):
     # ── Tournaments ───────────────────────────────────────────────────────────────── #
     MISSING_KEY: str = 'Some keys are missing'
     TOURNAMENT_NOT_CREATE: str = 'There is error when you try to create tournaments.'
+    TOURNAMENT_NOT_EXIST: str = 'Tournament you try to join not exist.'
+    ALREADY_JOIN_TOURNAMENT: str = 'You try to join tournament already joined.'
 
     # ── Game ──────────────────────────────────────────────────────────────────────────
     GAME_FULL: str = 'The game is currently full.'
@@ -190,6 +193,7 @@ class RTables(str, Enum):
     GROUP_CHAT: str = 'chat_{}'
     GROUP_GAME: str = 'game_{}'
     GROUP_NOTIF: str = 'notification_{}'
+    GROUP_TOURNAMENT: str = 'tournament_{}'
 
     # ── Hash Tables ───────────────────────────────────────────────────────────────── #
     HASH_CLIENT: str = 'client_{}'
