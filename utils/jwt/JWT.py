@@ -53,8 +53,17 @@ class JWT:
         return response
 
     def invalidate_token(self):
-        InvalidatedToken.objects.get_or_create(jti=self.JTI, token=self.encode_token(), exp=datetime.fromtimestamp(self.EXP, tz=timezone.utc),
-                                               type=self.TYPE)
+        # Convert EXP to datetime if it's a timestamp
+        exp_datetime = self.EXP
+        if isinstance(self.EXP, (int, float)):
+            exp_datetime = datetime.fromtimestamp(self.EXP, tz=timezone.utc)
+
+        InvalidatedToken.objects.get_or_create(
+            jti=self.JTI,
+            token=self.encode_token(),
+            exp=exp_datetime,
+            type=self.TYPE
+        )
 
     @staticmethod
     def validate_token(token_key: str, token_type: JWTType):
