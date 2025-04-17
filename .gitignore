@@ -95,3 +95,4 @@ transcendence.sqlite3
 test_db.sqlite3
 staticfiles
 docker/staticdocker
+.coverage

@@ -27,7 +27,7 @@ test:
 	# Wait for services to be ready
 	docker compose -f ./$(DOCKER_COMPOSE_FILE) exec -T db sh -c 'until pg_isready -U ${DATABASE_USERNAME} -d ${DATABASE_NAME}; do sleep 1; done'
 	# Run tests in the Django container
-	docker compose -f ./$(DOCKER_COMPOSE_FILE) run --rm django-web sh -c "pip install pytest pytest-asyncio && python manage.py test"
+	docker compose -f ./$(DOCKER_COMPOSE_FILE) run --rm django-web sh -c "python manage.py test"
 	# Clean up after tests
 	docker compose -f ./$(DOCKER_COMPOSE_FILE) down
 
