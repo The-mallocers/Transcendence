@@ -241,14 +241,14 @@ const routes = [
     },
     {
         path: '/chat/friendrequest/',
-        template: async () => {
-            return await fetchRoute(`/pages/chat/friendrequest/`);
+        template: async (query) => {
+            return await fetchRoute(`/pages/chat/friendrequest/${query}`);
         },
     },
     {
         path: '/pong/duel/',
-        template: async () => {
-            return await fetchRoute(`/pages/pong/duel/`);
+        template: async (query) => {
+            return await fetchRoute(`/pages/pong/duel/${query}`);
         },
     },
 ];

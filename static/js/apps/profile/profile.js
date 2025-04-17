@@ -9,11 +9,9 @@ const searchParams = new URLSearchParams(window.location.search);
 if(!searchParams.has('username'))
 {
     // Display all friends and pending friends
+    console.log("displaying friends from profile.js");
     const friends = await apiFriends("/api/friends/get_friends/");
     const pending_friends = await apiFriends("/api/friends/get_pending_friends/")
-    
-    console.log(friends);
-    console.log(pending_friends);
     
     friends.forEach(friend => {
         const friends_group = document.querySelector('.friends_group');
@@ -203,13 +201,23 @@ notifSocket.onmessage = (event) => {
             `<li class="list-group-item pending_item d-flex justify-content-between align-items-center" id="${message.data.content.username}">
                 ${message.data.content.username} wants to duel
                 <div class="btn-group d-grid gap-2 d-md-flex justify-content-md-end"  role="group" aria-label="Basic example">
-                    <button type="button" class="type-intra-green accept_friend" onclick="handleAcceptDuel(this.dataset.username)" id="${message.data.content.sender}">accept</button>
-                    <button type="button" class="type-intra-white refuse_friend" onclick="handleRefuseDuel(this.dataset.username)">refuse</button>
+                    <button type="button" class="type-intra-green accept_duel" id="${message.data.content.sender}">accept</button>
+                    <button type="button" class="type-intra-white delete_duel" onclick="handleRefuseDuel(this.dataset.username)">refuse</button>
                 </div>
             </li>
             `
+            
             const doc = parser.parseFromString(htmlString, "text/html");
             const pendingElement = doc.body.firstChild;
+
+            const acceptDuel = pendingElement.querySelector('.accept_duel');
+            acceptDuel.addEventListener('click', () => {
+                handleAcceptDuel(message.data.content.code);
+            });
+            // const deleteDuel = pendingElement.querySelector('.delete_duel');
+            // deleteDuel.addEventListener('click', () => {
+            //     handleDeleteDuel(message.data.content.code);
+            // });
             pending_group.appendChild(pendingElement);
         }
         toasts(`${message.data.content.username} wants a duel`, message.data);
@@ -260,20 +268,24 @@ window.handleRefuseFriend = function(username) {
     notifSocket.send(JSON.stringify(message));
 };
 
-// window.handleDeleteFriend = function(username) {
-//     console.log(username)
-//     const message = create_message_notif("delete_friend", username);
-//     notifSocket.send(JSON.stringify(message));
-// };
-
 window.handleDeleteFriend = function(friend) {
     console.log(friend);
     const message = create_message_notif("delete_friend", friend.username);
     notifSocket.send(JSON.stringify(message));
 };
 
-window.handleAcceptDuel = function(username) {
-    navigateTo(`/pong/duel/?target=${username}`)
+window.handleAcceptDuel = function(code) {
+    const message = {
+        "event": "notification",
+        "data": {
+            "action": "accept_duel",
+            "args": {
+                "code": code,
+            }
+        } 
+    }
+    notifSocket.send(JSON.stringify(message));
+    navigateTo(`/pong/duel/?guest=${guest}`);
 };
 
 window.handleRefuseDuel = function(username) {
@@ -340,7 +352,6 @@ export async function apiFriends(endpoint) {
             method: "GET",
             credentials: "include",
         });
-        console.log(response);
         const data = await response.json();
         if (data) {
             return data;
@@ -353,5 +364,6 @@ export async function apiFriends(endpoint) {
     }
 }
 
-export { notifSocket };
+export {notifSocket};
 export {create_message_notif}
+export {getClientId}

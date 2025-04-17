@@ -14,7 +14,8 @@ class Friend(models.Model):
     email = models.EmailField(null=False, editable=True, blank=True)
     friends = models.ManyToManyField(Clients, related_name='friend_requests_as_friend', blank=True)
     pending_friends = models.ManyToManyField(Clients, related_name='friend_requests_as_pending', blank=True)
-
+    pending_duel = models.ManyToManyField(Clients, related_name='duel_requests_as_pending', blank=True)
+    
     class Meta:
         # unique_together = ['friends', 'pending_friends']
         verbose_name_plural = 'Friend Requests'
@@ -28,23 +29,20 @@ class Friend(models.Model):
             with transaction.atomic():
                 # if friend is not my friend i add it to pending_friend
                 if not self.friends.filter(id=client.id).exists() and not self.pending_friends.filter(id=client.id).exists():
-                    print("entering in the adding pending friend")
                     self.pending_friends.add(client)
                     self.save()
                     return client
         except Exception as e:
-            print(f"Error retrieving friend request: {e}")
+            print(f"Error adding pending friend: {e}")
             return None
 
     @sync_to_async
     def accept_pending_friend(self, client):
         try:
             with transaction.atomic():
-                print("in the accepting function")
                 # check if my friend is in pending
                 pending_friend = self.pending_friends.filter(id=client.id).exists()
                 if not pending_friend:
-                    print("no pending friend")
                     raise ValidationError("No pending friend with this id")
                 # check if my friend is already my friend
                 friend = self.friends.filter(id=client.id).exists()
@@ -82,3 +80,16 @@ class Friend(models.Model):
         except Exception as e:
             print(f"Error removing friend: {e}")
             raise ValidationError("Failed to remove friend")
+        
+    #add friend to duel
+    @sync_to_async
+    def add_prending_duel(self, client):
+        try:
+            with transaction.atomic():
+                if not self.pending_duel.filter(id=client.id).exists():
+                    self.pending_duel.add(client)
+                    self.save()
+                    return client
+        except Exception as e:
+            print(f"Error adding pending duel: {e}")
+            return None

@@ -143,7 +143,6 @@ class NotificationService(BaseServices):
             return await asend_group_error(self.service_group, ResponseError.INTERNAL_ERROR)
 
     async def _handle_ask_duel(self, data, client):
-        print("in the handle ask duel")
         target = await Clients.aget_client_by_username(data['data']['args']['target_name'])
         if target is None:
             return await asend_group_error(RTables.GROUP_CLIENT(client.id), ResponseError.USER_NOT_FOUND)

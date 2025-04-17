@@ -86,7 +86,6 @@ class MatchmakingThread(Threads):
             player_2, stat_p2 = players[1]
             channel_p1 = self.redis.hget(name=RTables.HASH_CLIENT(player_1.decode('utf-8')), key=str(EventType.GAME.value))
             channel_p2 = self.redis.hget(name=RTables.HASH_CLIENT(player_2.decode('utf-8')), key=str(EventType.GAME.value))
-            print(channel_p1, channel_p2)
             if not channel_p1 or not channel_p2:
                 return False
             if stat_p1.decode('utf-8') == 'True' and stat_p2.decode('utf-8') == 'True':

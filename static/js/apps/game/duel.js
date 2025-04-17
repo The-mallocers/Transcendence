@@ -1,21 +1,83 @@
 import { navigateTo } from "../../spa/spa.js";
-import {WebSocketManager} from "../../websockets/websockets.js"
+import { gameSocket } from "./gamemode.js";
+import { WebSocketManager } from "../../websockets/websockets.js";
 
-let client_id = null;
-const clientId = await getClientId()
-const gameSocket = WebSocketManager.initGameSocket(clientId);
+let client_id;
+let clientId
+let gameSocketGuest = null;
+let height = 500;
+const width = 1000;
 
-const urlParams = new URLSearchParams(window.location.search);
-const targetUsername = urlParams.get('target');
-console.log("Target username:", targetUsername);
-const opponent = document.querySelector(".opponent_player")
-if (opponent)
-{
-    opponent.innerHTML = targetUsername;
+const paddleHeight = 100;
+
+let paddleDefaultPos = 250 - (paddleHeight / 2)
+
+window.GameState = {
+    ballY: height / 2,
+    ballX: width / 2,
+
+    left: {
+        x: paddleDefaultPos,
+        y: paddleDefaultPos,
+        username: "",
+        id: ""
+    },
+    right: {
+        x: paddleDefaultPos,
+        y: paddleDefaultPos,
+        username: "",
+        id: ""
+    }
 }
 
-gameSocket.onmessage = (event) => {
+window.GameInfos = {
+    left: {}
+}
 
+const startGameMessage = {
+    "event": "game",
+    "data": {
+        "action": "start_game"
+    }
+}
+
+//if it's the guest player
+const searchParams = new URLSearchParams(window.location.search);
+console.log(searchParams);
+if(searchParams.has("guest"))
+{
+    clientId = await getClientId();
+    gameSocketGuest = await WebSocketManager.initGameSocket(clientId);
+}
+
+if(gameSocket)
+{
+    setupSocketMessageHandler(gameSocket)
+}
+else if(gameSocketGuest)
+{
+    setupSocketMessageHandler(gameSocketGuest)
+}
+
+function setupSocketMessageHandler(socket) {
+    socket.onmessage = (e) => {
+        const jsonData = JSON.parse(e.data);
+        const { action, content } = jsonData.data;
+        console.log(action);
+        
+        switch (action) {
+            case "PLAYER_INFOS":
+                console.log("PLAYER INFOS IS:");
+                console.log(content);
+                updateGameState(content);
+                break;
+                
+            case "STARTING":
+                navigateTo("/pong/arena/");
+                socket.send(JSON.stringify(startGameMessage));
+                break;
+        }
+    };
 }
 
 async function getClientId() {
@@ -36,18 +98,4 @@ async function getClientId() {
         console.error("Erreur lors de la récupération de l'ID :", error);
         return null;
     }
-}
-
-function create_message_duel(action, targetUser)
-{
-    let message = {
-        "event": "game",
-        "data": {
-            "action": action,
-            "args": {
-                "target": targetUser,
-            }
-        } 
-    }
-    return message;
 }
