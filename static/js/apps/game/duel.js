@@ -8,6 +8,7 @@ const gameSocket = WebSocketManager.initGameSocket(clientId);
 const urlParams = new URLSearchParams(window.location.search);
 const targetUsername = urlParams.get('target');
 console.log("Target username:", targetUsername);
+console.log("CoucouCou la team !")
 const opponent = document.querySelector(".opponent_player")
 if (opponent)
 {
