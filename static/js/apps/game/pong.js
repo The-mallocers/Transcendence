@@ -14,7 +14,7 @@ let height = 500;
 const width = 1000;
 
 const ballSize = 10;
-const paddleThickness = 10;
+const paddleThickness = 20;
 let paddleHeight = 100;
 
 
