@@ -10,7 +10,7 @@ from apps.player.models import Player
 from utils.enums import EventType, ResponseAction
 from utils.enums import GameStatus
 from utils.enums import PaddleMove
-from utils.pong.objects import FPS, CANVAS_HEIGHT, CANVAS_WIDTH, BALL_SPEED, OFFSET_PADDLE, PADDLE_WIDTH, ANGLE_FACTOR
+from utils.pong.objects import FPS, CANVAS_HEIGHT, CANVAS_WIDTH, BALL_SPEED, OFFSET_PADDLE, PADDLE_WIDTH, ANGLE_FACTOR, MAX_ANGLE_FACTOR, MIN_HORIZONTAL_PERCENT
 from utils.pong.objects.ball import Ball
 from utils.pong.objects.objects_state import GameState
 from utils.pong.objects.paddle import Paddle
@@ -21,7 +21,7 @@ from utils.websockets.channel_send import send_group
 MAX_BOUNCE_ANGLE = math.radians(75)
 
 class PongLogic:
-    def __init__(self, game: Game, redis):  # ball, paddle_pL, paddle_pR, score_pL, score_pR):
+    def __init__(self, game: Game, redis): 
         self._logger = logging.getLogger(self.__class__.__name__)
         self.redis = redis
         self.game = game
@@ -68,19 +68,22 @@ class PongLogic:
         distance_x = self.ball.x - closest_x 
         distance_y = self.ball.y - closest_y 
 
-        #Word on the street is that this is faster than the regular distance formula
         distance_squared = distance_x ** 2 + distance_y ** 2
         return distance_squared <= self.ball.radius ** 2
     
     def _handle_paddle_collision(self, paddle, is_left):
         if self._is_paddle_collision(paddle):
+            
             # Calculate how far from the paddle center the ball hit
             relative_hit_pos = (self.ball.y - paddle.y) / paddle.height - 0.5
-            max_angle_factor = 0.8
-            relative_hit_pos = max(min(relative_hit_pos, max_angle_factor), -max_angle_factor)
+            relative_hit_pos = max(min(relative_hit_pos, MAX_ANGLE_FACTOR), -MAX_ANGLE_FACTOR)
             
             current_speed = math.sqrt(self.ball.dx**2 + self.ball.dy**2)
+    
+            max_vertical_component = current_speed * math.sqrt(1 - MIN_HORIZONTAL_PERCENT**2)
+            
             self.ball.dy = relative_hit_pos * ANGLE_FACTOR * current_speed
+            self.ball.dy = max(min(self.ball.dy, max_vertical_component), -max_vertical_component)
             
             dx_squared = current_speed**2 - self.ball.dy**2
             dx_magnitude = math.sqrt(max(dx_squared, 0.01))
@@ -122,19 +125,6 @@ class PongLogic:
 
         self._handle_paddle_collision(self.paddle_pL, is_left=True)
         self._handle_paddle_collision(self.paddle_pR, is_left=False)
-        # # Left paddle collision
-        # if(self._is_paddle_collision(self.paddle_pL)):
-        #     relative_hit_pos = (self.ball.y - self.paddle_pL.y) / self.paddle_pL.height - 0.5
-        #     self.ball.dy = relative_hit_pos * ANGLE_FACTOR * BALL_SPEED
-        #     self.ball.dx = abs(self.ball.dx)  # Ensure ball moves right
-        #     self.ball.x = self.paddle_pL.x + self.paddle_pL.width + self.ball.radius
-
-        # # Right paddle collision
-        # if(self._is_paddle_collision(self.paddle_pR)):
-        #     relative_hit_pos = (self.ball.y - self.paddle_pR.y) / self.paddle_pR.height - 0.5
-        #     self.ball.dy = relative_hit_pos * ANGLE_FACTOR * BALL_SPEED
-        #     self.ball.dx = -abs(self.ball.dx)  # Ensure ball moves left
-        #     self.ball.x = self.paddle_pR.x - self.ball.radius
 
         # Scoring
         if self.ball.x <= 0:
