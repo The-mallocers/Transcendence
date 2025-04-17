@@ -14,7 +14,7 @@ let height = 500;
 const width = 1000;
 
 const ballSize = 10;
-const paddleThickness = 10;
+const paddleThickness = 20;
 let paddleHeight = 100;
 
 
@@ -24,13 +24,6 @@ canvas.height = height;
 lusername.innerHTML = window.GameState.left.username
 rusername.innerHTML = window.GameState.right.username
 console.log('meowmeowmeow', window.GameState)
-
-socket.onclose = (e) => {
-    isGameOver.gameIsOver = true;
-    WebSocketManager.closeGameSocket();
-    navigateTo("/"); //Maybe redirect to an error page idk.
-}
-
 
 socket.onmessage = (e) => {
     const jsonData = JSON.parse(e.data);
@@ -65,10 +58,11 @@ socket.onmessage = (e) => {
         } else if (jsonData.data.action == "SCORE_RIGHT_UPDATE") {
             rscore.innerHTML = jsonData.data.content
         }
-    } else if (jsonData.data.event == "ERROR") {
+    } else if (jsonData.event == "ERROR") {
+        console.log("WE GOT AN ERROR"); 
         if (jsonData.data.action == "OPPONENT_LEFT") {
             console.log("Opponent Disconnected");
-            navigateTo("/"); //Later, Redirect to a screen telling your opponent he disconnected.
+            navigateTo("/pong/disconnect/"); //Later, Redirect to a screen telling your opponent he disconnected.
             isGameOver.gameIsOver = true;
             WebSocketManager.closeGameSocket();
         }

@@ -21,6 +21,10 @@ class Score:
 
     def update(self):
         self.score = self.get_score()
+    
+    def push_to_redis(self):
+        self.set_score(self.score)
+    
 
     def get_score(self):
         return self.redis.json().get(self.game_key, Path(f'player_{self.player_side}.score'))

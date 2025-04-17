@@ -126,11 +126,14 @@ class Clients(models.Model):
                 two_fa_mod = TwoFA()
                 two_fa_mod.save()
 
-                player_mod = Player(nickname=profile_mod.username)
+                player_mod = Player()
                 player_mod.save()
 
+                client_stats = Stats()
+                client_stats.save()
+                
                 client = Clients(password=password_mod, profile=profile_mod,
-                                 rights=rights_mod, twoFa=two_fa_mod, player=player_mod)
+                                 rights=rights_mod, twoFa=two_fa_mod, player=player_mod, stats=client_stats)
                 client.save()
 
                 return client

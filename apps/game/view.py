@@ -34,3 +34,8 @@ def gameover_get(req):
 def duel_get(req):
     from apps.game.views.duel import get
     return get(req)
+
+@require_http_methods(["GET"])
+def disconnect_get(req):
+    from apps.game.views.disconnect import get
+    return get(req)

@@ -168,43 +168,16 @@
         background-color: aliceblue;
     }
 
-    /* <span>Y</span>
-    <span>o</span>
-    <span class="wordEnd">u</span>
-    <span>w</span>
-    <span>o</span>
-    <span>n</span> */
-
 </style>
 <div class="gameoverPage">
     <div class="endState">
         {{ message }}
     </div>
-
-    <div class="vs">{{ client }} vs {{ opponnent }}</div>
-    <!--
-        <div class="container mt-5">
-            <div class="row">
-              <div class="col">
-              </div>
-              <div class="col">
-              </div>
-            </div>
-        </div> -->
-
-    <div class="scores">
-        <div id="myScore" class="score">{{ client_score }}</div>
-        <div class="dash"></div>
-        <div id="enemyScore" class="score">{{ opponent_score }}</div>
-    </div>
-
-
     <div class="btns mt-5">
         <div class="btn full d-inline" data-route="/pong/matchmaking/">Go back in queue</div>
         <div class="btn outlined d-inline" data-route="/">My profile</div>
     </div>
 
 </div>
-
 
 <script src="{% static '/js/apps/game/gameover.js' %}"></script>
