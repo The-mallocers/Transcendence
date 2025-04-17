@@ -46,7 +46,7 @@ class PongLogic:
             current_state = GameState.create_copy(self)
             changes = GameState.get_differences(current_state, previous_state)
             self._game_update(changes)
-            time.sleep(1 / FPS)  # Toy with this variable.
+            time.sleep(1 / FPS)
         except asyncio.CancelledError:
             pass
     
@@ -87,10 +87,9 @@ class PongLogic:
     def _handle_wall_collision(self):
         if self.ball.y <= self.ball.radius or self.ball.y >= CANVAS_HEIGHT - self.ball.radius:
             if self.ball.y < self.ball.radius:
-                self.ball.y = self.ball.radius  # Correct ball position
+                self.ball.y = self.ball.radius
             elif self.ball.y > CANVAS_HEIGHT - self.ball.radius:
-                self.ball.y = CANVAS_HEIGHT - self.ball.radius  # Correct ball position
-            # Reverse ball's vertical direction
+                self.ball.y = CANVAS_HEIGHT - self.ball.radius
             self.ball.dy = self.ball.dy * -1
 
     def _handle_movement(self, delta_time):
@@ -110,6 +109,7 @@ class PongLogic:
             
             current_speed = math.sqrt(self.ball.dx**2 + self.ball.dy**2)
     
+            #We dont want too vertical of a movement
             max_vertical_component = current_speed * math.sqrt(1 - MIN_HORIZONTAL_PERCENT**2)
             
             self.ball.dy = relative_hit_pos * ANGLE_FACTOR * current_speed
@@ -118,12 +118,11 @@ class PongLogic:
             dx_squared = current_speed**2 - self.ball.dy**2
             dx_magnitude = math.sqrt(max(dx_squared, 0.01))
 
-            # Ensure ball moves in the correct direction
             if is_left:
-                self.ball.dx = dx_magnitude # move right
+                self.ball.dx = dx_magnitude
                 self.ball.x = paddle.x + paddle.width + self.ball.radius
             else:
-                self.ball.dx = -dx_magnitude  # move left
+                self.ball.dx = -dx_magnitude
                 self.ball.x = paddle.x - self.ball.radius
 
     def _handle_paddle_direction(self, paddle: Paddle, delta_time):
@@ -148,13 +147,9 @@ class PongLogic:
         return distance_squared <= self.ball.radius ** 2
 
     def _reset_ball(self, ball):
-        # Always place ball in the center
         ball.x = CANVAS_WIDTH / 2
         ball.y = CANVAS_HEIGHT / 2
         
-        # Choose a random angle within specific ranges
-        # Avoid angles that are too shallow (close to 0° or 180°) or too steep (close to 90° or 270°)
-        # Pick angle between 30° and 60° or between 120° and 150° (in either hemisphere)
         angle_options = [
             random.uniform(math.radians(40), math.radians(60)),    # Right-up
             random.uniform(math.radians(120), math.radians(140)),  # Left-up
@@ -162,10 +157,7 @@ class PongLogic:
             random.uniform(math.radians(300), math.radians(320))   # Right-down
         ]
         
-        # Choose one of the four quadrants randomly
         angle = random.choice(angle_options)
-        
-        # Calculate velocity components based on angle
         ball.dx = BALL_SPEED * math.cos(angle)
         ball.dy = BALL_SPEED * math.sin(angle)
     
