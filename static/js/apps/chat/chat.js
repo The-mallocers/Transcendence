@@ -23,12 +23,13 @@ chatSocket.addEventListener("open", (event) => {
             "args": {}
         }
     };
+    console.log("Sending get_all_room_by_client message:", message);
     chatSocket.send(JSON.stringify(message));
 });
 
 chatSocket.onmessage = (event) => {
     const message = JSON.parse(event.data);
-    console.log("message send");
+    console.log("Message received:", message);
 
     if (message.data.action == "HISTORY_RECEIVED") {
         displayHistory(message.data.content.messages);
@@ -38,18 +39,32 @@ chatSocket.onmessage = (event) => {
         displayHistory([])
     }
     else if(message.data.action == "ALL_ROOM_RECEIVED") {
-        displayRooms(message.data.content.rooms);
+        console.log("Rooms received:", message.data.content.rooms);
+        if (message.data.content.rooms && Array.isArray(message.data.content.rooms)) {
+            displayRooms(message.data.content.rooms);
+        } else {
+            console.error("Invalid rooms data format:", message.data.content.rooms);
+            // Display error in UI or try to recover
+        }
     } else if (message.data.action == "MESSAGE_RECEIVED") {
-        let chatHistory = document.querySelector('.chatHistory');
+        // Only update the chat history if we're in the same room as the message
+        if (message.data.content.room_id === room_id) {
+            let chatHistory = document.querySelector('.chatHistory');
 
-        const parser = new DOMParser();
-        const htmlString = `<div class="msg ${clientId == message.data.content.sender ? "me align-self-end" : "you align-self-start"}">${message.data.content.message}</div>`;
-        const doc = parser.parseFromString(htmlString, "text/html");
-        const msgElement = doc.body.firstChild; // Get the actual <div> element
+            const parser = new DOMParser();
+            const htmlString = `<div class="msg ${clientId == message.data.content.sender ? "me align-self-end" : "you align-self-start"}">${message.data.content.message}</div>`;
+            const doc = parser.parseFromString(htmlString, "text/html");
+            const msgElement = doc.body.firstChild; // Get the actual <div> element
 
-        chatHistory.appendChild(msgElement);
-        scrollToBottom(chatHistory);
-        //Do things to show the new message on the front
+            chatHistory.appendChild(msgElement);
+            scrollToBottom(chatHistory);
+        } else {
+            // Add visual indicator that there's a new message in another room
+            const roomButton = document.getElementById(message.data.content.room_id);
+            if (roomButton) {
+                roomButton.classList.add('new-message');
+            }
+        }
     }
 }
 
@@ -77,8 +92,24 @@ document.getElementById("messageInput").addEventListener("keydown", function (ev
 
 // Attach event listener to a parent that exists before buttons are created
 document.addEventListener("click", function (event) {
-    if (event.target.classList.contains("roomroom")) {
-        const id = event.target.id;
+    if (event.target.classList.contains("roomroom") || event.target.closest(".roomroom")) {
+        // Get the actual button element (in case user clicked on child element)
+        const roomButton = event.target.classList.contains("roomroom") ? 
+                           event.target : 
+                           event.target.closest(".roomroom");
+        
+        // Remove active class from all room buttons
+        document.querySelectorAll(".roomroom").forEach(btn => {
+            btn.classList.remove("active");
+        });
+        
+        // Add active class to the clicked button
+        roomButton.classList.add("active");
+        
+        // Remove 'new-message' class from the clicked button
+        roomButton.classList.remove('new-message');
+        
+        const id = roomButton.id;
         room_id = id;
         console.log("Clicked on room", id);
 
@@ -91,7 +122,7 @@ document.addEventListener("click", function (event) {
                 }
             }
         };
-        //Dirty fucking hack because for some reason it tried to send the message twice.
+        
         if(chatSocket.readyState === WebSocket.OPEN) {
             chatSocket.send(JSON.stringify(message));
         }
@@ -136,36 +167,65 @@ async function displayHistory(message) {
 }
 
 async function displayRooms(rooms) {
-    console.log("Displaying rooms");
-    console.log("the length: " + rooms.length)
+    console.log("Displaying rooms. Count:", rooms.length);
     let chatRooms = document.querySelector('.chatRooms');
+    
+    if (!chatRooms) {
+        console.error("Could not find .chatRooms element");
+        return;
+    }
+    
+    let currentActiveRoomId = room_id; // Store the current active room ID
     chatRooms.innerHTML = "";
-    let htmlString;
+    
+    if (rooms.length === 0) {
+        console.log("No rooms to display");
+        chatRooms.innerHTML = `<div class="no-rooms">No chat rooms available</div>`;
+        return;
+    }
     
     for (let i = 0; i < rooms.length; i++) {
-        const parser = new DOMParser();
-        if(rooms[i].player.length > 1)
-        {
-            htmlString = 
-            `<button id="${rooms[i].room}" class="roomroom container d-flex align-items-center gap-3">
-                <img src="/static/assets/imgs/profile/default.png">
-                <div>chat global</div>
-            </button>`
+        try {
+            const room = rooms[i];
+            console.log(`Processing room ${i}:`, room);
+            
+            if (!room || !room.room) {
+                console.error(`Invalid room data at index ${i}:`, room);
+                continue; // Skip this iteration
+            }
+            
+            const parser = new DOMParser();
+            const isActive = room.room === currentActiveRoomId ? " active" : "";
+            let htmlString;
+            
+            if (room.player && room.player.length > 1) {
+                htmlString = 
+                `<button id="${room.room}" class="roomroom${isActive} container d-flex align-items-center gap-3">
+                    <img src="/static/assets/imgs/profile/default.png">
+                    <div>chat global</div>
+                </button>`;
+            } else {
+                let player = room.player && room.player.length > 0 ? room.player[0] : "unknown";
+                if (player == undefined)
+                    player = "delete user";
+                    
+                htmlString = 
+                `<button id="${room.room}" class="roomroom${isActive} chat-${player} container d-flex align-items-center gap-3">
+                    <img src="/static/assets/imgs/profile/default.png">
+                    <div>${player}</div>
+                </button>`;
+            }
+            
+            const doc = parser.parseFromString(htmlString, "text/html");
+            const roomElement = doc.body.firstChild;
+            chatRooms.appendChild(roomElement);
+        } catch (error) {
+            console.error(`Error processing room at index ${i}:`, error);
         }
-        else
-        {
-            let player = rooms[i].player[0];
-            if(player == undefined)
-                player = "delete user";
-            htmlString = 
-            `<button id="${rooms[i].room}" class="roomroom chat-${player} container d-flex align-items-center gap-3">
-                <img src="/static/assets/imgs/profile/default.png">
-                <div>${player}</div>
-            </button>`
-        }
-        const doc = parser.parseFromString(htmlString, "text/html");
-        const roomElement = doc.body.firstChild;
-        chatRooms.appendChild(roomElement);
     }
-    scrollToBottom(chatRooms);
+    
+    // Don't scroll if no rooms were added
+    if (rooms.length > 0) {
+        scrollToBottom(chatRooms);
+    }
 }
