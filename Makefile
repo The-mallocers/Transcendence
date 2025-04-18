@@ -22,25 +22,20 @@ down:
 	docker compose -f ./$(DOCKER_COMPOSE_FILE) down
 
 test:
-	# Start only the necessary services for testing (database and redis)
 	docker compose -f ./$(DOCKER_COMPOSE_FILE) up -d db redis
-	# Wait for services to be ready
 	docker compose -f ./$(DOCKER_COMPOSE_FILE) exec -T db sh -c 'until pg_isready -U ${DATABASE_USERNAME} -d ${DATABASE_NAME}; do sleep 1; done'
-	# Run tests in the Django container
 	docker compose -f ./$(DOCKER_COMPOSE_FILE) run --rm django-web sh -c "python manage.py test"
-	# Clean up after tests
 	docker compose -f ./$(DOCKER_COMPOSE_FILE) down
 
 test-coverage:
-	# Start only the necessary services for testing (database and redis)
 	docker compose -f ./$(DOCKER_COMPOSE_FILE) up -d db redis
-	# Wait for services to be ready
 	docker compose -f ./$(DOCKER_COMPOSE_FILE) exec -T db sh -c 'until pg_isready -U ${DATABASE_USERNAME} -d ${DATABASE_NAME}; do sleep 1; done'
-	# Run tests with coverage in the Django container
-	docker compose -f ./$(DOCKER_COMPOSE_FILE) run --rm django-web sh -c "pip install coverage && coverage run --source='.' manage.py test && coverage report && coverage html"
-	# Clean up after tests
+	docker compose -f ./$(DOCKER_COMPOSE_FILE) run --rm django-web sh -c "pip install coverage && coverage run --source='.' manage.py test && coverage report && coverage html && coverage xml -o coverage.xml"
+	CONTAINER_ID=$$(docker compose -f ./$(DOCKER_COMPOSE_FILE) run -d --rm django-web sleep 5) && \
+	docker cp $$CONTAINER_ID:/app/coverage.xml ./coverage.xml && \
+	docker stop $$CONTAINER_ID
+	sed -i '' 's|<source>/app</source>|<source>$(PWD)</source>|g' coverage.xml
 	docker compose -f ./$(DOCKER_COMPOSE_FILE) down
-
 
 logs:
 	docker compose -f ./$(DOCKER_COMPOSE_FILE) logs
@@ -51,9 +46,9 @@ status:
 restart: down up
 
 dbclean:
-	docker compose down -v
+	docker compose -f ./$(DOCKER_COMPOSE_FILE) down -v
 
 clean: dbclean
-	docker compose down --rmi all
+	docker compose -f ./$(DOCKER_COMPOSE_FILE) down --rmi all
 
 re: down up
