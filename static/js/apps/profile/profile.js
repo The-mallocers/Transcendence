@@ -4,9 +4,12 @@ import {navigateTo} from "../../spa/spa.js";
 let client_id = null;
 const clientId = await getClientId();
 const notifSocket =  await WebSocketManager.initNotifSocket(clientId);
-const searchParams = new URLSearchParams(window.location.search);
 
-if(!searchParams.has('username'))
+const searchParams = new URLSearchParams(window.location.search);
+const pathname = window.location.pathname;
+console.log(pathname);
+
+if(!searchParams.has('username') && pathname == '/')
 {
     // Display all friends and pending friends
     console.log("displaying friends from profile.js");
@@ -285,7 +288,7 @@ window.handleAcceptDuel = function(code) {
         } 
     }
     notifSocket.send(JSON.stringify(message));
-    navigateTo('/pong/duel/?guest');
+    navigateTo('/pong/duel/');
 };
 
 window.handleRefuseDuel = function(username) {

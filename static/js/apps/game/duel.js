@@ -1,10 +1,12 @@
 import { navigateTo } from "../../spa/spa.js";
-import { gameSocket } from "./gamemode.js";
 import { WebSocketManager } from "../../websockets/websockets.js";
 
 let client_id;
-let clientId
-let gameSocketGuest = null;
+let clientId;
+
+clientId = await getClientId();
+const gameSocket = await WebSocketManager.initGameSocket(clientId);
+
 let height = 500;
 const width = 1000;
 
@@ -41,31 +43,13 @@ const startGameMessage = {
     }
 }
 
-//if it's the guest player
-const searchParams = new URLSearchParams(window.location.search);
-console.log(searchParams);
-if(searchParams.has("guest"))
-{
-    console.log("creating game guest socket");
-    clientId = await getClientId();
-    gameSocketGuest = await WebSocketManager.initGameSocket(clientId);
-}
-else if(search)
-
-if(gameSocket)
-{
-    setupSocketMessageHandler(gameSocket)
-}
-else if(gameSocketGuest)
-{
-    setupSocketMessageHandler(gameSocketGuest)
-}
+setupSocketMessageHandler(gameSocket);
 
 function setupSocketMessageHandler(socket) {
     socket.onmessage = (e) => {
-        const jsonData = JSON.parse(e.data)
+        const jsonData = JSON.parse(e.data);
 
-        console.log(jsonData.data.action)
+        console.log(jsonData.data.action);
         //We should only get the response that a match was found
 
         //On message on regarde si c'est que la game a commencer
@@ -92,9 +76,7 @@ function setupSocketMessageHandler(socket) {
         }
     }
     if (jsonData.data.action == "STARTING") {
-        navigateTo("/pong/arena/")
-        console.log()
-
+        navigateTo("/pong/arena/");
         socket.send(JSON.stringify(startGameMessage))
     }
     };

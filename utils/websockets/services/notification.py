@@ -1,7 +1,9 @@
 from django.forms import ValidationError
+from asgiref.sync import sync_to_async
 
 from apps.chat.models import Rooms, Messages
 from apps.client.models import Clients
+from utils.util import create_game_id
 from utils.enums import EventType, ResponseAction, ResponseError, RTables
 from utils.websockets.channel_send import asend_group, asend_group_error
 from utils.websockets.services.services import BaseServices
@@ -142,6 +144,43 @@ class NotificationService(BaseServices):
         except Exception as e:
             return await asend_group_error(self.service_group, ResponseError.INTERNAL_ERROR)
 
+    #====================================DUELS=========================================
+
+    async def _handle_create_duel(self, data, client: Clients):
+        print("in the function of creating a duel")
+        # ── Target Check ──────────────────────────────────────────────────────────── #
+        target = await Clients.aget_client_by_id(data['data']['args']['target'])
+        if target is None:
+            return await asend_group_error(self.service_group, ResponseError.TARGET_NOT_FOUND)
+        target_online = await self.redis.hget(RTables.HASH_CLIENT(target.id), str(EventType.NOTIFICATION.value))
+        if not target_online:
+            return await asend_group_error(self.service_group, ResponseError.USER_OFFLINE)
+        if target.id == client.id:
+            return await asend_group_error(self.service_group, ResponseError.DUEL_HIMSELF)
+        target_queues = await Clients.acheck_in_queue(target, self.redis)
+        if target_queues is not RTables.HASH_G_QUEUE.value and target_queues is not None:
+            if await self.redis.hexists(target_queues, str(target.id)):
+                return await asend_group_error(self.service_group, ResponseError.ALREADY_INVITED)
+        # ── Client Check ──────────────────────────────────────────────────────────── #
+        queues = await Clients.acheck_in_queue(client, self.redis)
+        if queues:
+            return await asend_group_error(self.service_group, ResponseError.ALREADY_IN_QUEUE)
+        if await self.redis.hget(name=RTables.HASH_MATCHES, key=str(client.id)) is not None:
+            return await asend_group_error(self.service_group, ResponseError.ALREAY_IN_GAME)
+        else:
+            duel_code = await sync_to_async(create_game_id)()
+            await self.redis.hset(name=RTables.HASH_DUEL_QUEUE(duel_code), key=str(client.id), value=str(True))
+            await self.redis.hset(name=RTables.HASH_DUEL_QUEUE(duel_code), key=str(target.id), value=str(False))
+            await asend_group(self.service_group, EventType.NOTIFICATION, ResponseAction.DUEL_CREATED, {
+                'code': duel_code
+            })
+            return await asend_group(RTables.GROUP_NOTIF(target.id), EventType.NOTIFICATION, ResponseAction.ACK_ASK_DUEL,
+                                     {
+                                         "sender": str(client.id),
+                                         "username": await client.aget_profile_username(),
+                                         'code': duel_code
+                                     })
+            
     async def _handle_ask_duel(self, data, client):
         target = await Clients.aget_client_by_username(data['data']['args']['target_name'])
         if target is None:
