@@ -204,8 +204,8 @@ class NotificationService(BaseServices):
             else:
                 await self.redis.delete(RTables.HASH_DUEL_QUEUE(code))
                 opponent_id = next((key for key in await self.redis.hkeys(RTables.HASH_DUEL_QUEUE(code)) if key != str(client.id)), None)
-                await asend_group(self.service_group, EventType.MATCHMAKING, ResponseAction.REFUSED_DUEL)
-                await asend_group(RTables.GROUP_NOTIF(opponent_id), EventType.MATCHMAKING, ResponseAction.DUEL_REFUSED)
+                await asend_group(self.service_group, EventType.NOTIFICATION, ResponseAction.REFUSED_DUEL)
+                await asend_group(RTables.GROUP_NOTIF(opponent_id), EventType.NOTIFICATION, ResponseAction.DUEL_REFUSED)
     
     async def disconnect(self, client):
         pass
