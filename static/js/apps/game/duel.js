@@ -50,6 +50,7 @@ if(searchParams.has("guest"))
     clientId = await getClientId();
     gameSocketGuest = await WebSocketManager.initGameSocket(clientId);
 }
+else if(search)
 
 if(gameSocket)
 {

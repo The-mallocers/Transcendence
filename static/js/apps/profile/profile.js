@@ -285,7 +285,7 @@ window.handleAcceptDuel = function(code) {
         } 
     }
     notifSocket.send(JSON.stringify(message));
-    navigateTo(`/pong/duel/?guest=guest`);
+    navigateTo('/pong/duel/?guest');
 };
 
 window.handleRefuseDuel = function(username) {
