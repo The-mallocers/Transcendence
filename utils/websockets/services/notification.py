@@ -172,5 +172,6 @@ class NotificationService(BaseServices):
             else:
                 await self.redis.hset(RTables.HASH_DUEL_QUEUE(code), str(client.id), 'True')
                 await asend_group(self.service_group, EventType.MATCHMAKING, ResponseAction.DUEL_JOIN)
+    
     async def disconnect(self, client):
         pass

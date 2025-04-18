@@ -46,6 +46,7 @@ const searchParams = new URLSearchParams(window.location.search);
 console.log(searchParams);
 if(searchParams.has("guest"))
 {
+    console.log("creating game guest socket");
     clientId = await getClientId();
     gameSocketGuest = await WebSocketManager.initGameSocket(clientId);
 }
@@ -61,22 +62,40 @@ else if(gameSocketGuest)
 
 function setupSocketMessageHandler(socket) {
     socket.onmessage = (e) => {
-        const jsonData = JSON.parse(e.data);
-        const { action, content } = jsonData.data;
-        console.log(action);
-        
-        switch (action) {
-            case "PLAYER_INFOS":
-                console.log("PLAYER INFOS IS:");
-                console.log(content);
-                updateGameState(content);
-                break;
-                
-            case "STARTING":
-                navigateTo("/pong/arena/");
-                socket.send(JSON.stringify(startGameMessage));
-                break;
+        const jsonData = JSON.parse(e.data)
+
+        console.log(jsonData.data.action)
+        //We should only get the response that a match was found
+
+        //On message on regarde si c'est que la game a commencer
+        //on renvois le json approprie
+        if (jsonData.data.action == "PLAYER_INFOS") {
+            console.log("PLAYER INFOS IS:")
+            console.log(jsonData.data.content)
+            window.GameState = {
+                ballY: height / 2,
+                ballX: width / 2,
+
+                left: {
+                    x: jsonData.data.content.left.paddle.x,
+                    y: jsonData.data.content.left.paddle.y,
+                    username: jsonData.data.content.left.username,
+                    id: ""
+                },
+                right: {
+                    x: jsonData.data.content.right.paddle.x,
+                    y: jsonData.data.content.right.paddle.y,
+                    username: jsonData.data.content.right.username,
+                    id: ""
+                }
         }
+    }
+    if (jsonData.data.action == "STARTING") {
+        navigateTo("/pong/arena/")
+        console.log()
+
+        socket.send(JSON.stringify(startGameMessage))
+    }
     };
 }
 
