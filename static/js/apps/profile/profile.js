@@ -205,7 +205,7 @@ notifSocket.onmessage = (event) => {
                 ${message.data.content.username} wants to duel
                 <div class="btn-group d-grid gap-2 d-md-flex justify-content-md-end"  role="group" aria-label="Basic example">
                     <button type="button" class="type-intra-green accept_duel" id="${message.data.content.sender}">accept</button>
-                    <button type="button" class="type-intra-white delete_duel" onclick="handleRefuseDuel(this.dataset.username)">refuse</button>
+                    <button type="button" class="type-intra-white refuse_duel">refuse</button>
                 </div>
             </li>
             `
@@ -217,13 +217,21 @@ notifSocket.onmessage = (event) => {
             acceptDuel.addEventListener('click', () => {
                 handleAcceptDuel(message.data.content.code);
             });
-            // const deleteDuel = pendingElement.querySelector('.delete_duel');
-            // deleteDuel.addEventListener('click', () => {
-            //     handleDeleteDuel(message.data.content.code);
-            // });
+            const deleteDuel = pendingElement.querySelector('.refuse_duel');
+            deleteDuel.addEventListener('click', () => {
+                handleRefuseDuel(message.data.content.code);
+            });
             pending_group.appendChild(pendingElement);
         }
         toasts(`${message.data.content.username} wants a duel`, message.data);
+    }
+    else if(message.data.action == "REFUSED_DUEL")
+    {
+        const buttonToDelete = document.querySelector(`li.pending_item#${message.data.content.username}`);
+        if(buttonToDelete)
+        {
+            buttonToDelete.remove();
+        }
     }
 }
 
@@ -278,21 +286,13 @@ window.handleDeleteFriend = function(friend) {
 };
 
 window.handleAcceptDuel = function(code) {
-    const message = {
-        "event": "notification",
-        "data": {
-            "action": "accept_duel",
-            "args": {
-                "code": code,
-            }
-        } 
-    }
+    const message = create_message_duel("accept_duel", code);
     notifSocket.send(JSON.stringify(message));
     navigateTo('/pong/duel/');
 };
 
-window.handleRefuseDuel = function(username) {
-    const message = create_message_notif("delete_friend", username);
+window.handleRefuseDuel = function(code) {
+    const message = create_message_duel("refuse_duel", code);
     notifSocket.send(JSON.stringify(message));
 };
 
@@ -304,6 +304,20 @@ function create_message_notif(action, targetUser)
             "action": action,
             "args": {
                 "target_name": targetUser,
+            }
+        } 
+    }
+    return message;
+}
+
+function create_message_duel(action, code)
+{
+    let message = {
+        "event": "notification",
+        "data": {
+            "action": action,
+            "args": {
+                "code": code,
             }
         } 
     }
