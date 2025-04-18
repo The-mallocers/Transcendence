@@ -14,8 +14,7 @@ class Friend(models.Model):
     email = models.EmailField(null=False, editable=True, blank=True)
     friends = models.ManyToManyField(Clients, related_name='friend_requests_as_friend', blank=True)
     pending_friends = models.ManyToManyField(Clients, related_name='friend_requests_as_pending', blank=True)
-    pending_duel = models.ManyToManyField(Clients, related_name='duel_requests_as_pending', blank=True)
-    
+
     class Meta:
         # unique_together = ['friends', 'pending_friends']
         verbose_name_plural = 'Friend Requests'

@@ -46,6 +46,7 @@ class RequestAction(str, Enum):
     CREATE_DUEL: str = 'create_duel'
     LEAVE_DUEL: str = 'leave_duel'
     ACCEPT_DUEL: str = 'accept_duel'
+    REFUSE_DUEL: str = 'refuse_duel'
     # ACK_ASK_DUEL: str = 'ack_ask_duel'
 
     # ── Game Actions ──────────────────────────────────────────────────────────────────
@@ -87,6 +88,9 @@ class ResponseAction(str, Enum):
     DUEL_JOIN: str = 'You have successfully joined the duel'
     DUEL_LEFT: str = 'You have successfully left the duel'
     ACK_ASK_DUEL: str = 'Response of asking to join a duel'
+    ACK_PENDING_DUELS = 'Response of pending duels'
+    REFUSED_DUEL: str = 'You have refused the duel.'
+    DUEL_REFUSED: str = 'Duel refused'
 
     # ── Game Actions ──────────────────────────────────────────────────────────────────
     JOIN_GAME: str = 'You have successfully joined the game'
@@ -137,6 +141,7 @@ class ResponseError(str, Enum):
     DUEL_NOT_EXIST: str = 'Duel you try to join not exist.'
     NOT_INVITED: str = 'You are not invited to this duel.'
     ALREADY_JOIN_DUEL: str = 'You try to join duel already joined.'
+    CANNOT_REFUSE_DUEL: str = "You can't refuse a duel you already joined."
 
     # ── Game ──────────────────────────────────────────────────────────────────────────
     GAME_FULL: str = 'The game is currently full.'
