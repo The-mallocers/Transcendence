@@ -242,7 +242,8 @@ class NotificationService(BaseServices):
                 return await asend_group_error(self.service_group, ResponseError.CANNOT_REFUSE_DUEL)
             else:
                 await self.redis.delete(RTables.HASH_DUEL_QUEUE(code))
-                opponent_id = next((key for key in await self.redis.hkeys(RTables.HASH_DUEL_QUEUE(code)) if key != str(client.id)), None)
+                players = list(self.redis.hgetall(RTables.HASH_DUEL_QUEUE(code)).items())
+                opponent_id = next(player[0].decode() for player in players if player[0].decode() != str(client.id))
                 print(opponent_id)
                 await asend_group(self.service_group, EventType.NOTIFICATION, ResponseAction.REFUSED_DUEL)
                 await asend_group(RTables.GROUP_NOTIF(opponent_id), EventType.NOTIFICATION, ResponseAction.DUEL_REFUSED)
