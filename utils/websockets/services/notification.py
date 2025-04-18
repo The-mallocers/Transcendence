@@ -172,6 +172,40 @@ class NotificationService(BaseServices):
             else:
                 await self.redis.hset(RTables.HASH_DUEL_QUEUE(code), str(client.id), 'True')
                 await asend_group(self.service_group, EventType.MATCHMAKING, ResponseAction.DUEL_JOIN)
+
+    async def _handle_pending_duels(self, data, client):
+        if await Clients.acheck_in_queue(client, self.redis):
+            return await asend_group_error(self.service_group, ResponseError.ALREADY_IN_QUEUE)
+
+        pending_duels = []
+        async for key in self.redis.scan_iter(match=f"{RTables.HASH_DUEL_QUEUE('*')}"):
+            if await self.redis.hexists(key, str(client.id)):
+                duel_status = await self.redis.hget(key, str(client.id))
+                duel_code = key.decode().split(":")[-1]
+                pending_duels.append({
+                    "code": duel_code,
+                    "status": duel_status == 'True'
+                })
+
+        await asend_group(self.service_group,
+                          EventType.NOTIFICATION,
+                          ResponseAction.ACK_PENDING_DUELS,
+                          {"pending_duels": pending_duels})
+
+    async def _handle_refuse_duel(self, data, client):
+        code = data['data']['args']['code']
+        if not await self.redis.exists(RTables.HASH_DUEL_QUEUE(code)):
+            return await asend_group_error(self.service_group, ResponseError.DUEL_NOT_EXIST)
+        if await self.redis.hexists(RTables.HASH_DUEL_QUEUE(code), str(client.id)) is False:
+            return await asend_group_error(self.service_group, ResponseError.NOT_INVITED)
+        else:
+            if await self.redis.hget(RTables.HASH_DUEL_QUEUE(code), str(client.id)) == 'True':
+                return await asend_group_error(self.service_group, ResponseError.CANNOT_REFUSE_DUEL)
+            else:
+                await self.redis.delete(RTables.HASH_DUEL_QUEUE(code))
+                opponent_id = next((key for key in await self.redis.hkeys(RTables.HASH_DUEL_QUEUE(code)) if key != str(client.id)), None)
+                await asend_group(self.service_group, EventType.MATCHMAKING, ResponseAction.REFUSED_DUEL)
+                await asend_group(RTables.GROUP_NOTIF(opponent_id), EventType.MATCHMAKING, ResponseAction.DUEL_REFUSED)
     
     async def disconnect(self, client):
         pass

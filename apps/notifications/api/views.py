@@ -27,5 +27,11 @@ class GetPendingFriendsApiView(APIView):
     def get(self, request: HttpRequest, *args, **kwargs):
         client = Clients.get_client_by_request(request)
         serializer = FriendSerializer(client.friend.pending_friends.all(), many=True)
-        print(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class GetPendingDuelsApiView(APIView):
+    def get(self, request: HttpRequest, *args, **kwargs):
+        client = Clients.get_client_by_request(request)
+        serializer = FriendSerializer(client.friend.pending_duel.all(), many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)

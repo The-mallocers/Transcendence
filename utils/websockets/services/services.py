@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 from typing import Dict, Any
 
 from channels.layers import get_channel_layer
+from redis import Redis
 
 from apps.client.models import Clients
 from utils.enums import RequestAction
@@ -22,7 +23,7 @@ class BaseServices(ABC):
         self._logger = logging.getLogger(self.__class__.__name__)
         self._initialized: bool = False
 
-        self.redis = None
+        self.redis: Redis = None
         self.channel_layer = get_channel_layer()
         self.service_group = None
 

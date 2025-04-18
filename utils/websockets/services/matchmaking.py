@@ -33,9 +33,8 @@ class MatchmakingService(BaseServices):
     # ════════════════════════════════════ Duels ═════════════════════════════════════ #
 
     async def _handle_create_duel(self, data, client: Clients):
-        print("in the function of creating a duel")
         # ── Target Check ──────────────────────────────────────────────────────────── #
-        target = await Clients.aget_client_by_id(data['data']['args']['target'])
+        target: Clients = await Clients.aget_client_by_id(data['data']['args']['target'])
         if target is None:
             return await asend_group_error(self.service_group, ResponseError.TARGET_NOT_FOUND)
         target_online = await self.redis.hget(RTables.HASH_CLIENT(target.id), str(EventType.NOTIFICATION.value))
