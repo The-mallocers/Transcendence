@@ -1,6 +1,6 @@
 import {WebSocketManager} from "../websockets/websockets.js"
 import {isGameOver} from "../apps/game/VarGame.js"
-
+import * as html from "../utils/html_forms.js"
 // let notifSocket = null;
 // let clientId = null;
 class Router {
@@ -116,36 +116,27 @@ const header = {
 
 async function fetchRoute(path) {
     console.log("fetching the path :", path)
-    const response = await fetch(path, {
-        headers: header,
-        credentials: 'include'
-    });
-    const data = await response.json();
-    // console.log("testing redirect, data is :", data)
-    if (response.ok) {
-        console.log("response is A ok")
-        return data.html;
-    } else if (response.status === 302) {
-        //redirection
-        console.log(data, response)
-        return navigateTo(data.redirect)
-        // path = '/pages/auth/login'
-        // const response = await fetch(path, {
-        //     headers: header,
-        //     credentials: 'include'
-        // });
-        // const data = await response.json();
-        // window.history.pushState({}, '', '/auth/login');
-        // return data.html
-    } else if (response.status === 401) {
-        return navigateTo(data.redirect)
-    } else if (response.status >= 400 && response.status < 500) {
-        return data.html;
-
-    } else if (response.status == 500) {
-        //do something special
-    } else {
-        console.log("error, this isnt a valid error handling, but what do you want me to do")
+    try {
+        const response = await fetch(path, {
+            headers: header,
+            credentials: 'include'
+        });
+        const data = await response.json();
+        if (response.ok) {
+            return data.html;
+        } else if (response.status === 302) {
+            console.log(data, response)
+            return navigateTo(data.redirect)
+        } else if (response.status === 401) {
+            return navigateTo(data.redirect)
+        } else if (response.status >= 400 && response.status < 500) {
+            return data.html;
+        } else if (response.status == 500) {
+           return 
+        }
+    } catch (error) {
+        console.error(error.message);
+        return html.Fetch_Error;
     }
 }
 
@@ -279,46 +270,6 @@ document.addEventListener('click', async (e) => {
 
 const router = new Router(routes);
 
-class Route {
-    constructor(route, directSubRoutes) {
-        this.route = route
-        this.directSubRoutes = directSubRoutes.map(sub => new Route(sub.route, sub.directSubRoutes))
-    }
-
-
-    get possibleRoutes() {
-        let routes = [this.route];
-        for (let subRoute of this.directSubRoutes) {
-            const subRoutes = subRoute.possibleRoutes.map(r => this.route + r);
-            routes = routes.concat(subRoutes);
-        }
-        return routes;
-    }
-}
-
-
-const pongRoute = new Route(
-    '/pong',
-    [
-        {
-            route: '/test1',
-            directSubRoutes: []
-        },
-        {
-            route: '/test2',
-            directSubRoutes : []
-        }, {
-            route: '/test3',
-            directSubRoutes : [
-                {
-                    route: '/meow',
-                    directSubRoutes : []
-                }
-            ]
-        }
-    ]
-)
-
 document.addEventListener("keypress", function(event) {
     const routeElement = event.target.closest('.searchBar');
     if (event.key === "Enter")
@@ -333,3 +284,4 @@ document.addEventListener("keypress", function(event) {
         }
     }
 })
+
