@@ -25,14 +25,18 @@ if(!searchParams.has('username') && pathname == '/')
             <div class="d-flex align-items-center">
                 <button type="button" class="type-intra-green delete_friend me-4" >delete</button>
             </div>
-        </li>
-        `
+        </li>`
         const doc = parser.parseFromString(html_friend, "text/html");
         const friendElement = doc.body.firstChild;
     
         const deleteButton = friendElement.querySelector('.delete_friend');
-        deleteButton.addEventListener('click', () => {
-            handleDeleteFriend(friend);
+        deleteButton.addEventListener('click', function() {
+            const parentListItem = this.closest('li.list-group-item');
+            console.log("deleting my friend");
+            if (parentListItem) {
+                parentListItem.remove();
+            }
+            handleDeleteFriend(friend.username);
         });
         friends_group.appendChild(friendElement);
     });
@@ -53,12 +57,20 @@ if(!searchParams.has('username') && pathname == '/')
         const pendingElement = doc.body.firstChild;
     
         const acceptButton = pendingElement.querySelector('.accept_friend');
-        acceptButton.addEventListener('click', () => {
+        acceptButton.addEventListener('click', function() {
+            const parentListItem = this.closest('li.pending_item');
+            if (parentListItem) {
+                parentListItem.remove();
+            }
             handleAcceptFriend(pending_friend.username);
         });
         
         const deleteButton = pendingElement.querySelector('.refuse_friend');
-        deleteButton.addEventListener('click', () => {
+        deleteButton.addEventListener('click', function() {
+            const parentListItem = this.closest('li.pending_item');
+            if (parentListItem) {
+                parentListItem.remove();
+            }
             handleRefuseFriend(pending_friend.username);
         });
         pending_group.appendChild(pendingElement);
@@ -89,19 +101,27 @@ notifSocket.onmessage = (event) => {
             const pendingElement = doc.body.firstChild;
 
             const acceptButton = pendingElement.querySelector('.accept_friend');
-            acceptButton.addEventListener('click', () => {
+            acceptButton.addEventListener('click', function(){
+                const parentListItem = this.closest('li.pending_item');
+                if (parentListItem) {
+                    parentListItem.remove();
+                }
                 handleAcceptFriend(message.data.content.username);
             });
             
             const deleteButton = pendingElement.querySelector('.refuse_friend');
-            deleteButton.addEventListener('click', () => {
+            deleteButton.addEventListener('click', function() {
+                const parentListItem = this.closest('li.pending_item');
+                if (parentListItem) {
+                    parentListItem.remove();
+                }
                 handleRefuseFriend(message.data.content.username);
             });
             pending_group.appendChild(pendingElement);
         }
         toasts(`New friend request from ${message.data.content.username}`, message.data);
     }
-    else if(message.data.action == "ACK_ACCEPT_FRIEND_REQUEST_HOST") {
+    else if(message.data.action == "ACK_ACCEPT_FRIEND_REQUEST_HOST" || message.data.action == "ACK_ACCEPT_FRIEND_REQUEST") {
         let friends_group = document.querySelector('.friends_group');
         if(friends_group)
         {
@@ -117,70 +137,48 @@ notifSocket.onmessage = (event) => {
             const friendElement = doc.body.firstChild;
 
             const deleteButton = friendElement.querySelector('.delete_friend');
-            deleteButton.addEventListener('click', () => {
+            deleteButton.addEventListener('click', function() {
+                const parentListItem = this.closest('li.list-group-item');
+                console.log("deleting my friend");
+                if (parentListItem) {
+                    parentListItem.remove();
+                }
                 handleDeleteFriend(message.data.content.username);
             });
             friends_group.appendChild(friendElement);
-            
-            const buttonToDelete = document.querySelector(`li.pending_item#${message.data.content.username}`);
-            if(buttonToDelete)
+        }
+        if(message.data.action == "ACK_ACCEPT_FRIEND_REQUEST") {
+            const newChat = document.querySelector('.chatRooms');
+            if(newChat)
             {
-                buttonToDelete.remove();
+                const parser = new DOMParser();
+                const htmlChat = 
+                `<button id="${message.data.content.room}" class="roomroom chat-${message.data.content.username} container d-flex align-items-center gap-3">
+                        <img src="/static/assets/imgs/profile/default.png">
+                        <div>${message.data.content.username}</div>
+                </button>`
+                console.log(htmlChat);
+                const doc = parser.parseFromString(htmlChat, "text/html");
+                const chatElement = doc.body.firstChild;
+                newChat.appendChild(chatElement);
             }
-        }
-    }
-    else if(message.data.action == "ACK_ACCEPT_FRIEND_REQUEST") {
-        let friends_group = document.querySelector('.friends_group');
-        if(friends_group)
-        {
-            const parser = new DOMParser();
-            const add_to_friend = 
-            `<li class="list-group-item d-flex justify-content-between align-items-center">
-                <div>${message.data.content.username}</div>
-                <div class="d-flex align-items-center">
-                    <button type="button" class="type-intra-green delete_friend me-4">delete</button>
-                </div>
-            </li>
-            `
-            const doc = parser.parseFromString(add_to_friend, "text/html");
-            const friendElement = doc.body.firstChild;
-
-            const deleteButton = friendElement.querySelector('.delete_friend');
-            deleteButton.addEventListener('click', () => {
-                handleDeleteFriend(message.data.content.username);
-            });
-            friends_group.appendChild(friendElement);
-        }
-        const newChat = document.querySelector('.chatRooms');
-        if(newChat)
-        {
-            const parser = new DOMParser();
-            const htmlChat = 
-            `<button id="${message.data.content.room}" class="roomroom chat-${message.data.content.username} container d-flex align-items-center gap-3">
-                    <img src="/static/assets/imgs/profile/default.png">
-                    <div>${message.data.content.username}</div>
-            </button>`
-            console.log(htmlChat);
-            const doc = parser.parseFromString(htmlChat, "text/html");
-            const chatElement = doc.body.firstChild;
-            newChat.appendChild(chatElement);
         }
     }
     else if(message.data.action == "ACK_REFUSE_FRIEND_REQUEST") {
-        const buttonToDelete = document.querySelector(`li.pending_item#${message.data.content.username}`);
-        if(buttonToDelete)
-        {
-            buttonToDelete.remove();
-        }
+        // const buttonToDelete = document.querySelector(`li.pending_item#${message.data.content.username}`);
+        // if(buttonToDelete)
+        // {
+        //     buttonToDelete.remove();
+        // }
     }
     else if(message.data.action == "ACK_DELETE_FRIEND_HOST") {
-        const friendElements = document.querySelectorAll('.friends_group li');
-        friendElements.forEach(elem => {
-            const usernameElement = elem.querySelector('div:first-child');
-            if (usernameElement && usernameElement.textContent.trim() === message.data.content.username) {
-                elem.remove();
-            }
-        });
+        // const friendElements = document.querySelectorAll('.friends_group li');
+        // friendElements.forEach(elem => {
+        //     const usernameElement = elem.querySelector('div:first-child');
+        //     if (usernameElement && usernameElement.textContent.trim() === message.data.content.username) {
+        //         elem.remove();
+        //     }
+        // });
     }
     else if(message.data.action == "ACK_DELETE_FRIEND") {
         const friendElements = document.querySelectorAll('.friends_group li');
@@ -209,16 +207,15 @@ notifSocket.onmessage = (event) => {
                 </div>
             </li>
             `
-            
             const doc = parser.parseFromString(htmlString, "text/html");
             const pendingElement = doc.body.firstChild;
 
             const acceptDuel = pendingElement.querySelector('.accept_duel');
-            acceptDuel.addEventListener('click', () => {
+            acceptDuel.addEventListener('click', function() {
                 handleAcceptDuel(message.data.content.code);
             });
             const deleteDuel = pendingElement.querySelector('.refuse_duel');
-            deleteDuel.addEventListener('click', () => {
+            deleteDuel.addEventListener('click', function() {
                 handleRefuseDuel(message.data.content.code);
             });
             pending_group.appendChild(pendingElement);
@@ -227,11 +224,11 @@ notifSocket.onmessage = (event) => {
     }
     else if(message.data.action == "REFUSED_DUEL")
     {
-        const buttonToDelete = document.querySelector(`li.pending_item#${message.data.content.username}`);
-        if(buttonToDelete)
-        {
-            buttonToDelete.remove();
-        }
+        // const buttonToDelete = document.querySelector(`li.pending_item#${message.data.content.username}`);
+        // if(buttonToDelete)
+        // {
+        //     buttonToDelete.remove();
+        // }
     }
 }
 
@@ -265,6 +262,7 @@ window.handleAskFriend = function(username) {
 
 window.handleAcceptFriend = function(username) {
     const toast = document.querySelector(".toast");
+    
     if(toast)
         toast.remove();
     const message = create_message_notif("accept_friend_request", username);
@@ -279,9 +277,9 @@ window.handleRefuseFriend = function(username) {
     notifSocket.send(JSON.stringify(message));
 };
 
-window.handleDeleteFriend = function(friend) {
-    console.log(friend);
-    const message = create_message_notif("delete_friend", friend.username);
+window.handleDeleteFriend = function(username) {
+    console.log(username);
+    const message = create_message_notif("delete_friend", username);
     notifSocket.send(JSON.stringify(message));
 };
 

@@ -44,15 +44,15 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <ul class="friends_group list-group">
-                    {% for friend in friends_list %}
+                <ul class="friends_group list-group friends-to-duel">
+                    {% comment %} {% for friend in friends_list %}
                         <li class="list-group-item d-flex justify-content-between align-items-center">
                             <div>{{friend.username}}</div>
                             <div class="d-flex align-items-center">
                                 <button type="button" class="type-intra-green duel_friend me-4" onclick="hide_modal()" data-username="{{friend.username}}" data-id="{{friend.client.id}}">Duel</button>
                             </div>
                         </li>
-                    {% endfor %}
+                    {% endfor %} {% endcomment %}
                 </ul>
             </div>
             <div class="modal-header">
