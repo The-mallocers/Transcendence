@@ -1,8 +1,10 @@
 import {WebSocketManager} from "../websockets/websockets.js"
 import {isGameOver} from "../apps/game/VarGame.js"
 import * as html from "../utils/html_forms.js"
+
 // let notifSocket = null;
 // let clientId = null;
+
 class Router {
     constructor(routes) {
         this.routes = routes;
@@ -90,8 +92,6 @@ class Router {
 }
 
 window.onload = async () => {
-    console.log(pongRoute.possibleRoutes)
-    // console.log(window.location.pathname
 
     //Add the creation of the websocket here
     await router.handleLocation();

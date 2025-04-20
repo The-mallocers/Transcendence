@@ -45,14 +45,12 @@ socket.onmessage = (e) => {
     if (jsonData.event == "UPDATE") {
 
         if (jsonData.data.action == "PADDLE_LEFT_UPDATE") {
-            console.log(jsonData.data.content.y)
             window.GameState.left.y = jsonData.data.content.y
         } else if (jsonData.data.action == "PADDLE_RIGHT_UPDATE") {
             window.GameState.right.y = jsonData.data.content.y
         } else if (jsonData.data.action == "BALL_UPDATE") {
             window.GameState.ballX = jsonData.data.content.x;
             window.GameState.ballY = jsonData.data.content.y;
-            // console.table(jsonData.data.content.x, jsonData.data.content.y)
         } else if (jsonData.data.action == "SCORE_LEFT_UPDATE") {
             lscore.innerHTML = jsonData.data.content
         } else if (jsonData.data.action == "SCORE_RIGHT_UPDATE") {
@@ -62,23 +60,16 @@ socket.onmessage = (e) => {
         console.log("WE GOT AN ERROR"); 
         if (jsonData.data.action == "OPPONENT_LEFT") {
             console.log("Opponent Disconnected");
-            navigateTo("/pong/disconnect/"); //Later, Redirect to a screen telling your opponent he disconnected.
+            navigateTo("/pong/disconnect/"); 
             isGameOver.gameIsOver = true;
             WebSocketManager.closeGameSocket();
         }
     } else if (jsonData.data.action == "GAME_ENDING") {
-        //Close socket here as well
         const game_id = jsonData.data.content
-        console.log("game id is ", game_id);
-        console.log("ALLO C FINI LA GAME");
-        //We will want to navigate to a specific game
-        console.log("Navigating to /pong/gameover/");
         navigateTo(`/pong/gameover/?game=${game_id}`);
         isGameOver.gameIsOver = true;
         WebSocketManager.closeGameSocket();
     }
-    // return render()
-    // })s
 };
 
 
@@ -101,7 +92,6 @@ document.addEventListener('keydown', (event) => {
             keys.down = true;
             break;
     }
-    // updatePaddles()
 });
 
 document.addEventListener('keyup', (event) => {
@@ -113,11 +103,9 @@ document.addEventListener('keyup', (event) => {
             keys.down = false;
             break;
     }
-    // updatePaddles()
 });
 
 function updatePaddles() {
-    // gauche
     let direction = null;
     if (keys.up && keys.down) {
         if (previous_keys.up) {
@@ -137,7 +125,6 @@ function updatePaddles() {
         direction = 'idle'
     }
     if (direction) {
-        // console.log("direction is :", direction)
         const message = {
             "event": "game",
             "data": {
@@ -177,7 +164,6 @@ const drawBall = (x, y) => {
     ctx.fill();
 };
 
-// Complete rendering function
 const render = () => {
     clearArena();
     drawArena();
@@ -191,18 +177,14 @@ render()
 
 function gameLoop() {
     if (isGameOver.gameIsOver == true) {
-        // alert("returning like a fucking idiot")
         return;
     }
-    // console.log("Im looping, ", game_is_over)
     updatePaddles();
     render();
     requestAnimationFrame(gameLoop);
 }
 
-// Start the game loop
 isGameOver.gameIsOver = false;
 if (isGameOver.gameIsOver == false) {
-    // alert("I am in the loop for the first time")
     requestAnimationFrame(gameLoop);
 }
