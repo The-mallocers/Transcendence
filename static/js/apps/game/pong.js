@@ -10,16 +10,6 @@ let rusername = document.getElementById("rusername");
 let lscore = document.getElementById("scoreLeft");
 let rscore = document.getElementById("scoreRight");
 
-let previousGameState = {
-    left: { y: window.GameState.left.y },
-    right: { y: window.GameState.right.y },
-    ballX: window.GameState.ballX,
-    ballY: window.GameState.ballY
-};
-let lastUpdateTime = performance.now();
-const INTERPOLATION_SPEED = 0.15; // Adjust this value for smoother/faster transitions
-
-
 let height = 500;
 const width = 1000;
 
@@ -37,6 +27,8 @@ if (!window.GameState) {
 }
 lusername.innerHTML = window.GameState.left.username
 rusername.innerHTML = window.GameState.right.username
+
+
 
 socket.onmessage = (e) => {
     const jsonData = JSON.parse(e.data);
@@ -56,14 +48,7 @@ socket.onmessage = (e) => {
     }
 
     if (jsonData.event == "UPDATE") {
-        previousGameState = {
-            left: { y: window.GameState.left.y },
-            right: { y: window.GameState.right.y },
-            ballX: window.GameState.ballX,
-            ballY: window.GameState.ballY
-        };
-        
-        lastUpdateTime = performance.now();
+
         if (jsonData.data.action == "PADDLE_LEFT_UPDATE") {
             window.GameState.left.y = jsonData.data.content.y
         } else if (jsonData.data.action == "PADDLE_RIGHT_UPDATE") {
@@ -92,20 +77,6 @@ socket.onmessage = (e) => {
     }
 };
 
-function interpolateGameState() {
-    if (window.GameState.left.targetY !== undefined) {
-        window.GameState.left.y += (window.GameState.left.targetY - window.GameState.left.y) * INTERPOLATION_SPEED;
-    }
-    
-    if (window.GameState.right.targetY !== undefined) {
-        window.GameState.right.y += (window.GameState.right.targetY - window.GameState.right.y) * INTERPOLATION_SPEED;
-    }
-    
-    if (window.GameState.targetBallX !== undefined && window.GameState.targetBallY !== undefined) {
-        window.GameState.ballX += (window.GameState.targetBallX - window.GameState.ballX) * INTERPOLATION_SPEED;
-        window.GameState.ballY += (window.GameState.targetBallY - window.GameState.ballY) * INTERPOLATION_SPEED;
-    }
-}
 
 const keys = {};
 const previous_keys = {};
@@ -195,6 +166,9 @@ const drawBall = (x, y) => {
     ctx.fill();
 };
 
+
+
+
 const render = () => {
     clearArena();
     drawArena();
@@ -211,7 +185,6 @@ function gameLoop() {
         return;
     }
     updatePaddles();
-    interpolateGameState();
     render();
     requestAnimationFrame(gameLoop);
 }
@@ -220,8 +193,3 @@ isGameOver.gameIsOver = false;
 if (isGameOver.gameIsOver == false) {
     requestAnimationFrame(gameLoop);
 }
-
-window.GameState.left.targetY = window.GameState.left.y;
-window.GameState.right.targetY = window.GameState.right.y;
-window.GameState.targetBallX = window.GameState.ballX;
-window.GameState.targetBallY = window.GameState.ballY;
