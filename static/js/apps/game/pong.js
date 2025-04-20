@@ -73,17 +73,11 @@ socket.onmessage = (e) => {
 };
 
 
-const keys = {
-    'a': false,
-    'd': false,
-};
+const keys = {};
+const previous_keys = {};
+let previous_direction = null;
 
-const previous_keys = {
-    'a': false,
-    'd': false,
-}
-
-document.addEventListener('keydown', (event) => {
+window.addEventListener('keydown', (event) => {
     switch (event.key) {
         case 'ArrowUp':
             keys.up = true;
@@ -105,8 +99,10 @@ document.addEventListener('keyup', (event) => {
     }
 });
 
+
 function updatePaddles() {
     let direction = null;
+    //This might look confusing, but this is to simulate strafing keys
     if (keys.up && keys.down) {
         if (previous_keys.up) {
             direction = 'down'
@@ -124,7 +120,8 @@ function updatePaddles() {
     } else {
         direction = 'idle'
     }
-    if (direction) {
+    if (direction && direction !== previous_direction) {
+        previous_direction = direction;
         const message = {
             "event": "game",
             "data": {

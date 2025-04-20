@@ -22,4 +22,8 @@ dbclean:
 clean: dbclean
 	docker compose down --rmi all
 
+reload:
+	cp -r static/css /docker/staticdocker/css
+	cp -r static/js /docker/staticdocker/js
+
 re: down up
