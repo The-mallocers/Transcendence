@@ -1,5 +1,8 @@
 import {WebSocketManager} from "../../websockets/websockets.js";
 import {navigateTo} from "../../spa/spa.js";
+import { toast_friend } from "./toast.js";
+import { toast_duel } from "./toast.js";
+import { toast_message } from "./toast.js";
 
 let client_id = null;
 const clientId = await getClientId();
@@ -14,7 +17,8 @@ if(!searchParams.has('username') && pathname == '/')
     // Display all friends and pending friends
     console.log("displaying friends from profile.js");
     const friends = await apiFriends("/api/friends/get_friends/");
-    const pending_friends = await apiFriends("/api/friends/get_pending_friends/")
+    const pending_friends = await apiFriends("/api/friends/get_pending_friends/");
+    // const pending_duels = await apiFriends("/api/friends/get_pending_duels/");
     
     friends.forEach(friend => {
         const friends_group = document.querySelector('.friends_group');
@@ -31,11 +35,7 @@ if(!searchParams.has('username') && pathname == '/')
     
         const deleteButton = friendElement.querySelector('.delete_friend');
         deleteButton.addEventListener('click', function() {
-            const parentListItem = this.closest('li.list-group-item');
-            console.log("deleting my friend");
-            if (parentListItem) {
-                parentListItem.remove();
-            }
+            friendElement.remove();
             handleDeleteFriend(friend.username);
         });
         friends_group.appendChild(friendElement);
@@ -45,7 +45,7 @@ if(!searchParams.has('username') && pathname == '/')
         const pending_group = document.querySelector('.pending_group');
         const parser = new DOMParser();
         const html_string = 
-                `<li class="list-group-item pending_item d-flex justify-content-between align-items-center" id="${pending_friend.username}">
+                `<li class="list-group-item pending_item d-flex justify-content-between align-items-center">
                     ${pending_friend.username}
                     <div class="btn-group d-grid gap-2 d-md-flex justify-content-md-end"  role="group" aria-label="Basic example">
                         <button type="button" class="type-intra-green accept_friend">accept</button>
@@ -58,26 +58,52 @@ if(!searchParams.has('username') && pathname == '/')
     
         const acceptButton = pendingElement.querySelector('.accept_friend');
         acceptButton.addEventListener('click', function() {
-            const parentListItem = this.closest('li.pending_item');
-            if (parentListItem) {
-                parentListItem.remove();
-            }
+            pendingElement.remove();
             handleAcceptFriend(pending_friend.username);
         });
         
         const deleteButton = pendingElement.querySelector('.refuse_friend');
         deleteButton.addEventListener('click', function() {
-            const parentListItem = this.closest('li.pending_item');
-            if (parentListItem) {
-                parentListItem.remove();
-            }
+            pendingElement.remove();
             handleRefuseFriend(pending_friend.username);
         });
         pending_group.appendChild(pendingElement);
     });
+    // pending_duels.forEach((duel) => {
+    //     const pending_group = document.querySelector('.pending_group');
+    //     const parser = new DOMParser();
+    //     const html_string = 
+    //             `<li class="list-group-item pending_item d-flex justify-content-between align-items-center">
+    //                 ${duel.username} wants to duel
+    //                 <div class="btn-group d-grid gap-2 d-md-flex justify-content-md-end"  role="group" aria-label="Basic example">
+    //                     <button type="button" class="type-intra-green accept_duel">accept</button>
+    //                     <button type="button" class="type-intra-white refuse_duel">refuse</button>
+    //                 </div>
+    //             </li>
+    //             `
+    //     const doc = parser.parseFromString(html_string, "text/html");
+    //     const pendingElement = doc.body.firstChild;
+    
+    //     const acceptButton = pendingElement.querySelector('.accept_duel');
+    //     acceptButton.addEventListener('click', function() {
+    //         const parentListItem = this.closest('li.pending_item');
+    //         if (parentListItem) {
+    //             parentListItem.remove();
+    //         }
+    //         handleAcceptDuel(duel.username);
+    //     });
+        
+    //     const deleteButton = pendingElement.querySelector('.refuse_duel');
+    //     deleteButton.addEventListener('click', function() {
+    //         const parentListItem = this.closest('li.pending_item');
+    //         if (parentListItem) {
+    //             parentListItem.remove();
+    //         }
+    //         handleRefuseDuel(duel.username);
+    //     });
+    //     pending_group.appendChild(pendingElement);        
+    // })
 }
-
-
 
 notifSocket.onmessage = (event) => {
     console.log(event.data);
@@ -89,7 +115,7 @@ notifSocket.onmessage = (event) => {
         {
             const parser = new DOMParser();
             const htmlString = 
-            `<li class="list-group-item pending_item d-flex justify-content-between align-items-center" id="${message.data.content.username}">
+            `<li class="list-group-item pending_item d-flex justify-content-between align-items-center">
                 ${message.data.content.username}
                 <div class="btn-group d-grid gap-2 d-md-flex justify-content-md-end"  role="group" aria-label="Basic example">
                     <button type="button" class="type-intra-green accept_friend">accept</button>
@@ -102,24 +128,18 @@ notifSocket.onmessage = (event) => {
 
             const acceptButton = pendingElement.querySelector('.accept_friend');
             acceptButton.addEventListener('click', function(){
-                const parentListItem = this.closest('li.pending_item');
-                if (parentListItem) {
-                    parentListItem.remove();
-                }
+                pendingElement.remove();
                 handleAcceptFriend(message.data.content.username);
             });
             
             const deleteButton = pendingElement.querySelector('.refuse_friend');
             deleteButton.addEventListener('click', function() {
-                const parentListItem = this.closest('li.pending_item');
-                if (parentListItem) {
-                    parentListItem.remove();
-                }
+                pendingElement.remove();
                 handleRefuseFriend(message.data.content.username);
             });
             pending_group.appendChild(pendingElement);
+            toast_friend(`New friend request from ${message.data.content.username}`, message.data, pendingElement);
         }
-        toasts(`New friend request from ${message.data.content.username}`, message.data);
     }
     else if(message.data.action == "ACK_ACCEPT_FRIEND_REQUEST_HOST" || message.data.action == "ACK_ACCEPT_FRIEND_REQUEST") {
         let friends_group = document.querySelector('.friends_group');
@@ -138,11 +158,7 @@ notifSocket.onmessage = (event) => {
 
             const deleteButton = friendElement.querySelector('.delete_friend');
             deleteButton.addEventListener('click', function() {
-                const parentListItem = this.closest('li.list-group-item');
-                console.log("deleting my friend");
-                if (parentListItem) {
-                    parentListItem.remove();
-                }
+                friendElement.remove();
                 handleDeleteFriend(message.data.content.username);
             });
             friends_group.appendChild(friendElement);
@@ -157,7 +173,6 @@ notifSocket.onmessage = (event) => {
                         <img src="/static/assets/imgs/profile/default.png">
                         <div>${message.data.content.username}</div>
                 </button>`
-                console.log(htmlChat);
                 const doc = parser.parseFromString(htmlChat, "text/html");
                 const chatElement = doc.body.firstChild;
                 newChat.appendChild(chatElement);
@@ -199,10 +214,10 @@ notifSocket.onmessage = (event) => {
         {
             const parser = new DOMParser();
             const htmlString = 
-            `<li class="list-group-item pending_item d-flex justify-content-between align-items-center" id="${message.data.content.username}">
+            `<li class="list-group-item pending_item d-flex justify-content-between align-items-center">
                 ${message.data.content.username} wants to duel
                 <div class="btn-group d-grid gap-2 d-md-flex justify-content-md-end"  role="group" aria-label="Basic example">
-                    <button type="button" class="type-intra-green accept_duel" id="${message.data.content.sender}">accept</button>
+                    <button type="button" class="type-intra-green accept_duel">accept</button>
                     <button type="button" class="type-intra-white refuse_duel">refuse</button>
                 </div>
             </li>
@@ -214,13 +229,14 @@ notifSocket.onmessage = (event) => {
             acceptDuel.addEventListener('click', function() {
                 handleAcceptDuel(message.data.content.code);
             });
-            const deleteDuel = pendingElement.querySelector('.refuse_duel');
-            deleteDuel.addEventListener('click', function() {
+            const refuseDuel = pendingElement.querySelector('.refuse_duel');
+            refuseDuel.addEventListener('click', function() {
+                pendingElement.remove();
                 handleRefuseDuel(message.data.content.code);
             });
             pending_group.appendChild(pendingElement);
+            toast_duel(`${message.data.content.username} wants a duel`, message.data, pendingElement);
         }
-        toasts(`${message.data.content.username} wants a duel`, message.data);
     }
     else if(message.data.action == "REFUSED_DUEL")
     {
@@ -229,6 +245,10 @@ notifSocket.onmessage = (event) => {
         // {
         //     buttonToDelete.remove();
         // }
+    }
+    else if(message.data.action == "DUEL_REFUSED"){
+        navigateTo("/pong/gamemodes/");
+        toast_message(`${message.data.content.username} refuses the duel`);
     }
 }
 
@@ -278,18 +298,25 @@ window.handleRefuseFriend = function(username) {
 };
 
 window.handleDeleteFriend = function(username) {
-    console.log(username);
     const message = create_message_notif("delete_friend", username);
     notifSocket.send(JSON.stringify(message));
 };
 
 window.handleAcceptDuel = function(code) {
+    const toast = document.querySelector(".toast");
+    
+    if(toast)
+        toast.remove();
     const message = create_message_duel("accept_duel", code);
     notifSocket.send(JSON.stringify(message));
     navigateTo('/pong/duel/');
 };
 
 window.handleRefuseDuel = function(code) {
+    const toast = document.querySelector(".toast");
+    
+    if(toast)
+        toast.remove();
     const message = create_message_duel("refuse_duel", code);
     notifSocket.send(JSON.stringify(message));
 };
@@ -320,44 +347,6 @@ function create_message_duel(action, code)
         } 
     }
     return message;
-}
-
-function toasts(message, data){
-    const date = new Date();
-    const hours = date.getHours().toString().padStart(2, '0');
-    const minutes = date.getMinutes().toString().padStart(2, '0');
-    const time = `${hours}:${minutes}`;
-    
-    const toastHtml = `
-    <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-        <div class="toast-header">
-            <img src="/static/assets/imgs/chat.png" class="rounded me-2" alt="..." style="width: 20px; height: 20px; object-fit: contain;">
-            <strong class="me-auto">Friend Notification</strong>
-            <small>${time}</small>
-            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-        <div class="toast-body">${message}</div>
-        <div class="mt-2 pt-2 border-top d-flex justify-content-end">
-            <button type="button" class="btn type-intra-green me-2" onclick="handleAcceptFriend(this.dataset.username)" data-username=${data.content.username}>Accept</button>
-            <button type="button" class="btn type-intra-white" onclick="handleRefuseFriend(this.dataset.username)" data-username=${data.content.username}>Refuse</button>
-        </div>
-    </div>`;
-    
-    let toastContainer = document.querySelector('.toast-container');
-    if (!toastContainer) {
-        toastContainer = document.createElement('div');
-        toastContainer.className = 'toast-container position-fixed bottom-0 end-0 p-3';
-        document.body.appendChild(toastContainer);
-    }
-    toastContainer.innerHTML += toastHtml;
-    
-    const newToast = toastContainer.lastChild;
-    const toastBootstrap = new bootstrap.Toast(newToast);
-    toastBootstrap.show();
-    
-    newToast.addEventListener('hidden.bs.toast', function() {
-        this.remove();
-    });
 }
 
 export async function apiFriends(endpoint) {
