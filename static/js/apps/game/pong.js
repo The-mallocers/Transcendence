@@ -1,6 +1,6 @@
-import {WebSocketManager} from "../../websockets/websockets.js";
-import {navigateTo} from '../../spa/spa.js';
-import {isGameOver} from "./VarGame.js"
+import { WebSocketManager } from "../../websockets/websockets.js";
+import { navigateTo } from '../../spa/spa.js';
+import { isGameOver } from "./VarGame.js"
 
 const socket = WebSocketManager.gameSocket;
 let canvas = document.getElementById("pongCanvas");
@@ -9,73 +9,79 @@ let lusername = document.getElementById("lusername");
 let rusername = document.getElementById("rusername");
 let lscore = document.getElementById("scoreLeft");
 let rscore = document.getElementById("scoreRight");
-
 let height = 500;
 const width = 1000;
-
 const ballSize = 10;
 const paddleThickness = 20;
 let paddleHeight = 100;
-
-
 canvas.width = width;
 canvas.height = height;
+let is_gameplay_start = false;
+let last_time = 0;
 
 //Si un petit malin va sur la page sans permission
 if (!window.GameState) {
     navigateTo("/");
 }
-lusername.innerHTML = window.GameState.left.username
-rusername.innerHTML = window.GameState.right.username
+else {
+    lusername.innerHTML = window.GameState.left.username
+    rusername.innerHTML = window.GameState.right.username
 
-
-
-socket.onmessage = (e) => {
-    const jsonData = JSON.parse(e.data);
-    console.log("received the message below");
-    console.log(jsonData);
-    console.log("received the message with Data");
-    console.log(jsonData.data)
-    if (jsonData.data) {
-        console.log(jsonData.data.action)
-    }
-
-    //Attempt at handling errors
-    if (jsonData.data.action == "EXCEPTION") {
-        isGameOver.gameIsOver = true;
-        WebSocketManager.closeGameSocket();
-        navigateTo("/");
-    }
-
-    if (jsonData.event == "UPDATE") {
-
-        if (jsonData.data.action == "PADDLE_LEFT_UPDATE") {
-            window.GameState.left.y = jsonData.data.content.y
-        } else if (jsonData.data.action == "PADDLE_RIGHT_UPDATE") {
-            window.GameState.right.y = jsonData.data.content.y
-        } else if (jsonData.data.action == "BALL_UPDATE") {
-            window.GameState.ballX = jsonData.data.content.x;
-            window.GameState.ballY = jsonData.data.content.y;
-        } else if (jsonData.data.action == "SCORE_LEFT_UPDATE") {
-            lscore.innerHTML = jsonData.data.content
-        } else if (jsonData.data.action == "SCORE_RIGHT_UPDATE") {
-            rscore.innerHTML = jsonData.data.content
+    socket.onmessage = (e) => {
+        const jsonData = JSON.parse(e.data);
+        console.log("received the message below");
+        console.log(jsonData);
+        console.log("received the message with Data");
+        console.log(jsonData.data)
+        if (jsonData.data) {
+            console.log(jsonData.data.action)
         }
-    } else if (jsonData.event == "ERROR") {
-        console.log("WE GOT AN ERROR"); 
-        if (jsonData.data.action == "OPPONENT_LEFT") {
-            console.log("Opponent Disconnected");
-            navigateTo("/pong/disconnect/"); 
+
+        //Attempt at handling errors
+        if (jsonData.data.action == "EXCEPTION") {
+            isGameOver.gameIsOver = true;
+            WebSocketManager.closeGameSocket();
+            navigateTo("/");
+        }
+
+        if (jsonData.event == "UPDATE") {
+
+            if (is_gameplay_start == false) {
+                is_gameplay_start == true;
+                last_time = performance.now();
+            }
+            if (jsonData.data.action == "PADDLE_LEFT_UPDATE") {
+                window.GameState.left.y = jsonData.data.content.y
+            } else if (jsonData.data.action == "PADDLE_RIGHT_UPDATE") {
+                window.GameState.right.y = jsonData.data.content.y
+            } else if (jsonData.data.action == "BALL_UPDATE") {
+                console.log("Ball update is :", jsonData.data);
+                window.GameState.ballX = jsonData.data.content.x;
+                window.GameState.ballY = jsonData.data.content.y;
+                window.GameState.balldy = jsonData.data.content.dy;
+                window.GameState.balldx = jsonData.data.content.dx;
+            } else if (jsonData.data.action == "SCORE_LEFT_UPDATE") {
+                lscore.innerHTML = jsonData.data.content
+            } else if (jsonData.data.action == "SCORE_RIGHT_UPDATE") {
+                rscore.innerHTML = jsonData.data.content
+            }
+        } else if (jsonData.event == "ERROR") {
+            console.log("WE GOT AN ERROR");
+            if (jsonData.data.action == "OPPONENT_LEFT") {
+                console.log("Opponent Disconnected");
+                navigateTo("/pong/disconnect/");
+                isGameOver.gameIsOver = true;
+                WebSocketManager.closeGameSocket();
+            }
+        } else if (jsonData.data.action == "GAME_ENDING") {
+            const game_id = jsonData.data.content
+            navigateTo(`/pong/gameover/?game=${game_id}`);
             isGameOver.gameIsOver = true;
             WebSocketManager.closeGameSocket();
         }
-    } else if (jsonData.data.action == "GAME_ENDING") {
-        const game_id = jsonData.data.content
-        navigateTo(`/pong/gameover/?game=${game_id}`);
-        isGameOver.gameIsOver = true;
-        WebSocketManager.closeGameSocket();
-    }
-};
+    };
+}
+
 
 
 const keys = {};
@@ -160,13 +166,18 @@ const drawPaddle = (x, y) => {
 };
 
 const drawBall = (x, y) => {
+    //doing some math
+    const curr_time = performance.now(); 
+    const delta = (curr_time -  last_time) / 1000;
+    last_time = curr_time;
+    x += window.GameState.balldx * delta; 
+    y += window.GameState.balldy * delta; 
+
     ctx.fillStyle = "white";
     ctx.beginPath();
-    ctx.arc(x, y, ballSize, 0, Math.PI * 2);
+    ctx.arc(x , y, ballSize, 0, Math.PI * 2);
     ctx.fill();
 };
-
-
 
 
 const render = () => {
