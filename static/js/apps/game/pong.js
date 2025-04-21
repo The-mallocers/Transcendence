@@ -18,6 +18,7 @@ canvas.width = width;
 canvas.height = height;
 let is_gameplay_start = false;
 let last_time = 0;
+let did_tab_out = false;
 
 //Si un petit malin va sur la page sans permission
 if (!window.GameState) {
@@ -47,7 +48,7 @@ else {
         if (jsonData.event == "UPDATE") {
 
             if (is_gameplay_start == false) {
-                is_gameplay_start == true;
+                is_gameplay_start = true;
                 last_time = performance.now();
             }
             if (jsonData.data.action == "PADDLE_LEFT_UPDATE") {
@@ -57,7 +58,8 @@ else {
             } else if (jsonData.data.action == "BALL_UPDATE") {
                 console.log("Ball update is :", jsonData.data);
                 //Trying to have the client update with the raw data only if the speed changes
-                if (window.GameState.balldy != jsonData.data.content.dy || window.GameState.balldx != jsonData.data.content.dx) {
+                if (did_tab_out || window.GameState.balldy != jsonData.data.content.dy || window.GameState.balldx != jsonData.data.content.dx) {
+                    did_tab_out = false;
                     window.GameState.ballX = jsonData.data.content.x;
                     window.GameState.ballY = jsonData.data.content.y;
                     window.GameState.balldy = jsonData.data.content.dy;
@@ -85,7 +87,14 @@ else {
     };
 }
 
+document.addEventListener('visibilitychange', () => {
+    did_tab_out = true;
+    const isTabVisible = document.visibilityState === 'visible';
 
+    if (isTabVisible) {
+        last_time = performance.now();
+    }
+});
 
 const keys = {};
 const previous_keys = {};
@@ -170,16 +179,16 @@ const drawPaddle = (x, y) => {
 
 const drawBall = () => {
     //doing some math
-    const curr_time = performance.now(); 
-    const delta = (curr_time -  last_time) / 1000;
+    const curr_time = performance.now();
+    const delta = (curr_time - last_time) / 1000;
     last_time = curr_time;
 
-    window.GameState.ballX += window.GameState.balldx * delta; 
+    window.GameState.ballX += window.GameState.balldx * delta;
     window.GameState.ballY += window.GameState.balldy * delta;
 
     ctx.fillStyle = "white";
     ctx.beginPath();
-    ctx.arc(window.GameState.ballX , window.GameState.ballY, ballSize, 0, Math.PI * 2);
+    ctx.arc(window.GameState.ballX, window.GameState.ballY, ballSize, 0, Math.PI * 2);
     ctx.fill();
 };
 
