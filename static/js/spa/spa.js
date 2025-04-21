@@ -132,7 +132,7 @@ async function fetchRoute(path) {
         } else if (response.status >= 400 && response.status < 500) {
             return data.html;
         } else if (response.status == 500) {
-           return 
+           return html.Internal_Server_Error;
         }
     } catch (error) {
         console.error(error.message);
