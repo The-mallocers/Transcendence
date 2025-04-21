@@ -22,7 +22,7 @@ let did_tab_out = false;
 let delta = 0;
 const PADDLE_SPEED = 300; // pixels per second
 let lastUpdateTime = 0;
-
+//Need to add an API call so that I know which fucking paddle I am;
 
 
 //Si un petit malin va sur la page sans raison
@@ -30,6 +30,7 @@ if (!socket || socket.readyState === WebSocket.CLOSED) {
     navigateTo("/");
 }
 else {
+    console.log(window.GameState);
     lusername.innerHTML = window.GameState.left.username
     rusername.innerHTML = window.GameState.right.username
 
@@ -147,7 +148,7 @@ function updatePaddles() {
     } else {
         direction = 'idle'
     }
-    if (direction && direction != previous_direction) { //trying to send the direction only when it changes some reason this makes the straffing weird.
+    if (direction) { //trying to send the direction only when it changes, which would make sense, breaks everything ?!
         previous_direction = direction;
         const message = {
             "event": "game",
@@ -182,7 +183,6 @@ const drawPaddle = (x, y) => {
 };
 
 const drawBall = () => {
-    computeDelta();
     window.GameState.ballX += window.GameState.balldx * delta;
     window.GameState.ballY += window.GameState.balldy * delta;
 
@@ -195,6 +195,7 @@ const drawBall = () => {
 
 const render = () => {
     clearArena();
+
     drawArena();
     drawPaddle(10, window.GameState.left.y);
     drawPaddle(width - paddleThickness - 10, window.GameState.right.y);
@@ -213,6 +214,7 @@ function gameLoop() {
     if (isGameOver.gameIsOver == true) {
         return;
     }
+    computeDelta();
     updatePaddles();
     render();
     requestAnimationFrame(gameLoop);
