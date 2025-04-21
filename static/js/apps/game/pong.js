@@ -56,10 +56,13 @@ else {
                 window.GameState.right.y = jsonData.data.content.y
             } else if (jsonData.data.action == "BALL_UPDATE") {
                 console.log("Ball update is :", jsonData.data);
-                window.GameState.ballX = jsonData.data.content.x;
-                window.GameState.ballY = jsonData.data.content.y;
-                window.GameState.balldy = jsonData.data.content.dy;
-                window.GameState.balldx = jsonData.data.content.dx;
+                //Trying to have the client update with the raw data only if the speed changes
+                if (window.GameState.balldy != jsonData.data.content.dy || window.GameState.balldx != jsonData.data.content.dx) {
+                    window.GameState.ballX = jsonData.data.content.x;
+                    window.GameState.ballY = jsonData.data.content.y;
+                    window.GameState.balldy = jsonData.data.content.dy;
+                    window.GameState.balldx = jsonData.data.content.dx;
+                }
             } else if (jsonData.data.action == "SCORE_LEFT_UPDATE") {
                 lscore.innerHTML = jsonData.data.content
             } else if (jsonData.data.action == "SCORE_RIGHT_UPDATE") {
@@ -165,17 +168,18 @@ const drawPaddle = (x, y) => {
     ctx.fillRect(x, y, paddleThickness, paddleHeight);
 };
 
-const drawBall = (x, y) => {
+const drawBall = () => {
     //doing some math
     const curr_time = performance.now(); 
     const delta = (curr_time -  last_time) / 1000;
     last_time = curr_time;
-    x += window.GameState.balldx * delta; 
-    y += window.GameState.balldy * delta; 
+
+    window.GameState.ballX += window.GameState.balldx * delta; 
+    window.GameState.ballY += window.GameState.balldy * delta;
 
     ctx.fillStyle = "white";
     ctx.beginPath();
-    ctx.arc(x , y, ballSize, 0, Math.PI * 2);
+    ctx.arc(window.GameState.ballX , window.GameState.ballY, ballSize, 0, Math.PI * 2);
     ctx.fill();
 };
 
@@ -185,7 +189,7 @@ const render = () => {
     drawArena();
     drawPaddle(10, window.GameState.left.y);
     drawPaddle(width - paddleThickness - 10, window.GameState.right.y);
-    drawBall(window.GameState.ballX, window.GameState.ballY);
+    drawBall();
 };
 
 
