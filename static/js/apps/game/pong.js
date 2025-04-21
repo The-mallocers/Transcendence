@@ -19,9 +19,14 @@ canvas.height = height;
 let is_gameplay_start = false;
 let last_time = 0;
 let did_tab_out = false;
+let delta = 0;
+const PADDLE_SPEED = 300; // pixels per second
+let lastUpdateTime = 0;
 
-//Si un petit malin va sur la page sans permission
-if (!window.GameState) {
+
+
+//Si un petit malin va sur la page sans raison
+if (!socket || socket.readyState === WebSocket.CLOSED) {
     navigateTo("/");
 }
 else {
@@ -57,7 +62,7 @@ else {
                 window.GameState.right.y = jsonData.data.content.y
             } else if (jsonData.data.action == "BALL_UPDATE") {
                 console.log("Ball update is :", jsonData.data);
-                //Trying to have the client update with the raw data only if the speed changes
+                //We only update if we changed direction, this makes things smoother.
                 if (did_tab_out || window.GameState.balldy != jsonData.data.content.dy || window.GameState.balldx != jsonData.data.content.dx) {
                     did_tab_out = false;
                     window.GameState.ballX = jsonData.data.content.x;
@@ -71,7 +76,6 @@ else {
                 rscore.innerHTML = jsonData.data.content
             }
         } else if (jsonData.event == "ERROR") {
-            console.log("WE GOT AN ERROR");
             if (jsonData.data.action == "OPPONENT_LEFT") {
                 console.log("Opponent Disconnected");
                 navigateTo("/pong/disconnect/");
@@ -100,7 +104,7 @@ const keys = {};
 const previous_keys = {};
 let previous_direction = null;
 
-window.addEventListener('keydown', (event) => {
+document.addEventListener('keydown', (event) => {
     switch (event.key) {
         case 'ArrowUp':
             keys.up = true;
@@ -143,7 +147,7 @@ function updatePaddles() {
     } else {
         direction = 'idle'
     }
-    if (direction) { //For some reason this makes the straffing weird.
+    if (direction && direction != previous_direction) { //trying to send the direction only when it changes some reason this makes the straffing weird.
         previous_direction = direction;
         const message = {
             "event": "game",
@@ -178,11 +182,7 @@ const drawPaddle = (x, y) => {
 };
 
 const drawBall = () => {
-    //doing some math
-    const curr_time = performance.now();
-    const delta = (curr_time - last_time) / 1000;
-    last_time = curr_time;
-
+    computeDelta();
     window.GameState.ballX += window.GameState.balldx * delta;
     window.GameState.ballY += window.GameState.balldy * delta;
 
@@ -202,7 +202,12 @@ const render = () => {
 };
 
 
-render()
+function computeDelta() {
+    const curr_time = performance.now();
+    delta = (curr_time - last_time) / 1000;
+    last_time = curr_time;
+    return delta;
+}
 
 function gameLoop() {
     if (isGameOver.gameIsOver == true) {
@@ -217,3 +222,6 @@ isGameOver.gameIsOver = false;
 if (isGameOver.gameIsOver == false) {
     requestAnimationFrame(gameLoop);
 }
+
+//We used to call this to draw the ball once, maybe hardcore it in some other way, but ideally play an animation for the first few seconds.
+render()

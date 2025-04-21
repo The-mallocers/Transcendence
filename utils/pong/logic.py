@@ -123,8 +123,8 @@ class PongLogic:
             else:
                 self.ball.dx = -dx_magnitude
                 self.ball.x = paddle.x - self.ball.radius
-            self.ball.dx *= ACCEL
-            self.ball.dy *= ACCEL
+            self.ball.dx = min(self.ball.dx * ACCEL, MAX_SPEED)
+            self.ball.dy = min(self.ball.dy * ACCEL, MAX_SPEED)
 
 
     def _handle_paddle_direction(self, paddle: Paddle, delta_time):
