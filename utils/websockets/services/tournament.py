@@ -55,12 +55,13 @@ class TournamentService(BaseServices):
 
     async def _handle_join_tournament(self, data, client):
         code = data['data']['args']['code']
+        tournament: Tournaments = await Tournaments.aget_tournament_by_id(code)
         if await Clients.acheck_in_queue(client, self.redis):
             return await asend_group_error(self.service_group, ResponseError.ALREADY_IN_QUEUE)
         if not await self.redis.exists(RTables.HASH_TOURNAMENT_QUEUE(code)):
             return await asend_group_error(self.service_group, ResponseError.TOURNAMENT_NOT_EXIST)
-        # if await self.redis.hexists(RTables.HASH_DUEL_QUEUE(code), str(client.id)) is False:
-        #     return await asend_group_error(self.service_group, ResponseError.NOT_INVITED)
+        if not await self.redis.hexists(RTables.HASH_DUEL_QUEUE(code), str(client.id)) and tournament.public is False:
+            return await asend_group_error(self.service_group, ResponseError.NOT_INVITED)
         else:
             if await self.redis.hget(RTables.HASH_TOURNAMENT_QUEUE(code), str(client.id)) == 'True':
                 return await asend_group_error(self.service_group, ResponseError.ALREADY_JOIN_TOURNAMENT)
