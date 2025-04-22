@@ -2,6 +2,7 @@ import { navigateTo } from '../../spa/spa.js';
 import { WebSocketManager } from "../../websockets/websockets.js"
 
 
+
 function logout() {
     console.log("logout.js online")
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
@@ -22,7 +23,6 @@ function logout() {
         })
         .then(data => {
             console.log('Logout successful:', data);
-            localStorage.removeItem('client_id'); //Recent addition since our client id is stored in localstorage, we need to remove it.
             navigateTo('/auth/login')
         })
         .catch(error => {
@@ -34,5 +34,7 @@ let element = document.querySelector("#logout-btn");
 
 
 element.addEventListener("click", (e) => {
-    logout(e)
+    logout(e);
 })
+
+
