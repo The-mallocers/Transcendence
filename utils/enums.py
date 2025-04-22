@@ -206,6 +206,7 @@ class RTables(str, Enum):
     # ── Json ──────────────────────────────────────────────────────────────────────── #
     JSON_GAME: str = 'game_{}'
     JSON_DUEL: str = 'duel_{}'
+    JSON_TOURNAMENT: str = 'tournament_{}'
 
     def __str__(self, *args) -> str:
         if '{}' in self.value:  # Si la chaîne contient un placeholder

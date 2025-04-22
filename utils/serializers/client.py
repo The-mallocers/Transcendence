@@ -37,8 +37,7 @@ class ClientSerializer(serializers.ModelSerializer):
                 right = Rights.objects.create(is_admin=bool(is_admin))
                 friend = Friend.objects.create()
                 stats = Stats.objects.create()
-<<<<<<< HEAD
-                client = Clients.objects.create(profile=profile, password=passwrod, twoFa=two_fa, rights=right, friend=friend, stats=stats)
+                client = Clients.objects.create(profile=profile, password=password, twoFa=two_fa, rights=right, friend=friend, stats=stats)
 
                 global_room = Rooms.objects.get(id=uuid_global_room)
                 global_room.clients.add(client)
@@ -46,9 +45,6 @@ class ClientSerializer(serializers.ModelSerializer):
                 if validated_data.get('is_admin', False):
                     client.rights.is_admin = True
                     client.rights.save()
-=======
-                client = Clients.objects.create(profile=profile, password=password, twoFa=two_fa, rights=right, friend=friend, stats=stats)
->>>>>>> origin/156-feature-tournament-front
 
         except Exception as e:
             raise serializers.ValidationError(f"Error creating client: {str(e)}")

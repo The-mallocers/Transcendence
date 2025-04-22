@@ -20,6 +20,7 @@ class MatchmakingThread(Threads):
             try:
                 if game is None:
                     game = Game()
+                if check_tournament := self.check_tournament():
 
                 matched = self.select_players(game)
                 if matched:
@@ -36,7 +37,6 @@ class MatchmakingThread(Threads):
 
             except Exception as e:
                 traceback.print_exc()
-                pass
                 if game:
                     game.error_game()
                 if game.pL:
@@ -56,6 +56,7 @@ class MatchmakingThread(Threads):
         # self.redis.delete(RTables.HASH_CLIENT)
         self.redis.delete(RTables.HASH_G_QUEUE)
         self.redis.delete(RTables.HASH_DUEL_QUEUE('*'))
+        self.redis.delete(RTables.HASH_TOURNAMENT_QUEUE('*'))
         self.redis.delete(RTables.HASH_MATCHES)
 
         # RedisConnectionPool.close_connection(self.__class__.__name__)
@@ -86,7 +87,6 @@ class MatchmakingThread(Threads):
             player_2, stat_p2 = players[1]
             channel_p1 = self.redis.hget(name=RTables.HASH_CLIENT(player_1.decode('utf-8')), key=str(EventType.GAME.value))
             channel_p2 = self.redis.hget(name=RTables.HASH_CLIENT(player_2.decode('utf-8')), key=str(EventType.GAME.value))
-            print(channel_p1, channel_p2)
             if not channel_p1 or not channel_p2:
                 return False
             if stat_p1.decode('utf-8') == 'True' and stat_p2.decode('utf-8') == 'True':
@@ -97,3 +97,11 @@ class MatchmakingThread(Threads):
                 game.pR = Player(player_2.decode('utf-8'))
                 return True
         return False
+
+    def check_tournament(self):
+        for tournament in self.redis.scan_iter(match=RTables.HASH_TOURNAMENT_QUEUE('*')):
+            for player in self.redis.hgetall(name=tournament).items():
+                if player[1] == 'False':
+                    return None
+            return re.search(rf'{RTables.HASH_TOURNAMENT_QUEUE("")}(\w+)$', tournament.decode('utf-8')).group(1)
+        return None

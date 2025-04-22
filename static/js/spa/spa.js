@@ -262,8 +262,9 @@ const routes = [
         path: '/pong/duel/',
         template: async () => {
             return await fetchRoute(`/pages/pong/duel/`);
-        }
-    }    
+        },
+    },
+    {
         path: '/pong/tournament/create/',
         template: async (query) => {
             console.log(`/pages/profile/${query}`)
