@@ -22,6 +22,7 @@ let did_tab_out = false;
 let delta = 0;
 const PADDLE_SPEED = 300; // pixels per second
 let lastUpdateTime = 0;
+let frameCount = 0;
 //Need to add an API call so that I know which fucking paddle I am;
 
 
@@ -36,13 +37,13 @@ else {
 
     socket.onmessage = (e) => {
         const jsonData = JSON.parse(e.data);
-        console.log("received the message below");
-        console.log(jsonData);
-        console.log("received the message with Data");
-        console.log(jsonData.data)
-        if (jsonData.data) {
-            console.log(jsonData.data.action)
-        }
+        // console.log("received the message below");
+        // console.log(jsonData);
+        // console.log("received the message with Data");
+        // console.log(jsonData.data)
+        // if (jsonData.data) {
+        //     console.log(jsonData.data.action)
+        // }
 
         //Attempt at handling errors
         if (jsonData.data.action == "EXCEPTION") {
@@ -62,7 +63,7 @@ else {
             } else if (jsonData.data.action == "PADDLE_RIGHT_UPDATE") {
                 window.GameState.right.y = jsonData.data.content.y
             } else if (jsonData.data.action == "BALL_UPDATE") {
-                console.log("Ball update is :", jsonData.data);
+                // console.log("Ball update is :", jsonData.data);
                 //We only update if we changed direction, this makes things smoother.
                 if (did_tab_out || window.GameState.balldy != jsonData.data.content.dy || window.GameState.balldx != jsonData.data.content.dx) {
                     did_tab_out = false;
@@ -148,8 +149,14 @@ function updatePaddles() {
     } else {
         direction = 'idle'
     }
-    if (direction) { //trying to send the direction only when it changes, which would make sense, breaks everything ?!
+    if (direction != previous_direction) {
+        console.log("previous direction :", previous_direction);
+        console.log("direction :", direction);
+    }
+
+    if ((direction && previous_direction != direction) || frameCount % 10 === 0) { //Had to do this for some reason otherwise its shitty
         previous_direction = direction;
+        
         const message = {
             "event": "game",
             "data": {
@@ -183,8 +190,16 @@ const drawPaddle = (x, y) => {
 };
 
 const drawBall = () => {
-    window.GameState.ballX += window.GameState.balldx * delta;
-    window.GameState.ballY += window.GameState.balldy * delta;
+    const nextX = window.GameState.ballX + window.GameState.balldx * delta;
+    const nextY = window.GameState.ballY + window.GameState.balldy * delta;
+    
+    const leftBoundary = 10; //This is harcoding, if im a real G Id do an api call to get that value.
+    const rightBoundary = width - 10; 
+    
+    if (nextX > leftBoundary && nextX < rightBoundary) {
+        window.GameState.ballX = nextX;
+        window.GameState.ballY = nextY;
+    }
 
     ctx.fillStyle = "white";
     ctx.beginPath();
@@ -214,16 +229,25 @@ function gameLoop() {
     if (isGameOver.gameIsOver == true) {
         return;
     }
+    frameCount++;
     computeDelta();
     updatePaddles();
     render();
     requestAnimationFrame(gameLoop);
 }
+const antibsbool = Boolean(
+    socket &&
+    socket.readyState !== WebSocket.CLOSED &&
+    window.GameState &&
+    window.GameState.left &&
+    window.GameState.right
+);
 
 isGameOver.gameIsOver = false;
-if (isGameOver.gameIsOver == false) {
+if (isGameOver.gameIsOver == false && antibsbool) {
     requestAnimationFrame(gameLoop);
 }
-
 //We used to call this to draw the ball once, maybe hardcore it in some other way, but ideally play an animation for the first few seconds.
-render()
+if (antibsbool) {
+    render();
+}
