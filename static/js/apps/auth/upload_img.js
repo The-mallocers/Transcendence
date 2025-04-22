@@ -1,5 +1,3 @@
-import * as html from "../../utils/html_forms.js"
-
 const upload_btn = document.getElementById("upload-img-btn");
 const file_input = document.getElementById('file_input');
 upload_btn.addEventListener('click', () =>  {
@@ -9,8 +7,6 @@ upload_btn.addEventListener('click', () =>  {
 
 file_input.addEventListener('change', async () => {
     const file = file_input.files[0];
-    //Do I add the validation here ?
-    //Client AND server side validation like a BOSS;
     if (file) {
         try {
             const formData = new FormData();
@@ -31,7 +27,6 @@ file_input.addEventListener('change', async () => {
             }
             else {
                 showFeedback(data?.profile_picture?.[0] || "Something went wrong.", false);
-                console.log(data); // Log the error details
             }
         } catch (error) {
             const errorMessage = "Something went wrong, please upload a valid image 1000x1000 at most";
