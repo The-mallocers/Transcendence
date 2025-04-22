@@ -18,7 +18,7 @@ if(!searchParams.has('username') && pathname == '/')
     console.log("displaying friends from profile.js");
     const friends = await apiFriends("/api/friends/get_friends/");
     const pending_friends = await apiFriends("/api/friends/get_pending_friends/");
-    // const pending_duels = await apiFriends("/api/friends/get_pending_duels/");
+    const pending_duels = await apiFriends("/api/friends/get_pending_duels/");
     
     friends.forEach(friend => {
         const friends_group = document.querySelector('.friends_group');
@@ -69,40 +69,40 @@ if(!searchParams.has('username') && pathname == '/')
         });
         pending_group.appendChild(pendingElement);
     });
-    // pending_duels.forEach((duel) => {
-    //     const pending_group = document.querySelector('.pending_group');
-    //     const parser = new DOMParser();
-    //     const html_string = 
-    //             `<li class="list-group-item pending_item d-flex justify-content-between align-items-center">
-    //                 ${duel.username} wants to duel
-    //                 <div class="btn-group d-grid gap-2 d-md-flex justify-content-md-end"  role="group" aria-label="Basic example">
-    //                     <button type="button" class="type-intra-green accept_duel">accept</button>
-    //                     <button type="button" class="type-intra-white refuse_duel">refuse</button>
-    //                 </div>
-    //             </li>
-    //             `
-    //     const doc = parser.parseFromString(html_string, "text/html");
-    //     const pendingElement = doc.body.firstChild;
+    pending_duels.forEach((duel) => {
+        const pending_group = document.querySelector('.pending_group');
+        const parser = new DOMParser();
+        const html_string = 
+                `<li class="list-group-item pending_item d-flex justify-content-between align-items-center">
+                    ${duel.username} wants to duel
+                    <div class="btn-group d-grid gap-2 d-md-flex justify-content-md-end"  role="group" aria-label="Basic example">
+                        <button type="button" class="type-intra-green accept_duel">accept</button>
+                        <button type="button" class="type-intra-white refuse_duel">refuse</button>
+                    </div>
+                </li>
+                `
+        const doc = parser.parseFromString(html_string, "text/html");
+        const pendingElement = doc.body.firstChild;
     
-    //     const acceptButton = pendingElement.querySelector('.accept_duel');
-    //     acceptButton.addEventListener('click', function() {
-    //         const parentListItem = this.closest('li.pending_item');
-    //         if (parentListItem) {
-    //             parentListItem.remove();
-    //         }
-    //         handleAcceptDuel(duel.username);
-    //     });
+        const acceptButton = pendingElement.querySelector('.accept_duel');
+        acceptButton.addEventListener('click', function() {
+            const parentListItem = this.closest('li.pending_item');
+            if (parentListItem) {
+                parentListItem.remove();
+            }
+            handleAcceptDuel(duel.username);
+        });
         
-    //     const deleteButton = pendingElement.querySelector('.refuse_duel');
-    //     deleteButton.addEventListener('click', function() {
-    //         const parentListItem = this.closest('li.pending_item');
-    //         if (parentListItem) {
-    //             parentListItem.remove();
-    //         }
-    //         handleRefuseDuel(duel.username);
-    //     });
-    //     pending_group.appendChild(pendingElement);        
-    // })
+        const deleteButton = pendingElement.querySelector('.refuse_duel');
+        deleteButton.addEventListener('click', function() {
+            const parentListItem = this.closest('li.pending_item');
+            if (parentListItem) {
+                parentListItem.remove();
+            }
+            handleRefuseDuel(duel.username);
+        });
+        pending_group.appendChild(pendingElement);        
+    })
 }
 
 notifSocket.onmessage = (event) => {
