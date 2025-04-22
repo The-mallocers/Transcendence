@@ -1,6 +1,6 @@
 from django.urls import path
 
-from apps.auth.api.views import PasswordApiView, LoginApiView, RegisterApiView, LogoutApiView, GetClientIDApiView
+from apps.auth.api.views import PasswordApiView, LoginApiView, RegisterApiView, LogoutApiView, GetClientIDApiView, UploadPictureApiView
 from . import views
 
 urlpatterns = [
@@ -11,4 +11,5 @@ urlpatterns = [
     path('getId/', GetClientIDApiView.as_view(), name='getId'),
     path('change_two_fa', views.change_two_fa, name='two_fa'),
     path('2facode', views.post_twofa_code, name='2fa'),
+    path('upload_picture/', UploadPictureApiView.as_view(), name='picture'),
 ]
