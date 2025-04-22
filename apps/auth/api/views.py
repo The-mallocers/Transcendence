@@ -210,6 +210,7 @@ class GetClientIDApiView(APIView):
 
 class UploadPictureApiView(APIView):
     def post(self, request: HttpRequest, *args, **kwargs):
+        print("Its getting here !")
         try:
             client = Clients.get_client_by_request(request)
             profile = client.profile

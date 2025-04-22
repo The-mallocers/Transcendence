@@ -27,17 +27,38 @@ file_input.addEventListener('change', async () => {
             });
             const data = await response.json();
             if (response.ok) {
-                //Update something in the html to show we uploaded the image succesfully;
-                console.log("You uploaded the image !");
+                showFeedback("Profile picture uploaded successfully!");
             }
             else {
-                console.log("There was an error trying to upload the image");
+                showFeedback(data?.profile_picture?.[0] || "Something went wrong.", false);
                 console.log(data); // Log the error details
-                //Maybe do something different depending on if the image is too small or if the image is not a png
             }
         } catch (error) {
-            console.error(error.message);
-            return html.Fetch_Error;
+            const errorMessage = "Something went wrong, please upload a valid image 1000x1000 at most";
+            showFeedback(errorMessage, false);
         }
     }
 });
+
+const feedback = document.getElementById("upload-feedback");
+
+function showFeedback(message, isSuccess = true) {
+    if (isSuccess) {
+        feedback.innerHTML = message;
+        feedback.style.color = "#28a745"; // Green color
+        feedback.style.fontWeight = "bold";
+    }
+    else {
+        //The error message was a bit ugly
+        const regex = /string='([^']+)'/;
+        const match = message.match(regex);
+
+        if (match && match[1]) {
+            feedback.innerHTML =  match[1];
+        } else {
+            feedback.innerHTML =  message;
+        }
+        feedback.style.color = "#dc3545"; 
+        feedback.style.fontWeight = "bold"; 
+    }
+}
