@@ -163,21 +163,6 @@ notifSocket.onmessage = (event) => {
             });
             friends_group.appendChild(friendElement);
         }
-        if(message.data.action == "ACK_ACCEPT_FRIEND_REQUEST") {
-            const newChat = document.querySelector('.chatRooms');
-            if(newChat)
-            {
-                const parser = new DOMParser();
-                const htmlChat = 
-                `<button id="${message.data.content.room}" class="roomroom chat-${message.data.content.username} container d-flex align-items-center gap-3">
-                        <img src="/static/assets/imgs/profile/default.png">
-                        <div>${message.data.content.username}</div>
-                </button>`
-                const doc = parser.parseFromString(htmlChat, "text/html");
-                const chatElement = doc.body.firstChild;
-                newChat.appendChild(chatElement);
-            }
-        }
     }
     else if(message.data.action == "ACK_REFUSE_FRIEND_REQUEST") {
         // const buttonToDelete = document.querySelector(`li.pending_item#${message.data.content.username}`);

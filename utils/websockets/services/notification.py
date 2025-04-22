@@ -71,16 +71,23 @@ class NotificationService(BaseServices):
             await asend_group(self.service_group, EventType.NOTIFICATION,
                               ResponseAction.ACK_ACCEPT_FRIEND_REQUEST_HOST,
                               {
-                                  "sender": str(target.id),
-                                  "username": await target.aget_profile_username()
+                                "sender": str(target.id),
+                                "username": await target.aget_profile_username()
                               })
 
             await asend_group(RTables.GROUP_CLIENT(target.id), EventType.NOTIFICATION,
                               ResponseAction.ACK_ACCEPT_FRIEND_REQUEST,
                               {
-                                  "sender": str(client.id),
-                                  "username": await client.aget_profile_username(),
-                                  "room": str(room.id)
+                                "sender": str(client.id),
+                                "username": await client.aget_profile_username(),
+                                "room": str(room.id)
+                              })
+            await asend_group(RTables.GROUP_CLIENT(target.id), EventType.CHAT, 
+                              ResponseAction.NEW_FRIEND,
+                              {
+                                "sender": str(client.id),
+                                "username": await client.aget_profile_username(),
+                                "room": str(room.id)
                               })
 
         except:

@@ -108,11 +108,12 @@ class ResponseAction(str, Enum):
     SCORE_RIGHT_UPDATE: str = 'score_right_update'
 
     # ── Chat Actions ──────────────────────────────────────────────────────────────────
-    ROOM_CREATED = "You have successfully created a chat room"
-    MESSAGE_RECEIVED = "New message received"
-    HISTORY_RECEIVED = "history_received"
-    ALL_ROOM_RECEIVED = "all_room_received"
-
+    ROOM_CREATED: str = "You have successfully created a chat room"
+    MESSAGE_RECEIVED: str = "New message received"
+    HISTORY_RECEIVED: str = "history_received"
+    ALL_ROOM_RECEIVED: str = "all_room_received"
+    NEW_FRIEND: str = "new_friend"
+    
     # ── NOTIFICATION ACTION ───────────────────────────────────────────────────────────
     ACK_SEND_FRIEND_REQUEST: str = "acknowledge_send_friend_request"
     ACK_ACCEPT_FRIEND_REQUEST: str = "acknowledge_accept_friend_request"

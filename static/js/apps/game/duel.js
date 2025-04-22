@@ -37,11 +37,6 @@ window.GameInfos = {
     left: {}
 }
 
-// window.addEventListener('beforeunload', (event) =>{
-//     console.log(event);
-//     event.preventDefault();
-// })
-
 const startGameMessage = {
     "event": "game",
     "data": {

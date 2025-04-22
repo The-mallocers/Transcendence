@@ -28,7 +28,7 @@ chatSocket.addEventListener("open", (event) => {
 
 chatSocket.onmessage = (event) => {
     const message = JSON.parse(event.data);
-    console.log("message send");
+    console.log(event.data);
 
     if (message.data.action == "HISTORY_RECEIVED") {
         displayHistory(message.data.content.messages);
@@ -39,7 +39,44 @@ chatSocket.onmessage = (event) => {
     }
     else if(message.data.action == "ALL_ROOM_RECEIVED") {
         displayRooms(message.data.content.rooms);
-    } else if (message.data.action == "MESSAGE_RECEIVED") {
+    }
+    else if(message.data.action == "NEW_FRIEND") {
+        const newChat = document.querySelector('.chatRooms');
+        if(newChat)
+        {
+            const parser = new DOMParser();
+            const htmlChat = 
+            // `<button id="${message.data.content.room}" class="roomroom chat-${message.data.content.username} container d-flex align-items-center gap-3">
+            //         <img src="/static/assets/imgs/profile/default.png">
+            //         <div>${message.data.content.username}</div>
+            // </button>`
+            `<div id="${message.data.content.room}" class="roomroom container d-flex align-items-center justify-content-between">
+                <button class="chat-${message.data.content.username} btn d-flex align-items-center gap-3">
+                    <img src="/static/assets/imgs/profile/default.png">
+                    <div>${message.data.content.username}</div>
+                </button>
+                
+                <div class="dropdown">
+                    <button class="btn btn-secondary dropdown-toggle no-caret rounded-circle" type="button" id="dropdownMenu-${message.data.content.room}" data-bs-toggle="dropdown" aria-expanded="false">
+                        ...
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="dropdownMenu-${message.data.content.room}">
+                        <li><button class="dropdown-item chat-profile" type="button">Profil</button></li>
+                        <li><button class="dropdown-item chat-block" type="button">Block</button></li>
+                        <li><button class="dropdown-item chat-duel" type="button">Duel</button></li>
+                    </ul>
+                </div>
+            </div>`
+            const doc = parser.parseFromString(htmlChat, "text/html");
+            const chatElement = doc.body.firstChild;
+            const chatButton = chatElement.querySelector(`.chat-${message.data.content.username}`)
+            chatButton.addEventListener('click', function() {
+                clickRoom(message.data.content.room)
+            })
+            newChat.appendChild(chatElement);
+        }
+    }
+    else if (message.data.action == "MESSAGE_RECEIVED") {
         let chatHistory = document.querySelector('.chatHistory');
 
         const parser = new DOMParser();
