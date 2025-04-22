@@ -36,10 +36,16 @@ class GetPendingDuelsApiView(APIView):
     def get(self, request: HttpRequest, *args, **kwargs):
         client = Clients.get_client_by_request(request)
         redis = RedisConnectionPool.get_sync_connection(self.__class__.__name__)
-        pending_duels = []
+        duel_data = []
+
         for duel_hash in redis.scan_iter(match=RTables.HASH_DUEL_QUEUE('*')):
             if redis.hexists(duel_hash, str(client.id)):
-                pending_duels.append(duel_hash)
-        targets = [redis.hgetall(duel_hash) for duel_hash in pending_duels]
-        serializer = FriendSerializer(Clients.objects.filter(id__in=[x['target'] for x in targets]), many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+                duel_info = redis.hgetall(duel_hash)
+                target_client = Clients.objects.get(id=duel_info['target'])
+                duel_data.append({
+                    'id': str(target_client.id),
+                    'username': target_client.profile.username,
+                    'duel_id': duel_hash
+                })
+
+        return Response(duel_data, status=status.HTTP_200_OK)
