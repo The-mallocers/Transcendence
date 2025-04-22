@@ -1,0 +1,43 @@
+.inTournamentRoomContainer {
+    color: #151515;
+}
+
+
+.inTournamentRoomContainer .box {
+    background-color: white;
+}
+
+.inTournamentRoomContainer .content {
+    background-color: white;
+    border-radius: 5px;
+
+    box-shadow: 2px 2px 2px #00000020;
+
+    transition: all .5s;
+}
+
+.inTournamentRoomContainer .avatarContainer {
+    height: 3.5rem;
+    width: 3.5rem;
+
+    border-radius: 50%;
+    overflow: hidden;
+
+    
+} 
+
+.inTournamentRoomContainer .content:hover {
+    box-shadow: 5px 5px 5px #00000020;
+    transform: translateY(-5px);
+} 
+
+.inTournamentRoomContainer .content:active {
+    box-shadow: 0px 0px 0px #00000020;
+    transform: translateY(0px);
+} 
+
+
+.inTournamentRoomContainer .avatarContainer img{
+    height: 100%;
+    width: 100%;
+}
