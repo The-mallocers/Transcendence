@@ -23,7 +23,7 @@ class PongLogic:
         self._logger = logging.getLogger(self.__class__.__name__)
         self.redis = redis
         self.game = game
-        self.game_id = game.game_id
+        self.game_id = game.code
         self.last_update: float = -1  # This hack is sponsored by tfreydie and prevents the random +1 score at the start
 
         # ── Objects ───────────────────────────────────────────────────────────────────
@@ -183,7 +183,7 @@ class PongLogic:
 
         winner_player = Player.objects.create(client=winner_client, score=winner_score)
         loser_player = Player.objects.create(client=loser_client, score=loser_score)
-        finished_game = Game.objects.create(id=self.game.game_id, winner=winner_player, loser=loser_player, points_to_win=self.game.points_to_win,
+        finished_game = Game.objects.create(id=self.game.code, winner=winner_player, loser=loser_player, points_to_win=self.game.points_to_win,
                                             is_duel=self.game.rget_is_duel())
         self.save_player_info(winner_player, finished_game)
         self.save_player_info(loser_player, finished_game)

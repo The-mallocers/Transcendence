@@ -53,17 +53,17 @@ class Game(models.Model):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.redis = RedisConnectionPool.get_sync_connection()
-        self.game_id = create_game_id()
-        self.game_key = RTables.JSON_GAME(self.game_id)
+        self.code = create_game_id()
+        self.game_key = RTables.JSON_GAME(self.code)
         self.pL: Player = None
         self.pR: Player = None
 
     def __str__(self):
-        return f'Game with id: {self.game_id}'
+        return f'Game with id: {self.code}'
 
     def create_redis_game(self):
         from utils.serializers.game import GameSerializer
-        serializer = GameSerializer(self, context={'id': self.game_id, 'is_duel': self.is_duel})
+        serializer = GameSerializer(self, context={'id': self.code, 'is_duel': self.is_duel})
         self.redis.json().set(self.game_key, Path.root_path(), serializer.data)
 
     def init_players(self):
@@ -78,17 +78,17 @@ class Game(models.Model):
 
         # Add two player in group of the new game
         channel_name_pL = self.redis.hget(name=RTables.HASH_CLIENT(self.pL.client_id), key=str(EventType.GAME.value))
-        async_to_sync(channel_layer.group_add)(RTables.GROUP_GAME(self.game_id), channel_name_pL)
+        async_to_sync(channel_layer.group_add)(RTables.GROUP_GAME(self.code), channel_name_pL)
         channel_name_pR = self.redis.hget(name=RTables.HASH_CLIENT(self.pR.client_id), key=str(EventType.GAME.value))
-        async_to_sync(channel_layer.group_add)(RTables.GROUP_GAME(self.game_id), channel_name_pR)
+        async_to_sync(channel_layer.group_add)(RTables.GROUP_GAME(self.code), channel_name_pR)
 
-        self.redis.hset(name=RTables.HASH_MATCHES, key=str(self.pL.client_id), value=str(self.game_id))
-        self.redis.hset(name=RTables.HASH_MATCHES, key=str(self.pR.client_id), value=str(self.game_id))
+        self.redis.hset(name=RTables.HASH_MATCHES, key=str(self.pL.client_id), value=str(self.code))
+        self.redis.hset(name=RTables.HASH_MATCHES, key=str(self.pR.client_id), value=str(self.code))
 
-        self.pL.leave_queue(self.game_id, self.is_duel)
-        self.pR.leave_queue(self.game_id, self.is_duel)
+        self.pL.leave_queue(self.code, self.is_duel)
+        self.pR.leave_queue(self.code, self.is_duel)
 
-        send_group(RTables.GROUP_GAME(self.game_id), EventType.GAME, ResponseAction.JOIN_GAME)
+        send_group(RTables.GROUP_GAME(self.code), EventType.GAME, ResponseAction.JOIN_GAME)
 
     def error_game(self):
         self.rset_status(GameStatus.ERROR)

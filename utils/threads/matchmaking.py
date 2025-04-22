@@ -3,27 +3,27 @@ import re
 import time
 import traceback
 
+from apps.client.models import Clients
 from apps.game.models import Game
 from apps.player.models import Player
+from apps.tournaments.models import Tournaments
 from utils.enums import GameStatus, ResponseError, RTables, EventType
 from utils.threads.game import GameThread
 from utils.threads.threads import Threads
+from utils.threads.tournament import TournamentThread
 from utils.websockets.channel_send import send_group_error
 
 
 class MatchmakingThread(Threads):
     def main(self):
         game: Game = Game()
-        matched: bool = False
 
         while not self._stop_event.is_set():
             try:
                 if game is None:
                     game = Game()
-                if check_tournament := self.check_tournament():
 
-                matched = self.select_players(game)
-                if matched:
+                if self.select_players(game):
                     game.create_redis_game()
                     self._logger.info(f"Found match: {game.pL} vs {game.pR}")
                     game.rset_status(GameStatus.MATCHMAKING)
@@ -41,10 +41,10 @@ class MatchmakingThread(Threads):
                     game.error_game()
                 if game.pL:
                     send_group_error(RTables.GROUP_CLIENT(game.pL.id), ResponseError.MATCHMAKING_ERROR)
-                    game.pL.leave_queue(game.game_id, game.is_duel)
+                    game.pL.leave_queue(game.code, game.is_duel)
                 if game.pR:
                     send_group_error(RTables.GROUP_CLIENT(game.pR.id), ResponseError.MATCHMAKING_ERROR)
-                    game.pR.leave_queue(game.game_id, game.is_duel)
+                    game.pR.leave_queue(game.code, game.is_duel)
 
     def cleanup(self):
         self._logger.info("Cleaning up unfinished games from previous session...")
@@ -91,17 +91,9 @@ class MatchmakingThread(Threads):
                 return False
             if stat_p1.decode('utf-8') == 'True' and stat_p2.decode('utf-8') == 'True':
                 game.is_duel = True
-                game.game_id = re.search(rf'{RTables.HASH_DUEL_QUEUE("")}(\w+)$', duel.decode('utf-8')).group(1)
-                game.game_key = RTables.JSON_GAME(game.game_id)
+                game.code = re.search(rf'{RTables.HASH_DUEL_QUEUE("")}(\w+)$', duel.decode('utf-8')).group(1)
+                game.game_key = RTables.JSON_GAME(game.code)
                 game.pL = Player(player_1.decode('utf-8'))
                 game.pR = Player(player_2.decode('utf-8'))
                 return True
         return False
-
-    def check_tournament(self):
-        for tournament in self.redis.scan_iter(match=RTables.HASH_TOURNAMENT_QUEUE('*')):
-            for player in self.redis.hgetall(name=tournament).items():
-                if player[1] == 'False':
-                    return None
-            return re.search(rf'{RTables.HASH_TOURNAMENT_QUEUE("")}(\w+)$', tournament.decode('utf-8')).group(1)
-        return None

@@ -8,11 +8,16 @@ from django.db.models import IntegerField, DateTimeField, \
 from django.utils import timezone
 
 from apps.client.models import Clients
-from utils.enums import TournamentStatus
+from apps.player.models import Player
+from utils.enums import TournamentStatus, RTables
+from utils.redis import RedisConnectionPool
 from utils.util import create_tournament_id, validate_even
 
 
-# Create your models here.
+#       serializer = ClientSerializer(data=request.data)
+#       if serializer.is_valid():
+#        Create your models here.
+
 class Tournaments(models.Model):
     class Meta:
         db_table = 'pong_tournaments'
@@ -21,7 +26,7 @@ class Tournaments(models.Model):
     id = CharField(primary_key=True, editable=False, null=False, default=create_tournament_id, unique=True, max_length=5)
 
     # ── Tournaments Informations ───────────────────────────────────────────────────────────── #
-    created_at = DateTimeField(default=timezone.now)
+    created_at = DateTimeField(default=timezone.now()) #I think its () at the end.
     status = CharField(max_length=20, choices=[(status.name, status.value) for status in TournamentStatus], default=TournamentStatus.CREATING.value)
 
     # ── Settings Of Tournaments ───────────────────────────────────────────────────── #
@@ -41,6 +46,7 @@ class Tournaments(models.Model):
 
     def __str__(self):
         return f"{self.name}, create by {self.host.profile.username}."
+
 
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ FUNCIONS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
 

@@ -12,9 +12,9 @@ from utils.websockets.channel_send import send_group, send_group_error
 
 class GameThread(Threads):
     def __init__(self, game: Game):
-        super().__init__(f"Game_{game.game_id}")
+        super().__init__(f"Game_{game.code}")
         self.game = game
-        self.game_id = game.game_id
+        self.game_id = game.code
         self.logic: PongLogic = PongLogic(self.game, self.redis)
 
     def main(self):

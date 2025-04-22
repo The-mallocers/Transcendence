@@ -5,6 +5,7 @@ import threading
 from abc import ABC, abstractmethod
 
 from utils.redis import RedisConnectionPool
+from channels.layers import get_channel_layer
 
 
 class Threads(threading.Thread, ABC):
@@ -18,6 +19,7 @@ class Threads(threading.Thread, ABC):
         self._logger = logging.getLogger(self.__class__.__name__)
         self._stop_event = threading.Event()
         self._completed_actions = set()
+        self._channel_layer = get_channel_layer()
 
     def run(self):
         self._logger.info(f"Starting thread [{self.name}]")
