@@ -74,19 +74,18 @@ def get_rivals(client, games_played) -> dict:
     # getting all opponents
     for game in games_played:
         currOpponent = None
-        if game.winner.id == client.id:
-            currOpponent = game.loser.client.id
+        if game.winner.client.id == client.id:
+            currOpponent = game.loser.client
         else:
-            currOpponent = game.winner.client.id
+            currOpponent = game.winner.client
         if currOpponent not in opponents:
             opponents.append(currOpponent)
 
     rivals = {}
     for opponent in opponents:
-        rivals[opponent] = {
+        rivals[opponent.id] = {
             "games_won": 0,
             "games_lost": 0,
-            "profile_pic": opponent.profile.profile_picture
         }
 
     for game in games_played:
