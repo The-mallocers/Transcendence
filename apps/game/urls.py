@@ -11,4 +11,5 @@ urlpatterns = [
     path('tournament/create/', view.create_tournament_get, name='createTournament'),
     path('tournament/join/', view.join_tournament_get, name='joinTournament'),
     path('tournament/', view.inTournamentRoom, name='inRoom'),
+    path('tournament/tree/', view.inTournamentTree, name='tree'),
 ]
