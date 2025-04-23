@@ -33,7 +33,7 @@ class MatchmakingThread(Threads):
                 time.sleep(1)
 
             except Exception as e:
-                traceback.print_exc()
+                self._logger.error(traceback.format_exc())
                 if game:
                     game.error_game()
                 if game.pL:

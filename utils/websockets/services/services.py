@@ -57,7 +57,7 @@ class BaseServices(ABC):
                 return await handler_method(data, *args)
 
         except ValueError:
-            traceback.print_exc()
+            self._logger.error(traceback.format_exc())
             raise ServiceError(f"This action is not valid: {data['data']['action']}")
 
         except ServiceError as e:

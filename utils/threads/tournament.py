@@ -43,8 +43,7 @@ class TournamentThread(Threads):
                 self._ending()
 
         except Exception as e:
-            self._logger.error(e)
-            traceback.print_exc()
+            self._logger.error(traceback.format_exc())
             # self.game.rset_status(GameStatus.ERROR)
             send_group_error(RTables.GROUP_GAME(self.game_id), ResponseError.EXCEPTION, close=True)
             self.stop()

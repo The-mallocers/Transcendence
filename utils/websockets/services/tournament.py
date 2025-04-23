@@ -37,9 +37,9 @@ class TournamentService(BaseServices):
                 await asend_group_error(self.service_group, ResponseError.MISSING_KEY, f'{ResponseError.MISSING_KEY}: {str(e)}')
                 tournament.stop()
             except Exception as e:
-                traceback.print_exc()
                 await asend_group_error(self.service_group, ResponseError.TOURNAMENT_NOT_CREATE, str(e))
                 tournament.stop()
+                self._logger.error(traceback.format_exc())
 
     async def _handle_join_tournament(self, data, client):
         code = data['data']['args']['code']

@@ -167,8 +167,7 @@ class Clients(models.Model):
             with transaction.atomic():
                 return self.profile.username
         except Exception as e:
-            print(f"Error retrieving username: {e}")
-            return None
+            raise Exception(f"Error retrieving username: {e}")
 
     @sync_to_async
     def get_friend_table(self):
@@ -176,15 +175,13 @@ class Clients(models.Model):
             with transaction.atomic():
                 return self.friend
         except Exception as e:
-            print(f"Error retrieving friend request: {e}")
-            return None
+            raise Exception(f"Error retrieving friend request: {e}")
 
     def is_friend_by_id(self, client):
         try:
             return self.friend.friends.filter(id=client.id).exists()
         except Exception as e:
-            print(f"Error retrieving client: {e}")
-            return None
+            raise Exception(f"Error retrieving client: {e}")
 
     def get_all_friends(self):
         try:
@@ -194,8 +191,7 @@ class Clients(models.Model):
                                     "username": friend.profile.username})
             return friend_list
         except Exception as e:
-            print(f"Error retrieving client: {e}")
-            return None
+            raise Exception(f"Error retrieving client: {e}")
 
     def get_all_pending_request(self):
         try:
@@ -205,8 +201,7 @@ class Clients(models.Model):
                                      "username": friend.profile.username})
             return pending_list
         except Exception as e:
-            print(f"Error retrieving client: {e}")
-            return None
+            raise Exception(f"Error retrieving client: {e}")
 
     @sync_to_async
     def aget_all_pending_request(self):
@@ -217,8 +212,7 @@ class Clients(models.Model):
                                      "username": friend.profile.username})
             return pending_list
         except Exception as e:
-            print(f"Error retrieving client: {e}")
-            return None
+            raise Exception(f"Error retrieving client: {e}")
 
     @sync_to_async
     def aget_pending_request_by_client(self, target):
@@ -228,8 +222,7 @@ class Clients(models.Model):
                     return friend
             return None
         except Exception as e:
-            print(f"Error retrieving target: {e}")
-            return None
+            raise Exception(f"Error retrieving target: {e}")
 
     @staticmethod
     async def aget_client_by_username(username: str):

@@ -50,7 +50,7 @@ class RegisterApiView(APIView):
             except Exception as e:
                 import traceback
                 print("\n\nException during save:", str(e))
-                print(traceback.format_exc())
+                logging.getLogger('MainThread').error(traceback.format_exc())
                 return Response({"error": str(e)},
                                 status=status.HTTP_500_INTERNAL_SERVER_ERROR)  # this is ia stuff, maybe shouldnt be 500 idk
         else:

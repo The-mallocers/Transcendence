@@ -90,8 +90,7 @@ class Rooms(models.Model):
                     query = query.exclude(id=global_room)
                 return query.first()
         except Exception as e:
-            print(f"Error getting room by client ID: {e}")
-            return None
+            raise Exception(f"Error getting room by client ID: {e}")
         except Clients.DoesNotExist:
             return None
 
@@ -112,11 +111,10 @@ class Rooms(models.Model):
                 if query is not None:
                     query = query.exclude(id=global_room)
                 return query.first()
-        except Exception as e:
-            print(f"Error getting room by client ID: {e}")
-            return None
         except Clients.DoesNotExist:
             return None
+        except Exception as e:
+            raise Exception(f"Error getting room by client ID: {e}")
 
     @staticmethod
     @sync_to_async
