@@ -12,7 +12,7 @@ def get(req):
     winrate = ghistory = rivals = None
     friends_list = client.get_all_friends()
     friends_pending = client.get_all_pending_request()
-    # rivals = get_rivals()
+    rivals = get_rivals(client, games_played)
     ghistory = get_last_matches(client, games_played)
     print("game history is:", ghistory)
     if client is not None:
@@ -22,7 +22,7 @@ def get(req):
         "clients": Clients.objects.all(),
         "gamesHistory": ghistory,
         "winrate": winrate,
-        "winrate_angle": 42,  # int((winrate / 100) * 360),
+        "winrate_angle": int((winrate / 100) * 360),
         "rivals": rivals,
         "csrf_token": get_token(req),
         "show_friend_request": False,
@@ -48,20 +48,18 @@ def get_last_matches(client, games_played) -> list:
             break
         myPoints = 0
         enemyPoints = 0
-        oponnent = ""
+        opponent = ""
         if (client.id == game.winner.id):
             myPoints = game.winner.score
             enemyPoints = game.loser.score
-            oponnent = "Larry"
-            # oponnent = game.loser.nickname
+            opponent = game.loser.client.profile.username
         else:
             myPoints = game.loser.score
             enemyPoints = game.winner.score
-            oponnent = "Not Larry"
-            # oponnent = game.winner.nickname
+            opponent = game.winner.client.profile.username
 
         ghistory.append({
-            "opponent": oponnent,
+            "opponent": opponent,
             "won": client.id == game.winner.id,
             "myPoints": myPoints,
             "enemyPoints": enemyPoints,
@@ -70,57 +68,33 @@ def get_last_matches(client, games_played) -> list:
         i += 1
     return ghistory
 
-# Eventually this will return a dictionnary with all the
-# rivals and their associated winrates in series.
 def get_rivals(client, games_played) -> dict:
     opponents = []
 
     # getting all opponents
     for game in games_played:
         currOpponent = None
-        if game.winner.id == client.player.id:
-            currOpponent = game.loser.id
+        if game.winner.id == client.id:
+            currOpponent = game.loser.client.id
         else:
-            currOpponent = game.winner.id
+            currOpponent = game.winner.client.id
         if currOpponent not in opponents:
             opponents.append(currOpponent)
 
     rivals = {}
     for opponent in opponents:
-        currentClient = Clients.get_client_by_player(opponent)
         rivals[opponent] = {
             "games_won": 0,
             "games_lost": 0,
-            "profile_pic": currentClient.profile.profile_picture
+            "profile_pic": opponent.profile.profile_picture
         }
 
     for game in games_played:
-        if game.winner.id == client.player.id:
-            rivals[game.loser.id]["games_won"] += 1
-        elif game.loser.id == client.player.id:
-            rivals[game.winner.id]["games_lost"] += 1
+        if game.winner.client.id == client.id:
+            rivals[game.loser.client.id]["games_won"] += 1
+        elif game.loser.client.id == client.player.id:
+            rivals[game.winner.client.id]["games_lost"] += 1
 
     print("rivals after adding the maps")
     print(rivals)
-
-    # I want my dictionnary to be like
-    # rivals = {
-    #     'opponent_id' = [
-    #         games_won = number
-    #         games_lost = number
-    #     ],
-    #     'opponent_id' = [
-    #         games_won = number
-    #         games_lost = number
-    #     ]
-    # }
     return opponents
-
-# if (client.player.id == game.winner.id):
-#     myPoints = game.winner_score
-#     enemyPoints =  game.loser_score
-#     oponnent = game.loser.nickname
-# else :
-#     myPoints = game.loser_score
-#     enemyPoints =  game.winner_score
-#     oponnent = game.winner.nickname
