@@ -13,7 +13,8 @@ def get(req):
     friends_list = client.get_all_friends()
     friends_pending = client.get_all_pending_request()
     # rivals = get_rivals()
-    # ghistory = get_last_matches(client, games_played)
+    ghistory = get_last_matches(client, games_played)
+    print("game history is:", ghistory)
     if client is not None:
         winrate = get_winrate(client, games_played)
     context = {

@@ -21,13 +21,19 @@ class Player(models.Model):
     score = IntegerField(default=0)
 
     # ═════════════════════════════════ Local Fields ═════════════════════════════════ #
-    def __init__(self, client_id=None, *args, **kwargs):
+    # def __init__(self, client_id=None, *args, **kwargs):
+    #     from apps.client.models import Clients
+    #     super().__init__(*args, **kwargs)
+    #     self.class_client = Clients.get_client_by_id(client_id)
+    #     self.client_id = client_id
+    #     self.redis = RedisConnectionPool.get_sync_connection(self.__class__.__name__)
+
+    def my_init(self,client_id=None):
         from apps.client.models import Clients
-        super().__init__(*args, **kwargs)
         self.class_client = Clients.get_client_by_id(client_id)
         self.client_id = client_id
         self.redis = RedisConnectionPool.get_sync_connection(self.__class__.__name__)
-
+    
     def __str__(self):
         return f'Player with client id: {self.client_id}'
 

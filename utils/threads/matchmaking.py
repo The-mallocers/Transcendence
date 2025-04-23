@@ -70,7 +70,9 @@ class MatchmakingThread(Threads):
             selected_players = players[:2]  # this gets the first 2 players of the list
             random.shuffle(selected_players)
             game.pL = Player(selected_players[0])
+            game.pL.my_init()
             game.pR = Player(selected_players[1])
+            game.pR.my_init()
             if game.pL is not None and game.pR is not None:
                 return True
         return False

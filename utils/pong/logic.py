@@ -204,6 +204,8 @@ class PongLogic:
     def set_result(self, disconnect=False):
         winner = Player()
         loser = Player()
+        winner.my_init()
+        loser.my_init()
 
         if disconnect is True:
             if self.redis.hget(name="consumers_channels", key=str(self.game.pL.id)) is None:
