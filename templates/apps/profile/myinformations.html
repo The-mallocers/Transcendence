@@ -8,7 +8,7 @@
                 <div class="content">
                     <h2 class="text-center">Personal informations</h2>
                     <div class=" d-flex flex-column align-items-center justify-content-center inputs">
-                        <label class="w-50 mt-4 title-personal-info" for="email">Email</label>
+                        <!-- <label class="w-50 mt-4 title-personal-info" for="email">Email</label>
                         <input class="p-2 mt-1 w-50" type="text" placeholder="email" id="email">
 
                         <label class="w-50 mt-4 title-personal-info" for="nickname">Nickname</label>
@@ -18,9 +18,13 @@
                         <input class="p-2 mt-1 w-50" type="password" placeholder="change password" id="changepw">
 
                         <label class="w-50 mt-4 title-personal-info" for="changepwconf">Confirm password</label>
-                        <input class="p-2 mt-1 w-50" type="password" placeholder="change password" id="changepwconf">
+                        <input class="p-2 mt-1 w-50" type="password" placeholder="change password" id="changepwconf"> -->
 
-                        <div class="type-intra-green mt-4" id="logout-btn">send modifications (and also log out lol)</div>
+                        <div class="type-intra-green mt-4" id="logout-btn">log out</div>
+                        <div id="upload-feedback"></div>
+                        <div class="type-intra-green mt-4" id="upload-img-btn">Upload new profile picture</div>
+                        
+                        <input type="file" id="file_input" style="display: none;" />
                     </div>
                     {% if isAdmin %}
                         <div class="type-intra-green mt-4" data-route="/admin/monitoring/">Monitoring</div>
@@ -68,4 +72,5 @@
     </div>
 </div>
 <script type="module" src="{% static 'js/apps/auth/logout.js' %}"></script>
+<script type="module" src="{% static 'js/apps/auth/upload_img.js' %}"></script>
 
