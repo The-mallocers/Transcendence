@@ -9,8 +9,7 @@ from django.utils import timezone
 
 from apps.client.models import Clients
 from apps.player.models import Player
-from utils.enums import TournamentStatus, RTables
-from utils.redis import RedisConnectionPool
+from utils.enums import TournamentStatus
 from utils.util import create_tournament_id, validate_even
 
 
@@ -26,7 +25,7 @@ class Tournaments(models.Model):
     id = CharField(primary_key=True, editable=False, null=False, default=create_tournament_id, unique=True, max_length=5)
 
     # ── Tournaments Informations ───────────────────────────────────────────────────────────── #
-    created_at = DateTimeField(default=timezone.now()) #I think its () at the end.
+    created_at = DateTimeField(default=timezone.now)  # I think its () at the end.
     status = CharField(max_length=20, choices=[(status.name, status.value) for status in TournamentStatus], default=TournamentStatus.CREATING.value)
 
     # ── Settings Of Tournaments ───────────────────────────────────────────────────── #

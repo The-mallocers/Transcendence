@@ -1,35 +1,15 @@
 import time
 import traceback
+
+from redis.commands.json.path import Path
+
 from apps.client.models import Clients
-from apps.tournaments.models import Tournaments
 from utils.enums import EventType, GameStatus, RTables, ResponseAction, ResponseError
 from utils.redis import RedisConnectionPool
+from utils.serializers.tournament import TournamentSerializer
 from utils.threads.threads import Threads
 from utils.util import create_tournament_id
-from utils.websockets.channel_send import asend_group, send_group, send_group_error
-from redis.commands.json.path import Path
-from utils.serializers.tournament_redis_start import TournamentArgsSerializer
-
-
-# This thread wil :
-# Manage the lobby and make sure everybody is in when the tournament is starting
-# Do the match matchmaking for the tournament, take players as they go and match them against one another.
-# After the tournament is over, clean up redis and destroy itself.
-# {
-#     "event": "tournament",
-#     "data": {
-#         "action": "create_tournament",
-#         "args": {
-#             "name": "Mon tournoi",
-#             "max_players": 8,
-#             "public": true,
-#             "bots": true,
-#             "points_to_win": 11,
-#             "timer": 120
-#         }
-#     }
-# }
-
+from utils.websockets.channel_send import send_group, send_group_error
 
 
 class TournamentThread(Threads):
@@ -87,7 +67,6 @@ class TournamentThread(Threads):
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ EVENT ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
 
     def _starting(self):
-        self.create_tournament_redis()
         return False
 
     def _running(self):
@@ -122,32 +101,11 @@ class TournamentThread(Threads):
             'code': self.code,
             'name': self.title
         })
-        
-    def create_tournament_redis(self):
-        data = self.get_valid_data()
-        if data == None:
-            pass
-            #Throw exception ? Idk
-        else:
-            pass
-            #Upload data to redis. The only data missing are the players and we will update this as we go.
-        pass 
 
-    #returns None if the data isnt valid, but feel free to change the error handling
-    def get_valid_data(self) -> dict:
-        data = {
-            "id": self.code,
-            "host": self.host, #Im not quite sure what assigning a class will return
-            "max_players": self.max_player,
-            "name": self.title, #should this be name or title ?
-            "public": self.public,
-            "bots": self.bots,
-            "points_to_win": self.points_to_win,
-            "timer": self.timer
-        }
-        serializer = TournamentArgsSerializer(data=data) 
+    @staticmethod
+    async def create_tournament_redis(code, data, redis):
+        serializer = TournamentSerializer(data=data)
         if serializer.is_valid():
-            return serializer.data
+            await redis.json().set(RTables.JSON_TOURNAMENT(code), Path.root_path(), serializer.data)
         else:
-            self._logger.warning(f"Serializer errors: {serializer.errors}")
-            return None
+            raise Exception(serializer.errors)

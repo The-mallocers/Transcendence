@@ -8,7 +8,6 @@ from apps.tournaments.models import Tournaments
 from utils.enums import EventType
 from utils.enums import RTables, ResponseError, ResponseAction
 from utils.threads.tournament import TournamentThread
-from utils.util import create_tournament_id
 from utils.websockets.channel_send import asend_group_error, asend_group
 from utils.websockets.services.services import BaseServices
 
@@ -30,13 +29,8 @@ class TournamentService(BaseServices):
         else:
             tournament = await sync_to_async(TournamentThread)(client)
             try:
-                tournament.title = data['data']['args']['name']
-                tournament.max_player = data['data']['args']['max_players']
-                tournament.points_to_win = data['data']['args']['points_to_win']
-                tournament.public = data['data']['args']['public']
-                tournament.bots = data['data']['args']['bots']
-                tournament.timer = data['data']['args']['timer']
                 await self.channel_layer.group_add(RTables.GROUP_TOURNAMENT(tournament.code), self.channel_name)
+                await TournamentThread.create_tournament_redis(tournament.code, data['data']['args'], self.redis)
                 await sync_to_async(tournament.add_client)(client)
                 await sync_to_async(tournament.start)()
             except KeyError as e:

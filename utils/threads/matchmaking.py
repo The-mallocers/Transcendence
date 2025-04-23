@@ -3,14 +3,11 @@ import re
 import time
 import traceback
 
-from apps.client.models import Clients
 from apps.game.models import Game
 from apps.player.models import Player
-from apps.tournaments.models import Tournaments
 from utils.enums import GameStatus, ResponseError, RTables, EventType
 from utils.threads.game import GameThread
 from utils.threads.threads import Threads
-from utils.threads.tournament import TournamentThread
 from utils.websockets.channel_send import send_group_error
 
 
@@ -48,6 +45,9 @@ class MatchmakingThread(Threads):
 
     def cleanup(self):
         self._logger.info("Cleaning up unfinished games from previous session...")
+
+        # Stop all active threads (GameThread and TournamentThread instances)
+        Threads.stop_all_threads(except_thread=self)
 
         game_keys = self.redis.keys('game:*')
         for key in game_keys:
