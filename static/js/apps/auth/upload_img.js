@@ -1,6 +1,6 @@
 const upload_btn = document.getElementById("upload-img-btn");
 const file_input = document.getElementById('file_input');
-upload_btn.addEventListener('click', () =>  {
+upload_btn.addEventListener('click', () => {
     file_input.click();
 });
 
@@ -18,14 +18,13 @@ file_input.addEventListener('change', async () => {
                 headers: {
                     'X-CSRFToken': csrfToken,
                 },
-                body: formData 
+                body: formData
 
             });
             const data = await response.json();
             if (response.ok) {
                 showFeedback("Profile picture uploaded successfully!");
-            }
-            else {
+            } else {
                 showFeedback(data?.profile_picture?.[0] || "Something went wrong.", false);
             }
         } catch (error) {
@@ -42,18 +41,17 @@ function showFeedback(message, isSuccess = true) {
         feedback.innerHTML = message;
         feedback.style.color = "#28a745"; // Green color
         feedback.style.fontWeight = "bold";
-    }
-    else {
+    } else {
         //The error message was a bit ugly
         const regex = /string='([^']+)'/;
         const match = message.match(regex);
 
         if (match && match[1]) {
-            feedback.innerHTML =  match[1];
+            feedback.innerHTML = match[1];
         } else {
-            feedback.innerHTML =  message;
+            feedback.innerHTML = message;
         }
-        feedback.style.color = "#dc3545"; 
-        feedback.style.fontWeight = "bold"; 
+        feedback.style.color = "#dc3545";
+        feedback.style.fontWeight = "bold";
     }
 }

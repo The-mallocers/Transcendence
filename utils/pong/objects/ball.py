@@ -2,6 +2,7 @@ from dataclasses import dataclass
 
 from redis.commands.json.path import Path
 
+from utils.enums import RTables
 from utils.pong.objects import BALL_RADIUS, CANVAS_WIDTH, CANVAS_HEIGHT, BALL_SPEED
 
 
@@ -17,7 +18,7 @@ class Ball:
 
         # ── Utils ─────────────────────────────────────────────────────────────────────────    
         self.redis = redis
-        self.game_key = f'game:{game_id}'
+        self.game_key = RTables.JSON_GAME(game_id)
 
     def update(self):
         self.radius = self.get_radius()
@@ -25,7 +26,7 @@ class Ball:
         self.y = self.get_y()
         self.dx = self.get_dx()
         self.dy = self.get_dy()
-    
+
     def push_to_redis(self):
         self.set_radius(self.radius)
         self.set_x(self.x)

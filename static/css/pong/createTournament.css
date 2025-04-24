@@ -1,0 +1,74 @@
+.createTournamentContainer {
+    padding: 2rem;
+}
+
+.createTournamentContainer .box{
+    padding: 1rem;
+    background-color: white;
+    color: #141414;
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+
+.createTournamentContainer, .createTournamentContainer .points, .createTournamentContainer .counter{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    font-size: 1.5rem;
+}
+
+.createTournamentContainer .minus, .createTournamentContainer .score, .createTournamentContainer .plus {
+    padding: 1rem;
+}
+
+
+.createTournamentContainer .roomNameContainer, .createTournamentContainer .points {
+    justify-content: space-between;
+    padding: 0 10rem;
+}
+
+.createTournamentContainer .roomPrivateContainer {
+    gap: 2rem;
+    padding: 0 10rem;
+}
+
+.createTournamentContainer .minus, .createTournamentContainer .plus{
+    background-color: #00BABB;
+    color: white;
+    cursor: pointer;
+}
+
+.createTournamentContainer .minus {
+    border-radius: 5px 0 0 5px;
+}
+
+.createTournamentContainer .score{
+    background-color: #fcfcfc;
+}
+.createTournamentContainer .plus {
+    border-radius: 0 5px 5px 0;
+
+}
+
+.createTournamentContainer .createBtn {
+    background-color: #00BABB;
+    color: white;
+    align-self: center;
+}
+
+.createTournamentContainer .roomNameContainer input{
+    border: none;
+    background-color: #efecec;
+
+    padding: .5rem;
+}
+
+.roomPrivateContainer input[type="checkbox"] {
+    height: 1.5rem;
+    width: 1.5rem;
+
+    accent-color: #00BABB;
+}

@@ -4,6 +4,7 @@ from django.db import models, transaction
 from django.db.models import ForeignKey
 from django.db.models.fields import IntegerField
 
+from utils.enums import PlayerSide, RTables
 from utils.redis import RedisConnectionPool
 
 
@@ -37,8 +38,11 @@ class Player(models.Model):
     def __str__(self):
         return f'Player with client id: {self.client_id}'
 
-    def leave_queue(self):
-        self.redis.hdel('matchmaking_queue', str(self.client_id))
+    def leave_queue(self, game_id, is_duel):
+        if is_duel is True:
+            self.redis.hdel(RTables.HASH_DUEL_QUEUE(game_id), str(self.client_id))
+        if is_duel is False:
+            self.redis.hdel(RTables.HASH_G_QUEUE, str(self.client_id))
 
     # ━━ GETTER / SETTER ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
 
@@ -73,11 +77,11 @@ class Player(models.Model):
         # Iterate through the game state
         for game in game_state:
             # Check player_left
-            if game.get('player_left', {}).get('id') == player_id:
+            if game.get(PlayerSide.LEFT, {}).get('id') == player_id:
                 return 'left'
 
             # Check player_right
-            if game.get('player_right', {}).get('id') == player_id:
+            if game.get(PlayerSide.RIGHT, {}).get('id') == player_id:
                 return 'right'
 
         # Return None if player not found

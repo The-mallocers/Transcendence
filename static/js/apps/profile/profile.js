@@ -5,6 +5,39 @@ let client_id = null;
 const clientId = await getClientId();
 const notifSocket =  await WebSocketManager.initNotifSocket(clientId);
 
+const items = await getAllfriends();
+const listContainer = document.getElementById("list-container");
+function handleButtonClick(item) {
+    alert(`Vous avez cliqué sur le bouton de : ${item.text}`);
+}
+
+// Génération dynamique de la liste
+
+items?.forEach(item => {
+    // Création de la div principale
+    const itemDiv = document.createElement("div");
+    itemDiv.className = "item";
+
+    // Ajout du texte
+    const itemText = document.createElement("span");
+    itemText.textContent = item.text;
+
+    // Ajout du bouton
+    const itemButton = document.createElement("button");
+    itemButton.textContent = "Cliquez-moi";
+    itemButton.onclick = () => handleButtonClick(item); // Liaison spécifique à l'élément
+
+    // Ajout des éléments à la div principale
+    itemDiv.appendChild(itemText);
+    itemDiv.appendChild(itemButton);
+
+    // Ajout de la div principale au conteneur
+    listContainer.appendChild(itemDiv);
+});
+
+
+
+
 notifSocket.onmessage = (event) => {
     console.log(event.data);
     const message = JSON.parse(event.data);
@@ -27,7 +60,7 @@ notifSocket.onmessage = (event) => {
             const pendingElement = doc.body.firstChild;
             pending_group.appendChild(pendingElement);
         }
-        toasts(`New friend request from ${message.data.content.username}`);
+        toasts(`New friend request from ${message.data.content.username}`, message.data);
     }
     else if(message.data.action == "ACK_ACCEPT_FRIEND_REQUEST_HOST") {
         let friends_group = document.querySelector('.friends_group');
@@ -111,19 +144,26 @@ notifSocket.onmessage = (event) => {
         const chatElement = document.querySelector(`.chat-${message.data.content.username}`);
         if(chatElement)
             chatElement.remove();
-        
-        // const addFriendement = document.querySelector(".friends_group")
-        // if(addFriendement)
-        // {
-        //     const parser = new DOMParser();
-        //     const htmlAddElement = 
-        //     `{% if show_friend_request %}
-        //         <button type="button" class="type-intra-green friendrequest" onclick="handleAskFriend(new URLSearchParams(window.location.search).get('username'))">Friend Request</button>
-        //     {%endif%}`
-        //     const doc = parser.parseFromString(htmlAddElement, "text/html");
-        //     const pendingFriendElement = doc.body.firstChild;
-        //     addFriendement.appendChild(pendingFriendElement);
-        // }
+    }
+    else if(message.data.action == "ACK_ASK_DUEL") {
+        let pending_group = document.querySelector('.pending_group');
+        if(pending_group)
+        {
+            const parser = new DOMParser();
+            const htmlString = 
+            `<li class="list-group-item pending_item d-flex justify-content-between align-items-center" id="${message.data.content.username}">
+                ${message.data.content.username} wants to duel
+                <div class="btn-group d-grid gap-2 d-md-flex justify-content-md-end"  role="group" aria-label="Basic example">
+                    <button type="button" class="type-intra-green accept_friend" onclick="handleAcceptDuel(this.dataset.username)" data-username="${message.data.content.username}" id="${message.data.content.sender}">accept</button>
+                    <button type="button" class="type-intra-white refuse_friend" onclick="handleRefuseDuel(this.dataset.username)" data-username="${message.data.content.username}">refuse</button>
+                </div>
+            </li>
+            `
+            const doc = parser.parseFromString(htmlString, "text/html");
+            const pendingElement = doc.body.firstChild;
+            pending_group.appendChild(pendingElement);
+        }
+        toasts(`${message.data.content.username} wants a duel`, message.data);
     }
 }
 
@@ -156,16 +196,33 @@ window.handleAskFriend = function(username) {
 };
 
 window.handleAcceptFriend = function(username) {
+    const toast = document.querySelector(".toast");
+    if(toast)
+        toast.remove();
     const message = create_message_notif("accept_friend_request", username);
     notifSocket.send(JSON.stringify(message));
 };
 
 window.handleRefuseFriend = function(username) {
+    const toast = document.querySelector(".toast");
+    if(toast)
+        toast.remove();
     const message = create_message_notif("refuse_friend_request", username);
     notifSocket.send(JSON.stringify(message));
 };
 
 window.handleDeleteFriend = function(username) {
+    const message = create_message_notif("delete_friend", username);
+    notifSocket.send(JSON.stringify(message));
+};
+
+window.handleAcceptDuel = function(username) {
+    navigateTo(`/pong/duel/?target=${username}`)
+    // const message = create_message_notif("delete_friend", username);
+    // notifSocket.send(JSON.stringify(message));
+};
+
+window.handleRefuseDuel = function(username) {
     const message = create_message_notif("delete_friend", username);
     notifSocket.send(JSON.stringify(message));
 };
@@ -184,7 +241,7 @@ function create_message_notif(action, targetUser)
     return message;
 }
 
-function toasts(message){
+function toasts(message, data){
     const date = new Date();
     const hours = date.getHours().toString().padStart(2, '0');
     const minutes = date.getMinutes().toString().padStart(2, '0');
@@ -199,6 +256,10 @@ function toasts(message){
             <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
         </div>
         <div class="toast-body">${message}</div>
+        <div class="mt-2 pt-2 border-top d-flex justify-content-end">
+            <button type="button" class="btn type-intra-green me-2" onclick="handleAcceptFriend(this.dataset.username)" data-username=${data.content.username}>Accept</button>
+            <button type="button" class="btn type-intra-white" onclick="handleRefuseFriend(this.dataset.username)" data-username=${data.content.username}>Refuse</button>
+        </div>
     </div>`;
     
     let toastContainer = document.querySelector('.toast-container');
@@ -217,3 +278,28 @@ function toasts(message){
         this.remove();
     });
 }
+
+export async function getAllfriends() {
+    // if (client_id !== null) return client_id;
+    console.log("Getting client ID")
+    try {
+        const response = await fetch("/api/friends/", {
+            method: "GET",
+            credentials: "include",
+        });
+        const data = await response.json();
+
+        if (data) {
+            // return all the friends
+        } else {
+            throw new Error(data.error);
+        }
+    } catch (error) {
+        console.error("Wesh je touche pas a ca mais on a pas de route api getAllFriends Chef")
+        console.error("Erreur lors de la récupération de l'ID :", error);
+        return null;
+    }
+}
+
+export { notifSocket };
+export {create_message_notif}

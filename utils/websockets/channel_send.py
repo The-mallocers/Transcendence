@@ -51,7 +51,7 @@ async def asend_group_error(channel_name, error_type: ResponseError, content=Non
                 'event': EventType.ERROR.name,
                 'data': {
                     'action': error_type.name,
-                    'content': content if content is not None else error_type.value,
+                    'error': content if content is not None else error_type.value,
                 }
             }
         }

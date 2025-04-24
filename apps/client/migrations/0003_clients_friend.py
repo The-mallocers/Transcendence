@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('client', '0002_initial'),
         ('notifications', '0002_friend_delete_friendrequest'),

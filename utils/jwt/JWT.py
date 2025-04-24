@@ -36,7 +36,6 @@ class JWT:
         if self.client.rights.is_admin:
             self.ROLES.append('admin')
 
-
     def __str__(self):
         return f"{self.TYPE}_token expired in {self.EXP}, issue a {self.IAT}"
 
@@ -54,8 +53,17 @@ class JWT:
         return response
 
     def invalidate_token(self):
-        InvalidatedToken.objects.get_or_create(jti=self.JTI, token=self.encode_token(), exp=datetime.fromtimestamp(self.EXP, tz=timezone.utc),
-                                               type=self.TYPE)
+        # Convert EXP to datetime if it's a timestamp
+        exp_datetime = self.EXP
+        if isinstance(self.EXP, (int, float)):
+            exp_datetime = datetime.fromtimestamp(self.EXP, tz=timezone.utc)
+
+        InvalidatedToken.objects.get_or_create(
+            jti=self.JTI,
+            token=self.encode_token(),
+            exp=exp_datetime,
+            type=self.TYPE
+        )
 
     @staticmethod
     def validate_token(token_key: str, token_type: JWTType):
@@ -73,6 +81,8 @@ class JWT:
             raise jwt.InvalidTokenError(f'Validating token with type {token_type.value} failed due to invalid token. {str(e)}')
         except jwt.InvalidKeyError as e:
             raise jwt.InvalidKeyError(f'Validating token with type {token_type.value} failed due to invalid key. {str(e)}')
+        except Clients.DoesNotExist as e:
+            raise jwt.InvalidKeyError('Token link to a non-existent user')
 
     @staticmethod
     def extract_token(request: HttpRequest, token_type: JWTType):
@@ -114,6 +124,8 @@ class JWT:
     @staticmethod
     def _get_token(data: dict):
         client = Clients.get_client_by_id(data['sub'])
+        if client is None:
+            raise Clients.DoesNotExist()
         token = JWT(client=client, token_type=data['type'])
         token.EXP = data.get('exp')
         token.JTI = uuid.UUID(data['jti'])

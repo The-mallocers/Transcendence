@@ -31,6 +31,25 @@ def gameover_get(req):
     return get(req)
 
 @require_http_methods(["GET"])
+def duel_get(req):
+    from apps.game.views.duel import get
+    return get(req)
+def create_tournament_get(req):
+    from apps.game.views.tournaments import create_tournament
+    return create_tournament(req)
+
+@require_http_methods(["GET"])
+def join_tournament_get(req):
+    from apps.game.views.tournaments import join_tournament
+    return join_tournament(req)
+
+@require_http_methods(["GET"])
+def inTournamentRoom(req):
+    from apps.game.views.tournaments import inRoom
+    return inRoom(req)
+
+
+@require_http_methods(["GET"])
 def disconnect_get(req):
     from apps.game.views.disconnect import get
     return get(req)

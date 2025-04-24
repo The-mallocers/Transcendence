@@ -14,7 +14,7 @@ PADDING_PADDLE = 5
 PADDING_SCORE = 10
 MAX_SPEED = 800
 ACCEL = 1.2
-#Do not forget to add your Constant here ! otherwise "*" will not see them
+# Do not forget to add your Constant here ! otherwise "*" will not see them
 __all__ = ["BALL_SPEED", "PADDLE_SPEED", "PADDLE_WIDTH", "PADDLE_HEIGHT", "BALL_RADIUS", "FPS", "OFFSET_PADDLE",
            "CANVAS_WIDTH", "CANVAS_HEIGHT", "ANGLE_FACTOR", "MAX_ANGLE_FACTOR", "MIN_HORIZONTAL_PERCENT", "PADDING_PADDLE",
            "PADDING_SCORE", "MAX_SPEED", "ACCEL"]

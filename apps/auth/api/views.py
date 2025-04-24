@@ -51,7 +51,7 @@ class RegisterApiView(APIView):
             except Exception as e:
                 import traceback
                 print("\n\nException during save:", str(e))
-                print(traceback.format_exc())
+                logging.getLogger('MainThread').error(traceback.format_exc())
                 return Response({"error": str(e)},
                                 status=status.HTTP_500_INTERNAL_SERVER_ERROR)  # this is ia stuff, maybe shouldnt be 500 idk
         else:
@@ -160,7 +160,6 @@ def get_qrcode(user):
 
 
 def formulate_json_response(state, status, message, redirect):
-    print("what the heellll")
     return (JsonResponse({
         "success": state,
         "message": message,
@@ -171,7 +170,7 @@ def formulate_json_response(state, status, message, redirect):
 def post_twofa_code(req):
     email = req.COOKIES.get('email')
     client = Clients.get_client_by_email(email)
-    response = formulate_json_response(False, 400, "Error getting the user", "/auth/login")
+    response = formulate_json_response(False,    400, "Error getting the user", "/auth/login")
     if client is None:
         return response
     if req.method == "POST":
@@ -208,18 +207,19 @@ class GetClientIDApiView(APIView):
             "message": "ID retrieved succesfully"
         }, status=status.HTTP_200_OK)
 
+
 class UploadPictureApiView(APIView):
     def post(self, request: HttpRequest, *args, **kwargs):
         print("Its getting here !")
         try:
             client = Clients.get_client_by_request(request)
             profile = client.profile
-            
+
             if not profile:
                 return Response({"error": "Profile not found"}, status=status.HTTP_404_NOT_FOUND)
-                
+
             serializer = ProfilePictureValidator(data=request.data)
-            
+
             if serializer.is_valid():
                 profile.profile_picture = serializer.validated_data['profile_picture']
                 profile.save()

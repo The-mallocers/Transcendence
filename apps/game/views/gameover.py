@@ -22,7 +22,7 @@ def get(request):
         message = "You lost !"
         client_score = found_game.loser.score
         opponent_score = found_game.winner.score
-        opponent = found_game.winner.profile.username
+        opponent = found_game.winner.client.profile.username
 
     html_content = render_to_string("pong/../../templates/apps/pong/gameover.html", {
         "csrf_token": get_token(request),
