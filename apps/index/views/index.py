@@ -50,13 +50,12 @@ def get_last_matches(client, games_played) -> list:
     for game in games_played:
         if (i >= 4):
             break
-        print(game.id)
         game = Game.objects.get(id=game.id)
         print(game.winner.score)
         myPoints = 0
         enemyPoints = 0
         opponent = ""
-        if (client.id == game.winner.id):
+        if (client.id == game.winner.client.id):
             myPoints = game.winner.score
             enemyPoints = game.loser.score
             opponent = game.loser.client.profile.username
@@ -67,7 +66,7 @@ def get_last_matches(client, games_played) -> list:
 
         ghistory.append({
             "opponent": opponent,
-            "won": client.id == game.winner.id,
+            "won": client.id == game.winner.client.id,
             "myPoints": myPoints,
             "enemyPoints": enemyPoints,
             "when": game.created_at
