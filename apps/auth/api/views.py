@@ -160,7 +160,6 @@ def get_qrcode(user):
 
 
 def formulate_json_response(state, status, message, redirect):
-    print("what the heellll")
     return (JsonResponse({
         "success": state,
         "message": message,
@@ -171,7 +170,7 @@ def formulate_json_response(state, status, message, redirect):
 def post_twofa_code(req):
     email = req.COOKIES.get('email')
     client = Clients.get_client_by_email(email)
-    response = formulate_json_response(False, 400, "Error getting the user", "/auth/login")
+    response = formulate_json_response(False,    400, "Error getting the user", "/auth/login")
     if client is None:
         return response
     if req.method == "POST":

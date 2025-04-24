@@ -295,6 +295,7 @@ export async function getAllfriends() {
             throw new Error(data.error);
         }
     } catch (error) {
+        console.error("Wesh je touche pas a ca mais on a pas de route api getAllFriends Chef")
         console.error("Erreur lors de la récupération de l'ID :", error);
         return null;
     }
