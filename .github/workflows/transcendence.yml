@@ -137,7 +137,7 @@ jobs:
         run: docker compose -f docker-compose.yml up -d
 
       - name: Run Django tests
-        run: docker compose -f docker-compose.yml exec -T django-web python manage.py test > test_results.txt
+        run: docker compose -f docker-compose.yml exec -T django-web python manage.py test -v 2> test_results.txt
 
       - name: Archive test results
         uses: actions/upload-artifact@v4
