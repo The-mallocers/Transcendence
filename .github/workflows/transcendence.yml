@@ -108,6 +108,8 @@ jobs:
           echo "REDIS_PORT=${{ vars.REDIS_PORT }}" >> .env
           echo "ADMIN_EMAIL=${{ vars.ADMIN_EMAIL }}" >> .env
           echo "ADMIN_USERNAME=${{ vars.ADMIN_USERNAME }}" >> .env
+          echo "AUTH_42_CLIENT=${{ vars.AUTH_42_CLIENT }}" >> .env
+          echo "AUTH_42_SECRET=${{ vars.AUTH_42_SECRET }}" >> .env
 
       - name: Copy override file to root
         run: cp .github/docker-compose.override.yml ./docker-compose.override.yml
