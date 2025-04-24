@@ -50,14 +50,13 @@
             <div class="box">
                 <h4>Biggest rivals</h4>
                 <div class="lastPlayerContainer mt-4">
-                    {% for rival in rivals %}
+                    {% for rival_id, rival in rivals.items %}
                         <div class="lastPlayer container d-flex flex-row align-items-center justify-content-center"
-                             data-route="/profile/?username={{ rival.profile.username }}">
-                            <!-- <img src="{% static 'assets/imgs/' %}{{ rival.profile_picture }}" alt="{{rival.profile_picture}}"> -->
-                            <img src="{{ rival.profile.profile_picture.url }}">
-                            <span class="names d-flex flex-row align-items-end justify-content-center">
+                             data-route="/profile/?username={{ rival.username }}">
+                             <span class="names d-flex flex-row align-items-end justify-content-center">
+                                <img src="{{ rival.profile_picture }}">
                                 <h4 class="fullName">{{ rival.username }}</h4>
-                                <small class="mx-2">(Wins: {{ rival.games_won }}, Losses: {{ rival.games_lost }})</small>
+                                <h4 class="mx-2">(Wins: {{ rival.games_won }}, Losses: {{ rival.games_lost }})</h4>
                             </span>
                         </div>
                     {% endfor %}

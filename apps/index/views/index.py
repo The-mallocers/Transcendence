@@ -29,6 +29,7 @@ def get(req):
         "friends_list": friends_list,
         "friends_pending" : friends_pending
     }
+    print("Feeding into the context rivals =", rivals)
     html_content = render_to_string("apps/profile/profile.html", context)
     return JsonResponse({'html': html_content})
 
@@ -86,14 +87,19 @@ def get_rivals(client, games_played) -> dict:
         rivals[opponent.id] = {
             "games_won": 0,
             "games_lost": 0,
+            "username": opponent.profile.username,
+            "profile_picture": opponent.profile.profile_picture.url,
         }
 
     for game in games_played:
         if game.winner.client.id == client.id:
             rivals[game.loser.client.id]["games_won"] += 1
-        elif game.loser.client.id == client.player.id:
+        elif game.loser.client.id == client.id:
             rivals[game.winner.client.id]["games_lost"] += 1
 
     print("rivals after adding the maps")
     print(rivals)
-    return opponents
+    return rivals
+
+    
+ 
