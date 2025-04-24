@@ -41,3 +41,17 @@
     height: 100%;
     width: 100%;
 }
+
+.inTournamentRoomContainer .btns .btn {
+    padding: 1rem 2rem;
+}
+
+.inTournamentRoomContainer .btns .btn:first-of-type {
+    color: white;
+    background-color: #00BABB;
+}
+
+.inTournamentRoomContainer .btns .btn:last-of-type {
+    border-color: #00BABB;
+    color: #00BABB;
+}
