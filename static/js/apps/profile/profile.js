@@ -12,7 +12,8 @@ function handleButtonClick(item) {
 }
 
 // Génération dynamique de la liste
-items.forEach(item => {
+
+items?.forEach(item => {
     // Création de la div principale
     const itemDiv = document.createElement("div");
     itemDiv.className = "item";
