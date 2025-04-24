@@ -35,8 +35,6 @@ window.choose_duel_friend = function(){
 
 window.hide_modal = async function(usernameId){
     try{
-        // const button = document.querySelector(".duel_friend");
-        // const usernameID = button.getAttribute('data-id');
         const modal = bootstrap.Modal.getInstance(document.getElementById('friendSelectionModal'));
         modal.hide();
         const message = create_message_duel("create_duel",usernameId);
@@ -48,7 +46,7 @@ window.hide_modal = async function(usernameId){
     }
 }
 
-function create_message_duel(action, targetUser)
+export function create_message_duel(action, targetUser)
 {
     let message = {
         "event": "notification",

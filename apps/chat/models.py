@@ -124,7 +124,9 @@ class Rooms(models.Model):
         try:
             with transaction.atomic():
                 username_list = list(
-                    Clients.objects.filter(rooms__id=room_id).values_list('profile__username', flat=True))
+                        Clients.objects.filter(rooms__id=room_id).values_list('profile__username', flat=True)
+                    )
+                print(username_list)
                 return username_list
         except Rooms.DoesNotExist:
             return []

@@ -1,8 +1,10 @@
-// window.addEventListener('load', onPageLoad);
 import { WebSocketManager } from "../../websockets/websockets.js"
+import { notifSocket } from "../profile/profile.js";
+import { navigateTo } from "../../spa/spa.js";
+import { create_message_duel } from "../game/gamemode.js";
 
 let client_id = null;
-let room_id = null; 
+let room_id = null;
 
 
 function scrollToBottom(element){
@@ -41,40 +43,7 @@ chatSocket.onmessage = (event) => {
         displayRooms(message.data.content.rooms);
     }
     else if(message.data.action == "NEW_FRIEND") {
-        const newChat = document.querySelector('.chatRooms');
-        if(newChat)
-        {
-            const parser = new DOMParser();
-            const htmlChat = 
-            // `<button id="${message.data.content.room}" class="roomroom chat-${message.data.content.username} container d-flex align-items-center gap-3">
-            //         <img src="/static/assets/imgs/profile/default.png">
-            //         <div>${message.data.content.username}</div>
-            // </button>`
-            `<div id="${message.data.content.room}" class="roomroom container d-flex align-items-center justify-content-between">
-                <button class="chat-${message.data.content.username} btn d-flex align-items-center gap-3">
-                    <img src="/static/assets/imgs/profile/default.png">
-                    <div>${message.data.content.username}</div>
-                </button>
-                
-                <div class="dropdown">
-                    <button class="btn btn-secondary dropdown-toggle no-caret rounded-circle" type="button" id="dropdownMenu-${message.data.content.room}" data-bs-toggle="dropdown" aria-expanded="false">
-                        ...
-                    </button>
-                    <ul class="dropdown-menu" aria-labelledby="dropdownMenu-${message.data.content.room}">
-                        <li><button class="dropdown-item chat-profile" type="button">Profil</button></li>
-                        <li><button class="dropdown-item chat-block" type="button">Block</button></li>
-                        <li><button class="dropdown-item chat-duel" type="button">Duel</button></li>
-                    </ul>
-                </div>
-            </div>`
-            const doc = parser.parseFromString(htmlChat, "text/html");
-            const chatElement = doc.body.firstChild;
-            const chatButton = chatElement.querySelector(`.chat-${message.data.content.username}`)
-            chatButton.addEventListener('click', function() {
-                clickRoom(message.data.content.room)
-            })
-            newChat.appendChild(chatElement);
-        }
+        create_front_chat_room(message);
     }
     else if (message.data.action == "MESSAGE_RECEIVED") {
         let chatHistory = document.querySelector('.chatHistory');
@@ -128,9 +97,25 @@ window.clickRoom = function(room){
         chatSocket.send(JSON.stringify(message));
     }
 }
+window.handleChatProfile = function(username)
+{
+    navigateTo(`/profile/?username=${username}`)
+}
+
+window.handleChatBlock = function(username)
+{
+
+}
+
+window.handleChatDuel = function(usernameId)
+{
+    console.log(usernameId);
+    const message = create_message_duel("create_duel",usernameId);
+    notifSocket.send(JSON.stringify(message));
+    navigateTo('/pong/duel/');
+}
 
 async function getClientId() {
-    // if (client_id !== null) return client_id;
     console.log("Getting client ID")
     try {
         const response = await fetch("/api/auth/getId/", {
@@ -186,6 +171,7 @@ async function displayRooms(rooms) {
         else
         {
             let player = rooms[i].player[0];
+            console.log(rooms[i]);
             if(player == undefined)
                 player = "delete user";
             htmlString = 
@@ -203,4 +189,50 @@ async function displayRooms(rooms) {
         chatRooms.appendChild(roomElement);
     }
     scrollToBottom(chatRooms);
+}
+
+function create_front_chat_room(message){
+    const newChat = document.querySelector('.chatRooms');
+    if(newChat)
+    {
+        const parser = new DOMParser();
+        const htmlChat = 
+        `<div class="roomroom container d-flex align-items-center justify-content-between">
+            <button class="chat-${message.data.content.username} btn d-flex align-items-center gap-3">
+                <img src="/static/assets/imgs/profile/default.png">
+                <div>${message.data.content.username}</div>
+            </button>
+            
+            <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle no-caret rounded-circle" type="button" id="dropdownMenu-${message.data.content.room}" data-bs-toggle="dropdown" aria-expanded="false">
+                    ...
+                </button>
+                <ul class="dropdown-menu">
+                    <li><button class="dropdown-item chat-profile" type="button">Profil</button></li>
+                    <li><button class="dropdown-item chat-block" type="button">Block</button></li>
+                    <li><button class="dropdown-item chat-duel" type="button">Duel</button></li>
+                </ul>
+            </div>
+        </div>`
+        const doc = parser.parseFromString(htmlChat, "text/html");
+        const chatElement = doc.body.firstChild;
+        const chatButton = chatElement.querySelector(`.chat-${message.data.content.username}`)
+        const chatProfile = chatElement.querySelector(`.chat-profile`);
+        const chatBlock = chatElement.querySelector(`.chat-block`);
+        const chatDuel = chatElement.querySelector(`.chat-duel`);
+
+        chatButton.addEventListener('click', function() {
+            clickRoom(message.data.content.room)
+        })
+        chatProfile.addEventListener('click', function(){
+            handleChatProfile(message.data.content.username);
+        })
+        chatBlock.addEventListener('click', function(){
+            handleChatBlock(message.data.content.username);
+        })
+        chatDuel.addEventListener('click', function(){
+            handleChatDuel(message.data.content.sender)
+        })
+        newChat.appendChild(chatElement);
+    }
 }

@@ -157,8 +157,11 @@ class ChatService(BaseServices):
                 player = Client
                 if str(client.id) != await Rooms.get_client_id_by_username(Client):
                     players.append(player)
-            formatted_messages.append({"room": str(room), "player": players})
-        await asend_group(self.service_group, EventType.CHAT, ResponseAction.ALL_ROOM_RECEIVED, {"rooms": formatted_messages})
+        formatted_messages.append({"room": str(room), "player": players})
+        await asend_group(self.service_group, 
+                        EventType.CHAT, 
+                        ResponseAction.ALL_ROOM_RECEIVED, 
+                        {"rooms": formatted_messages})
 
     async def disconnect(self, client):
         await self.channel_layer.group_discard(RTables.GROUP_CHAT(uuid_global_room), self.channel_name)
