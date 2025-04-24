@@ -73,8 +73,10 @@ class MatchmakingThread(Threads):
             selected_players = players[:2]  # this gets the first 2 players of the list
             random.shuffle(selected_players)
             game.is_duel = False
-            game.pL = Player(selected_players[0])
-            game.pR = Player(selected_players[1])
+            game.pL = Player()
+            game.pL.my_init(selected_players[0])
+            game.pR = Player()
+            game.pR.my_init(selected_players[1])
             if game.pL is not None and game.pR is not None:
                 return True
         # second we check the duel for start game
