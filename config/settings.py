@@ -134,6 +134,7 @@ PROTECTED_PATHS = [
 EXCLUDED_PATHS = [
     '/api/auth/login',
     '/api/auth/register',
+    '/api/auth/2facode',
     '/pages/auth/login',
     '/pages/auth/register',
     '/pages/auth/2fa',

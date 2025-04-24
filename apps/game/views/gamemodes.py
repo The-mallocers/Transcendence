@@ -8,7 +8,7 @@ from apps.client.models import Clients
 def get(request):
     client = Clients.get_client_by_request(request)
     friends_list = client.get_all_friends()
-    # print(friends_list)
+    print("friend list is:", friends_list)
     for friend in friends_list:
         print(friend)
         print(friend['client'])

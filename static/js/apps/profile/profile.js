@@ -12,7 +12,8 @@ function handleButtonClick(item) {
 }
 
 // Génération dynamique de la liste
-items.forEach(item => {
+
+items?.forEach(item => {
     // Création de la div principale
     const itemDiv = document.createElement("div");
     itemDiv.className = "item";
@@ -294,6 +295,7 @@ export async function getAllfriends() {
             throw new Error(data.error);
         }
     } catch (error) {
+        console.error("Wesh je touche pas a ca mais on a pas de route api getAllFriends Chef")
         console.error("Erreur lors de la récupération de l'ID :", error);
         return null;
     }

@@ -46,6 +46,7 @@ if (!socket || socket.readyState === WebSocket.CLOSED) {
 
         //Attempt at handling errors
         if (jsonData.data.action == "EXCEPTION") {
+            console.log("REDIRECTION BECAUSE EXCEPTION HAPPENED");
             isGameOver.gameIsOver = true;
             WebSocketManager.closeGameSocket();
             navigateTo("/");
@@ -85,6 +86,7 @@ if (!socket || socket.readyState === WebSocket.CLOSED) {
             }
         } else if (jsonData.data.action == "GAME_ENDING") {
             const game_id = jsonData.data.content
+            console.log("GAME IS OVER");
             navigateTo(`/pong/gameover/?game=${game_id}`);
             isGameOver.gameIsOver = true;
             WebSocketManager.closeGameSocket();
