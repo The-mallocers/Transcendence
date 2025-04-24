@@ -1,5 +1,6 @@
 import json
 import logging
+import traceback
 from urllib.parse import parse_qs
 
 from channels.generic.websocket import AsyncWebsocketConsumer
@@ -7,7 +8,7 @@ from django.conf import settings
 from redis.asyncio import Redis
 
 from apps.client.models import Clients
-from utils.enums import EventType, ResponseError
+from utils.enums import EventType, ResponseError, RTables
 from utils.websockets.channel_send import asend_group_error
 from utils.websockets.services.services import ServiceError, BaseServices
 
@@ -26,58 +27,63 @@ class WsConsumer(AsyncWebsocketConsumer):
         logging.getLogger('websocket.client').info(f'New WebSocket connection from {self.scope["client"]}')
         query_string = self.scope['query_string'].decode()
         query_params = parse_qs(query_string)
+        path = self.scope['path']
 
-        self.client: Clients = await Clients.get_client_by_id_async(query_params.get('id', ['default'])[0])
-
-        await self.accept()
-        if self.client is None:
-            await self.channel_layer.group_add('consumer_error', self.channel_name)
-            await asend_group_error('consumer_error', ResponseError.PLAYER_NOT_FOUND, close=True)
-            return
-        else:
-            await self.channel_layer.group_add(str(self.client.id), self.channel_name)
-            await self._redis.hset(name="consumers_channels", key=str(self.client.id), value=str(self.channel_name))
+        try:
+            self.client: Clients = await Clients.aget_client_by_id(query_params.get('id', ['default'])[0])
+            self.event_type = EventType(path.split('/')[2]) if len(path.split('/')) > 2 else None
+            await self.accept()
+            if await self._redis.hget(name=RTables.HASH_CLIENT(self.client.id), key=str(self.event_type.value)) is not None:
+                raise ServiceError('You are already connected')
+            else:
+                await self.channel_layer.group_add(RTables.GROUP_CLIENT(self.client.id), self.channel_name)
+                await self.channel_layer.group_add(f'{self.event_type.value}_{self.client.id}', self.channel_name)
+                await self._redis.hset(name=RTables.HASH_CLIENT(self.client.id), key=str(self.event_type.value), value=str(self.channel_name))
+                return True
+        except AttributeError:
+            await self.channel_layer.group_add(RTables.GROUP_ERROR, self.channel_name)
+            await asend_group_error(RTables.GROUP_ERROR, ResponseError.CLIENT_NOT_FOUND, close=True)
+            return False
+        except ValueError:
+            await self.channel_layer.group_add(RTables.GROUP_ERROR, self.channel_name)
+            await asend_group_error(RTables.GROUP_ERROR, ResponseError.SERVICE_ERROR, content="Service is not available", close=True)
+            return False
+        except ServiceError:
+            await self.channel_layer.group_add(RTables.GROUP_ERROR, self.channel_name)
+            await asend_group_error(RTables.GROUP_ERROR, ResponseError.ALREADY_CONNECTED, close=True)
+            return False
 
     async def disconnect(self, close_code):
         logging.getLogger('websocket.client').info(f'WebSocket disconnected with code {close_code}')
-        await self._redis.hdel('consumers_channels', str(self.client.id))
-        await self.channel_layer.group_discard(str(self.client.id), self.channel_name)
+        await self.service.handle_disconnect(self.client)
+        await self.channel_layer.group_discard(RTables.GROUP_ERROR, self.channel_name)
+        self.event_type = EventType.GAME if self.event_type is EventType.MATCHMAKING else self.event_type
+        if self.client:
+            await self.channel_layer.group_discard(RTables.GROUP_CLIENT(self.client.id), self.channel_name)
+            await self.channel_layer.group_discard(f'{self.event_type.value}_{self.client.id}', self.channel_name)
+            await self._redis.hdel(RTables.HASH_CLIENT(self.client.id), str(self.event_type.value))
 
     async def receive(self, text_data=None, bytes_data=None):
         try:
-            data = json.loads(text_data)
-            self.event_type = EventType(data['event'])
-
             if not self.client:
                 raise ServiceError("Client is not connected")
 
-            if self.service.__class__.__name__ != self.event_type.value.capitalize() + 'Service':
-                raise ServiceError("Service is not available")
+            data = json.loads(text_data)
+            self.event_type = EventType(data['event'])
 
-            if self.event_type is EventType.MATCHMAKING:
-                await self.service.process_action(data, self.client)
+            await self.service.process_action(data, self.client)
 
-            if self.event_type is EventType.GAME:
-                await self.service.process_action(data, self.client)
-
-            if self.event_type is EventType.CHAT:
-                await self.service.process_action(data, self.client)
-
-            if self.event_type is EventType.TOURNAMENT:
-                player = await PlayerManager.get_player_from_client_db_async(
-                    self.client.id)
-                await self.service.process_action(data, player)
-            
-            if self.event_type is EventType.NOTIFICATION:
-                await self.service.process_action(data, self.client)
-            
-        except json.JSONDecodeError as e:
-            self._logger.error(e)
-            await asend_group_error(self.client.id, ResponseError.JSON_ERROR)
+        except json.JSONDecodeError:
+            self._logger.error(traceback.format_exc())
+            await asend_group_error(RTables.GROUP_CLIENT(self.client.id), ResponseError.JSON_ERROR)
 
         except ServiceError as e:
-            self._logger.error(e)
-            await asend_group_error(self.client.id, ResponseError.SERVICE_ERROR, content=str(e))
+            self._logger.error(traceback.format_exc())
+            await asend_group_error(RTables.GROUP_CLIENT(self.client.id), ResponseError.SERVICE_ERROR, content=str(e))
+
+        except Exception as e:
+            self._logger.error(traceback.format_exc())
+            await asend_group_error(RTables.GROUP_CLIENT(self.client.id), ResponseError.EXCEPTION, content=str(e), close=True)
 
     async def send_channel(self, event):
         message = event['message']

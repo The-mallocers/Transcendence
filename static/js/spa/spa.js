@@ -1,7 +1,7 @@
-import { WebSocketManager } from "../websockets/websockets.js"
-import { isGameOver } from "../apps/game/VarGame.js"
+import {WebSocketManager} from "../websockets/websockets.js"
+import {isGameOver} from "../apps/game/VarGame.js"
 import * as html from "../utils/html_forms.js"
-import { routes } from "../utils/routes.js";
+import {routes} from "../utils/routes.js";
 // let notifSocket = null;
 // let clientId = null;
 

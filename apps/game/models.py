@@ -1,17 +1,16 @@
-import traceback
-
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 from django.db import models
 from django.db.models import IntegerField, ForeignKey, CharField, ImageField
-from django.db.models.fields import DateTimeField
+from django.db.models.fields import DateTimeField, BooleanField
 from django.utils import timezone
 from redis import DataError
 from redis.commands.json.path import Path
 
+from apps.client.models import Clients
 from apps.player.models import Player
 from apps.tournaments.models import Tournaments
-from utils.enums import EventType, ResponseAction, Ranks
+from utils.enums import EventType, ResponseAction, Ranks, RTables, PlayerSide
 from utils.enums import GameStatus
 from utils.redis import RedisConnectionPool
 from utils.serializers.player import PlayersRedisSerializer
@@ -37,7 +36,7 @@ class Game(models.Model):
     # ═══════════════════════════════ Database Fields ════════════════════════════════ #
 
     # ━━ PRIMARY FIELD ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
-    id = IntegerField(primary_key=True, editable=False, null=False, unique=True)
+    id = CharField(primary_key=True, editable=False, null=False, unique=True, max_length=5)
 
     # ━━ Game informations ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
     winner = ForeignKey(Player, on_delete=models.SET_NULL, related_name='winner', null=True)
@@ -45,6 +44,7 @@ class Game(models.Model):
     tournament_id = ForeignKey(Tournaments, on_delete=models.SET_NULL,
                                null=True, related_name='tournament', blank=True)
     created_at = DateTimeField(default=timezone.now)
+    is_duel = BooleanField(default=False)
 
     # ━━ Game setings ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
     points_to_win = IntegerField(default=3)
@@ -53,22 +53,22 @@ class Game(models.Model):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.redis = RedisConnectionPool.get_sync_connection()
-        self.game_id = create_game_id()
-        self.game_key = f'game:{self.game_id}'
+        self.code = create_game_id()
+        self.game_key = RTables.JSON_GAME(self.code)
         self.pL: Player = None
         self.pR: Player = None
 
     def __str__(self):
-        return f'Game with id: {self.game_id}'
+        return f'Game with id: {self.code}'
 
     def create_redis_game(self):
         from utils.serializers.game import GameSerializer
-        serializer = GameSerializer(self, context={'id': self.game_id})
+        serializer = GameSerializer(self, context={'id': self.code, 'is_duel': self.is_duel})
         self.redis.json().set(self.game_key, Path.root_path(), serializer.data)
 
     def init_players(self):
         # On ajoute a la db de redis , a l'id de la game, les infos des deux joueurs
-        players_serializer = PlayersRedisSerializer(instance={'player_left': self.pL, 'player_right': self.pR})
+        players_serializer = PlayersRedisSerializer(instance={PlayerSide.LEFT: self.pL, PlayerSide.RIGHT: self.pR})
         existing_data = self.redis.json().get(self.game_key)
         existing_data.update(players_serializer.data)
         self.redis.json().set(self.game_key, Path.root_path(), existing_data)
@@ -77,19 +77,18 @@ class Game(models.Model):
         channel_layer = get_channel_layer()
 
         # Add two player in group of the new game
-        channel_name_pL = self.redis.hget(name="consumers_channels", key=str(self.pL.client_id))
-        async_to_sync(channel_layer.group_add)(str(self.game_id), channel_name_pL)
-        channel_name_pR = self.redis.hget(name="consumers_channels", key=str(self.pR.client_id))
-        async_to_sync(channel_layer.group_add)(str(self.game_id), channel_name_pR)
+        channel_name_pL = self.redis.hget(name=RTables.HASH_CLIENT(self.pL.client_id), key=str(EventType.GAME.value))
+        async_to_sync(channel_layer.group_add)(RTables.GROUP_GAME(self.code), channel_name_pL)
+        channel_name_pR = self.redis.hget(name=RTables.HASH_CLIENT(self.pR.client_id), key=str(EventType.GAME.value))
+        async_to_sync(channel_layer.group_add)(RTables.GROUP_GAME(self.code), channel_name_pR)
 
-        # Add the players in player_game redis table
-        self.redis.hset(name="current_matches", key=str(self.pL.client_id), value=str(self.game_id))
-        self.redis.hset(name="current_matches", key=str(self.pR.client_id), value=str(self.game_id))
+        self.redis.hset(name=RTables.HASH_MATCHES, key=str(self.pL.client_id), value=str(self.code))
+        self.redis.hset(name=RTables.HASH_MATCHES, key=str(self.pR.client_id), value=str(self.code))
 
-        self.pL.leave_queue()
-        self.pR.leave_queue()
+        self.pL.leave_queue(self.code, self.is_duel)
+        self.pR.leave_queue(self.code, self.is_duel)
 
-        send_group(self.game_id, EventType.GAME, ResponseAction.JOIN_GAME)
+        send_group(RTables.GROUP_GAME(self.code), EventType.GAME, ResponseAction.JOIN_GAME)
 
     def error_game(self):
         self.rset_status(GameStatus.ERROR)
@@ -108,10 +107,13 @@ class Game(models.Model):
     def rget_status(self) -> GameStatus | None:
         try:
             status = self.redis.json().get(self.game_key, Path('status'))
-            if status:
-                return GameStatus(status)
-            else:
-                return None
+            return GameStatus(status)
         except DataError:
-            traceback.print_exc()
+            return None
+
+    def rget_is_duel(self) -> bool | None:
+        try:
+            status = self.redis.json().get(self.game_key, Path('is_duel'))
+            return bool(status)
+        except DataError:
             return None

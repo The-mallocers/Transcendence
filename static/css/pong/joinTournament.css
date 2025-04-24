@@ -1,0 +1,153 @@
+/* .joinTournamentContainer .roomsContainer{
+    row-gap: 2rem;
+} */
+/* 
+.joinTournamentContainer .room {
+    padding: 2rem;
+    aspect-ratio: 1 / 1;
+    position: relative;
+
+    perspective: 1000px; 
+    
+}
+
+.joinTournamentContainer .room .front {
+    top: 0;
+    left: 0;
+
+    height: 100%;
+    width: 100%;
+    font-size: 1.5rem;
+    font-weight: bold;
+    border-radius: 5px;
+
+    position: absolute;
+
+    opacity: 1;
+    transition: all .5s;
+}
+
+.joinTournamentContainer .room .back {
+
+    top: 0;
+    left: 0;
+    
+    height: 100%;
+    width: 100%;
+    font-size: 1.5rem;
+    font-weight: bold;
+    border-radius: 5px;
+
+    position: absolute;
+
+    background-color: blue;
+
+
+    opacity: 0;
+
+    transition: all .5s;
+}
+
+
+.joinTournamentContainer .room:hover .front {
+    transform: rotateY(180deg);
+    opacity: 0;
+}
+
+.joinTournamentContainer .room:hover .back {
+    transform: rotateY(180deg);
+    opacity: 1;
+}
+
+
+
+.joinTournamentContainer .players {
+    position: absolute;
+
+    bottom: 10px;
+    right: 10px;
+}
+
+.joinTournamentContainer .roomAvatar{
+    height: 5rem;
+    width: 5rem;
+    border-radius: 50%;
+} */
+
+.joinTournamentContainer .room {
+    padding: .5rem;
+    /* aspect-ratio: 1 / 1; */
+    height: 25rem;
+    transform-style: preserve-3d; /* Allows 3D transformations on child elements */
+    transition: transform 0.75s; /* Smooth flip transition */
+
+}
+
+.joinTournamentContainer .cardContainer {
+    position: relative;
+    height: 100%;
+    width: 100%;
+}
+
+.joinTournamentContainer .room .front,
+.joinTournamentContainer .room .back {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    font-size: 1.5rem;
+    font-weight: bold;
+    border-radius: 5px;
+    backface-visibility: hidden; /* Prevent back from showing when flipped */
+    height: 100%;
+    width: 100%;
+}
+
+.joinTournamentContainer .room .front {
+    background-color: #ffffff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: transform 0.75s, opacity 0.5s; /* Smooth transition for flipping */
+}
+
+.joinTournamentContainer .room .back {
+    background-color: #ffffff;
+    opacity: 0;
+    transform: rotateY(180deg); /* Flip the back side initially */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: transform 0.75s, opacity 0.5s; /* Smooth transition for flip and opacity */
+}
+
+.joinTournamentContainer .room:hover .front {
+    transform: rotateY(180deg);
+    opacity: 0; /* Hide the front side on hover */
+}
+
+.joinTournamentContainer .room:hover .back {
+    transform: rotateY(0deg);
+    opacity: 1; /* Show the back side on hover */
+}
+
+.joinTournamentContainer .players {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+}
+
+.joinTournamentContainer .roomAvatar {
+    height: 5rem;
+    width: 5rem;
+    border-radius: 50%;
+}
+
+
+
+.joinTournamentContainer .joinBtn {
+    background-color: #00BABB;
+    color: white;
+    align-self: center;
+}

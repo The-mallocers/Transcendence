@@ -1,6 +1,6 @@
-import { WebSocketManager } from "../../websockets/websockets.js";
-import { navigateTo } from '../../spa/spa.js';
-import { isGameOver } from "./VarGame.js"
+import {WebSocketManager} from "../../websockets/websockets.js";
+import {navigateTo} from '../../spa/spa.js';
+import {isGameOver} from "./VarGame.js"
 
 const socket = WebSocketManager.gameSocket;
 let canvas = document.getElementById("pongCanvas");
@@ -29,8 +29,7 @@ let frameCount = 0;
 //Si un petit malin va sur la page sans raison
 if (!socket || socket.readyState === WebSocket.CLOSED) {
     navigateTo("/");
-}
-else {
+} else {
     console.log(window.GameState);
     lusername.innerHTML = window.GameState.left.username
     rusername.innerHTML = window.GameState.right.username
@@ -192,10 +191,10 @@ const drawPaddle = (x, y) => {
 const drawBall = () => {
     const nextX = window.GameState.ballX + window.GameState.balldx * delta;
     const nextY = window.GameState.ballY + window.GameState.balldy * delta;
-    
+
     const leftBoundary = 10; //This is harcoding, if im a real G Id do an api call to get that value.
-    const rightBoundary = width - 10; 
-    
+    const rightBoundary = width - 10;
+
     if (nextX > leftBoundary && nextX < rightBoundary) {
         window.GameState.ballX = nextX;
         window.GameState.ballY = nextY;
@@ -235,6 +234,7 @@ function gameLoop() {
     render();
     requestAnimationFrame(gameLoop);
 }
+
 const antibsbool = Boolean(
     socket &&
     socket.readyState !== WebSocket.CLOSED &&

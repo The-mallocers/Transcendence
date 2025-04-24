@@ -3,6 +3,9 @@ import traceback
 from abc import ABC, abstractmethod
 from typing import Dict, Any
 
+from channels.layers import get_channel_layer
+
+from apps.client.models import Clients
 from utils.enums import RequestAction
 from utils.redis import RedisConnectionPool
 
@@ -20,15 +23,25 @@ class BaseServices(ABC):
         self._initialized: bool = False
 
         self.redis = None
+        self.channel_layer = get_channel_layer()
+        self.service_group = None
 
     @abstractmethod
-    async def init(self, *args) -> bool:
+    async def init(self, client: Clients, *args) -> bool:
         self.redis = await RedisConnectionPool.get_async_connection(self.__class__.__name__)
         return True
 
     @abstractmethod
-    async def handle_disconnect(self, client):
+    async def disconnect(self, client):
         pass
+
+    async def handle_disconnect(self, client):
+        if client is None:
+            return
+        if self.redis is None:
+            return
+        else:
+            return await self.disconnect(client)
 
     async def process_action(self, data: Dict[str, Any], *args):
         try:
@@ -44,8 +57,11 @@ class BaseServices(ABC):
                 return await handler_method(data, *args)
 
         except ValueError:
-            traceback.print_exc()
+            self._logger.error(traceback.format_exc())
             raise ServiceError(f"This action is not valid: {data['data']['action']}")
 
         except ServiceError as e:
+            raise e
+
+        except Exception as e:
             raise e

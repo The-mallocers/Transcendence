@@ -9,7 +9,8 @@ from django.http import HttpRequest
 from apps.auth.models import Password, TwoFA
 from apps.player.models import Player
 from apps.profile.models import Profile
-from utils.enums import Ranks
+from utils.enums import Ranks, RTables
+
 
 class Stats(models.Model):
     class Meta:
@@ -24,12 +25,13 @@ class Stats(models.Model):
     rank = models.CharField(default=Ranks.BRONZE.value, max_length=100, blank=True)
     games = models.ManyToManyField('game.Game', blank=True)
 
+
 class Clients(models.Model):
-    #Primary key
+    # Primary key
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False,
                           null=False)
 
-    #Joined tables
+    # Joined tables
     password = models.ForeignKey(Password, on_delete=models.CASCADE)
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
     twoFa = models.ForeignKey(TwoFA, on_delete=models.CASCADE)
@@ -53,16 +55,17 @@ class Clients(models.Model):
 
     @staticmethod
     def get_client_by_id(id: uuid.UUID):
-        if id is None:
+        try:
+            client = Clients.objects.get(id=id)
+            return client
+        except:
             return None
-        client = Clients.objects.get(id=id)
-        return client
-        
+
     @staticmethod
     def get_client_by_username(username: str):
         try:
             return Clients.objects.get(profile__username=username)
-        except :
+        except:
             return None  # Or handle the error appropriately
 
     @staticmethod
@@ -72,10 +75,10 @@ class Clients(models.Model):
         if token is not None:
             return Clients.get_client_by_id(token.SUB)
         return None
-    
+
     @staticmethod
     @sync_to_async
-    def get_client_by_id_async(id: uuid.UUID):
+    def aget_client_by_id(id: uuid.UUID):
         try:
             with transaction.atomic():
                 return Clients.objects.get(id=id)
@@ -84,14 +87,9 @@ class Clients(models.Model):
         except ValidationError:
             return None
 
-    @staticmethod
     @sync_to_async
-    def get_client_by_player_id_async(player_id):
-        try:
-            with transaction.atomic():
-                return Clients.objects.get(player_id=player_id)
-        except Clients.DoesNotExist:
-            return None
+    def aget_mmr(self):
+        return self.stats.mmr
 
     @staticmethod
     def get_client_by_email(email: Profile.email):
@@ -100,18 +98,6 @@ class Clients(models.Model):
             return None
         client = Clients.objects.filter(profile=profile).first()
         return client
-
-    @staticmethod
-    def get_client_by_request(request: HttpRequest):
-        from utils.jwt.JWT import JWTType, JWT
-
-        if 'access_token' in request.COOKIES:
-            token = JWT.extract_token(request, JWTType.ACCESS)
-            if not token:
-                return None
-            return Clients.get_client_by_id(token.SUB)
-
-        return None
 
     @staticmethod
     def get_client_by_player(player_id):
@@ -174,32 +160,29 @@ class Clients(models.Model):
             return Clients.objects.select_related('player').get(id=client_id)
         except Clients.DoesNotExist:
             return None
-        
+
     @sync_to_async
     def aget_profile_username(self):
         try:
             with transaction.atomic():
                 return self.profile.username
         except Exception as e:
-            print(f"Error retrieving username: {e}")
-            return None
-        
+            raise Exception(f"Error retrieving username: {e}")
+
     @sync_to_async
     def get_friend_table(self):
         try:
             with transaction.atomic():
                 return self.friend
         except Exception as e:
-            print(f"Error retrieving friend request: {e}")
-            return None
+            raise Exception(f"Error retrieving friend request: {e}")
 
     def is_friend_by_id(self, client):
         try:
             return self.friend.friends.filter(id=client.id).exists()
         except Exception as e:
-            print(f"Error retrieving client: {e}")
-            return None
-    
+            raise Exception(f"Error retrieving client: {e}")
+
     def get_all_friends(self):
         try:
             friend_list = []
@@ -208,53 +191,65 @@ class Clients(models.Model):
                                     "username": friend.profile.username})
             return friend_list
         except Exception as e:
-            print(f"Error retrieving client: {e}")
-            return None
+            raise Exception(f"Error retrieving client: {e}")
 
     def get_all_pending_request(self):
         try:
             pending_list = []
             for friend in self.friend.pending_friends.all():
                 pending_list.append({"client": friend,
-                                    "username": friend.profile.username})
+                                     "username": friend.profile.username})
             return pending_list
         except Exception as e:
-            print(f"Error retrieving client: {e}")
-            return None
-        
+            raise Exception(f"Error retrieving client: {e}")
+
     @sync_to_async
-    def Aget_all_pending_request(self):
+    def aget_all_pending_request(self):
         try:
             pending_list = []
             for friend in self.friend.pending_friends.all():
                 pending_list.append({"client": friend,
-                                    "username": friend.profile.username})
+                                     "username": friend.profile.username})
             return pending_list
         except Exception as e:
-            print(f"Error retrieving client: {e}")
-            return None
-    
+            raise Exception(f"Error retrieving client: {e}")
+
     @sync_to_async
-    def Aget_pending_request_by_client(self, target):
+    def aget_pending_request_by_client(self, target):
         try:
             for friend in self.friend.pending_friends.all():
                 if friend.id == target.id:
                     return friend
             return None
         except Exception as e:
-            print(f"Error retrieving target: {e}")
-            return None
-        
+            raise Exception(f"Error retrieving target: {e}")
+
     @staticmethod
-    async def ASget_client_by_username(username: str):
+    async def aget_client_by_username(username: str):
         try:
             return await Clients.objects.aget(profile__username=username)
-        except :
+        except:
             return None
-        
+
     @staticmethod
-    async def ASget_client_by_ID(client_id: uuid.UUID):
+    async def aget_client_by_ID(client_id: uuid.UUID):
         try:
             return await Clients.objects.aget(id=client_id)
-        except :
-            return None 
+        except:
+            return None
+
+    @staticmethod
+    async def acheck_in_queue(client, redis):
+        cursor = 0
+        if await redis.hget(name=RTables.HASH_G_QUEUE, key=str(client.id)):
+            print('global')
+            return RTables.HASH_G_QUEUE
+        while True:
+            cursor, keys = await redis.scan(cursor=cursor, match=RTables.HASH_QUEUE('*'))
+            for key in keys:
+                ready = await redis.hget(key, str(client.id))
+                if ready and ready.decode('utf-8') == 'True':
+                    return key
+            if cursor == 0:
+                break
+        return None

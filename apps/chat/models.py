@@ -58,7 +58,7 @@ class Rooms(models.Model):
 
     @staticmethod
     @sync_to_async
-    def ASget_room_id_by_client_id(client_id):
+    def aget_room_id_by_client_id(client_id):
         try:
             with transaction.atomic():
                 return list(Rooms.objects.filter(clients__id=client_id).values_list('id', flat=True))
@@ -71,16 +71,16 @@ class Rooms(models.Model):
             return list(Rooms.objects.filter(clients__id=client_id).values_list('id', flat=True))
         except Clients.DoesNotExist:
             return []
+
     @staticmethod
     def get_room_by_client_id(client_id):
         try:
-            return list(Rooms.objects.filter(clients__id=client_id))  
+            return list(Rooms.objects.filter(clients__id=client_id))
         except Clients.DoesNotExist:
             return []
-    
-    
+
     @staticmethod
-    @sync_to_async  
+    @sync_to_async
     def Aget_room_by_client_id(client_id):
         global_room = "00000000-0000-0000-0000-000000000000"
         try:
@@ -90,22 +90,20 @@ class Rooms(models.Model):
                     query = query.exclude(id=global_room)
                 return query.first()
         except Exception as e:
-            print(f"Error getting room by client ID: {e}")
-            return None
+            raise Exception(f"Error getting room by client ID: {e}")
         except Clients.DoesNotExist:
             return None
-        
+
     @staticmethod
     def get_room_by_client_id(client_id):
         try:
-            return list(Rooms.objects.filter(clients__id=client_id))  
+            return list(Rooms.objects.filter(clients__id=client_id))
         except Clients.DoesNotExist:
             return []
-    
-    
+
     @staticmethod
-    @sync_to_async  
-    def Aget_room_by_client_id(client_id):
+    @sync_to_async
+    def aget_room_by_client_id(client_id):
         global_room = "00000000-0000-0000-0000-000000000000"
         try:
             with transaction.atomic():
@@ -113,12 +111,11 @@ class Rooms(models.Model):
                 if query is not None:
                     query = query.exclude(id=global_room)
                 return query.first()
-        except Exception as e:
-            print(f"Error getting room by client ID: {e}")
-            return None
         except Clients.DoesNotExist:
             return None
-        
+        except Exception as e:
+            raise Exception(f"Error getting room by client ID: {e}")
+
     @staticmethod
     @sync_to_async
     def get_usernames_by_room_id(room_id):
@@ -139,19 +136,19 @@ class Rooms(models.Model):
                 return str(client.id)  # Retourne l'ID sous forme de chaîne
         except Clients.DoesNotExist:
             return None
-    
+
     @sync_to_async
-    def Adelete_room(self):
+    def adelete_room(self):
         try:
             with transaction.atomic():
                 print("delete room")
                 self.delete()
         except Clients.DoesNotExist:
             return None
-        
+
     @staticmethod
     @sync_to_async
-    def Adelete_all_user_by_room_id(roomId):
+    def adelete_all_user_by_room_id(roomId):
         try:
             with transaction.atomic():
                 room = Rooms.objects.get(id=roomId)
@@ -160,7 +157,7 @@ class Rooms(models.Model):
             return True
         except Exception:
             return None
-            
+
 
 class Messages(models.Model):
     id = models.BigAutoField(primary_key=True)
@@ -182,7 +179,7 @@ class Messages(models.Model):
 
     @staticmethod
     @sync_to_async
-    def Aget_message_by_room(room):
+    def aget_message_by_room(room):
         try:
             with transaction.atomic():
                 return list(Messages.objects.filter(room__id=room.id))
@@ -199,7 +196,7 @@ class Messages(models.Model):
 
     @staticmethod
     @sync_to_async
-    def Adelete_all_messages_by_room_id(roomId):
+    def adelete_all_messages_by_room_id(roomId):
         try:
             with transaction.atomic():
                 print("deleting messages...")
@@ -207,6 +204,3 @@ class Messages(models.Model):
                 return True
         except Exception:
             return None
-    
-
-

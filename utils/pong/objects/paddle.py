@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from redis.commands.json.path import Path
 
 from apps.player.models import Player
-from utils.enums import PaddleMove
+from utils.enums import PaddleMove, RTables
 from utils.pong.objects import PADDLE_WIDTH, PADDLE_HEIGHT, PADDLE_SPEED, CANVAS_HEIGHT
 
 
@@ -19,7 +19,7 @@ class Paddle:
 
         # ── Utils ─────────────────────────────────────────────────────────────────────────    
         self.redis = redis
-        self.game_key = f'game:{game_id}'
+        self.game_key = RTables.JSON_GAME(game_id)
         self.player_id = player_id
         self.move: PaddleMove = PaddleMove.IDLE
         self.player_side = Player.get_player_side(self.player_id, self.game_key, self.redis)
@@ -31,7 +31,7 @@ class Paddle:
         self.y = self.get_y()
         self.speed = self.get_speed()
         self.move = self.get_move()
-    
+
     def push_to_redis(self):
         self.set_width(self.width)
         self.set_height(self.height)

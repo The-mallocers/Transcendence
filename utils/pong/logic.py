@@ -7,10 +7,10 @@ import time
 from apps.client.models import Clients
 from apps.game.models import Game
 from apps.player.models import Player
-from utils.enums import EventType, ResponseAction
+from utils.enums import EventType, ResponseAction, RTables
 from utils.enums import GameStatus
 from utils.enums import PaddleMove
-from utils.pong.objects import * 
+from utils.pong.objects import *
 from utils.pong.objects.ball import Ball
 from utils.pong.objects.objects_state import GameState
 from utils.pong.objects.paddle import Paddle
@@ -21,19 +21,18 @@ from utils.websockets.channel_send import send_group
 MAX_BOUNCE_ANGLE = math.radians(75)
 
 class PongLogic:
-    def __init__(self, game: Game, redis): 
+    def __init__(self, game: Game, redis):
         self._logger = logging.getLogger(self.__class__.__name__)
         self.redis = redis
         self.game = game
-        self.game_id = game.game_id
+        self.game_id = game.code
         self.last_update: float = -1  # This hack is sponsored by tfreydie and prevents the random +1 score at the start
 
         # ── Objects ───────────────────────────────────────────────────────────────────
         self.ball: Ball = Ball(game_id=self.game_id, redis=redis)
-        self.paddle_pL: Paddle = Paddle(game_id=self.game_id, redis=redis, player_id=self.game.pL.client_id,
-                                        x=OFFSET_PADDLE)
-        self.paddle_pR: Paddle = Paddle(game_id=self.game_id, redis=redis, player_id=self.game.pR.client_id,
-                                        x=CANVAS_WIDTH - OFFSET_PADDLE - PADDLE_WIDTH)
+        self.paddle_pL: Paddle = Paddle(game_id=self.game_id, redis=redis, player_id=self.game.pL.client_id, x=OFFSET_PADDLE)
+        self.paddle_pR: Paddle = Paddle(game_id=self.game_id, redis=redis, player_id=self.game.pR.client_id, x=CANVAS_WIDTH - OFFSET_PADDLE -
+                                                                                                               PADDLE_WIDTH)
         self.score_pL: Score = Score(game_id=self.game_id, redis=redis, player_id=self.game.pL.client_id)
         self.score_pR: Score = Score(game_id=self.game_id, redis=redis, player_id=self.game.pR.client_id)
         self.points_to_win = self.game.points_to_win
@@ -49,7 +48,7 @@ class PongLogic:
             time.sleep(1 / FPS)
         except asyncio.CancelledError:
             pass
-    
+
     def _game_loop(self):
         current_time = time.time()
         delta_time = self._compute_delta(current_time)
@@ -101,20 +100,20 @@ class PongLogic:
 
     def _handle_paddle_collision(self, paddle, is_left):
         if self._is_paddle_collision(paddle):
-            
+
             # Calculate how far from the paddle center the ball hit
             relative_hit_pos = (self.ball.y - paddle.y) / paddle.height - 0.5
             relative_hit_pos = max(min(relative_hit_pos, MAX_ANGLE_FACTOR), -MAX_ANGLE_FACTOR)
-            
-            current_speed = math.sqrt(self.ball.dx**2 + self.ball.dy**2)
-    
-            #We dont want too vertical of a movement
-            max_vertical_component = current_speed * math.sqrt(1 - MIN_HORIZONTAL_PERCENT**2)
-            
+
+            current_speed = math.sqrt(self.ball.dx ** 2 + self.ball.dy ** 2)
+
+            # We dont want too vertical of a movement
+            max_vertical_component = current_speed * math.sqrt(1 - MIN_HORIZONTAL_PERCENT ** 2)
+
             self.ball.dy = relative_hit_pos * ANGLE_FACTOR * current_speed
             self.ball.dy = max(min(self.ball.dy, max_vertical_component), -max_vertical_component)
-            
-            dx_squared = current_speed**2 - self.ball.dy**2
+
+            dx_squared = current_speed ** 2 - self.ball.dy ** 2
             dx_magnitude = math.sqrt(max(dx_squared, 0.01))
 
             if is_left:
@@ -125,7 +124,6 @@ class PongLogic:
                 self.ball.x = paddle.x - self.ball.radius
             self.ball.dx = min(self.ball.dx * ACCEL, MAX_SPEED)
             self.ball.dy = min(self.ball.dy * ACCEL, MAX_SPEED)
-
 
     def _handle_paddle_direction(self, paddle: Paddle, delta_time):
         move = paddle.move
@@ -141,9 +139,9 @@ class PongLogic:
     def _is_paddle_collision(self, paddle: Paddle):
         closest_x = max(paddle.x, min(self.ball.x, paddle.x + paddle.width))
         closest_y = max(paddle.y - PADDING_PADDLE, min(self.ball.y, paddle.y + paddle.height + PADDING_PADDLE))
-       
-        distance_x = self.ball.x - closest_x 
-        distance_y = self.ball.y - closest_y 
+
+        distance_x = self.ball.x - closest_x
+        distance_y = self.ball.y - closest_y
 
         distance_squared = distance_x ** 2 + distance_y ** 2
         return distance_squared <= self.ball.radius ** 2
@@ -151,89 +149,91 @@ class PongLogic:
     def _reset_ball(self, ball):
         ball.x = CANVAS_WIDTH / 2
         ball.y = CANVAS_HEIGHT / 2
-        
+
         angle_options = [
-            random.uniform(math.radians(40), math.radians(60)),    # Right-up
+            random.uniform(math.radians(40), math.radians(60)),  # Right-up
             random.uniform(math.radians(120), math.radians(140)),  # Left-up
             random.uniform(math.radians(220), math.radians(240)),  # Left-down
-            random.uniform(math.radians(300), math.radians(320))   # Right-down
+            random.uniform(math.radians(300), math.radians(320))  # Right-down
         ]
-        
+
         angle = random.choice(angle_options)
         ball.dx = BALL_SPEED * math.cos(angle)
         ball.dy = BALL_SPEED * math.sin(angle)
-    
+
     def _push_all_to_redis(self):
         self.ball.push_to_redis()
         self.paddle_pL.push_to_redis()
         self.paddle_pR.push_to_redis()
         self.score_pL.push_to_redis()
         self.score_pR.push_to_redis()
-        
+
     def _pull_all_from_redis(self):
         self.ball.update()
         self.paddle_pL.update()
         self.paddle_pR.update()
         self.score_pL.update()
         self.score_pR.update()
-        
+
     def _game_update(self, changes):
         if changes['ball']:
             self.ball.update()
-            send_group(self.game_id, EventType.UPDATE, ResponseAction.BALL_UPDATE, BallSerializer(self.ball).data)
+            send_group(RTables.GROUP_GAME(self.game_id), EventType.UPDATE, ResponseAction.BALL_UPDATE, BallSerializer(self.ball).data)
 
         if changes['paddle_pL']:
             self.paddle_pL.update()
-            send_group(self.game_id, EventType.UPDATE, ResponseAction.PADDLE_LEFT_UPDATE,
+            send_group(RTables.GROUP_GAME(self.game_id), EventType.UPDATE, ResponseAction.PADDLE_LEFT_UPDATE,
                        PaddleSerializer(self.paddle_pL).data)
 
         if changes['paddle_pR']:
             self.paddle_pR.update()
-            send_group(self.game_id, EventType.UPDATE, ResponseAction.PADDLE_RIGHT_UPDATE,
+            send_group(RTables.GROUP_GAME(self.game_id), EventType.UPDATE, ResponseAction.PADDLE_RIGHT_UPDATE,
                        PaddleSerializer(self.paddle_pR).data)
 
         if changes['score_pL']:
             self.score_pL.update()
-            send_group(self.game_id, EventType.UPDATE, ResponseAction.SCORE_LEFT_UPDATE,
+            send_group(RTables.GROUP_GAME(self.game_id), EventType.UPDATE, ResponseAction.SCORE_LEFT_UPDATE,
                        self.score_pL.get_score())
 
         if changes['score_pR']:
             self.score_pR.update()
-            send_group(self.game_id, EventType.UPDATE, ResponseAction.SCORE_RIGHT_UPDATE,
+            send_group(RTables.GROUP_GAME(self.game_id), EventType.UPDATE, ResponseAction.SCORE_RIGHT_UPDATE,
                        self.score_pR.get_score())
 
     def set_result(self, disconnect=False):
-        winner = Player()
-        loser = Player()
+        winner_score = 0
+        winner_client = None
+        loser_score = 0
+        loser_client = None
 
         if disconnect is True:
-            if self.redis.hget(name="consumers_channels", key=str(self.game.pL.id)) is None:
+            if self.redis.hget(name=RTables.HASH_CLIENT(self.game.pL.id), key=str(EventType.GAME.value)) is None:
                 self.score_pL.set_score(0)
                 self.score_pR.set_score(self.game.points_to_win)
-            if self.redis.hget(name="consumers_channels", key=str(self.game.pR.id)) is None:
+            if self.redis.hget(name=RTables.HASH_CLIENT(self.game.pR.id), key=str(EventType.GAME.value)) is None:
                 self.score_pR.set_score(0)
                 self.score_pL.set_score(self.game.points_to_win)
 
         if self.score_pL.get_score() > self.score_pR.get_score():
-            winner.client = Clients.get_client_by_id(self.game.pL.client_id)
-            winner.score = self.score_pL.get_score()
-            loser.client = Clients.get_client_by_id(self.game.pR.client_id)
-            loser.score = self.score_pR.get_score()
+            winner_client = Clients.get_client_by_id(self.game.pL.client_id)
+            winner_score = self.score_pL.get_score()
+            loser_client = Clients.get_client_by_id(self.game.pR.client_id)
+            loser_score = self.score_pR.get_score()
         elif self.score_pL.get_score() < self.score_pR.get_score():
-            winner.client = Clients.get_client_by_id(self.game.pR.client_id)
-            winner.score = self.score_pR.get_score()
-            loser.client = Clients.get_client_by_id(self.game.pL.client_id)
-            loser.score = self.score_pL.get_score()
+            winner_client = Clients.get_client_by_id(self.game.pR.client_id)
+            winner_score = self.score_pR.get_score()
+            loser_client = Clients.get_client_by_id(self.game.pL.client_id)
+            loser_score = self.score_pL.get_score()
 
-        loser.save()
-        winner.save()
-        finished_game = Game.objects.create(id=self.game.game_id, winner=winner, loser=loser,
-                                            points_to_win=self.game.points_to_win)
-        self.save_player_info(loser, finished_game)
-        self.save_player_info(winner, finished_game)
+        winner_player = Player.objects.create(client=winner_client, score=winner_score)
+        loser_player = Player.objects.create(client=loser_client, score=loser_score)
+        finished_game = Game.objects.create(id=self.game.code, winner=winner_player, loser=loser_player, points_to_win=self.game.points_to_win,
+                                            is_duel=self.game.rget_is_duel())
+        self.save_player_info(winner_player, finished_game)
+        self.save_player_info(loser_player, finished_game)
 
     def save_player_info(self, player, finished_game):
         player.game = finished_game
+        player.save()
         player.client.stats.games.add(finished_game)
         player.client.stats.save()
-        player.save()

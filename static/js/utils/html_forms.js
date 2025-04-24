@@ -1,5 +1,4 @@
-
-const Fetch_Error =  `
+const Fetch_Error = `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -33,7 +32,7 @@ const Fetch_Error =  `
 </html>
 `;
 
-const Internal_Server_Error =  `
+const Internal_Server_Error = `
 <!DOCTYPE html>
 <html lang="en">
 <head>

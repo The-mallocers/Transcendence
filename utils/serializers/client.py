@@ -3,11 +3,13 @@ from rest_framework import serializers
 
 from apps.admin.models import Rights
 from apps.auth.models import Password, TwoFA
+from apps.chat.models import Rooms
 from apps.client.models import Clients, Stats
 from apps.notifications.models import Friend
 from apps.profile.models import Profile
 from utils.serializers.auth import PasswordSerializer
 from utils.serializers.profile import ProfileSerializer
+from utils.websockets.services.chat import uuid_global_room
 
 
 class ClientSerializer(serializers.ModelSerializer):
@@ -36,6 +38,13 @@ class ClientSerializer(serializers.ModelSerializer):
                 friend = Friend.objects.create()
                 stats = Stats.objects.create()
                 client = Clients.objects.create(profile=profile, password=password, twoFa=two_fa, rights=right, friend=friend, stats=stats)
+
+                global_room = Rooms.objects.get(id=uuid_global_room)
+                global_room.clients.add(client)
+
+                if validated_data.get('is_admin', False):
+                    client.rights.is_admin = True
+                    client.rights.save()
 
         except Exception as e:
             raise serializers.ValidationError(f"Error creating client: {str(e)}")
