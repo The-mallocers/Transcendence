@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 import atexit
 import logging
+import logging.config
 import os
 import shutil
 import stat
@@ -226,87 +227,8 @@ GRFANA_ADMIN_PWD = os.environ.get('GRAFANA_PASSWORD')
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ LOGGING SETTINGS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
 
-class PermissionedRotatingFileHandler(RotatingFileHandler):
-    """Custom rotating file handler that sets proper file permissions."""
-    def _open(self):
-        rtv = super(PermissionedRotatingFileHandler, self)._open()
-        os.chmod(self.baseFilename, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH)
-        return rtv
-
-    def doRollover(self):
-        """
-        Override the default rotation behavior to use a fixed naming scheme.
-        This prevents multiple log files with timestamps from being created.
-        """
-        if self.stream:
-            self.stream.close()
-            self.stream = None
-
-        # Don't use timestamps in the rotated file names
-        # Instead, use a fixed naming scheme with sequential numbers
-        for i in range(self.backupCount - 1, 0, -1):
-            sfn = f"{self.baseFilename}.{i}"
-            dfn = f"{self.baseFilename}.{i + 1}"
-            if os.path.exists(sfn):
-                if os.path.exists(dfn):
-                    os.remove(dfn)
-                os.rename(sfn, dfn)
-
-        dfn = f"{self.baseFilename}.1"
-        if os.path.exists(dfn):
-            os.remove(dfn)
-
-        # Rename the base file
-        os.rename(self.baseFilename, dfn)
-
-        # Create a new file
-        self.mode = 'w'
-        self.stream = self._open()
-
-
-class PermissionedTimedRotatingFileHandler(TimedRotatingFileHandler):
-    """Custom timed rotating file handler that sets proper file permissions."""
-
-    def _open(self):
-        rtv = super(PermissionedTimedRotatingFileHandler, self)._open()
-        os.chmod(self.baseFilename, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH)
-        return rtv
-
-    def doRollover(self):
-        """
-        Override the default rotation behavior to use a fixed naming scheme.
-        This prevents multiple log files with timestamps from being created.
-        """
-        if self.stream:
-            self.stream.close()
-            self.stream = None
-
-        # Get the time that this sequence started at and make it a TimeTuple
-        current_time = int(time.time())
-
-        # Don't use timestamps in the rotated file names
-        # Instead, use a fixed naming scheme with sequential numbers
-        for i in range(self.backupCount - 1, 0, -1):
-            sfn = f"{self.baseFilename}.{i}"
-            dfn = f"{self.baseFilename}.{i + 1}"
-            if os.path.exists(sfn):
-                if os.path.exists(dfn):
-                    os.remove(dfn)
-                os.rename(sfn, dfn)
-
-        dfn = f"{self.baseFilename}.1"
-        if os.path.exists(dfn):
-            os.remove(dfn)
-
-        # Rename the base file
-        os.rename(self.baseFilename, dfn)
-
-        # Create a new file
-        self.mode = 'w'
-        self.stream = self._open()
-
-        # Set the new rollover time
-        self.rolloverAt = self.computeRollover(current_time)
+# Import custom logging handlers
+from utils.logger import PermissionedRotatingFileHandler, PermissionedTimedRotatingFileHandler
 
 
 # Log directory and file configuration
@@ -392,7 +314,7 @@ LOGGING = {
         # Main log file handler
         'file': {
             'level': 'INFO',
-            'class': 'config.settings.PermissionedRotatingFileHandler',
+            'class': 'utils.logger.PermissionedRotatingFileHandler',
             'filename': os.path.join(LOG_DIR, LOG_FILENAME),
             'formatter': 'aligned',
             'encoding': 'utf-8',
@@ -417,7 +339,7 @@ LOGGING = {
         # Error log handler
         'error_file': {
             'level': 'ERROR',
-            'class': 'config.settings.PermissionedTimedRotatingFileHandler',
+            'class': 'utils.logger.PermissionedTimedRotatingFileHandler',
             'filename': os.path.join(ERROR_LOG_DIR, ERROR_LOG_FILENAME),
             'formatter': 'aligned',
             'encoding': 'utf-8',
@@ -428,7 +350,7 @@ LOGGING = {
         # Access log handler
         'access_file': {
             'level': 'INFO',
-            'class': 'config.settings.PermissionedTimedRotatingFileHandler',
+            'class': 'utils.logger.PermissionedTimedRotatingFileHandler',
             'filename': os.path.join(ACCESS_LOG_DIR, ACCESS_LOG_FILENAME),
             'formatter': 'aligned',
             'encoding': 'utf-8',
@@ -440,7 +362,7 @@ LOGGING = {
         # Security log handler
         'security_file': {
             'level': 'INFO',
-            'class': 'config.settings.PermissionedTimedRotatingFileHandler',
+            'class': 'utils.logger.PermissionedTimedRotatingFileHandler',
             'filename': os.path.join(SECURITY_LOG_DIR, SECURITY_LOG_FILENAME),
             'formatter': 'json',  # Use JSON format for security logs for better analysis
             'encoding': 'utf-8',
@@ -451,7 +373,7 @@ LOGGING = {
         # Performance log handler
         'performance_file': {
             'level': 'DEBUG',
-            'class': 'config.settings.PermissionedRotatingFileHandler',
+            'class': 'utils.logger.PermissionedRotatingFileHandler',
             'filename': os.path.join(PERFORMANCE_LOG_DIR, PERFORMANCE_LOG_FILENAME),
             'formatter': 'aligned',
             'encoding': 'utf-8',
@@ -497,6 +419,29 @@ LOGGING = {
             'level': 'DEBUG' if DEBUG else 'INFO',
             'propagate': False,
         },
+        # Django management commands logger (collectstatic, migrate, etc.)
+        'django.core.management': {
+            'handlers': ['console', 'file', 'latest_file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'django.core.management.commands': {
+            'handlers': ['console', 'file', 'latest_file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        # Static files logger
+        'django.contrib.staticfiles': {
+            'handlers': ['console', 'file', 'latest_file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        # Migrations logger
+        'django.db.migrations': {
+            'handlers': ['console', 'file', 'latest_file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
         # Custom application loggers
         'apps': {
             'handlers': ['console', 'file', 'error_file'],
@@ -515,6 +460,59 @@ LOGGING = {
             'propagate': False,
         },
         'daphne.cli': {
+            'handlers': ['console', 'file', 'latest_file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        # Uvicorn loggers
+        'uvicorn': {
+            'handlers': ['console', 'file', 'latest_file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'uvicorn.error': {
+            'handlers': ['console', 'file', 'error_file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'uvicorn.access': {
+            'handlers': ['access_file', 'console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'uvicorn.main': {
+            'handlers': ['console', 'file', 'latest_file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'uvicorn.config': {
+            'handlers': ['console', 'file', 'latest_file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        # WatchFiles loggers (used by Uvicorn hot reload)
+        'watchfiles': {
+            'handlers': ['console', 'file', 'latest_file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'watchfiles.main': {
+            'handlers': ['console', 'file', 'latest_file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'watchfiles.watcher': {
+            'handlers': ['console', 'file', 'latest_file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        # Uvicorn reload supervisor logger
+        'uvicorn.supervisors': {
+            'handlers': ['console', 'file', 'latest_file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'uvicorn.supervisors.reload': {
             'handlers': ['console', 'file', 'latest_file'],
             'level': 'INFO',
             'propagate': False,
@@ -570,3 +568,8 @@ def cleanup_old_logs():
 
 # Register the cleanup function to run on application exit
 atexit.register(cleanup_old_logs)
+
+# Configure Uvicorn to use Django's logging
+# This prevents Uvicorn from configuring its own logging
+LOGGING_CONFIG = None
+logging.config.dictConfig(LOGGING)

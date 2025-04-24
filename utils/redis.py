@@ -9,10 +9,9 @@ import redis
 import redis.asyncio as aioredis
 from django.conf import settings
 
-logger = logging.getLogger(__name__)
-
 
 class RedisConnectionPool:
+    _logger = logging.getLogger(__name__)
     _pools: Dict[str, Dict[int, aioredis.Redis]] = {}
     _sync_pools: Dict[str, Dict[int, redis.Redis]] = {}
     _lock = threading.RLock()
@@ -38,7 +37,7 @@ class RedisConnectionPool:
             if 'REDIS_URL' in os.environ:
                 default_params['url'] = os.environ['REDIS_URL']
         except (AttributeError, ImportError):
-            logger.warning("Could not load Redis configuration from Django settings")
+            cls._logger.warning("Could not load Redis configuration from Django settings")
 
         return default_params
 
@@ -80,7 +79,7 @@ class RedisConnectionPool:
                 )
 
             cls._pools[alias][identifier] = connection
-            logger.debug(f"Created new Redis connection for alias: {alias}, context: {identifier}")
+            cls._logger.debug(f"Created new Redis connection for alias: {alias}, context: {identifier}")
 
         return cls._pools[alias][identifier]
 
@@ -112,7 +111,7 @@ class RedisConnectionPool:
                 )
 
             cls._sync_pools[alias][identifier] = connection
-            logger.debug(f"Created new synchronous Redis connection for alias: {alias}, context: {identifier}")
+            cls._logger.debug(f"Created new synchronous Redis connection for alias: {alias}, context: {identifier}")
 
         return cls._sync_pools[alias][identifier]
 
@@ -130,7 +129,7 @@ class RedisConnectionPool:
         try:
             yield connection
         except Exception as e:
-            logger.error(f"Redis error: {str(e)}")
+            cls._logger.error(f"Redis error: {str(e)}")
             raise
         finally:
             # No need to explicitly close synchronous Redis connections
@@ -145,9 +144,9 @@ class RedisConnectionPool:
             if alias in cls._pools and identifier in cls._pools[alias]:
                 try:
                     await cls._pools[alias][identifier].close()
-                    logger.debug(f"Closed Redis connection for alias: {alias}, context: {identifier}")
+                    cls._logger.debug(f"Closed Redis connection for alias: {alias}, context: {identifier}")
                 except Exception as e:
-                    logger.error(f"Error closing Redis connection: {str(e)}")
+                    cls._logger.error(f"Error closing Redis connection: {str(e)}")
                 finally:
                     del cls._pools[alias][identifier]
 
@@ -158,9 +157,9 @@ class RedisConnectionPool:
                 for identifier, connection in list(connections.items()):
                     try:
                         await connection.close()
-                        logger.debug(f"Closed Redis connection for alias: {alias}, context: {identifier}")
+                        cls._logger.debug(f"Closed Redis connection for alias: {alias}, context: {identifier}")
                     except Exception as e:
-                        logger.error(f"Error closing Redis connection: {str(e)}")
+                        cls._logger.error(f"Error closing Redis connection: {str(e)}")
                     finally:
                         del connections[identifier]
             cls._pools.clear()

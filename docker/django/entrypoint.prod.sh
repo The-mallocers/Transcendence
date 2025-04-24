@@ -1,7 +1,5 @@
 #!/bin/bash
 
-echo "PostgreSQL started"
-
 _term() {
   echo "Received SIGTERM, shutting down gracefully..."
   kill -TERM "$child"
@@ -24,6 +22,13 @@ if [ $# -eq 0 ]; then
       --reload \
       --reload-dir . \
       --reload-dir ./utils \
+      --reload-dir ./static \
+      --reload-dir ./templates \
+      --reload-dir ./apps \
+      --reload-include "*.py" \
+      --reload-include "*.html" \
+      --reload-include "*.js" \
+      --reload-include "*.css" \
       --workers 3
 else
   # A command was passed, execute it
