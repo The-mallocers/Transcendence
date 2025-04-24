@@ -30,6 +30,15 @@ class Paddle:
         self.x = self.get_x()
         self.y = self.get_y()
         self.speed = self.get_speed()
+        self.move = self.get_move()
+
+    def push_to_redis(self):
+        self.set_width(self.width)
+        self.set_height(self.height)
+        self.set_x(self.x)
+        self.set_y(self.y)
+        self.set_speed(self.speed)
+        self.set_move(self.move)
 
     def __str__(self):
         return f'X: {self.x}, Y: {self.y}'
@@ -92,7 +101,7 @@ class Paddle:
 
     #
     def handle_wall_collision(self, y) -> float:
-        height = self.get_height()
+        height = self.height
         if y <= 0:
             return 0
         elif y + height >= CANVAS_HEIGHT:

@@ -10,6 +10,7 @@ from utils.jwt.JWT import JWT
 from utils.serializers.auth import PasswordSerializer
 from utils.serializers.client import ClientSerializer
 from utils.serializers.permissions.auth import PasswordPermission
+from utils.serializers.picture import ProfilePictureValidator
 
 
 class PasswordApiView(APIView):
@@ -206,3 +207,25 @@ class GetClientIDApiView(APIView):
             "client_id": client.id,
             "message": "ID retrieved succesfully"
         }, status=status.HTTP_200_OK)
+
+
+class UploadPictureApiView(APIView):
+    def post(self, request: HttpRequest, *args, **kwargs):
+        print("Its getting here !")
+        try:
+            client = Clients.get_client_by_request(request)
+            profile = client.profile
+
+            if not profile:
+                return Response({"error": "Profile not found"}, status=status.HTTP_404_NOT_FOUND)
+
+            serializer = ProfilePictureValidator(data=request.data)
+
+            if serializer.is_valid():
+                profile.profile_picture = serializer.validated_data['profile_picture']
+                profile.save()
+                return Response({"message": "Profile picture updated successfully"}, status=status.HTTP_200_OK)
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

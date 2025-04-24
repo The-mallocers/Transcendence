@@ -47,3 +47,9 @@ def join_tournament_get(req):
 def inTournamentRoom(req):
     from apps.game.views.tournaments import inRoom
     return inRoom(req)
+
+
+@require_http_methods(["GET"])
+def disconnect_get(req):
+    from apps.game.views.disconnect import get
+    return get(req)

@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import math
 import random
 import time
 
@@ -9,7 +10,7 @@ from apps.player.models import Player
 from utils.enums import EventType, ResponseAction, RTables
 from utils.enums import GameStatus
 from utils.enums import PaddleMove
-from utils.pong.objects import FPS, CANVAS_HEIGHT, CANVAS_WIDTH, BALL_SPEED, OFFSET_PADDLE, PADDLE_WIDTH
+from utils.pong.objects import *
 from utils.pong.objects.ball import Ball
 from utils.pong.objects.objects_state import GameState
 from utils.pong.objects.paddle import Paddle
@@ -17,9 +18,10 @@ from utils.pong.objects.score import Score
 from utils.serializers.game import PaddleSerializer, BallSerializer
 from utils.websockets.channel_send import send_group
 
+MAX_BOUNCE_ANGLE = math.radians(75)
 
 class PongLogic:
-    def __init__(self, game: Game, redis):  # ball, paddle_pL, paddle_pR, score_pL, score_pR):
+    def __init__(self, game: Game, redis):
         self._logger = logging.getLogger(self.__class__.__name__)
         self.redis = redis
         self.game = game
@@ -43,85 +45,135 @@ class PongLogic:
             current_state = GameState.create_copy(self)
             changes = GameState.get_differences(current_state, previous_state)
             self._game_update(changes)
-            time.sleep(1 / FPS)  # Toy with this variable.
+            time.sleep(1 / FPS)
         except asyncio.CancelledError:
-            pass
-
-    def handle_paddle_direction(self, paddle, delta_time):
-        move = paddle.get_move()
-        if move == PaddleMove.UP:
-            paddle.decrease_y(delta_time)
-        elif move == PaddleMove.DOWN:
-            paddle.increase_y(delta_time)
-        elif move == PaddleMove.IDLE:
-            # Maybe we'll do things when its idle later !
             pass
 
     def _game_loop(self):
         current_time = time.time()
-        # ugly as shit fix but doing properly would require changing the way we are initializing a game.
+        delta_time = self._compute_delta(current_time)
+        self._pull_all_from_redis()
+        self._handle_movement(delta_time)
+        self._handle_wall_collision()
+        self._handle_paddle_collision(self.paddle_pL, is_left=True)
+        self._handle_paddle_collision(self.paddle_pR, is_left=False)
+        self._handle_score()
+        self._push_all_to_redis()
+        self._handle_end_game()
+        self.last_update = current_time
+
+    def _handle_end_game(self):
+        if self.score_pL.score >= self.points_to_win:
+            self.game.rset_status(GameStatus.ENDING)
+        elif self.score_pR.score >= self.points_to_win:
+            self.game.rset_status(GameStatus.ENDING)
+
+    def _handle_score(self):
+        if self.ball.x <= 0 + PADDING_SCORE:
+            self.score_pR.score += 1
+            self._reset_ball(self.ball)
+        elif self.ball.x >= CANVAS_WIDTH - PADDING_SCORE:
+            self.score_pL.score += 1
+            self._reset_ball(self.ball)
+
+    def _compute_delta(self, current_time):
         if self.last_update == -1:
             delta_time = 0
         else:
             delta_time = current_time - self.last_update
+        return delta_time
 
-        self.ball.multiply_dx(1.001)
-        self.ball.multiply_dy(1.001)
+    def _handle_wall_collision(self):
+        if self.ball.y <= self.ball.radius or self.ball.y >= CANVAS_HEIGHT - self.ball.radius:
+            if self.ball.y < self.ball.radius:
+                self.ball.y = self.ball.radius
+            elif self.ball.y > CANVAS_HEIGHT - self.ball.radius:
+                self.ball.y = CANVAS_HEIGHT - self.ball.radius
+            self.ball.dy = self.ball.dy * -1
 
-        self.ball.increase_x(self.ball.get_dx() * delta_time)
-        self.ball.increase_y(self.ball.get_dy() * delta_time)
+    def _handle_movement(self, delta_time):
 
-        self.handle_paddle_direction(self.paddle_pL, delta_time)
-        self.handle_paddle_direction(self.paddle_pR, delta_time)
+        self.ball.x += self.ball.dx * delta_time
+        self.ball.y += self.ball.dy * delta_time
+        self._handle_paddle_direction(self.paddle_pL, delta_time)
+        self._handle_paddle_direction(self.paddle_pR, delta_time)
 
-        # Ball collision with top and bottom walls
-        if self.ball.get_y() <= self.ball.get_radius() or self.ball.get_y() >= CANVAS_HEIGHT - self.ball.get_radius():
-            if self.ball.get_y() < self.ball.get_radius():
-                self.ball.set_y(self.ball.get_radius())  # Correct ball position
-            elif self.ball.get_y() > CANVAS_HEIGHT - self.ball.get_radius():
-                self.ball.set_y(CANVAS_HEIGHT - self.ball.get_radius())  # Correct ball position
-            # Reverse ball's vertical direction
-            self.ball.set_dy(self.ball.get_dy() * -1)
+    def _handle_paddle_collision(self, paddle, is_left):
+        if self._is_paddle_collision(paddle):
 
-        # Left paddle collision
-        if (
-                self.ball.get_x() - self.ball.get_radius() <= self.paddle_pL.get_x() + self.paddle_pL.get_width() and
-                self.ball.get_x() >= self.paddle_pL.get_x() and
-                self.ball.get_y() >= self.paddle_pL.get_y() and
-                self.ball.get_y() <= self.paddle_pL.get_y() + self.paddle_pL.get_height()):
-            self.ball.set_dx(abs(self.ball.get_dx()))  # Ensure ball moves right
-            self.ball.set_x(
-                self.paddle_pL.get_x() + self.paddle_pL.get_width() + self.ball.get_radius())
+            # Calculate how far from the paddle center the ball hit
+            relative_hit_pos = (self.ball.y - paddle.y) / paddle.height - 0.5
+            relative_hit_pos = max(min(relative_hit_pos, MAX_ANGLE_FACTOR), -MAX_ANGLE_FACTOR)
 
-        # Right paddle collision
-        if (self.ball.get_x() + self.ball.get_radius() >= self.paddle_pR.get_x() and
-                self.ball.get_x() <= self.paddle_pR.get_x() + self.paddle_pR.get_width() and
-                self.ball.get_y() >= self.paddle_pR.get_y() and
-                self.ball.get_y() <= self.paddle_pR.get_y() + self.paddle_pR.get_height()):
-            self.ball.set_dx(-abs(self.ball.get_dx()))  # Ensure ball moves left
-            self.ball.set_x(self.paddle_pR.get_x() - self.ball.get_radius())
+            current_speed = math.sqrt(self.ball.dx ** 2 + self.ball.dy ** 2)
 
-        # Scoring
-        if self.ball.get_x() <= 0:
-            self.score_pR.add_score()
-            self._reset_ball(self.ball)
-        elif self.ball.get_x() >= CANVAS_WIDTH:
-            self.score_pL.add_score()
-            self._reset_ball(self.ball)
+            # We dont want too vertical of a movement
+            max_vertical_component = current_speed * math.sqrt(1 - MIN_HORIZONTAL_PERCENT ** 2)
 
-        # Check win
-        if self.score_pL.get_score() >= self.points_to_win:
-            self.game.rset_status(GameStatus.ENDING)
-        elif self.score_pR.get_score() >= self.points_to_win:
-            self.game.rset_status(GameStatus.ENDING)
+            self.ball.dy = relative_hit_pos * ANGLE_FACTOR * current_speed
+            self.ball.dy = max(min(self.ball.dy, max_vertical_component), -max_vertical_component)
 
+            dx_squared = current_speed ** 2 - self.ball.dy ** 2
+            dx_magnitude = math.sqrt(max(dx_squared, 0.01))
+
+            if is_left:
+                self.ball.dx = dx_magnitude
+                self.ball.x = paddle.x + paddle.width + self.ball.radius
+            else:
+                self.ball.dx = -dx_magnitude
+                self.ball.x = paddle.x - self.ball.radius
+            self.ball.dx = min(self.ball.dx * ACCEL, MAX_SPEED)
+            self.ball.dy = min(self.ball.dy * ACCEL, MAX_SPEED)
+
+    def _handle_paddle_direction(self, paddle: Paddle, delta_time):
+        move = paddle.move
+        if move == PaddleMove.UP:
+            paddle.y = paddle.y - paddle.speed * delta_time
+            paddle.y = paddle.handle_wall_collision(paddle.y)
+        elif move == PaddleMove.DOWN:
+            paddle.y = paddle.y + paddle.speed * delta_time
+            paddle.y = paddle.handle_wall_collision(paddle.y)
+        elif move == PaddleMove.IDLE:
+            pass
+
+    def _is_paddle_collision(self, paddle: Paddle):
+        closest_x = max(paddle.x, min(self.ball.x, paddle.x + paddle.width))
+        closest_y = max(paddle.y - PADDING_PADDLE, min(self.ball.y, paddle.y + paddle.height + PADDING_PADDLE))
+
+        distance_x = self.ball.x - closest_x
+        distance_y = self.ball.y - closest_y
+
+        distance_squared = distance_x ** 2 + distance_y ** 2
+        return distance_squared <= self.ball.radius ** 2
+
+    def _reset_ball(self, ball):
+        ball.x = CANVAS_WIDTH / 2
+        ball.y = CANVAS_HEIGHT / 2
+
+        angle_options = [
+            random.uniform(math.radians(40), math.radians(60)),  # Right-up
+            random.uniform(math.radians(120), math.radians(140)),  # Left-up
+            random.uniform(math.radians(220), math.radians(240)),  # Left-down
+            random.uniform(math.radians(300), math.radians(320))  # Right-down
+        ]
+
+        angle = random.choice(angle_options)
+        ball.dx = BALL_SPEED * math.cos(angle)
+        ball.dy = BALL_SPEED * math.sin(angle)
+
+    def _push_all_to_redis(self):
+        self.ball.push_to_redis()
+        self.paddle_pL.push_to_redis()
+        self.paddle_pR.push_to_redis()
+        self.score_pL.push_to_redis()
+        self.score_pR.push_to_redis()
+
+    def _pull_all_from_redis(self):
         self.ball.update()
         self.paddle_pL.update()
         self.paddle_pR.update()
         self.score_pL.update()
         self.score_pR.update()
-
-        self.last_update = current_time
 
     def _game_update(self, changes):
         if changes['ball']:
@@ -148,12 +200,6 @@ class PongLogic:
             send_group(RTables.GROUP_GAME(self.game_id), EventType.UPDATE, ResponseAction.SCORE_RIGHT_UPDATE,
                        self.score_pR.get_score())
 
-    def _reset_ball(self, ball):
-        ball.set_x(CANVAS_WIDTH / 2)
-        ball.set_y(CANVAS_HEIGHT / ((random.random() + 1) * 2))
-        ball.set_dx(BALL_SPEED * (1 if random.random() > 0.5 else -1))
-        ball.set_dy(BALL_SPEED * (1 if random.random() > 0.5 else -1))
-
     def set_result(self, disconnect=False):
         winner_score = 0
         winner_client = None
@@ -167,8 +213,6 @@ class PongLogic:
             if self.redis.hget(name=RTables.HASH_CLIENT(self.game.pR.id), key=str(EventType.GAME.value)) is None:
                 self.score_pR.set_score(0)
                 self.score_pL.set_score(self.game.points_to_win)
-            # self.score_pL.set_score(0) if self.redis.hget(name="consumers_channels", key=str(self.game.pL.id)) is None else self.score_pR.get_score(0)
-            # self.score_pL.set_score(self.game.points_to_win) if self.redis.hget(name="consumers_channels", key=str(self.game.pL.id)) is not None else self.score_pR.get_score(self.game.points_to_win)
 
         if self.score_pL.get_score() > self.score_pR.get_score():
             winner_client = Clients.get_client_by_id(self.game.pL.client_id)

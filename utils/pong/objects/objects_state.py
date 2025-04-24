@@ -61,7 +61,7 @@ class GameState:
             'paddle_pL': {},
             'paddle_pR': {},
             'score_pL': {},
-            'score_pR': {}
+            'score_pR': {},
         }
 
         # Compare Ball properties

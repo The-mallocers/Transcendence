@@ -6,8 +6,10 @@
     <h3>{{ client.profile.username }}</h3>
 
     <div class="avatar">
-        
-        <img  src="{% static 'assets/imgs/' %}{{ client.profile.profile_picture }}">
+
+        <!-- <img  src="{% static 'assets/imgs/' %}{{ client.profile.profile_picture }}"> -->
+        <img src="{{ client.profile.profile_picture.url }}">
+        <!-- <img src="{% static 'assets/imgs/' %}{{ client.profile.profile_picture }}"> -->
     </div>
     <div class="container infos">
         <div class="row">
