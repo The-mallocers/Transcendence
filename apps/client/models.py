@@ -242,7 +242,6 @@ class Clients(models.Model):
     async def acheck_in_queue(client, redis):
         cursor = 0
         if await redis.hget(name=RTables.HASH_G_QUEUE, key=str(client.id)):
-            print('global')
             return RTables.HASH_G_QUEUE
         while True:
             cursor, keys = await redis.scan(cursor=cursor, match=RTables.HASH_QUEUE('*'))

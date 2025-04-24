@@ -14,9 +14,9 @@ from utils.enums import TournamentStatus
 
 
 class TournamentSerializer(serializers.Serializer):
-    name = serializers.CharField(
+    title = serializers.CharField(
         max_length=40,
-        error_messages={'blank': 'Tournament name cannot be empty'}
+        error_messages={'blank': 'Tournament title cannot be empty'}
     )
     max_players = serializers.IntegerField(
         validators=[
@@ -38,6 +38,7 @@ class TournamentSerializer(serializers.Serializer):
             MaxValueValidator(600, message="Timer cannot exceed 600 seconds (10 minutes)")
         ]
     )
+    host = serializers.UUIDField()
 
     def validate(self, data):
         if data.get('max_players') % 2 != 0:
@@ -48,6 +49,7 @@ class TournamentSerializer(serializers.Serializer):
         data = super().to_representation(instance)
         data['status'] = TournamentStatus.CREATING
         data['created-at'] = timezone.now().isoformat()
+        data['players'] = [data['host']]
         data['scoreboards'] = self.generate_tournament_structure(data['max_players'])
         return data
 

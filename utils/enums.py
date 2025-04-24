@@ -7,7 +7,6 @@ class GameStatus(str, Enum):
     STARTING: str = 'starting'
     RUNNING: str = 'running'
     ENDING: str = 'ending'
-    DESTROYING: str = 'destroying'
     FINISHED: str = 'finished'
     ERROR: str = 'error'
 
@@ -17,7 +16,8 @@ status_order = list(GameStatus)
 
 class TournamentStatus(str, Enum):
     CREATING: str = 'creating'
-    MATCHMAKING: str = 'matchmaking'
+    WAITING: str = 'waiting'
+    CREATING_MATCH: str = 'creating_match'
     STARTING: str = 'starting'
     RUNNING: str = 'running'
     ENDING: str = 'ending'
@@ -93,6 +93,8 @@ class ResponseAction(str, Enum):
     TOURNAMENT_JOIN: str = 'You have successfully joined the tournament'
     TOURNAMENT_PLAYER_JOIN: str = 'Player join the tournament.'
     TOURNAMENT_LEFT: str = 'You have successfully left the tournament'
+    TOURNAMENT_WAITTING_PLAYERS: str = 'Waiting players for tournament'
+    TOURNAMENT_PLAYERS_READY: str = 'Players are ready'
 
     # ── Game Actions ──────────────────────────────────────────────────────────────────
     JOIN_GAME: str = 'You have successfully joined the game'
@@ -145,10 +147,11 @@ class ResponseError(str, Enum):
     ALREADY_JOIN_DUEL: str = 'You try to join duel already joined.'
 
     # ── Tournaments ───────────────────────────────────────────────────────────────── #
-    MISSING_KEY: str = 'Some keys are missing'
+    KEY_ERROR: str = 'Error in tournament key.'
     TOURNAMENT_NOT_CREATE: str = 'There is error when you try to create tournaments.'
     TOURNAMENT_NOT_EXIST: str = 'Tournament you try to join not exist.'
     ALREADY_JOIN_TOURNAMENT: str = 'You try to join tournament already joined.'
+    HOST_LEAVE: str = 'Host leave tournament.'
 
     # ── Game ──────────────────────────────────────────────────────────────────────────
     GAME_FULL: str = 'The game is currently full.'

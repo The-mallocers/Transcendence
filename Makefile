@@ -10,6 +10,7 @@ help:
 	@echo "  make logs            - Show container logs"
 	@echo "  make status          - Show container status"
 	@echo "  make restart         - Restart all containers"
+	@echo "  make reload          - Reload staticfile"
 	@echo "  make dbclean         - Remove database volumes"
 	@echo "  make clean           - Remove all containers and images"
 	@echo "  make re              - Alias for restart"

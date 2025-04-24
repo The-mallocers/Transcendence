@@ -79,7 +79,7 @@ class RedisConnectionPool:
                 )
 
             cls._pools[alias][identifier] = connection
-            cls._logger.debug(f"Created new Redis connection for alias: {alias}, context: {identifier}")
+            cls._logger.debug(f"Created new asynchronous Redis connection for alias: {alias}, context: {identifier}")
 
         return cls._pools[alias][identifier]
 
@@ -111,7 +111,7 @@ class RedisConnectionPool:
                 )
 
             cls._sync_pools[alias][identifier] = connection
-            cls._logger.debug(f"Created new synchronous Redis connection for alias: {alias}, context: {identifier}")
+            cls._logger.debug(f"Created new Redis connection for alias: {alias}, context: {identifier}")
 
         return cls._sync_pools[alias][identifier]
 

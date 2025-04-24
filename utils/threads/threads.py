@@ -12,10 +12,11 @@ from utils.redis import RedisConnectionPool
 class Threads(threading.Thread, ABC):
     instance = None
     active_threads = []
+    _shutdown_lock = threading.Lock()
 
     def __init__(self, name):
         super().__init__(daemon=True, name=name)
-        self.redis = RedisConnectionPool.get_sync_connection(self.__class__.__name__)
+        self.redis = RedisConnectionPool.get_sync_connection(name)
         # self.loop = asyncio.new_event_loop()
 
         self._logger = logging.getLogger(self.__class__.__name__)
@@ -57,11 +58,6 @@ class Threads(threading.Thread, ABC):
             self._logger.debug(f"Action '{action_id}' executed")
             return True
         return False
-
-    # async def exec(self):
-    #     self.redis = await RedisConnectionPool.get_async_connection(self.name)
-    #     await self.main()
-    #     await RedisConnectionPool.close_connection(self.name)
 
     @abstractmethod
     def main(self):
