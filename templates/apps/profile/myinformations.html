@@ -6,20 +6,21 @@
         <div class="row align-items-start box">
             <div class="col-7">
                 <div class="content">
-                    <h2 class="text-center">Personal informations</h2>
+                    <h2 class="text-center">Update Personal informations</h2>
                     <div class=" d-flex flex-column align-items-center justify-content-center inputs">
-                        <!-- <label class="w-50 mt-4 title-personal-info" for="email">Email</label>
+                        <label class="w-50 mt-4 title-personal-info" for="email">New Email</label>
                         <input class="p-2 mt-1 w-50" type="text" placeholder="email" id="email">
 
-                        <label class="w-50 mt-4 title-personal-info" for="nickname">Nickname</label>
+                        <label class="w-50 mt-4 title-personal-info" for="nickname">New Username</label>
                         <input class="p-2 mt-1 w-50" type="text" placeholder="nickname" id="nickname">
                         
                         <label class="w-50 mt-4 title-personal-info" for="changepw">Change password</label>
                         <input class="p-2 mt-1 w-50" type="password" placeholder="change password" id="changepw">
 
                         <label class="w-50 mt-4 title-personal-info" for="changepwconf">Confirm password</label>
-                        <input class="p-2 mt-1 w-50" type="password" placeholder="change password" id="changepwconf"> -->
+                        <input class="p-2 mt-1 w-50" type="password" placeholder="change password" id="changepwconf">
 
+                        <div class="type-intra-green mt-4" id="update-btn">Update informations</div>
                         <div class="type-intra-green mt-4" id="logout-btn">log out</div>
                         <div id="upload-feedback"></div>
                         <div class="type-intra-green mt-4" id="upload-img-btn">Upload new profile picture</div>
@@ -32,14 +33,17 @@
                 </div>
             </div>
             <div class="col-5">
-                <div class="content d-flex flex-column justify-content-center align-items-center">
-                    <svg class="shield" viewBox="0 0 94 125" xmlns="http://www.w3.org/2000/svg">
-                        <path class="shieldPath"
+                <div class="content d-flex flex-column justify-content-center align-items-center" >
+                    <svg class="shield" viewBox="0 0 94 125" xmlns="http://www.w3.org/2000/svg" >
+                        <path class="shieldPath {% if twoFaEnable %}fillGreen{% endif %}" 
                               d="M46.009 0.27625L14.5877 9.02375V11.0687C14.5877 22.0438 7.9441 17.275 1.98196 19.4575L0.00250072 20.1838L0 22.0438V67.92C0 83.7687 7.92035 98.5875 22.902 110.772C34.1035 119.884 45.195 124.29 45.6626 124.474L47.0006 125L48.3386 124.475C48.805 124.293 59.8953 119.885 71.0993 110.774C86.0809 98.5888 94 83.7688 94 67.9212V20.1863L92.018 19.4587C86.0547 17.275 79.4123 22.0438 79.4123 11.07V9.02375L47.0006 0L46.009 0.27625Z "/>
                     </svg>
                     <h2 class="text-center mt-5">Enable 2-FA</h2>
-                    <div class="switch mt-3" data-status="off" onclick="switchToggle(this)"></div>
-
+                    <div class="switch mt-3" data-status="on" onclick="switchToggle(this)" {% if twoFaEnable %}fillGreen{% endif %} ></div>
+                    <!-- {% if twoFaEnable %}
+                    {% else %}
+                        <div class="switch mt-3" data-status="off" onclick="switchToggle(this)"></div>
+                    {%endif%} -->
                     <script>
                         async function switchToggle(e) {
                             e.dataset.status = (e.dataset.status === 'on' ? 'off' : 'on');
@@ -73,4 +77,5 @@
 </div>
 <script type="module" src="{% static 'js/apps/auth/logout.js' %}"></script>
 <script type="module" src="{% static 'js/apps/auth/upload_img.js' %}"></script>
+<script type="module" src="{% static 'js/apps/auth/update_infos.js' %}"></script>
 

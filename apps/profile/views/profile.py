@@ -39,10 +39,13 @@ def get(req):
 
 
 def get_settings(req):
+    #I need to add in the context the fact that he has 2FA activated
     client = Clients.get_client_by_request(req)
+        
     html_content = render_to_string("apps/profile/myinformations.html", {
         "csrf_token": get_token(req),
         "isAdmin": client.rights.is_admin,
+        "twoFaEnable": client.twoFa.enable
     })
     return JsonResponse({
         'html': html_content,
