@@ -1,15 +1,24 @@
 """
-Custom logging handlers for Django.
+Custom logging handlers and filters for Django.
 
 This module contains custom logging handlers that extend the standard
 logging handlers with additional functionality like file permissions
-and custom rotation behavior.
+and custom rotation behavior, as well as custom filters for log messages.
 """
 
 import os
 import stat
 import time
+from logging import Filter
 from logging.handlers import RotatingFileHandler, TimedRotatingFileHandler
+
+
+class StaticRequestFilter(Filter):
+    """Filter that removes log messages containing 'static'."""
+
+    def filter(self, record):
+        """Return True if the record should be logged (i.e., if 'static' is not in the message)."""
+        return 'static' not in record.getMessage()
 
 
 class PermissionedRotatingFileHandler(RotatingFileHandler):

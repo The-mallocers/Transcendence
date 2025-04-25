@@ -52,8 +52,8 @@ class Game(models.Model):
     # ═════════════════════════════════ Local Fields ═════════════════════════════════ #
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.redis = RedisConnectionPool.get_sync_connection()
         self.code = create_game_id()
+        self.redis = RedisConnectionPool.get_sync_connection(self.__class__.__name__ + f'_{self.code}')
         self.game_key = RTables.JSON_GAME(self.code)
         self.pL: Player = None
         self.pR: Player = None

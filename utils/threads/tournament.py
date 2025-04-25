@@ -78,7 +78,7 @@ class TournamentThread(Threads):
 
     def _starting(self):
         if self.status is TournamentStatus.CREATING_MATCH:
-            print('creating match')
+            print('creating match.')
         return False
 
     def _running(self):

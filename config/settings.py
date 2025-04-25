@@ -11,10 +11,12 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 import atexit
+import json
 import logging
 import logging.config
 import os
 import shutil
+import signal
 import stat
 import sys
 import time
@@ -31,6 +33,8 @@ from django.middleware.clickjacking import XFrameOptionsMiddleware
 from django.middleware.common import CommonMiddleware
 from django.middleware.csrf import CsrfViewMiddleware
 from django.middleware.security import SecurityMiddleware
+
+from utils.threads.threads import Threads
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ PATH SETTINGS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
 
@@ -227,10 +231,6 @@ GRFANA_ADMIN_PWD = os.environ.get('GRAFANA_PASSWORD')
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ LOGGING SETTINGS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
 
-# Import custom logging handlers
-from utils.logger import PermissionedRotatingFileHandler, PermissionedTimedRotatingFileHandler
-
-
 # Log directory and file configuration
 LOG_DIR = os.path.join(BASE_DIR, 'logs')
 os.makedirs(LOG_DIR, exist_ok=True)
@@ -244,289 +244,22 @@ PERFORMANCE_LOG_DIR = os.path.join(LOG_DIR, 'performance')
 for directory in [ERROR_LOG_DIR, ACCESS_LOG_DIR, SECURITY_LOG_DIR, PERFORMANCE_LOG_DIR]:
     os.makedirs(directory, exist_ok=True)
 
-# Log file names and rotation settings
-# Use a fixed name for the main log file to prevent multiple files being created
+# Log file names for permission setting
+LATEST_LOG_FILENAME = 'latest.log'
 LOG_FILENAME = 'django.log'
 ERROR_LOG_FILENAME = 'error.log'
 ACCESS_LOG_FILENAME = 'access.log'
 SECURITY_LOG_FILENAME = 'security.log'
 PERFORMANCE_LOG_FILENAME = 'performance.log'
-LATEST_LOG_FILENAME = 'latest.log'
 
-# Log rotation settings
-MAX_LOG_SIZE = 10 * 1024 * 1024  # 10MB
-MAX_LOG_FILES = 5  # Maximum number of log files to keep
-LOG_ROTATION_WHEN = 'midnight'  # Rotate logs at midnight
-LOG_ROTATION_INTERVAL = 1  # Rotate every day
+# Log rotation settings for cleanup
 LOG_ROTATION_BACKUP_COUNT = 60  # Keep logs for 60 days
-
-# Define log levels based on environment
-LOG_LEVEL = 'DEBUG' if DEBUG else 'INFO'
-CONSOLE_LOG_LEVEL = 'DEBUG' if DEBUG else 'WARNING'
-
-# Column widths for aligned logging
-LEVEL_WIDTH = 8
-THREAD_WIDTH = 17
-NAME_WIDTH = 20
-
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'filters': {
-        'require_debug_false': {
-            '()': 'django.utils.log.RequireDebugFalse',
-        },
-        'require_debug_true': {
-            '()': 'django.utils.log.RequireDebugTrue',
-        },
-        'ignore_static_requests': {
-            '()': 'django.utils.log.CallbackFilter',
-            'callback': lambda record: 'static' not in record.getMessage(),
-        },
-    },
-    'formatters': {
-        'aligned': {
-            'format': f'%(asctime)s.%(msecs)03d | %(levelname)-{LEVEL_WIDTH}s | %(threadName)-{THREAD_WIDTH}s | %(name)-{NAME_WIDTH}s | %(message)s',
-            'datefmt': '%Y-%m-%d %H:%M:%S'
-        },
-        'colored': {
-            '()': 'colorlog.ColoredFormatter',
-            'format': f'%(log_color)s%(asctime)s.%(msecs)03d | %(levelname)-{LEVEL_WIDTH}s | %(threadName)-{THREAD_WIDTH}s | %(name)-{NAME_WIDTH}s | %(message)s%(reset)s',
-            'datefmt': '%Y-%m-%d %H:%M:%S',
-            'log_colors': {
-                'DEBUG': 'cyan',
-                'INFO': 'green',
-                'WARNING': 'yellow',
-                'ERROR': 'red',
-                'CRITICAL': 'red,bg_white',
-            },
-        },
-        'simple': {
-            'format': '%(asctime)s | %(levelname)s | %(message)s',
-            'datefmt': '%Y-%m-%d %H:%M:%S'
-        },
-        'json': {
-            'format': '{"timestamp": "%(asctime)s.%(msecs)03d", "level": "%(levelname)s", "thread": "%(threadName)s", "name": "%(name)s", "message": "%(message)s", "pathname": "%(pathname)s", "lineno": %(lineno)d}',
-            'datefmt': '%Y-%m-%d %H:%M:%S'
-        },
-    },
-    'handlers': {
-        # Main log file handler
-        'file': {
-            'level': 'INFO',
-            'class': 'utils.logger.PermissionedRotatingFileHandler',
-            'filename': os.path.join(LOG_DIR, LOG_FILENAME),
-            'formatter': 'aligned',
-            'encoding': 'utf-8',
-            'maxBytes': MAX_LOG_SIZE,
-            'backupCount': MAX_LOG_FILES,
-        },
-        # Latest log file handler (overwrites on restart)
-        'latest_file': {
-            'level': LOG_LEVEL,
-            'class': 'logging.FileHandler',
-            'filename': os.path.join(LOG_DIR, LATEST_LOG_FILENAME),
-            'formatter': 'aligned',
-            'encoding': 'utf-8',
-            'mode': 'w',
-        },
-        # Console handler with color formatting
-        'console': {
-            'level': CONSOLE_LOG_LEVEL,
-            'class': 'logging.StreamHandler',
-            'formatter': 'colored',
-        },
-        # Error log handler
-        'error_file': {
-            'level': 'ERROR',
-            'class': 'utils.logger.PermissionedTimedRotatingFileHandler',
-            'filename': os.path.join(ERROR_LOG_DIR, ERROR_LOG_FILENAME),
-            'formatter': 'aligned',
-            'encoding': 'utf-8',
-            'when': LOG_ROTATION_WHEN,
-            'interval': LOG_ROTATION_INTERVAL,
-            'backupCount': LOG_ROTATION_BACKUP_COUNT,
-        },
-        # Access log handler
-        'access_file': {
-            'level': 'INFO',
-            'class': 'utils.logger.PermissionedTimedRotatingFileHandler',
-            'filename': os.path.join(ACCESS_LOG_DIR, ACCESS_LOG_FILENAME),
-            'formatter': 'aligned',
-            'encoding': 'utf-8',
-            'when': LOG_ROTATION_WHEN,
-            'interval': LOG_ROTATION_INTERVAL,
-            'backupCount': LOG_ROTATION_BACKUP_COUNT,
-            'filters': ['ignore_static_requests'],
-        },
-        # Security log handler
-        'security_file': {
-            'level': 'INFO',
-            'class': 'utils.logger.PermissionedTimedRotatingFileHandler',
-            'filename': os.path.join(SECURITY_LOG_DIR, SECURITY_LOG_FILENAME),
-            'formatter': 'json',  # Use JSON format for security logs for better analysis
-            'encoding': 'utf-8',
-            'when': LOG_ROTATION_WHEN,
-            'interval': LOG_ROTATION_INTERVAL,
-            'backupCount': LOG_ROTATION_BACKUP_COUNT,
-        },
-        # Performance log handler
-        'performance_file': {
-            'level': 'DEBUG',
-            'class': 'utils.logger.PermissionedRotatingFileHandler',
-            'filename': os.path.join(PERFORMANCE_LOG_DIR, PERFORMANCE_LOG_FILENAME),
-            'formatter': 'aligned',
-            'encoding': 'utf-8',
-            'maxBytes': MAX_LOG_SIZE,
-            'backupCount': MAX_LOG_FILES,
-        },
-        # Mail admins on error (production only)
-        'mail_admins': {
-            'level': 'ERROR',
-            'filters': ['require_debug_false'],
-            'class': 'django.utils.log.AdminEmailHandler',
-            'include_html': True,
-        },
-    },
-    'loggers': {
-        # Root logger - handles all logging
-        '': {
-            'handlers': ['console', 'file', 'latest_file', 'error_file'],
-            'level': LOG_LEVEL,
-            'propagate': True,
-        },
-        # Django request logger
-        'django.request': {
-            'handlers': ['access_file', 'error_file', 'mail_admins'],
-            'level': 'INFO',
-            'propagate': False,
-        },
-        # Django security logger
-        'django.security': {
-            'handlers': ['security_file', 'mail_admins'],
-            'level': 'INFO',
-            'propagate': False,
-        },
-        # Django server logger
-        'django.server': {
-            'handlers': ['access_file', 'console'],
-            'level': 'INFO',
-            'propagate': False,
-        },
-        # Database queries logger (debug only)
-        'django.db.backends': {
-            'handlers': ['performance_file'],
-            'level': 'DEBUG' if DEBUG else 'INFO',
-            'propagate': False,
-        },
-        # Django management commands logger (collectstatic, migrate, etc.)
-        'django.core.management': {
-            'handlers': ['console', 'file', 'latest_file'],
-            'level': 'INFO',
-            'propagate': False,
-        },
-        'django.core.management.commands': {
-            'handlers': ['console', 'file', 'latest_file'],
-            'level': 'INFO',
-            'propagate': False,
-        },
-        # Static files logger
-        'django.contrib.staticfiles': {
-            'handlers': ['console', 'file', 'latest_file'],
-            'level': 'INFO',
-            'propagate': False,
-        },
-        # Migrations logger
-        'django.db.migrations': {
-            'handlers': ['console', 'file', 'latest_file'],
-            'level': 'INFO',
-            'propagate': False,
-        },
-        # Custom application loggers
-        'apps': {
-            'handlers': ['console', 'file', 'error_file'],
-            'level': LOG_LEVEL,
-            'propagate': True,
-        },
-        'utils': {
-            'handlers': ['console', 'file', 'error_file'],
-            'level': LOG_LEVEL,
-            'propagate': False,
-        },
-        # Daphne server logger
-        'daphne': {
-            'handlers': ['console', 'file', 'latest_file'],
-            'level': 'INFO',
-            'propagate': False,
-        },
-        'daphne.cli': {
-            'handlers': ['console', 'file', 'latest_file'],
-            'level': 'INFO',
-            'propagate': False,
-        },
-        # Uvicorn loggers
-        'uvicorn': {
-            'handlers': ['console', 'file', 'latest_file'],
-            'level': 'INFO',
-            'propagate': False,
-        },
-        'uvicorn.error': {
-            'handlers': ['console', 'file', 'error_file'],
-            'level': 'INFO',
-            'propagate': False,
-        },
-        'uvicorn.access': {
-            'handlers': ['access_file', 'console'],
-            'level': 'INFO',
-            'propagate': False,
-        },
-        'uvicorn.main': {
-            'handlers': ['console', 'file', 'latest_file'],
-            'level': 'INFO',
-            'propagate': False,
-        },
-        'uvicorn.config': {
-            'handlers': ['console', 'file', 'latest_file'],
-            'level': 'INFO',
-            'propagate': False,
-        },
-        # WatchFiles loggers (used by Uvicorn hot reload)
-        'watchfiles': {
-            'handlers': ['console', 'file', 'latest_file'],
-            'level': 'INFO',
-            'propagate': False,
-        },
-        'watchfiles.main': {
-            'handlers': ['console', 'file', 'latest_file'],
-            'level': 'INFO',
-            'propagate': False,
-        },
-        'watchfiles.watcher': {
-            'handlers': ['console', 'file', 'latest_file'],
-            'level': 'INFO',
-            'propagate': False,
-        },
-        # Uvicorn reload supervisor logger
-        'uvicorn.supervisors': {
-            'handlers': ['console', 'file', 'latest_file'],
-            'level': 'INFO',
-            'propagate': False,
-        },
-        'uvicorn.supervisors.reload': {
-            'handlers': ['console', 'file', 'latest_file'],
-            'level': 'INFO',
-            'propagate': False,
-        },
-    },
-}
-
 
 # Apply permissions to log files if they exist
 def apply_log_permissions(log_path):
     """Apply read/write permissions to log files."""
     if os.path.exists(log_path):
         os.chmod(log_path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH)
-
 
 # Apply permissions to main log files
 log_files = [
@@ -541,15 +274,9 @@ log_files = [
 for log_file in log_files:
     apply_log_permissions(log_file)
 
-
 # Register a function to clean up old log files on application exit
 def cleanup_old_logs():
-    """Clean up old log files to prevent disk space issues."""
     try:
-        # Find and remove log files older than LOG_ROTATION_BACKUP_COUNT days
-        import time
-        from datetime import timedelta
-
         cutoff_time = time.time() - (LOG_ROTATION_BACKUP_COUNT * 24 * 60 * 60)
 
         for root, _, files in os.walk(LOG_DIR):
@@ -566,10 +293,18 @@ def cleanup_old_logs():
         raise Exception(f"Error during log cleanup: {e}")
 
 
-# Register the cleanup function to run on application exit
-atexit.register(cleanup_old_logs)
+def clean_threads(signum, frame):
+    Threads.stop_all_threads()
+    signal.default_int_handler(signum, frame)
 
-# Configure Uvicorn to use Django's logging
-# This prevents Uvicorn from configuring its own logging
+# Register the cleanup function to run on application exit
+signal.signal(signal.SIGTERM, cleanup_old_logs)
+signal.signal(signal.SIGTERM, clean_threads)
+
+# Load logging configuration from JSON file
+with open(os.path.join(BASE_DIR, 'config', 'logging.json'), 'r') as f:
+    LOGGING = json.load(f)
+
+# Configure Django's logging
 LOGGING_CONFIG = None
 logging.config.dictConfig(LOGGING)

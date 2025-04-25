@@ -1,0 +1,298 @@
+{
+  "version": 1,
+  "disable_existing_loggers": false,
+  "filters": {
+    "require_debug_false": {
+      "()": "django.utils.log.RequireDebugFalse"
+    },
+    "require_debug_true": {
+      "()": "django.utils.log.RequireDebugTrue"
+    },
+    "ignore_static_requests": {
+      "()": "utils.logger.StaticRequestFilter"
+    }
+  },
+  "formatters": {
+    "aligned": {
+      "format": "%(asctime)s.%(msecs)03d | %(levelname)-8s | %(threadName)-17s | %(name)-25s | %(message)s",
+      "datefmt": "%Y-%m-%d %H:%M:%S"
+    },
+    "colored": {
+      "()": "colorlog.ColoredFormatter",
+      "format": "\u001B[37m%(asctime)s.%(msecs)03d %(log_color)s%(levelname)-8s | %(threadName)-17s | %(name)-25s | %(message)s%(reset)s",
+      "datefmt": "%Y-%m-%d %H:%M:%S",
+      "log_colors": {
+        "DEBUG": "cyan",
+        "INFO": "green",
+        "WARNING": "yellow",
+        "ERROR": "red",
+        "CRITICAL": "red,bg_white"
+      }
+    },
+    "simple": {
+      "format": "%(asctime)s | %(levelname)s | %(message)s",
+      "datefmt": "%Y-%m-%d %H:%M:%S"
+    },
+    "json": {
+      "format": "{\"timestamp\": \"%(asctime)s.%(msecs)03d\", \"level\": \"%(levelname)s\", \"thread\": \"%(threadName)s\", \"name\": \"%(name)s\", \"message\": \"%(message)s\", \"pathname\": \"%(pathname)s\", \"lineno\": %(lineno)d}",
+      "datefmt": "%Y-%m-%d %H:%M:%S"
+    }
+  },
+  "handlers": {
+    "console": {
+      "class": "logging.StreamHandler",
+      "level": "DEBUG",
+      "formatter": "colored"
+    },
+    "file": {
+      "class": "utils.logger.PermissionedRotatingFileHandler",
+      "level": "INFO",
+      "formatter": "aligned",
+      "filename": "logs/django.log",
+      "maxBytes": 10485760,
+      "backupCount": 5,
+      "encoding": "utf-8"
+    },
+    "latest_file": {
+      "class": "logging.FileHandler",
+      "level": "DEBUG",
+      "formatter": "aligned",
+      "filename": "logs/latest.log",
+      "encoding": "utf-8",
+      "mode": "w"
+    },
+    "error_file": {
+      "class": "utils.logger.PermissionedTimedRotatingFileHandler",
+      "level": "ERROR",
+      "formatter": "aligned",
+      "filename": "logs/errors/error.log",
+      "encoding": "utf-8",
+      "when": "midnight",
+      "interval": 1,
+      "backupCount": 60
+    },
+    "access_file": {
+      "class": "utils.logger.PermissionedTimedRotatingFileHandler",
+      "level": "INFO",
+      "formatter": "aligned",
+      "filename": "logs/access/access.log",
+      "encoding": "utf-8",
+      "when": "midnight",
+      "interval": 1,
+      "backupCount": 60,
+      "filters": [
+        "ignore_static_requests"
+      ]
+    },
+    "security_file": {
+      "class": "utils.logger.PermissionedTimedRotatingFileHandler",
+      "level": "INFO",
+      "formatter": "json",
+      "filename": "logs/security/security.log",
+      "encoding": "utf-8",
+      "when": "midnight",
+      "interval": 1,
+      "backupCount": 60
+    },
+    "performance_file": {
+      "class": "utils.logger.PermissionedRotatingFileHandler",
+      "level": "DEBUG",
+      "formatter": "aligned",
+      "filename": "logs/performance/performance.log",
+      "encoding": "utf-8",
+      "maxBytes": 10485760,
+      "backupCount": 5
+    },
+    "mail_admins": {
+      "level": "ERROR",
+      "filters": [
+        "require_debug_false"
+      ],
+      "class": "django.utils.log.AdminEmailHandler",
+      "include_html": true
+    }
+  },
+  "loggers": {
+    "": {
+      "handlers": [
+        "console",
+        "file",
+        "latest_file",
+        "error_file"
+      ],
+      "level": "DEBUG",
+      "propagate": false
+    },
+    "django.request": {
+      "handlers": [
+        "access_file",
+        "error_file",
+        "mail_admins"
+      ],
+      "level": "INFO",
+      "propagate": false
+    },
+    "django.security": {
+      "handlers": [
+        "security_file",
+        "mail_admins"
+      ],
+      "level": "INFO",
+      "propagate": false
+    },
+    "django.server": {
+      "handlers": [
+        "access_file",
+        "console"
+      ],
+      "level": "INFO",
+      "propagate": false
+    },
+    "django.db.backends": {
+      "handlers": [
+        "performance_file"
+      ],
+      "level": "DEBUG",
+      "propagate": false
+    },
+    "django.core.management": {
+      "handlers": [
+        "console",
+        "file",
+        "latest_file"
+      ],
+      "level": "INFO",
+      "propagate": false
+    },
+    "django.core.management.commands": {
+      "handlers": [
+        "console",
+        "file",
+        "latest_file"
+      ],
+      "level": "INFO",
+      "propagate": false
+    },
+    "django.contrib.staticfiles": {
+      "handlers": [
+        "console",
+        "file",
+        "latest_file"
+      ],
+      "level": "INFO",
+      "propagate": false
+    },
+    "django.db.migrations": {
+      "handlers": [
+        "console",
+        "file",
+        "latest_file"
+      ],
+      "level": "INFO",
+      "propagate": false
+    },
+    "apps": {
+      "handlers": [
+        "console",
+        "file",
+        "error_file"
+      ],
+      "level": "DEBUG",
+      "propagate": true
+    },
+    "utils": {
+      "handlers": [
+        "console",
+        "file",
+        "error_file"
+      ],
+      "level": "DEBUG",
+      "propagate": false
+    },
+    "daphne": {
+      "handlers": [
+        "console",
+        "file",
+        "latest_file"
+      ],
+      "level": "INFO",
+      "propagate": false
+    },
+    "daphne.cli": {
+      "handlers": [
+        "console",
+        "file",
+        "latest_file"
+      ],
+      "level": "INFO",
+      "propagate": false
+    },
+    "uvicorn": {
+      "handlers": [
+        "console",
+        "file",
+        "latest_file"
+      ],
+      "level": "INFO",
+      "propagate": false
+    },
+    "uvicorn.error": {
+      "handlers": [
+        "console",
+        "file",
+        "error_file"
+      ],
+      "level": "INFO",
+      "propagate": false
+    },
+    "uvicorn.access": {
+      "handlers": [
+        "access_file",
+        "console"
+      ],
+      "level": "INFO",
+      "propagate": false
+    },
+    "uvicorn.main": {
+      "handlers": [
+        "console",
+        "file",
+        "latest_file"
+      ],
+      "level": "INFO",
+      "propagate": false
+    },
+    "uvicorn.config": {
+      "handlers": [
+        "console",
+        "file",
+        "latest_file"
+      ],
+      "level": "INFO",
+      "propagate": false
+    },
+    "uvicorn.supervisors": {
+      "handlers": [
+        "console",
+        "file",
+        "latest_file"
+      ],
+      "level": "INFO",
+      "propagate": false
+    },
+    "uvicorn.supervisors.reload": {
+      "handlers": [
+        "console",
+        "file",
+        "latest_file"
+      ],
+      "level": "INFO",
+      "propagate": false
+    },
+    "watchfiles": {
+      "handlers": [],
+      "level": "DEBUG",
+      "propagate": false
+    }
+  }
+}
