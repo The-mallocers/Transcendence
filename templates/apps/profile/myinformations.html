@@ -6,47 +6,36 @@
         <div class="row align-items-start box">
             <div class="col-7">
                 <div class="content">
+                    <h2 class="text-center">Current username: {{ client.profile.username }}</h2>
+                    <h2 class="text-center">Current email: {{ client.profile.email }}</h2>
                     <h2 class="text-center">Update Personal informations</h2>
-                    <form id="register-form" method="POST" action="{% url 'register' %}" enctype="multipart/form-data">
+                    <form id="register-form" method="PUT" action="{% url 'update' %}" enctype="multipart/form-data">
                         <div id="error-message" style="color: red;"></div>
                         {% csrf_token %}
                         <div class="row">
                             <div class="col">
                                 <input class="p-3 container-fluid" type="text" id="username" name="username"
-                                       placeholder="Entrez votre pseudo" required>
+                                       placeholder="Enter new username" required>
                             </div>
                             <div class="col">
                                 <input class="p-3 container-fluid" type="email" id="email" name="email"
-                                       placeholder="Entrez votre e-mail" required>
+                                       placeholder="Enter new email" required>
                             </div>
                         </div>
-            
                         <div class="row">
                             <div class="col">
                                 <input class="p-3 container-fluid mt-3" type="password" id="password" name="password"
-                                       placeholder="Entrez votre mot de passe" required>
+                                       placeholder="Enter new password" required>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col">
                                 <input class="p-3 container-fluid mt-3" type="password" id="password_check" name="password_check"
-                                       placeholder="Verifiez votre mot de passe" required>
+                                       placeholder="Verify password" required>
                             </div>
                         </div>
                     </form>
                     <div class=" d-flex flex-column align-items-center justify-content-center inputs">
-                        <!-- <label class="w-50 mt-4 title-personal-info" for="email">New Email</label>
-                        <input class="p-2 mt-1 w-50" type="text" placeholder="email" id="email">
-
-                        <label class="w-50 mt-4 title-personal-info" for="nickname">New Username</label>
-                        <input class="p-2 mt-1 w-50" type="text" placeholder="nickname" id="nickname">
-                        
-                        <label class="w-50 mt-4 title-personal-info" for="changepw">Change password</label>
-                        <input class="p-2 mt-1 w-50" type="password" placeholder="change password" id="changepw">
-
-                        <label class="w-50 mt-4 title-personal-info" for="changepwconf">Confirm password</label>
-                        <input class="p-2 mt-1 w-50" type="password" placeholder="change password" id="changepwconf"> -->
-
                         <div class="type-intra-green mt-4" id="update-btn">Update informations</div>
                         <div class="type-intra-green mt-4" id="logout-btn">log out</div>
                         <div id="upload-feedback"></div>

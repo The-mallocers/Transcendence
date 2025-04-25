@@ -45,7 +45,8 @@ def get_settings(req):
     html_content = render_to_string("apps/profile/myinformations.html", {
         "csrf_token": get_token(req),
         "isAdmin": client.rights.is_admin,
-        "twoFaEnable": client.twoFa.enable
+        "twoFaEnable": client.twoFa.enable,
+        "client": client,
     })
     return JsonResponse({
         'html': html_content,
