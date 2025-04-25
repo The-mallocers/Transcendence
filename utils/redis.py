@@ -137,18 +137,17 @@ class RedisConnectionPool:
             pass
 
     @classmethod
-    async def close_connection(cls, alias: str = 'default'):
+    def close_sync_connection(cls, alias: str = 'default'):
         identifier = cls._get_identifier()
 
-        with cls._lock:
-            if alias in cls._pools and identifier in cls._pools[alias]:
-                try:
-                    await cls._pools[alias][identifier].close()
-                    cls._logger.debug(f"Closed Redis connection for alias: {alias}, context: {identifier}")
-                except Exception as e:
-                    cls._logger.error(f"Error closing Redis connection: {str(e)}")
-                finally:
-                    del cls._pools[alias][identifier]
+        if alias in cls._sync_pools and identifier in cls._sync_pools[alias]:
+            try:
+                cls._sync_pools[alias][identifier].close()
+                cls._logger.debug(f"Closed Redis sync connection for alias: {alias}, context: {identifier}")
+            except Exception as e:
+                cls._logger.error(f"Error closing Redis sync connection: {str(e)}")
+            finally:
+                del cls._sync_pools[alias][identifier]
 
     @classmethod
     async def close_all_connections(cls):

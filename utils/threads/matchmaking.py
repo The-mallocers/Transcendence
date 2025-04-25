@@ -49,11 +49,6 @@ class MatchmakingThread(Threads):
                     game.pR.leave_queue(game.code, game.is_duel)
 
     def cleanup(self):
-        self._logger.info("Cleaning up unfinished games from previous session...")
-
-        # Stop all active threads (GameThread and TournamentThread instances)
-        # Threads.stop_all_threads(except_thread=self)
-
         game_keys = self.redis.keys('game:*')
         for key in game_keys:
             self.redis.delete(key)
@@ -63,11 +58,8 @@ class MatchmakingThread(Threads):
         self.redis.delete(RTables.HASH_DUEL_QUEUE('*'))
         self.redis.delete(RTables.HASH_TOURNAMENT_QUEUE('*'))
         self.redis.delete(RTables.HASH_MATCHES)
-        self.redis.delete('*')
 
         # RedisConnectionPool.close_connection(self.__class__.__name__)
-
-        self._logger.info("Cleanup of unfinished games complete")
 
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ FUNCTIONS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

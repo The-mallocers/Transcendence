@@ -34,7 +34,7 @@ class TournamentService(BaseServices):
                 await asend_group(RTables.GROUP_TOURNAMENT(tournament_code), EventType.TOURNAMENT, ResponseAction.TOURNAMENT_CREATED, {
                     'code': tournament_code,
                 })
-            except KeyError as e:
+            except ValueError as e:
                 await asend_group_error(self.service_group, ResponseError.KEY_ERROR, str(e))
             except Exception as e:
                 await asend_group_error(self.service_group, ResponseError.TOURNAMENT_NOT_CREATE, str(e))

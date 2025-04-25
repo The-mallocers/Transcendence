@@ -1,3 +1,4 @@
+import random
 import traceback
 from time import sleep
 
@@ -5,8 +6,11 @@ from asgiref.sync import sync_to_async
 from redis.commands.json.path import Path
 
 from apps.client.models import Clients
+from apps.game.models import Game
+from apps.player.models import Player
 from utils.enums import EventType, GameStatus, RTables, ResponseAction, ResponseError, TournamentStatus
 from utils.serializers.tournament import TournamentSerializer
+from utils.threads.game import GameThread
 from utils.threads.threads import Threads
 from utils.util import create_tournament_id
 from utils.websockets.channel_send import send_group, send_group_error
@@ -29,6 +33,10 @@ class TournamentThread(Threads):
         self.timer = self.get('timer')
         self.status: TournamentStatus = TournamentStatus(self.get('status'))
 
+        self.rounds = self.get('scoreboards.num_rounds')
+        self.set('scoreboards.current_round', 1)
+        self.current_round = self.get('scoreboards.current_round')
+
     def main(self):
         try:
             self.set_status(TournamentStatus.WAITING)
@@ -48,14 +56,8 @@ class TournamentThread(Threads):
             self.stop()
 
     def cleanup(self):
-        self._logger.info("Cleaning up tournament...")
-
         self.redis.delete(RTables.JSON_TOURNAMENT(self.code))
         self.redis.expire(f'channels:group:{RTables.GROUP_TOURNAMENT(self.code)}', 0)
-
-        # RedisConnectionPool.close_connection(self.__class__.__name__)
-
-        self._logger.info("Cleanup of tournament complete")
 
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ EVENT ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
 
@@ -67,7 +69,7 @@ class TournamentThread(Threads):
             if players > len(self.clients):
                 last_client_id = list(queue.keys())[-1]
                 last_client = Clients.get_client_by_id(last_client_id.decode('utf-8'))
-                self.clients.append(last_client)
+                self.add_client(last_client)
                 send_group(RTables.GROUP_TOURNAMENT(self.code), EventType.TOURNAMENT, ResponseAction.TOURNAMENT_PLAYER_JOIN,
                            {'id': str(last_client.id)})
             if players == self.max_players:
@@ -78,7 +80,29 @@ class TournamentThread(Threads):
 
     def _starting(self):
         if self.status is TournamentStatus.CREATING_MATCH:
-            print('creating match.')
+            random.shuffle(self.clients)
+            match = 1
+            place = 0
+            game: Game = Game()
+            for client in self.clients:
+                if place == 0:
+                    game.pL = Player(client.id)
+                    place += 1
+                elif place == 1:
+                    game.pR = Player(client.id)
+                    place += 1
+                if place == 2:
+                    game.create_redis_game()
+                    # game.init_players()
+                    game.rset_status(GameStatus.STARTING)
+                    self.set(f'scoreboards.rounds.round_{self.current_round}.games.r{self.current_round}m{match}.game_code', game.code)
+                    GameThread(game=game)
+
+                    place = 0
+                    match += 1
+                    game = Game()
+            self.set_status(TournamentStatus.STARTING)
+            return True
         return False
 
     def _running(self):
@@ -113,7 +137,9 @@ class TournamentThread(Threads):
             await redis.json().set(RTables.JSON_TOURNAMENT(code), Path.root_path(), serializer.data)
             return code
         else:
-            raise KeyError(serializer.error_messages)
+            for field, errors in serializer.errors.items():
+                for error in errors:
+                    raise ValueError(f'{field}: {error}')
 
     def set_status(self, status: TournamentStatus):
         self.status = status
@@ -121,3 +147,12 @@ class TournamentThread(Threads):
 
     def get(self, key):
         return self.redis.json().get(RTables.JSON_TOURNAMENT(self.code), Path(key))
+
+    def set(self, key, value):
+        self.redis.json().set(RTables.JSON_TOURNAMENT(self.code), Path(key), value)
+
+    def add_client(self, client: Clients):
+        self.clients.append(client)
+        current_players = self.get('players')
+        current_players.append(str(client.id))
+        self.redis.json().set(RTables.JSON_TOURNAMENT(self.code), Path('players'), current_players)

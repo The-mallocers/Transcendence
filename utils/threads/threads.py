@@ -38,6 +38,8 @@ class Threads(threading.Thread, ABC):
         self._stop_event.set()
         self.cleanup()
 
+        RedisConnectionPool.close_sync_connection(self.name)
+
         # Remove this thread from the active threads list
         if self in Threads.active_threads:
             Threads.active_threads.remove(self)

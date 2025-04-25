@@ -7,12 +7,6 @@ from rest_framework import serializers
 from utils.enums import TournamentStatus
 
 
-# Left to add
-# - name -> Ptit nom par default a priori ?
-# - host -> Aucune idee de comment je choppe ca
-# - Players -> Une liste avec excatement assez de slots par rapport a max players ?
-
-
 class TournamentSerializer(serializers.Serializer):
     title = serializers.CharField(
         max_length=40,
@@ -21,7 +15,7 @@ class TournamentSerializer(serializers.Serializer):
     max_players = serializers.IntegerField(
         validators=[
             MinValueValidator(2, message="Tournament must have at least 2 players"),
-            MaxValueValidator(16, message="Tournament cannot have more than 16 players")
+            MaxValueValidator(16, message="Tournament cannot have more than 16 players"),
         ]
     )
     public = serializers.BooleanField()
@@ -40,16 +34,16 @@ class TournamentSerializer(serializers.Serializer):
     )
     host = serializers.UUIDField()
 
-    def validate(self, data):
-        if data.get('max_players') % 2 != 0:
-            raise serializers.ValidationError("Maximum players must be an even number")
-        return data
+    def validate_max_players(self, value):
+        # if value % 4 != 0:
+        #     raise ValidationError("Number of maximum players must be a multiple of 4")
+        return value
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
         data['status'] = TournamentStatus.CREATING
         data['created-at'] = timezone.now().isoformat()
-        data['players'] = [data['host']]
+        data['players'] = [str(data['host'])]
         data['scoreboards'] = self.generate_tournament_structure(data['max_players'])
         return data
 
