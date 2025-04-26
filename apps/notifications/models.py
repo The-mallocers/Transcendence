@@ -14,13 +14,14 @@ class Friend(models.Model):
     email = models.EmailField(null=False, editable=True, blank=True)
     friends = models.ManyToManyField(Clients, related_name='friend_requests_as_friend', blank=True)
     pending_friends = models.ManyToManyField(Clients, related_name='friend_requests_as_pending', blank=True)
-
+    blocked_users = models.ManyToManyField(Clients, related_name='blocked_by', blank=True)
+    
     class Meta:
         # unique_together = ['friends', 'pending_friends']
         verbose_name_plural = 'Friend Requests'
 
-    def __str__(self):
-        return f"Friend Request with {self.id}"
+    # def __str__(self):
+    #     return f"Friend Request with {self.id}"
 
     @sync_to_async
     def add_pending_friend(self, client):
@@ -91,4 +92,46 @@ class Friend(models.Model):
                     return client
         except Exception as e:
             print(f"Error adding pending duel: {e}")
+            return None
+    
+    @sync_to_async
+    def get_blocked_users(self):
+        try:
+            with transaction.atomic():
+                return self.blocked_users
+        except Exception as e:
+            print(f"Error getting blocked users: {e}")
+            return None
+        
+    @sync_to_async
+    def block_user(self, target):
+        try:
+            with transaction.atomic():
+                if not self.blocked_users.filter(id=target.id).exists():
+                    self.blocked_users.add(target)
+                    self.save()
+        except Exception as e:
+            print(f"Error adding block user: {e}")
+            return None
+
+    @sync_to_async
+    def unblock_user(self, target):
+        try:
+            with transaction.atomic():
+                if self.blocked_users.filter(id=target.id).exists():
+                    self.blocked_users.remove(target)
+                    self.save()
+        except Exception as e:
+            print(f"Error unblock user: {e}")
+            return None
+        
+    @sync_to_async
+    def user_is_block(self, target):
+        try:
+            with transaction.atomic():
+                if self.blocked_users.filter(id=target.id).exists():
+                    return True
+                return False
+        except Exception as e:
+            print(f"Error unblock user: {e}")
             return None

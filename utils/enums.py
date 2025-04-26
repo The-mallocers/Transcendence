@@ -75,7 +75,9 @@ class RequestAction(str, Enum):
     ACCEPT_FRIEND_REQUEST: str = "accept_friend_request"
     REFUSE_FRIEND_REQUEST: str = "refuse_friend_request"
     DELETE_FRIEND: str = "delete_friend"
-
+    BLOCK_FRIEND: str = "block_friend"
+    UNBLOCK_FRIEND: str = "unblock_friend"
+    BLOCK_UNBLOCK_FRIEND: str = "block_unblock_friend"
 
 # All the responses the server sends to the client
 class ResponseAction(str, Enum):
@@ -113,6 +115,7 @@ class ResponseAction(str, Enum):
     HISTORY_RECEIVED: str = "history_received"
     ALL_ROOM_RECEIVED: str = "all_room_received"
     NEW_FRIEND: str = "new_friend"
+    ERROR_MESSAGE_USER_BLOCK: str = "error_message_user_block"
     
     # ── NOTIFICATION ACTION ───────────────────────────────────────────────────────────
     ACK_SEND_FRIEND_REQUEST: str = "acknowledge_send_friend_request"
@@ -121,7 +124,8 @@ class ResponseAction(str, Enum):
     ACK_REFUSE_FRIEND_REQUEST: str = "acknowledge_refuse_friend_request"
     ACK_DELETE_FRIEND: str = "ack_delete_friend"
     ACK_DELETE_FRIEND_HOST: str = "ack_delete_friend_host"
-
+    FRIEND_BLOCKED: str = "friend_blocked"
+    FRIEND_UNBLOCKED: str ="friend_unblocked"
     NOTIF_TEST = "notification_test"
 
     TEST: str = 'test'

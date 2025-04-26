@@ -192,7 +192,7 @@ notifSocket.onmessage = (event) => {
         
         const chatElement = document.querySelector(`.chat-${message.data.content.username}`);
         if(chatElement)
-            chatElement.remove();
+            chatElement.parentElement.remove();
     }
     else if(message.data.action == "ACK_ASK_DUEL") {
         let pending_group = document.querySelector('.pending_group');
@@ -335,6 +335,21 @@ function create_message_duel(action, code)
     return message;
 }
 
+function create_message_notif_block(action, targetUser, status)
+{
+    let message = {
+        "event": "notification",
+        "data": {
+            "action": action,
+            "args": {
+                "target_name": targetUser,
+                "status" : status,
+            }
+        } 
+    }
+    return message;
+}
+
 export async function apiFriends(endpoint) {
     console.log("Getting client ID")
     try {
@@ -357,3 +372,4 @@ export async function apiFriends(endpoint) {
 export {notifSocket};
 export {create_message_notif}
 export {getClientId}
+export {create_message_notif_block}

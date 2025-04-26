@@ -137,7 +137,7 @@ class NotificationService(BaseServices):
                                   "username": await client.aget_profile_username()
                               })
             # get the room to delete
-            room = await Rooms.aget_room_by_client_id(client.id)
+            room = await Rooms.Aget_room_by_client_id(client.id)
             if room is None:
                 return
             # First delete all messages corresponding to the two users
@@ -149,6 +149,7 @@ class NotificationService(BaseServices):
         except ValidationError:
             return await asend_group_error(self.service_group, ResponseError.NOT_FRIEND)
         except Exception as e:
+            print(repr(e))
             return await asend_group_error(self.service_group, ResponseError.INTERNAL_ERROR)
 
     #====================================DUELS=========================================
@@ -181,6 +182,7 @@ class NotificationService(BaseServices):
             await asend_group(self.service_group, EventType.NOTIFICATION, ResponseAction.DUEL_CREATED, {
                 'code': duel_code
             })
+            print("sending request to duel")
             return await asend_group(RTables.GROUP_NOTIF(target.id), EventType.NOTIFICATION, ResponseAction.ACK_ASK_DUEL,
                                      {
                                          "sender": str(client.id),
@@ -202,7 +204,8 @@ class NotificationService(BaseServices):
                                     })
         except Exception as e:
             print(repr(e))
-            return await asend_group_error(RTables.GROUP_CLIENT(client.id), ResponseError.INTERNAL_ERROR)
+            return await asend_group_error(RTables.GROUP_CLIENT(client.id), 
+                                           ResponseError.INTERNAL_ERROR)
 
     async def _handle_accept_duel(self, data, client):
         code = data['data']['args']['code']
@@ -260,6 +263,54 @@ class NotificationService(BaseServices):
                 await asend_group(RTables.GROUP_NOTIF(opponent_id), EventType.NOTIFICATION, 
                                 ResponseAction.DUEL_REFUSED,
                                 {"username": await client.aget_profile_username()})
-                
+    
+    # manage friends block and unblock
+    async def _handle_block_unblock_friend(self, data, client):
+        try:
+            target = await Clients.aget_client_by_username(data['data']['args']['target_name'])
+            if target is None:
+                return await asend_group_error(self.service_group, ResponseError.USER_NOT_FOUND)
+            friend_table = await client.get_friend_table()
+            status = data['data']['args']['status']
+            if status == "block":
+                await friend_table.block_user(target)
+                await asend_group(RTables.GROUP_CHAT(client.id),
+                                EventType.CHAT,
+                                ResponseAction.FRIEND_BLOCKED,
+                                {
+                                    "message" : "successfully block friend",
+                                    "username" : await target.aget_profile_username()
+                                })
+            elif status == "unblock":
+                await friend_table.unblock_user(target)
+                await asend_group(self.service_group,
+                        EventType.NOTIFICATION,
+                        ResponseAction.FRIEND_UNBLOCKED,
+                        {
+                            "message" : "successfully unblock friend",
+                            "username" : await target.aget_profile_username()
+                        })
+        except Exception as e:
+            print(repr(e))
+            return await asend_group_error(self.service_group, ResponseError.INTERNAL_ERROR)
+        
+    async def _handle_unblock_friend(self, data, client):
+        try:
+            target = await Clients.aget_client_by_username(data['data']['args']['target_name'])
+            if target is None:
+                return await asend_group_error(self.service_group, ResponseError.USER_NOT_FOUND)
+            friend_table = await client.get_friend_table()
+            await friend_table.unblock_user(target)
+            await asend_group(self.service_group,
+                    EventType.NOTIFICATION,
+                    ResponseAction.FRIEND_UNBLOCKED,
+                    {
+                        "message" : "successfully unblock friend",
+                        "username" : await target.aget_profile_username()
+                    })
+        except Exception as e:
+            print(repr(e))
+            return await asend_group_error(self.service_group, ResponseError.INTERNAL_ERROR)
+    
     async def disconnect(self, client):
         pass
