@@ -37,7 +37,8 @@ async function update() {
         if (response.ok) {
             console.log("We changed the stuff like you wanted !");
         } else {
-           console.log("Some errors happened while changing stuff");
+            error.textContent = "Error updating";
+            console.log("Some errors happened while changing stuff");
         }
     } catch (error) {
         console.log("Error with the fetch operation");

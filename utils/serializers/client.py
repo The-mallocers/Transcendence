@@ -1,3 +1,4 @@
+import bcrypt
 from django.db import transaction
 from rest_framework import serializers
 
@@ -63,15 +64,18 @@ class ClientSerializer(serializers.ModelSerializer):
             for attr, value in profile_data.items():
                 setattr(instance.profile, attr, value)
             instance.profile.save()
-
         # Update password fields
         if password_data:
-            # Optional: remove passwordcheck
+            # # Optional: remove passwordcheck
             password_data.pop('passwordcheck', None)
+            if bcrypt.checkpw(password_data['password'].encode('utf-8'), instance.password.password.encode('utf-8')):
+                raise serializers.ValidationError("New password must be different from the old password.")
             for attr, value in password_data.items():
                 setattr(instance.password, attr, value)
             instance.password.save()
-
+            # password_serializer = PasswordSerializer(instance=instance.password, data=password_data, partial=True)
+            # password_serializer.is_valid(raise_exception=True)
+            # password_serializer.save()
         print(instance)
         instance.save()
         return instance
