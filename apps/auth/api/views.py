@@ -11,8 +11,7 @@ from utils.serializers.auth import PasswordSerializer
 from utils.serializers.client import ClientSerializer
 from utils.serializers.permissions.auth import PasswordPermission
 from utils.serializers.picture import ProfilePictureValidator
-from utils.serializers.update.email import EmailSerializer
-from utils.serializers.update.username import UsernameSerializer
+
 
 
 class PasswordApiView(APIView):
@@ -55,7 +54,7 @@ class RegisterApiView(APIView):
                 print("\n\nException during save:", str(e))
                 logging.getLogger('MainThread').error(traceback.format_exc())
                 return Response({"error": str(e)},
-                                status=status.HTTP_500_INTERNAL_SERVER_ERROR)  # this is ia stuff, maybe shouldnt be 500 idk
+                                status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         else:
             print("Validation errors:", serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -72,39 +71,26 @@ class RegisterApiView(APIView):
 # }
 class UpdateApiView(APIView):
     def post(self, request, *args, **kwargs):
-        print('SALUT')
-        client = Clients.get_client_by_request(request)
-        serializer = ClientSerializer(data=request.data)
-        data = request.data
-        
-        #Getting the data of the form
-        username = data.get("profile", {}).get("username")
-        email = data.get("profile", {}).get("email")
-        password = data.get("password", {}).get("password")
-        passwordcheck = data.get("passwordcheck", {}).get("passwordcheck")
-        
-        if username:
-            serializer = UsernameSerializer(instance=client.profile, data={"username": username})
-            if serializer.is_valid():
-                client.profile.username = username
-                # client.profile.save()
-            else:
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        if email:
-            serializer = EmailSerializer(instance=client.profile, data={"email": email})
-            if serializer.is_valid():
-                client.profile.email = email
-            else:
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        # if password and passwordcheck:
-        #     pass
-        
-        client.profile.save()
-        #Saving the changes made to db !
-        return Response({"message": "Infos updated successfully"}, status=status.HTTP_200_OK)
-       
+        try:
+            data = request.data
+            for section in list(data.keys()):
+                if isinstance(data[section], dict):
+                    for key in list(data[section].keys()):
+                        if data[section][key] == "":
+                            del data[section][key]
+                    if not data[section]:
+                        del data[section]   
 
-
+            print("data:", data)
+            client = Clients.get_client_by_request(request)
+            serializer = ClientSerializer(instance=client, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response({"message": "Infos updated succesfully"}, status=status.HTTP_200_OK)
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST) 
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR) 
 
 class LoginApiView(APIView):
     permission_classes = []

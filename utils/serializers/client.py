@@ -50,3 +50,27 @@ class ClientSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(f"Error creating client: {str(e)}")
 
         return client
+    
+    def update(self, instance, validated_data):
+        profile_data = validated_data.pop('profile', {})
+        password_data = validated_data.pop('password', {})
+        print("In update method of client")
+        print(profile_data)
+        print(password_data)
+
+        # Update profile fields
+        if profile_data:
+            for attr, value in profile_data.items():
+                setattr(instance.profile, attr, value)
+            instance.profile.save()
+
+        # Update password fields
+        if password_data:
+            # Optional: remove passwordcheck
+            password_data.pop('passwordcheck', None)
+            for attr, value in password_data.items():
+                setattr(instance.password, attr, value)
+            instance.password.save()
+
+        instance.save()
+        return instance
