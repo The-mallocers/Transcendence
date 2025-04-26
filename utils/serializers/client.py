@@ -57,7 +57,7 @@ class ClientSerializer(serializers.ModelSerializer):
         print("In update method of client")
         print(profile_data)
         print(password_data)
-
+        print("instance:", instance)
         # Update profile fields
         if profile_data:
             for attr, value in profile_data.items():
@@ -72,5 +72,6 @@ class ClientSerializer(serializers.ModelSerializer):
                 setattr(instance.password, attr, value)
             instance.password.save()
 
+        print(instance)
         instance.save()
         return instance

@@ -181,3 +181,47 @@ ul.friends_group .list-group-item{
     font-family: "futura-pt", "Helvetica", "Sans serif";
     font-weight: bold;
 }
+
+#upload-img-btn {
+    font-weight: bold;
+    width: 30%; /* or whatever percentage you want */
+    display: inline-block; /* ensures the width takes effect */
+    text-align: center; /* center the text inside */
+    box-sizing: border-box; /* makes sure padding/border don't make it overflow */
+    margin-right: auto;
+}
+
+#logout-btn {
+    font-weight: bold;
+    width: 20%; 
+    display: inline-block; /* ensures the width takes effect */
+    text-align: center; /* center the text inside */
+    box-sizing: border-box; /* makes sure padding/border don't make it overflow */
+    margin-left: auto;
+    background-color: #c0392b;
+    color: white;
+    padding: 1rem;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    cursor: pointer;
+}
+
+#logout-btn:hover {
+    background-color: #e74c3c;
+    transform: scale(1.03);
+}
+
+#update-btn {
+    font-weight: bold;
+    width: 30%; /* or whatever percentage you want */
+    display: inline-block; /* ensures the width takes effect */
+    text-align: center; /* center the text inside */
+    box-sizing: border-box; /* makes sure padding/border don't make it overflow */
+    margin-right: auto;
+}
+
+#profile_picture {
+    margin-right: auto; 
+}

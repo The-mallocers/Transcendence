@@ -69,6 +69,7 @@ class RegisterApiView(APIView):
 #         passwordcheck: passwordcheck
 #     }
 # }
+
 class UpdateApiView(APIView):
     def post(self, request, *args, **kwargs):
         try:

@@ -36,10 +36,12 @@
                         </div>
                     </form>
                     <div class=" d-flex flex-column align-items-center justify-content-center inputs">
-                        <div class="type-intra-green mt-4" id="update-btn">Update informations</div>
-                        <div class="type-intra-green mt-4" id="logout-btn">log out</div>
                         <div id="upload-feedback"></div>
+                        <div class="type-intra-green mt-4" id="update-btn">Update informations</div>
+                        <h2 class="text-center">Current picture:</h2>
+                        <img src="{{ client.profile.profile_picture.url }}" id="profile_picture">
                         <div class="type-intra-green mt-4" id="upload-img-btn">Upload new profile picture</div>
+                        <div class="type-intra-green mt-4" id="logout-btn">Log out</div>
 
                         <input type="file" id="file_input" style="display: none;"/>
                     </div>
