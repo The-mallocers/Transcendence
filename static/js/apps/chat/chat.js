@@ -2,8 +2,8 @@ import { WebSocketManager } from "../../websockets/websockets.js"
 import { notifSocket } from "../profile/profile.js";
 import { navigateTo } from "../../spa/spa.js";
 import { create_message_duel } from "../game/gamemode.js";
-import { create_message_notif } from "../profile/profile.js";
 import { create_message_notif_block } from "../profile/profile.js";
+import { toast_message } from "../profile/toast.js";
 
 let client_id = null;
 let room_id = null;
@@ -60,6 +60,9 @@ chatSocket.onmessage = (event) => {
         chatHistory.appendChild(msgElement);
         scrollToBottom(chatHistory);
         //Do things to show the new message on the front
+    }
+    else if(message.data.action == "ERROR_MESSAGE_USER_BLOCK"){
+        toast_message("You cant send message to block Friend")
     }
 }
 

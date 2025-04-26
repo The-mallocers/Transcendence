@@ -101,7 +101,7 @@ class ChatService(BaseServices):
                 # dans le cas ou j'envoie un message a un user bloqué
                 player = await client.get_friend_table()
                 if await player.user_is_block(target):
-                    return await asend_group(RTables.GROUP_CHAT(str(room.id)), EventType.CHAT, 
+                    return await asend_group(RTables.GROUP_CHAT(str(client.id)), EventType.CHAT, 
                         ResponseAction.ERROR_MESSAGE_USER_BLOCK, 
                         {
                             'message': "You can't send messages to block user",
@@ -112,7 +112,7 @@ class ChatService(BaseServices):
                 # dans le cas ou j'envoie un message à un utilisateur qui m'a bloqué
                 player = await target.get_friend_table()
                 if await player.user_is_block(client):
-                    return await asend_group(RTables.GROUP_CHAT(str(room.id)), EventType.CHAT, 
+                    return await asend_group(RTables.GROUP_CHAT(str(target.id)), EventType.CHAT, 
                         ResponseAction.ERROR_MESSAGE_USER_BLOCK, 
                         {
                             'message': "You can't send messages to block user",

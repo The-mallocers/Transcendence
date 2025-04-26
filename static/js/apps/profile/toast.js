@@ -111,7 +111,7 @@ function toast_message(message){
     <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
         <div class="toast-header">
             <img src="/static/assets/imgs/chat.png" class="rounded me-2" alt="..." style="width: 20px; height: 20px; object-fit: contain;">
-            <strong class="me-auto">Friend Notification</strong>
+            <strong class="me-auto">Notification</strong>
             <small>${time}</small>
             <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
         </div>
