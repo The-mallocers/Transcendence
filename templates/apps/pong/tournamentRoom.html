@@ -1,0 +1,91 @@
+<div class="inTournamentRoomContainer p-5">
+    <div class="box p-3">
+        <h1 class="mt-2 text-center">{{ roomInfos.name }}</h1>
+        <div class="container-fluid mt-3">
+            <div class="row row-cols-2 d-flex justify-content-start">
+                {% for player in players %}
+                    <div class="col p-2">
+                        <div class="content border p-3 d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center justify-content-center gap-3">
+                                <div class="avatarContainer">
+                                    <img src="{{player.avatar}}" alt="">
+                                </div>
+                                <div class="nickname ml-3">{{ player.nickname }}</div>
+                            </div>
+                            <div > </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    
+<!-- 
+        <h1 class="text-center">Create a tournament</h1>
+
+        <div class="d-flex roomNameContainer align-items-center justify-content-between mt-4">
+            <label for="roomName">Room name</label>
+            <input id="roomName" type="text" placeholder="minimeow's room">
+        </div>
+
+        <div class="points text-center mt-2">
+            <div>Points to win</div>
+            <div class="counter">
+                <div class="minus">-</div>
+                <div class="score">1</div>
+                <div class="plus">+</div>
+            </div>
+        </div>
+
+        <div class="d-flex roomPrivateContainer align-items-center mt-2">
+            <label for="roomName">Private room</label>
+            <input type="checkbox" checked>
+        </div>
+
+        <div class="btn createBtn mt-4">Create Room</div> -->
+
+        
+
+    <!-- <script>    
+        let minus = document.querySelector(".minus")
+        let plus = document.querySelector(".plus")
+        
+
+        function decrease(){
+            let score = document.querySelector(".score")
+            val = parseInt(score.innerHTML)
+            if (val > 1)
+                score.innerHTML = --val
+        }
+
+        function increase(){
+            let score = document.querySelector(".score")
+            val = parseInt(score.innerHTML)
+            score.innerHTML = ++val
+        }
+
+        minus.addEventListener("click", decrease)
+        plus.addEventListener("click", increase)
+    </script> -->
+</div>
+
+
+<!--         <div class="row row-cols-3 d-flex justify-content-start roomsContainer">
+          {% for room in rooms %}
+            <div class="col room d-flex justify-content-center align-items-center">
+                <div class="cardContainer">
+                    <div class="front d-flex align-items-center justify-content-center border">
+                        <div class="d-flex flex-column align-items-center justify-content-center">
+                            <img class="roomAvatar" src='/static{{room.leaderAvatar}}' alt="">
+                            <div class="p-3 text-center">{{ room.name }}</div>
+                        </div>
+                        <div class="p-3 text-center players">{{ room.players }} / 8</div>
+                    </div>
+                    <div class="back d-flex justify-content-center align-items-center">
+                        <div class="btn joinBtn">Join Game</div>
+                    </div>
+                </div>
+            </div>
+          {% endfor %}
+        </div>
+ -->

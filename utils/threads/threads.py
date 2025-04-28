@@ -4,11 +4,14 @@ import logging
 import threading
 from abc import ABC, abstractmethod
 
+from channels.layers import get_channel_layer
+
 from utils.redis import RedisConnectionPool
 
 
 class Threads(threading.Thread, ABC):
     instance = None
+    active_threads = []
 
     def __init__(self, name):
         super().__init__(daemon=True, name=name)
@@ -18,6 +21,10 @@ class Threads(threading.Thread, ABC):
         self._logger = logging.getLogger(self.__class__.__name__)
         self._stop_event = threading.Event()
         self._completed_actions = set()
+        self._channel_layer = get_channel_layer()
+
+        # Add this thread to the active threads list
+        Threads.active_threads.append(self)
 
     def run(self):
         self._logger.info(f"Starting thread [{self.name}]")
@@ -29,6 +36,10 @@ class Threads(threading.Thread, ABC):
         self._logger.info(f"Stopping thread [{self.name}]")
         self._stop_event.set()
         self.cleanup()
+
+        # Remove this thread from the active threads list
+        if self in Threads.active_threads:
+            Threads.active_threads.remove(self)
 
     def execute_once(self, action_func, *args, **kwargs):
         frame = inspect.currentframe().f_back
@@ -59,3 +70,25 @@ class Threads(threading.Thread, ABC):
     @abstractmethod
     def cleanup(self):
         pass
+
+    @staticmethod
+    def stop_all_threads(except_thread=None):
+        """
+        Stop all active threads except the specified thread.
+
+        Args:
+            except_thread: The thread to exclude from stopping (usually the calling thread)
+        """
+        import logging
+        logger = logging.getLogger("Threads")
+
+        active_count = sum(1 for t in Threads.active_threads if t != except_thread and t.is_alive())
+        logger.info(f"Stopping all active threads ({active_count} threads)...")
+
+        for thread in list(Threads.active_threads):
+            if thread != except_thread and thread.is_alive():
+                logger.info(f"Stopping thread [{thread.name}]")
+                thread.stop()
+
+        remaining = sum(1 for t in Threads.active_threads if t != except_thread and t.is_alive())
+        logger.info(f"Thread cleanup complete. Remaining active threads: {remaining}")

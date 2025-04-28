@@ -1,0 +1,49 @@
+<div class="createTournamentContainer">
+    <div class="box">
+
+        <h1 class="text-center">Create a tournament</h1>
+
+        <div class="d-flex roomNameContainer align-items-center justify-content-between mt-4">
+            <label for="roomName">Room name</label>
+            <input id="roomName" type="text" placeholder="minimeow's room">
+        </div>
+
+        <div class="points text-center mt-2">
+            <div>Points to win</div>
+            <div class="counter">
+                <div class="minus">-</div>
+                <div class="score">1</div>
+                <div class="plus">+</div>
+            </div>
+        </div>
+
+        <div class="d-flex roomPrivateContainer align-items-center mt-2">
+            <label for="roomName">Private room</label>
+            <input type="checkbox" checked>
+        </div>
+
+        <div class="btn createBtn mt-4">Create Room</div>
+    </div>
+
+    <script>    
+        let minus = document.querySelector(".minus")
+        let plus = document.querySelector(".plus")
+        
+
+        function decrease(){
+            let score = document.querySelector(".score")
+            val = parseInt(score.innerHTML)
+            if (val > 1)
+                score.innerHTML = --val
+        }
+
+        function increase(){
+            let score = document.querySelector(".score")
+            val = parseInt(score.innerHTML)
+            score.innerHTML = ++val
+        }
+
+        minus.addEventListener("click", decrease)
+        plus.addEventListener("click", increase)
+    </script>
+</div>

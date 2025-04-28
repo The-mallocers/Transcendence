@@ -23,13 +23,6 @@ class GameService(BaseServices):
             self._logger.error(f"No active game found for client {client.id}")
         return True
 
-    # async def process_action(self, data: Dict[str, Any], *args):
-    #     # if await self.redis.hget(name='player_game', key=str(args[0].id)) is None:
-    #     #     client = await Clients.get_client_by_player_id_async(args[0].id)
-    #     #     await send_group_error(RTable.GROUP_CLIENT(client.id, ResponseError.NO_GAME)
-    #     # else:
-    #     return await super().process_action(data, *args)
-
     async def _handle_start_game(self, data, client: Clients):
         status = GameStatus(await self.redis.json().get(self.game_key, Path('status')))
         if status_order.index(status) < status_order.index(GameStatus.STARTING):
@@ -52,4 +45,5 @@ class GameService(BaseServices):
                 await self.redis.json().set(self.game_key, Path('player_right.paddle.move'), data['data']['args'])
 
     async def disconnect(self, client):
-        await self.redis.json().set(self.game_key, Path('status'), GameStatus.ENDING)
+        if self.game_key:
+            await self.redis.json().set(self.game_key, Path('status'), GameStatus.ENDING)

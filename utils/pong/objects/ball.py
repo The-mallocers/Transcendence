@@ -26,7 +26,7 @@ class Ball:
         self.y = self.get_y()
         self.dx = self.get_dx()
         self.dy = self.get_dy()
-    
+
     def push_to_redis(self):
         self.set_radius(self.radius)
         self.set_x(self.x)

@@ -9,88 +9,103 @@ let lusername = document.getElementById("lusername");
 let rusername = document.getElementById("rusername");
 let lscore = document.getElementById("scoreLeft");
 let rscore = document.getElementById("scoreRight");
-
 let height = 500;
 const width = 1000;
-
 const ballSize = 10;
 const paddleThickness = 20;
 let paddleHeight = 100;
-
-
 canvas.width = width;
 canvas.height = height;
+let is_gameplay_start = false;
+let last_time = 0;
+let did_tab_out = false;
+let delta = 0;
+const PADDLE_SPEED = 300; // pixels per second
+let lastUpdateTime = 0;
+let frameCount = 0;
+//Need to add an API call so that I know which fucking paddle I am;
 
-lusername.innerHTML = window.GameState.left.username
-rusername.innerHTML = window.GameState.right.username
-console.log('meowmeowmeow', window.GameState)
 
-socket.onmessage = (e) => {
-    const jsonData = JSON.parse(e.data);
-    console.log("received the message below");
-    console.log(jsonData);
-    console.log("received the message with Data");
-    console.log(jsonData.data)
-    if (jsonData.data) {
-        console.log(jsonData.data.action)
-    }
+//Si un petit malin va sur la page sans raison
+if (!socket || socket.readyState === WebSocket.CLOSED) {
+    navigateTo("/");
+} else {
+    console.log(window.GameState);
+    lusername.innerHTML = window.GameState.left.username
+    rusername.innerHTML = window.GameState.right.username
 
-    //Attempt at handling errors
-    if (jsonData.data.action == "EXCEPTION") {
-        isGameOver.gameIsOver = true;
-        WebSocketManager.closeGameSocket();
-        navigateTo("/");
-    }
+    socket.onmessage = (e) => {
+        const jsonData = JSON.parse(e.data);
+        // console.log("received the message below");
+        // console.log(jsonData);
+        // console.log("received the message with Data");
+        // console.log(jsonData.data)
+        // if (jsonData.data) {
+        //     console.log(jsonData.data.action)
+        // }
 
-    if (jsonData.event == "UPDATE") {
-
-        if (jsonData.data.action == "PADDLE_LEFT_UPDATE") {
-            console.log(jsonData.data.content.y)
-            window.GameState.left.y = jsonData.data.content.y
-        } else if (jsonData.data.action == "PADDLE_RIGHT_UPDATE") {
-            window.GameState.right.y = jsonData.data.content.y
-        } else if (jsonData.data.action == "BALL_UPDATE") {
-            window.GameState.ballX = jsonData.data.content.x;
-            window.GameState.ballY = jsonData.data.content.y;
-            // console.table(jsonData.data.content.x, jsonData.data.content.y)
-        } else if (jsonData.data.action == "SCORE_LEFT_UPDATE") {
-            lscore.innerHTML = jsonData.data.content
-        } else if (jsonData.data.action == "SCORE_RIGHT_UPDATE") {
-            rscore.innerHTML = jsonData.data.content
+        //Attempt at handling errors
+        if (jsonData.data.action == "EXCEPTION") {
+            console.log("REDIRECTION BECAUSE EXCEPTION HAPPENED");
+            isGameOver.gameIsOver = true;
+            WebSocketManager.closeGameSocket();
+            navigateTo("/");
         }
-    } else if (jsonData.event == "ERROR") {
-        console.log("WE GOT AN ERROR"); 
-        if (jsonData.data.action == "OPPONENT_LEFT") {
-            console.log("Opponent Disconnected");
-            navigateTo("/pong/disconnect/"); //Later, Redirect to a screen telling your opponent he disconnected.
+
+        if (jsonData.event == "UPDATE") {
+
+            if (is_gameplay_start == false) {
+                is_gameplay_start = true;
+                last_time = performance.now();
+            }
+            if (jsonData.data.action == "PADDLE_LEFT_UPDATE") {
+                window.GameState.left.y = jsonData.data.content.y
+            } else if (jsonData.data.action == "PADDLE_RIGHT_UPDATE") {
+                window.GameState.right.y = jsonData.data.content.y
+            } else if (jsonData.data.action == "BALL_UPDATE") {
+                // console.log("Ball update is :", jsonData.data);
+                //We only update if we changed direction, this makes things smoother.
+                if (did_tab_out || window.GameState.balldy != jsonData.data.content.dy || window.GameState.balldx != jsonData.data.content.dx) {
+                    did_tab_out = false;
+                    window.GameState.ballX = jsonData.data.content.x;
+                    window.GameState.ballY = jsonData.data.content.y;
+                    window.GameState.balldy = jsonData.data.content.dy;
+                    window.GameState.balldx = jsonData.data.content.dx;
+                }
+            } else if (jsonData.data.action == "SCORE_LEFT_UPDATE") {
+                lscore.innerHTML = jsonData.data.content
+            } else if (jsonData.data.action == "SCORE_RIGHT_UPDATE") {
+                rscore.innerHTML = jsonData.data.content
+            }
+        } else if (jsonData.event == "ERROR") {
+            if (jsonData.data.action == "OPPONENT_LEFT") {
+                console.log("Opponent Disconnected");
+                navigateTo("/pong/disconnect/");
+                isGameOver.gameIsOver = true;
+                WebSocketManager.closeGameSocket();
+            }
+        } else if (jsonData.data.action == "GAME_ENDING") {
+            const game_id = jsonData.data.content
+            console.log("GAME IS OVER");
+            navigateTo(`/pong/gameover/?game=${game_id}`);
             isGameOver.gameIsOver = true;
             WebSocketManager.closeGameSocket();
         }
-    } else if (jsonData.data.action == "GAME_ENDING") {
-        //Close socket here as well
-        const game_id = jsonData.data.content
-        console.log("game id is ", game_id);
-        console.log("ALLO C FINI LA GAME");
-        //We will want to navigate to a specific game
-        console.log("Navigating to /pong/gameover/");
-        navigateTo(`/pong/gameover/?game=${game_id}`);
-        isGameOver.gameIsOver = true;
-        WebSocketManager.closeGameSocket();
-    }
-    // return render()
-    // })s
-};
-
-
-const keys = {
-    'a': false,
-    'd': false,
-};
-
-const previous_keys = {
-    'a': false,
-    'd': false,
+    };
 }
+
+document.addEventListener('visibilitychange', () => {
+    did_tab_out = true;
+    const isTabVisible = document.visibilityState === 'visible';
+
+    if (isTabVisible) {
+        last_time = performance.now();
+    }
+});
+
+const keys = {};
+const previous_keys = {};
+let previous_direction = null;
 
 document.addEventListener('keydown', (event) => {
     switch (event.key) {
@@ -101,7 +116,6 @@ document.addEventListener('keydown', (event) => {
             keys.down = true;
             break;
     }
-    // updatePaddles()
 });
 
 document.addEventListener('keyup', (event) => {
@@ -113,12 +127,12 @@ document.addEventListener('keyup', (event) => {
             keys.down = false;
             break;
     }
-    // updatePaddles()
 });
 
+
 function updatePaddles() {
-    // gauche
     let direction = null;
+    //This might look confusing, but this is to simulate strafing keys
     if (keys.up && keys.down) {
         if (previous_keys.up) {
             direction = 'down'
@@ -136,8 +150,14 @@ function updatePaddles() {
     } else {
         direction = 'idle'
     }
-    if (direction) {
-        // console.log("direction is :", direction)
+    if (direction != previous_direction) {
+        console.log("previous direction :", previous_direction);
+        console.log("direction :", direction);
+    }
+
+    if ((direction && previous_direction != direction) || frameCount % 10 === 0) { //Had to do this for some reason otherwise its shitty
+        previous_direction = direction;
+        
         const message = {
             "event": "game",
             "data": {
@@ -170,39 +190,66 @@ const drawPaddle = (x, y) => {
     ctx.fillRect(x, y, paddleThickness, paddleHeight);
 };
 
-const drawBall = (x, y) => {
+const drawBall = () => {
+    const nextX = window.GameState.ballX + window.GameState.balldx * delta;
+    const nextY = window.GameState.ballY + window.GameState.balldy * delta;
+
+    const leftBoundary = 10; //This is harcoding, if im a real G Id do an api call to get that value.
+    const rightBoundary = width - 10;
+
+    if (nextX > leftBoundary && nextX < rightBoundary) {
+        window.GameState.ballX = nextX;
+        window.GameState.ballY = nextY;
+    }
+
     ctx.fillStyle = "white";
     ctx.beginPath();
-    ctx.arc(x, y, ballSize, 0, Math.PI * 2);
+    ctx.arc(window.GameState.ballX, window.GameState.ballY, ballSize, 0, Math.PI * 2);
     ctx.fill();
 };
 
-// Complete rendering function
+
 const render = () => {
     clearArena();
+
     drawArena();
     drawPaddle(10, window.GameState.left.y);
     drawPaddle(width - paddleThickness - 10, window.GameState.right.y);
-    drawBall(window.GameState.ballX, window.GameState.ballY);
+    drawBall();
 };
 
 
-render()
+function computeDelta() {
+    const curr_time = performance.now();
+    delta = (curr_time - last_time) / 1000;
+    last_time = curr_time;
+    return delta;
+}
 
 function gameLoop() {
     if (isGameOver.gameIsOver == true) {
-        // alert("returning like a fucking idiot")
         return;
     }
-    // console.log("Im looping, ", game_is_over)
+    frameCount++;
+    computeDelta();
     updatePaddles();
     render();
     requestAnimationFrame(gameLoop);
 }
 
-// Start the game loop
+const antibsbool = Boolean(
+    socket &&
+    socket.readyState !== WebSocket.CLOSED &&
+    window.GameState &&
+    window.GameState.left &&
+    window.GameState.right
+);
+
 isGameOver.gameIsOver = false;
-if (isGameOver.gameIsOver == false) {
-    // alert("I am in the loop for the first time")
+if (isGameOver.gameIsOver == false && antibsbool) {
     requestAnimationFrame(gameLoop);
+}
+//We used to call this to draw the ball once, maybe hardcore it in some other way, but ideally play an animation for the first few seconds.
+if (antibsbool) {
+    render();
 }

@@ -1,5 +1,5 @@
-import { navigateTo } from '../../spa/spa.js';
-import { WebSocketManager } from "../../websockets/websockets.js"
+import {navigateTo} from '../../spa/spa.js';
+import {WebSocketManager} from "../../websockets/websockets.js"
 
 
 function logout() {
@@ -22,7 +22,6 @@ function logout() {
         })
         .then(data => {
             console.log('Logout successful:', data);
-            localStorage.removeItem('client_id'); //Recent addition since our client id is stored in localstorage, we need to remove it.
             navigateTo('/auth/login')
         })
         .catch(error => {
@@ -30,9 +29,11 @@ function logout() {
         });
 }
 
-let element = document.querySelector("#logout-btn");
+const element = document.querySelector("#logout-btn");
 
 
-element.addEventListener("click", (e) => {
-    logout(e)
+element?.addEventListener("click", (e) => {
+    logout(e);
 })
+
+

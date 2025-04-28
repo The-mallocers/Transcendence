@@ -12,9 +12,9 @@ from utils.websockets.channel_send import send_group, send_group_error
 
 class GameThread(Threads):
     def __init__(self, game: Game):
-        super().__init__(f"Game_{game.game_id}")
+        super().__init__(f"Game_{game.code}")
         self.game = game
-        self.game_id = game.game_id
+        self.game_id = game.code
         self.logic: PongLogic = PongLogic(self.game, self.redis)
 
     def main(self):
@@ -29,8 +29,7 @@ class GameThread(Threads):
                 self._ending()  # I will get this one out of this loop I swear it
 
         except Exception as e:
-            self._logger.error(e)
-            traceback.print_exc()
+            self._logger.error(traceback.format_exc())
             self.game.rset_status(GameStatus.ERROR)
             send_group_error(RTables.GROUP_GAME(self.game_id), ResponseError.EXCEPTION, close=True)
             self.stop()

@@ -31,9 +31,9 @@ class EventType(str, Enum):
     GAME: str = 'game'
     TOURNAMENT: str = 'tournament'
     UPDATE: str = 'update'
-    ERROR: str = 'error'
     CHAT: str = 'chat'
     NOTIFICATION: str = 'notification'
+    ERROR: str = 'error'
 
 
 # All the actions the client sends to the server
@@ -94,6 +94,12 @@ class ResponseAction(str, Enum):
     REFUSED_DUEL: str = 'You have refused the duel.'
     DUEL_REFUSED: str = 'Duel refused'
 
+    # ── Tournaments ───────────────────────────────────────────────────────────────── #
+    TOURNAMENT_CREATED: str = 'You have successfully create the tournament'
+    TOURNAMENT_JOIN: str = 'You have successfully joined the tournament'
+    TOURNAMENT_PLAYER_JOIN: str = 'Player join the tournament.'
+    TOURNAMENT_LEFT: str = 'You have successfully left the tournament'
+
     # ── Game Actions ──────────────────────────────────────────────────────────────────
     JOIN_GAME: str = 'You have successfully joined the game'
     LEFT_GAME: str = 'You have successfully left the game'
@@ -148,6 +154,12 @@ class ResponseError(str, Enum):
     ALREADY_JOIN_DUEL: str = 'You try to join duel already joined.'
     CANNOT_REFUSE_DUEL: str = "You can't refuse a duel you already joined."
 
+    # ── Tournaments ───────────────────────────────────────────────────────────────── #
+    MISSING_KEY: str = 'Some keys are missing'
+    TOURNAMENT_NOT_CREATE: str = 'There is error when you try to create tournaments.'
+    TOURNAMENT_NOT_EXIST: str = 'Tournament you try to join not exist.'
+    ALREADY_JOIN_TOURNAMENT: str = 'You try to join tournament already joined.'
+
     # ── Game ──────────────────────────────────────────────────────────────────────────
     GAME_FULL: str = 'The game is currently full.'
     ALREADY_JOINED: str = "You have already joined the game."
@@ -191,6 +203,7 @@ class RTables(str, Enum):
     GROUP_CHAT: str = 'chat_{}'
     GROUP_GAME: str = 'game_{}'
     GROUP_NOTIF: str = 'notification_{}'
+    GROUP_TOURNAMENT: str = 'tournament_{}'
 
     # ── Hash Tables ───────────────────────────────────────────────────────────────── #
     HASH_CLIENT: str = 'client_{}'
@@ -198,10 +211,12 @@ class RTables(str, Enum):
     HASH_QUEUE: str = 'queue_{}'
     HASH_G_QUEUE: str = HASH_QUEUE.format('global')
     HASH_DUEL_QUEUE: str = HASH_QUEUE.format("duel_{}")
+    HASH_TOURNAMENT_QUEUE: str = HASH_QUEUE.format("tournament_{}")
 
     # ── Json ──────────────────────────────────────────────────────────────────────── #
     JSON_GAME: str = 'game_{}'
     JSON_DUEL: str = 'duel_{}'
+    JSON_TOURNAMENT: str = 'tournament_{}'
 
     def __str__(self, *args) -> str:
         if '{}' in self.value:  # Si la chaîne contient un placeholder

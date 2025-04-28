@@ -8,6 +8,7 @@ from apps.profile.models import Profile
 
 
 def get(req):
+    print("Salut les bebous")
     requestUsername = req.GET.get("username", "minimeow")
     # print(requestUsername)
     target = Clients.get_client_by_username(requestUsername)
@@ -38,7 +39,15 @@ def get(req):
 
 
 def get_settings(req):
-    html_content = render_to_string("apps/profile/myinformations.html", {"csrf_token": get_token(req)})
+    #I need to add in the context the fact that he has 2FA activated
+    client = Clients.get_client_by_request(req)
+        
+    html_content = render_to_string("apps/profile/myinformations.html", {
+        "csrf_token": get_token(req),
+        "isAdmin": client.rights.is_admin,
+        "twoFaEnable": client.twoFa.enable,
+        "client": client,
+    })
     return JsonResponse({
         'html': html_content,
     })
@@ -74,6 +83,7 @@ def post(request: HttpRequest, client_id):
                 'message': 'Profile updated successfully'
             }, status=200)
         except PermissionDenied as e:
+            print("This is the only return 400 in the codebase, is this triggering ?!")
             return JsonResponse({
                 'success': False,
                 'message': str(e)

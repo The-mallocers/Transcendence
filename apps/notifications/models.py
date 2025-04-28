@@ -33,8 +33,7 @@ class Friend(models.Model):
                     self.save()
                     return client
         except Exception as e:
-            print(f"Error adding pending friend: {e}")
-            return None
+            raise Exception(f"Error retrieving friend request: {e}")
 
     @sync_to_async
     def accept_pending_friend(self, client):
@@ -78,7 +77,6 @@ class Friend(models.Model):
                 self.friends.remove(client)
                 self.save()
         except Exception as e:
-            print(f"Error removing friend: {e}")
             raise ValidationError("Failed to remove friend")
         
     #add friend to duel

@@ -14,15 +14,13 @@ from utils.websockets.channel_send import send_group_error
 class MatchmakingThread(Threads):
     def main(self):
         game: Game = Game()
-        matched: bool = False
 
         while not self._stop_event.is_set():
             try:
                 if game is None:
                     game = Game()
 
-                matched = self.select_players(game)
-                if matched:
+                if self.select_players(game):
                     game.create_redis_game()
                     self._logger.info(f"Found match: {game.pL} vs {game.pR}")
                     game.rset_status(GameStatus.MATCHMAKING)
@@ -35,19 +33,21 @@ class MatchmakingThread(Threads):
                 time.sleep(1)
 
             except Exception as e:
-                traceback.print_exc()
-                pass
+                self._logger.error(traceback.format_exc())
                 if game:
                     game.error_game()
                 if game.pL:
                     send_group_error(RTables.GROUP_CLIENT(game.pL.id), ResponseError.MATCHMAKING_ERROR)
-                    game.pL.leave_queue(game.game_id, game.is_duel)
+                    game.pL.leave_queue(game.code, game.is_duel)
                 if game.pR:
                     send_group_error(RTables.GROUP_CLIENT(game.pR.id), ResponseError.MATCHMAKING_ERROR)
-                    game.pR.leave_queue(game.game_id, game.is_duel)
+                    game.pR.leave_queue(game.code, game.is_duel)
 
     def cleanup(self):
         self._logger.info("Cleaning up unfinished games from previous session...")
+
+        # Stop all active threads (GameThread and TournamentThread instances)
+        Threads.stop_all_threads(except_thread=self)
 
         game_keys = self.redis.keys('game:*')
         for key in game_keys:
@@ -56,6 +56,7 @@ class MatchmakingThread(Threads):
         # self.redis.delete(RTables.HASH_CLIENT)
         self.redis.delete(RTables.HASH_G_QUEUE)
         self.redis.delete(RTables.HASH_DUEL_QUEUE('*'))
+        self.redis.delete(RTables.HASH_TOURNAMENT_QUEUE('*'))
         self.redis.delete(RTables.HASH_MATCHES)
 
         # RedisConnectionPool.close_connection(self.__class__.__name__)
@@ -72,8 +73,10 @@ class MatchmakingThread(Threads):
             selected_players = players[:2]  # this gets the first 2 players of the list
             random.shuffle(selected_players)
             game.is_duel = False
-            game.pL = Player(selected_players[0])
-            game.pR = Player(selected_players[1])
+            game.pL = Player()
+            game.pL.my_init(selected_players[0])
+            game.pR = Player()
+            game.pR.my_init(selected_players[1])
             if game.pL is not None and game.pR is not None:
                 return True
         # second we check the duel for start game
@@ -90,8 +93,8 @@ class MatchmakingThread(Threads):
                 return False
             if stat_p1.decode('utf-8') == 'True' and stat_p2.decode('utf-8') == 'True':
                 game.is_duel = True
-                game.game_id = re.search(rf'{RTables.HASH_DUEL_QUEUE("")}(\w+)$', duel.decode('utf-8')).group(1)
-                game.game_key = RTables.JSON_GAME(game.game_id)
+                game.code = re.search(rf'{RTables.HASH_DUEL_QUEUE("")}(\w+)$', duel.decode('utf-8')).group(1)
+                game.game_key = RTables.JSON_GAME(game.code)
                 game.pL = Player(player_1.decode('utf-8'))
                 game.pR = Player(player_2.decode('utf-8'))
                 return True

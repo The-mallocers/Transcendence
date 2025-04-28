@@ -29,6 +29,7 @@ async function validateCode() {
             // alert('Code submitted: ' + code);
         } catch (err) {
             console.log(err);
+            console.log("coucou");
             navigateTo(result.redirect);
         }
     } else {

@@ -3,6 +3,7 @@ from django.conf.urls.static import static
 from django.urls import path, include, re_path
 from django.views.generic import TemplateView
 
+from utils.enums import EventType
 from utils.websockets.consumers.chat import ChatConsumer
 from utils.websockets.consumers.game import GameConsumer
 from utils.websockets.consumers.notification import NotificationfConsumer
@@ -22,10 +23,10 @@ urlpatterns = [
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ WEBSOCKET ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
 websocket_urlpatterns = [
-    path("ws/game/", GameConsumer.as_asgi()),
-    path("ws/chat/", ChatConsumer.as_asgi()),
-    path("ws/tournaments/", TournamentConsumer.as_asgi()),
-    path("ws/notification/", NotificationfConsumer.as_asgi())
+    path(f"ws/{EventType.GAME.value}/", GameConsumer.as_asgi()),
+    path(f"ws/{EventType.CHAT.value}/", ChatConsumer.as_asgi()),
+    path(f"ws/{EventType.TOURNAMENT.value}/", TournamentConsumer.as_asgi()),
+    path(f"ws/{EventType.NOTIFICATION.value}/", NotificationfConsumer.as_asgi())
 ]
 
 if settings.DEBUG:

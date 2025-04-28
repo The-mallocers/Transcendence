@@ -21,7 +21,7 @@ class Score:
 
     def update(self):
         self.score = self.get_score()
-    
+
     def push_to_redis(self):
         self.set_score(self.score)
     

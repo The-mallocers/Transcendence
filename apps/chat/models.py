@@ -90,8 +90,7 @@ class Rooms(models.Model):
                     query = query.exclude(id=global_room)
                 return query.first()
         except Exception as e:
-            print(f"Error getting room by client ID: {e}")
-            return None
+            raise Exception(f"Error getting room by client ID: {e}")
         except Clients.DoesNotExist:
             return None
 

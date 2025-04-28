@@ -31,7 +31,7 @@ class Paddle:
         self.y = self.get_y()
         self.speed = self.get_speed()
         self.move = self.get_move()
-    
+
     def push_to_redis(self):
         self.set_width(self.width)
         self.set_height(self.height)

@@ -10,22 +10,21 @@ from apps.player.models import Player
 from utils.enums import EventType, ResponseAction, RTables
 from utils.enums import GameStatus
 from utils.enums import PaddleMove
-from utils.pong.objects import * 
+from utils.pong.objects import *
 from utils.pong.objects.ball import Ball
 from utils.pong.objects.objects_state import GameState
 from utils.pong.objects.paddle import Paddle
 from utils.pong.objects.score import Score
 from utils.serializers.game import PaddleSerializer, BallSerializer
 from utils.websockets.channel_send import send_group
-
-MAX_BOUNCE_ANGLE = math.radians(75)
+from django.db.models import F
 
 class PongLogic:
-    def __init__(self, game: Game, redis): 
+    def __init__(self, game: Game, redis):
         self._logger = logging.getLogger(self.__class__.__name__)
         self.redis = redis
         self.game = game
-        self.game_id = game.game_id
+        self.game_id = game.code
         self.last_update: float = -1  # This hack is sponsored by tfreydie and prevents the random +1 score at the start
 
         # ── Objects ───────────────────────────────────────────────────────────────────
@@ -48,7 +47,7 @@ class PongLogic:
             time.sleep(1 / FPS)
         except asyncio.CancelledError:
             pass
-    
+
     def _game_loop(self):
         current_time = time.time()
         delta_time = self._compute_delta(current_time)
@@ -92,8 +91,7 @@ class PongLogic:
             self.ball.dy = self.ball.dy * -1
 
     def _handle_movement(self, delta_time):
-        self.ball.dx *= 1.001
-        self.ball.dy *= 1.001
+
         self.ball.x += self.ball.dx * delta_time
         self.ball.y += self.ball.dy * delta_time
         self._handle_paddle_direction(self.paddle_pL, delta_time)
@@ -101,20 +99,20 @@ class PongLogic:
 
     def _handle_paddle_collision(self, paddle, is_left):
         if self._is_paddle_collision(paddle):
-            
+
             # Calculate how far from the paddle center the ball hit
             relative_hit_pos = (self.ball.y - paddle.y) / paddle.height - 0.5
             relative_hit_pos = max(min(relative_hit_pos, MAX_ANGLE_FACTOR), -MAX_ANGLE_FACTOR)
-            
-            current_speed = math.sqrt(self.ball.dx**2 + self.ball.dy**2)
-    
-            #We dont want too vertical of a movement
-            max_vertical_component = current_speed * math.sqrt(1 - MIN_HORIZONTAL_PERCENT**2)
-            
+
+            current_speed = math.sqrt(self.ball.dx ** 2 + self.ball.dy ** 2)
+
+            # We dont want too vertical of a movement
+            max_vertical_component = current_speed * math.sqrt(1 - MIN_HORIZONTAL_PERCENT ** 2)
+
             self.ball.dy = relative_hit_pos * ANGLE_FACTOR * current_speed
             self.ball.dy = max(min(self.ball.dy, max_vertical_component), -max_vertical_component)
-            
-            dx_squared = current_speed**2 - self.ball.dy**2
+
+            dx_squared = current_speed ** 2 - self.ball.dy ** 2
             dx_magnitude = math.sqrt(max(dx_squared, 0.01))
 
             if is_left:
@@ -123,6 +121,8 @@ class PongLogic:
             else:
                 self.ball.dx = -dx_magnitude
                 self.ball.x = paddle.x - self.ball.radius
+            self.ball.dx = min(self.ball.dx * ACCEL, MAX_SPEED)
+            self.ball.dy = min(self.ball.dy * ACCEL, MAX_SPEED)
 
     def _handle_paddle_direction(self, paddle: Paddle, delta_time):
         move = paddle.move
@@ -138,9 +138,9 @@ class PongLogic:
     def _is_paddle_collision(self, paddle: Paddle):
         closest_x = max(paddle.x, min(self.ball.x, paddle.x + paddle.width))
         closest_y = max(paddle.y - PADDING_PADDLE, min(self.ball.y, paddle.y + paddle.height + PADDING_PADDLE))
-       
-        distance_x = self.ball.x - closest_x 
-        distance_y = self.ball.y - closest_y 
+
+        distance_x = self.ball.x - closest_x
+        distance_y = self.ball.y - closest_y
 
         distance_squared = distance_x ** 2 + distance_y ** 2
         return distance_squared <= self.ball.radius ** 2
@@ -148,32 +148,32 @@ class PongLogic:
     def _reset_ball(self, ball):
         ball.x = CANVAS_WIDTH / 2
         ball.y = CANVAS_HEIGHT / 2
-        
+
         angle_options = [
-            random.uniform(math.radians(40), math.radians(60)),    # Right-up
+            random.uniform(math.radians(40), math.radians(60)),  # Right-up
             random.uniform(math.radians(120), math.radians(140)),  # Left-up
             random.uniform(math.radians(220), math.radians(240)),  # Left-down
-            random.uniform(math.radians(300), math.radians(320))   # Right-down
+            random.uniform(math.radians(300), math.radians(320))  # Right-down
         ]
-        
+
         angle = random.choice(angle_options)
         ball.dx = BALL_SPEED * math.cos(angle)
         ball.dy = BALL_SPEED * math.sin(angle)
-    
+
     def _push_all_to_redis(self):
         self.ball.push_to_redis()
         self.paddle_pL.push_to_redis()
         self.paddle_pR.push_to_redis()
         self.score_pL.push_to_redis()
         self.score_pR.push_to_redis()
-        
+
     def _pull_all_from_redis(self):
         self.ball.update()
         self.paddle_pL.update()
         self.paddle_pR.update()
         self.score_pL.update()
         self.score_pR.update()
-        
+
     def _game_update(self, changes):
         if changes['ball']:
             self.ball.update()
@@ -202,6 +202,8 @@ class PongLogic:
     def set_result(self, disconnect=False):
         winner = Player()
         loser = Player()
+        winner.my_init()
+        loser.my_init()
 
         if disconnect is True:
             if self.redis.hget(name=RTables.HASH_CLIENT(self.game.pL.id), key=str(EventType.GAME.value)) is None:
@@ -224,13 +226,19 @@ class PongLogic:
 
         loser.save()
         winner.save()
-        finished_game = Game.objects.create(id=self.game.game_id, winner=winner, loser=loser, points_to_win=self.game.points_to_win,
-                                            is_duel=self.game.rget_is_duel())
+        finished_game = Game.objects.create(id=self.game.code, winner=winner, loser=loser,
+                                            points_to_win=self.game.points_to_win, is_duel=self.game.rget_is_duel())
+        
+        #mmr gain would happen here.
+        winner.client.stats.wins = F('wins') + 1
+        loser.client.stats.losses = F('losses') + 1
         self.save_player_info(loser, finished_game)
         self.save_player_info(winner, finished_game)
 
     def save_player_info(self, player, finished_game):
         player.game = finished_game
+        player.save()
         player.client.stats.games.add(finished_game)
+        player.client.stats.total_game = F('total_game') + 1
         player.client.stats.save()
         player.save()
