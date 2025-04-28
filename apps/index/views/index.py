@@ -9,7 +9,6 @@ from apps.game.models import Game
 def get(req):
     print("in index")
     client = Clients.get_client_by_request(req)
-    print(client.stats, "meowmeoowwmeowmeoooooooooowwwwwwww")
     games_played = client.stats.games.all().order_by('-created_at')
     winrate = ghistory = rivals = None
     ghistory = get_last_matches(client, games_played)

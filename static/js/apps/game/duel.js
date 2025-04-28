@@ -1,22 +1,83 @@
 import { navigateTo } from "../../spa/spa.js";
-import {WebSocketManager} from "../../websockets/websockets.js"
+import { WebSocketManager } from "../../websockets/websockets.js";
+// import { notifSocket } from "../profile/profile.js";
 
-let client_id = null;
-const clientId = await getClientId()
-const gameSocket = WebSocketManager.initGameSocket(clientId);
+let client_id;
+let clientId;
 
-const urlParams = new URLSearchParams(window.location.search);
-const targetUsername = urlParams.get('target');
-console.log("Target username:", targetUsername);
-const opponent = document.querySelector(".opponent_player")
-if (opponent)
-{
-    opponent.innerHTML = targetUsername;
+clientId = await getClientId();
+const gameSocket = await WebSocketManager.initGameSocket(clientId);
+
+let height = 500;
+const width = 1000;
+
+const paddleHeight = 100;
+
+let paddleDefaultPos = 250 - (paddleHeight / 2)
+
+window.GameState = {
+    ballY: height / 2,
+    ballX: width / 2,
+
+    left: {
+        x: paddleDefaultPos,
+        y: paddleDefaultPos,
+        username: "",
+        id: ""
+    },
+    right: {
+        x: paddleDefaultPos,
+        y: paddleDefaultPos,
+        username: "",
+        id: ""
+    }
 }
 
-gameSocket.onmessage = (event) => {
-
+window.GameInfos = {
+    left: {}
 }
+
+const startGameMessage = {
+    "event": "game",
+    "data": {
+        "action": "start_game"
+    }
+}
+
+gameSocket.onmessage = (e) => {
+    const jsonData = JSON.parse(e.data);
+
+    console.log(jsonData.data.action);
+    //We should only get the response that a match was found
+
+    //On message on regarde si c'est que la game a commencer
+    //on renvois le json approprie
+    if (jsonData.data.action == "PLAYER_INFOS") {
+        console.log("PLAYER INFOS IS:")
+        console.log(jsonData.data.content)
+        window.GameState = {
+            ballY: height / 2,
+            ballX: width / 2,
+
+            left: {
+                x: jsonData.data.content.left.paddle.x,
+                y: jsonData.data.content.left.paddle.y,
+                username: jsonData.data.content.left.username,
+                id: ""
+            },
+            right: {
+                x: jsonData.data.content.right.paddle.x,
+                y: jsonData.data.content.right.paddle.y,
+                username: jsonData.data.content.right.username,
+                id: ""
+            }
+        }   
+    }
+    if (jsonData.data.action == "STARTING") {
+        navigateTo("/pong/arena/");
+        gameSocket.send(JSON.stringify(startGameMessage))
+    }
+};
 
 async function getClientId() {
     try {
@@ -36,18 +97,4 @@ async function getClientId() {
         console.error("Erreur lors de la récupération de l'ID :", error);
         return null;
     }
-}
-
-function create_message_duel(action, targetUser)
-{
-    let message = {
-        "event": "game",
-        "data": {
-            "action": action,
-            "args": {
-                "target": targetUser,
-            }
-        } 
-    }
-    return message;
 }

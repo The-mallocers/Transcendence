@@ -81,6 +81,7 @@ class ChatService(BaseServices):
         try:
             # Validate request structure
             args = data.get('data', {}).get('args', {})
+            print(args)
             message, room_id = args.get('message'), args.get('room_id')
 
             if not message or not room_id:
@@ -95,9 +96,30 @@ class ChatService(BaseServices):
             if room.id not in await Rooms.aget_room_id_by_client_id(client.id):
                 return await asend_group_error(self.service_group, ResponseError.NOT_ALLOWED)
 
-            # Store the message
+            target = await room.aget_target_by_room_id(client)
+            if target:
+                # dans le cas ou j'envoie un message a un user bloqué
+                player = await client.get_friend_table()
+                if await player.user_is_block(target):
+                    return await asend_group(RTables.GROUP_CHAT(str(client.id)), EventType.CHAT, 
+                        ResponseAction.ERROR_MESSAGE_USER_BLOCK, 
+                        {
+                            'message': "You can't send messages to block user",
+                            'sender': str(client.id),
+                            'room_id': str(room.id)
+                        })
+                
+                # dans le cas ou j'envoie un message à un utilisateur qui m'a bloqué
+                player = await target.get_friend_table()
+                if await player.user_is_block(client):
+                    return await asend_group(RTables.GROUP_CHAT(str(client.id)), EventType.CHAT, 
+                        ResponseAction.ERROR_MESSAGE_USER_BLOCK, 
+                        {
+                            'message': "You can't send messages to block user",
+                            'sender': str(client.id),
+                            'room_id': str(room.id)
+                        })
             await Messages.objects.acreate(sender=client, content=message, room=room)
-
             # Send the message to the group
             room_group = str(await Rooms.get_id(room))
             await asend_group(RTables.GROUP_CHAT(room_group), EventType.CHAT, ResponseAction.MESSAGE_RECEIVED, {
@@ -125,10 +147,11 @@ class ChatService(BaseServices):
             # Fetching the room and its messages
             room = await Rooms.get_room_by_id(room_id)
             if not room:
-                await asend_group_error(self.service_group, ResponseError.ROOM_NOT_FOUND)
-                return
-
-            messages = await Messages.aget_message_by_room(room)
+                return await asend_group_error(self.service_group, ResponseError.ROOM_NOT_FOUND)
+            
+            target = await room.aget_target_by_room_id(client)
+            
+            messages = await Messages.aget_message_by_room(room, target)
             if not messages:
                 await asend_group_error(self.service_group, ResponseError.NO_HISTORY)
                 return
@@ -151,14 +174,25 @@ class ChatService(BaseServices):
         rooms = await Rooms.aget_room_id_by_client_id(client.id)
         formatted_messages = []
         for room in rooms:
-            clients = await Rooms.get_usernames_by_room_id(room)
+            #retrieve all users from on room
+            users = await Rooms.get_usernames_by_room_id(room)
             players = []
-            for Client in clients:
-                player = Client
-                if str(client.id) != await Rooms.get_client_id_by_username(Client):
-                    players.append(player)
+            for user in users:
+                if str(client.id) != await Rooms.get_client_id_by_username(user):
+                    stringblock = "Block"
+                    player = await client.get_friend_table()
+                    if await player.user_is_block(await Clients.aget_client_by_username(user)):
+                        stringblock = "Unblock"
+                    players.append({
+                        "username": user, 
+                        "id": await Rooms.get_client_id_by_username(user),
+                        "status" : stringblock
+                    })
             formatted_messages.append({"room": str(room), "player": players})
-        await asend_group(self.service_group, EventType.CHAT, ResponseAction.ALL_ROOM_RECEIVED, {"rooms": formatted_messages})
+        await asend_group(self.service_group, 
+                        EventType.CHAT, 
+                        ResponseAction.ALL_ROOM_RECEIVED, 
+                        {"rooms": formatted_messages})
 
     async def disconnect(self, client):
         await self.channel_layer.group_discard(RTables.GROUP_CHAT(uuid_global_room), self.channel_name)
