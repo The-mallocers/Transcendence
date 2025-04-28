@@ -34,12 +34,7 @@ class Password(models.Model):
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ FUNCTIONS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
 
     def check_pwd(self, password: str) -> bool:
-        print("Comparing both Password")
-        print(password)
-        print(self.password)
-        matched = bcrypt.checkpw(password.encode('utf-8'), self.password.encode('utf-8'))
-        print("Allo")
-        return matched
+        return bcrypt.checkpw(password.encode('utf-8'), self.password.encode('utf-8'))
 
 
 class TwoFA(models.Model):

@@ -6,8 +6,8 @@
         <div class="row align-items-start box">
             <div class="col-7">
                 <div class="content">
-                    <h2 class="text-center">Current username: {{ client.profile.username }}</h2>
-                    <h2 class="text-center">Current email: {{ client.profile.email }}</h2>
+                        <h2 class="text-center" id="currusername">Current username: {{ client.profile.username }}</h2>
+                        <h2 class="text-center" id="curremail">Current email: {{ client.profile.email }}</h2>
                     <h2 class="text-center">Update Personal informations</h2>
                     <form id="register-form" method="PUT" action="{% url 'update' %}" enctype="multipart/form-data">
                         <div id="error-message" style="color: red;"></div>
@@ -36,9 +36,9 @@
                         </div>
                     </form>
                     <div class=" d-flex flex-column align-items-center justify-content-center inputs">
-                        <div id="upload-feedback"></div>
                         <div class="type-intra-green mt-4" id="update-btn">Update informations</div>
                         <h2 class="text-center">Current picture:</h2>
+                        <div id="upload-feedback"></div>
                         <img src="{{ client.profile.profile_picture.url }}" id="profile_picture">
                         <div class="type-intra-green mt-4" id="upload-img-btn">Upload new profile picture</div>
                         <div class="type-intra-green mt-4" id="logout-btn">Log out</div>

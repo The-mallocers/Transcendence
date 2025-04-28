@@ -184,19 +184,19 @@ ul.friends_group .list-group-item{
 
 #upload-img-btn {
     font-weight: bold;
-    width: 30%; /* or whatever percentage you want */
-    display: inline-block; /* ensures the width takes effect */
-    text-align: center; /* center the text inside */
-    box-sizing: border-box; /* makes sure padding/border don't make it overflow */
+    width: 30%; 
+    display: inline-block; 
+    text-align: center; 
+    box-sizing: border-box; 
     margin-right: auto;
 }
 
 #logout-btn {
     font-weight: bold;
     width: 20%; 
-    display: inline-block; /* ensures the width takes effect */
-    text-align: center; /* center the text inside */
-    box-sizing: border-box; /* makes sure padding/border don't make it overflow */
+    display: inline-block; 
+    text-align: center; 
+    box-sizing: border-box; 
     margin-left: auto;
     background-color: #c0392b;
     color: white;
@@ -215,10 +215,10 @@ ul.friends_group .list-group-item{
 
 #update-btn {
     font-weight: bold;
-    width: 30%; /* or whatever percentage you want */
-    display: inline-block; /* ensures the width takes effect */
-    text-align: center; /* center the text inside */
-    box-sizing: border-box; /* makes sure padding/border don't make it overflow */
+    width: 30%; 
+    display: inline-block; 
+    text-align: center; 
+    box-sizing: border-box; 
     margin-right: auto;
 }
 

@@ -52,12 +52,12 @@ function register(event) {
 
 let element = document.querySelector("#register-btn");
 
-element.addEventListener("click", (e) => {
+element?.addEventListener("click", (e) => {
     register(e)
 })
 
 //This is a frontend check to avoid needing to ask the backend for validation, even if we still do.
-function isPasswordcheckValid(password, passwordcheck) {
+export function isPasswordcheckValid(password, passwordcheck) {
     if (password === passwordcheck) {
         return true
     }
@@ -69,7 +69,7 @@ function isPasswordcheckValid(password, passwordcheck) {
     }
 }
 
-function handleErrorFront(errorData) {
+export function handleErrorFront(errorData) {
     clearAllErrorMessages();
     
     if ("profile" in errorData) {
@@ -97,7 +97,7 @@ function handleErrorFront(errorData) {
 }
 
 
-function displayErrorMessage(fieldId, message) {
+export function displayErrorMessage(fieldId, message) {
     const field = document.getElementById(fieldId);
     if (!field) return;
     

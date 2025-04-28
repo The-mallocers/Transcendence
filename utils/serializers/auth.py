@@ -41,30 +41,11 @@ class PasswordSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Passwords do not match.")
         return data
 
-    # Update custom object function
-    # def update(self, instance, validated_data):
-    #     print("HELLO am i in update")
-    #     new_password = validated_data.get('password', instance.password)
-    #     old_password = instance.password
-
-    #     if not new_password.startswith('$2b$'):
-    #         salt = bcrypt.gensalt(prefix=b'2b')
-    #         new_password = bcrypt.hashpw(new_password.encode('utf-8'), salt).decode('utf-8')
-
-    #     instance.old_password = old_password
-    #     instance.password = new_password
-    #     print(f"old pw : {old_password} vs new_password {new_password}")
-    #     if old_password != new_password:
-    #         raise serializers.ValidationError("New password must be different from the old password.")
-    #     instance.save()
-    #     return instance
-
     def update(self, instance, validated_data):
         new_password = validated_data.get('password')
         
         # Check if the new password matches the old one using the check_pwd method
         if instance.check_pwd(new_password):
-            print("CHECK PW RETURNED TRUE")
             raise serializers.ValidationError("New password must be different from the old password.")
         
         # Store the old password before updating
@@ -80,5 +61,4 @@ class PasswordSerializer(serializers.ModelSerializer):
             instance.password = new_password
         
         instance.save()
-        print("Hello ? Im returning as intended ?")
         return instance

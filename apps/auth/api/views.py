@@ -15,7 +15,6 @@ from utils.serializers.permissions.auth import PasswordPermission
 from utils.serializers.picture import ProfilePictureValidator
 
 
-
 class PasswordApiView(APIView):
     permission_classes = [PasswordPermission]
 
@@ -61,21 +60,12 @@ class RegisterApiView(APIView):
             print("Validation errors:", serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-# const data = {
-#     profile: {
-#         username: username,
-#         email: email
-#     },
-#     password: {
-#         password: password,
-#         passwordcheck: passwordcheck
-#     }
-# }
 
 class UpdateApiView(APIView):
     def post(self, request, *args, **kwargs):
         try:
             data = request.data
+            #We get rid of the empty fields
             for section in list(data.keys()):
                 if isinstance(data[section], dict):
                     for key in list(data[section].keys()):
@@ -84,7 +74,6 @@ class UpdateApiView(APIView):
                     if not data[section]:
                         del data[section]   
 
-            print("data:", data)
             client = Clients.get_client_by_request(request)
             
             serializer = ClientSerializer(instance=client, data=request.data, partial=True)
@@ -106,10 +95,6 @@ class UpdateApiView(APIView):
             return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR) 
-
-
-
-
 
 
 class LoginApiView(APIView):
@@ -276,7 +261,8 @@ class UploadPictureApiView(APIView):
             if serializer.is_valid():
                 profile.profile_picture = serializer.validated_data['profile_picture']
                 profile.save()
-                return Response({"message": "Profile picture updated successfully"}, status=status.HTTP_200_OK)
+                return Response({"message": "Profile picture updated successfully",
+                                 "picture": profile.profile_picture.url}, status=status.HTTP_200_OK)
             else:
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
