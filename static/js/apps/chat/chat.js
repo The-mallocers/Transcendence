@@ -50,6 +50,7 @@ chatSocket.onmessage = (event) => {
                                 message.data.content.sender, "Block");
     }
     else if(message.data.action == "MESSAGE_RECEIVED") {
+        if (message.data.content.room_id === room_id) {
         let chatHistory = document.querySelector('.chatHistory');
 
         const parser = new DOMParser();
@@ -60,6 +61,7 @@ chatSocket.onmessage = (event) => {
         chatHistory.appendChild(msgElement);
         scrollToBottom(chatHistory);
         //Do things to show the new message on the front
+        }
     }
     else if(message.data.action == "ERROR_MESSAGE_USER_BLOCK"){
         toast_message("You cant send message to block Friend")
