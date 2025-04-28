@@ -29,10 +29,10 @@ function logout() {
         });
 }
 
-let element = document.querySelector("#logout-btn");
+const element = document.querySelector("#logout-btn");
 
 
-element.addEventListener("click", (e) => {
+element?.addEventListener("click", (e) => {
     logout(e);
 })
 
