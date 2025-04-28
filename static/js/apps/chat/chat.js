@@ -202,7 +202,7 @@ function create_front_chat_room(room, username, usernameId, status){
         const parser = new DOMParser();
         const htmlChat = 
         `<div class="roomroom container d-flex align-items-center justify-content-between">
-            <button class="chat-${username} btn d-flex align-items-center gap-3">
+            <button class="chat-${username} chat-button btn d-flex align-items-center gap-3">
                 <img src="/static/assets/imgs/profile/default.png">
                 <div>${username}</div>
             </button>
@@ -227,6 +227,15 @@ function create_front_chat_room(room, username, usernameId, status){
 
         chatButton.addEventListener('click', function() {
             console.log(room);
+            const roomroomDiv = this.closest('.roomroom');
+    
+            roomroomDiv.classList.add('active-room');
+            
+            document.querySelectorAll('.roomroom.active-room').forEach(div => {
+                if (div !== roomroomDiv) {
+                    div.classList.remove('active-room');
+                }
+            });
             clickRoom(room)
         })
         chatProfile.addEventListener('click', function(){

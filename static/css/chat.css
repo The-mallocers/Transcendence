@@ -148,6 +148,10 @@
     background-color: #045f61;
 }
 
+.roomroom.active-room {
+    background-color: #053435;
+}
+
 #messageInput:focus {
     outline: none;
     outline: 2px solid #000;
