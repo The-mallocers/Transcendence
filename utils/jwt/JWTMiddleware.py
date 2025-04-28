@@ -37,8 +37,8 @@ class JWTMiddleware:
         return False
 
     def _update_tokens(self, request: HttpRequest):
+        
         refresh_token = JWT.extract_token(request, JWTType.REFRESH)
-        refresh_token.invalidate_token()
         client = Clients.get_client_by_id(refresh_token.SUB)
 
         access = JWT(client, JWTType.ACCESS)
@@ -51,6 +51,8 @@ class JWTMiddleware:
 
         access.set_cookie(response)
         refresh.set_cookie(response)
+        #Claude wants me to invalidate the token at the end
+        refresh_token.invalidate_token()
 
         return response
 
@@ -63,16 +65,11 @@ class JWTMiddleware:
                 return self.get_response(request)
             else:
                 try:
-                    JWT.extract_token(request, JWTType.REFRESH)
-                    JWT.extract_token(request, JWTType.ACCESS).invalidate_token()
-                    return self._update_tokens(request)
-
-                except jwt.InvalidKeyError as e:
-                    return JsonResponse({
-                        'status': 'unauthorized',
-                        'redirect': '/auth/login',
-                        'message': str(e)}, status=status.HTTP_302_FOUND)
-
+                    #We dont want to invalidate anything if the access token is good
+                    # JWT.extract_token(request, JWTType.REFRESH)
+                    JWT.extract_token(request, JWTType.ACCESS) #.invalidate_token()
+                    # return self._update_tokens(request)
+                    return self.get_response(request)
                 except (jwt.InvalidTokenError, jwt.ExpiredSignatureError):
                     try:
                         return self._update_tokens(request)
@@ -81,3 +78,8 @@ class JWTMiddleware:
                             'status': 'unauthorized',
                             'redirect': '/auth/login',
                             'message': str(e)}, status=status.HTTP_302_FOUND)
+                except jwt.InvalidKeyError as e:
+                    return JsonResponse({
+                        'status': 'unauthorized',
+                        'redirect': '/auth/login',
+                        'message': str(e)}, status=status.HTTP_302_FOUND)
