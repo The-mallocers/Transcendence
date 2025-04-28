@@ -67,6 +67,10 @@ class Game(models.Model):
         self.redis.json().set(self.game_key, Path.root_path(), serializer.data)
 
     def init_players(self):
+        winner = Player()
+        loser = Player()
+        winner.my_init()
+        loser.my_init()
         # On ajoute a la db de redis , a l'id de la game, les infos des deux joueurs
         players_serializer = PlayersRedisSerializer(instance={PlayerSide.LEFT: self.pL, PlayerSide.RIGHT: self.pR})
         existing_data = self.redis.json().get(self.game_key)
