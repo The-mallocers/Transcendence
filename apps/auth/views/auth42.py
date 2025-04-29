@@ -26,10 +26,13 @@ from utils.serializers.client import ClientSerializer
 from django.conf import settings
 import os
 
-
-
 import random
 import string
+
+
+from django.template.loader import render_to_string
+from django.middleware.csrf import get_token
+
 
 def generate_password():
     length = random.randint(8, 32)
@@ -94,8 +97,21 @@ def auth42(request):
             raise IrreversibleError(f'Failed to create admin in migration file: '
                                     f'{format_validation_errors(serializer.errors)}')
 
-    response = formulate_json_response(True, 302, "Login Successful", "/")
-    
+    # response = formulate_json_response(True, 302, "Login Successful", "/")
+
+    csrf_token = get_token(request)
+
+
+    html_content = render_to_string("apps/auth/42fallback.html", {
+        "csrf_token": csrf_token,
+    })
+
+    response = JsonResponse({
+        'html': html_content,
+    })
+
+    # response = formulate_json_response(True, 200, "Login Successful", "/")
+
     JWT(client, JWTType.ACCESS).set_cookie(response)
     JWT(client, JWTType.REFRESH).set_cookie(response)
 

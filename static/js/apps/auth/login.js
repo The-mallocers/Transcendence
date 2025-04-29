@@ -53,7 +53,7 @@ let element = document.querySelector("#login-btn");
 
 element.addEventListener("click", (e)=>{login(e)} )
 
-//Add logic to redirect to 2fa screen if needed
+
 const login42Button = document.getElementById('auth42');
 if (login42Button) {
     login42Button.addEventListener('click', () => {
@@ -64,6 +64,73 @@ if (login42Button) {
             scope: 'public'
         });
 
-        window.location.href = `${AUTH_CONFIG.authorizationEndpoint}?${params}`;
+        // // Open the login page in a new tab
+        // const authWindow = window.open(
+        //     `${AUTH_CONFIG.authorizationEndpoint}?${params}`,
+        //     '42Auth',
+        //     'width=600,height=700'
+        // );
+
+        const authWindow = window.open(
+            `${AUTH_CONFIG.authorizationEndpoint}?${params}`,
+            '42Auth',
+            'width=600,height=700'
+        );
+
+
+
+        let meowInterval = setInterval(async ()=>{
+            const response = await fetch("/api/auth/getId/", {
+                method: "GET",
+                credentials: "include",
+            });
+
+            if (response.status == 200){
+                clearInterval(meowInterval)
+                navigateTo("/")
+            }
+                
+            console.log()
+            // if (document.cookie !== previousCookies) {
+            //     // console.log("Cookies changed!");
+            //     // previousCookies = document.cookie;
+            //     // // Do something with the new cookies
+
+  
+            // }
+
+            // console.log(document.cookie)
+        },3000)
+
+        setTimeout(() => {
+            authWindow.close()
+            clearInterval(meowInterval)
+            navigateTo("/auth/login")
+        }, 10000);
+
+        // setTimeout(()=>{
+        //     navigateTo("/")
+        // }, 2000)
+
     });
 }
+
+
+// window.addEventListener('message', (event) => {
+//     console.log('Message received:', event.data);
+//     console.log('Sender origin:', event.origin);
+//     console.log('Expected origin:', window.location.origin);
+
+//     // Check the origin to ensure the message is from a trusted source
+//     if (event.origin !== window.location.origin) {
+//         console.error('Origin mismatch:', event.origin);
+//         return;
+//     }
+
+//     if (event.data === 'authenticated') {
+//         console.log('Authentication complete!');
+//         navigateTo('/'); // Navigate after authentication
+//     }
+// });
+
+
