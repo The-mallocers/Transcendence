@@ -138,12 +138,17 @@ class LogoutApiView(APIView):
     def post(self, request: HttpRequest, *args, **kwargs):
         if request.COOKIES.get('access_token') is not None:
             response = Response({"message": "Successfully logged out."}, status=status.HTTP_200_OK)
+            #This will throw an exception if any of these token are invalid, but since it redirects to login anyway
+            #its probably fine.
+            JWT.extract_token(request, JWTType.REFRESH).invalidate_token()
+            JWT.extract_token(request, JWTType.ACCESS).invalidate_token()
+                
             response.delete_cookie('access_token')
             response.delete_cookie('refresh_token')
             return response
         else:
             return Response({
-                "error": "You are not log"
+                "error": "You are not logged in"
             }, status=status.HTTP_401_UNAUTHORIZED)
 
 
