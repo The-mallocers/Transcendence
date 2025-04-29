@@ -55,6 +55,7 @@ class Game(models.Model):
         self.code = create_game_id()
         self.redis = RedisConnectionPool.get_sync_connection(self.__class__.__name__ + f'_{self.code}')
         self.game_key = RTables.JSON_GAME(self.code)
+        self.tournament_code = None
         self.pL: Player = None
         self.pR: Player = None
 
@@ -73,22 +74,21 @@ class Game(models.Model):
         existing_data.update(players_serializer.data)
         self.redis.json().set(self.game_key, Path.root_path(), existing_data)
 
-        # getting channel layer
-        channel_layer = get_channel_layer()
-
-        # Add two player in group of the new game
-        channel_name_pL = self.redis.hget(name=RTables.HASH_CLIENT(self.pL.client_id), key=str(EventType.GAME.value))
-        async_to_sync(channel_layer.group_add)(RTables.GROUP_GAME(self.code), channel_name_pL)
-        channel_name_pR = self.redis.hget(name=RTables.HASH_CLIENT(self.pR.client_id), key=str(EventType.GAME.value))
-        async_to_sync(channel_layer.group_add)(RTables.GROUP_GAME(self.code), channel_name_pR)
-
         self.redis.hset(name=RTables.HASH_MATCHES, key=str(self.pL.client_id), value=str(self.code))
         self.redis.hset(name=RTables.HASH_MATCHES, key=str(self.pR.client_id), value=str(self.code))
 
-        self.pL.leave_queue(self.code, self.is_duel)
-        self.pR.leave_queue(self.code, self.is_duel)
+        if self.tournament_code is None:  # si la game n'est pas dans un tournois
+            channel_layer = get_channel_layer()
 
-        send_group(RTables.GROUP_GAME(self.code), EventType.GAME, ResponseAction.JOIN_GAME)
+            channel_name_pL = self.redis.hget(name=RTables.HASH_CLIENT(self.pL.client_id), key=str(EventType.GAME.value))
+            channel_name_pR = self.redis.hget(name=RTables.HASH_CLIENT(self.pR.client_id), key=str(EventType.GAME.value))
+            async_to_sync(channel_layer.group_add)(RTables.GROUP_GAME(self.code), channel_name_pL)
+            async_to_sync(channel_layer.group_add)(RTables.GROUP_GAME(self.code), channel_name_pR)
+
+            self.pL.leave_queue(self.code, self.is_duel)
+            self.pR.leave_queue(self.code, self.is_duel)
+
+            send_group(RTables.GROUP_GAME(self.code), EventType.GAME, ResponseAction.JOIN_GAME)
 
     def error_game(self):
         self.rset_status(GameStatus.ERROR)

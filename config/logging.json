@@ -22,7 +22,7 @@
       "format": "\u001B[37m%(asctime)s.%(msecs)03d %(log_color)s%(levelname)-8s | %(threadName)-17s | %(name)-25s | %(message)s%(reset)s",
       "datefmt": "%Y-%m-%d %H:%M:%S",
       "log_colors": {
-        "DEBUG": "cyan",
+        "DEBUG": "purple",
         "INFO": "green",
         "WARNING": "yellow",
         "ERROR": "red",
@@ -123,6 +123,11 @@
       "level": "DEBUG",
       "propagate": false
     },
+    "websocket.client": {
+      "handlers": [],
+      "level": "INFO",
+      "propagate": false
+    },
     "django.request": {
       "handlers": [
         "access_file",
@@ -207,6 +212,15 @@
         "error_file"
       ],
       "level": "DEBUG",
+      "propagate": false
+    },
+    "utils.redis": {
+      "handlers": [
+        "console",
+        "file",
+        "error_file"
+      ],
+      "level": "INFO",
       "propagate": false
     },
     "daphne": {

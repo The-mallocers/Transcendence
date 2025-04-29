@@ -43,7 +43,7 @@ class TournamentSerializer(serializers.Serializer):
         data = super().to_representation(instance)
         data['status'] = TournamentStatus.CREATING
         data['created-at'] = timezone.now().isoformat()
-        data['players'] = [str(data['host'])]
+        data['clients'] = [str(data['host'])]
         data['scoreboards'] = self.generate_tournament_structure(data['max_players'])
         return data
 

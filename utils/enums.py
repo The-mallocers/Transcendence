@@ -3,6 +3,7 @@ from enum import Enum
 
 class GameStatus(str, Enum):
     CREATING: str = 'creating'
+    WAITING: str = 'waiting'
     MATCHMAKING: str = 'matchmaking'
     STARTING: str = 'starting'
     RUNNING: str = 'running'
@@ -95,6 +96,7 @@ class ResponseAction(str, Enum):
     TOURNAMENT_LEFT: str = 'You have successfully left the tournament'
     TOURNAMENT_WAITTING_PLAYERS: str = 'Waiting players for tournament'
     TOURNAMENT_PLAYERS_READY: str = 'Players are ready'
+    TOURNAMENT_GAME_READY: str = 'Game is ready'
 
     # ── Game Actions ──────────────────────────────────────────────────────────────────
     JOIN_GAME: str = 'You have successfully joined the game'

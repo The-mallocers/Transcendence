@@ -1,6 +1,9 @@
 import time
 import traceback
 
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
+
 from apps.game.models import Game
 from utils.enums import GameStatus, EventType, ResponseAction, \
     ResponseError, PlayerSide, RTables
@@ -12,15 +15,20 @@ from utils.websockets.channel_send import send_group, send_group_error
 
 class GameThread(Threads):
     def __init__(self, game: Game):
-        super().__init__(f"Game_{game.code}")
+        super().__init__(f"GameThread[{game.code}]")
         self.game = game
         self.game_id = game.code
         self.logic: PongLogic = PongLogic(self.game, self.redis)
 
     def main(self):
         try:
+            while self.game.tournament_code is not None:
+                if not self._waitting_players():
+                    time.sleep(2)
+                else:
+                    break
             while self.game_is_running():
-                if self._starting() == False:
+                if not self._starting():
                     time.sleep(0.1)
                 else:
                     break
@@ -51,6 +59,32 @@ class GameThread(Threads):
         self._logger.info("Cleanup of game complete")
 
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ EVENT ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
+
+    def _waitting_players(self):
+        if self.game.rget_status() is GameStatus.MATCHMAKING and self.game.tournament_code is not None:
+            channel_layer = get_channel_layer()
+            both_joined = 0
+
+            if self.redis.hexists(RTables.HASH_CLIENT(self.game.pR.client_id), EventType.GAME.value):
+                channel_name_pR = self.redis.hget(name=RTables.HASH_CLIENT(self.game.pR.client_id), key=str(EventType.GAME.value))
+                channel_name_pR = channel_name_pR.decode('utf-8')
+                if self.redis.zscore(f'channels:group:{RTables.GROUP_GAME(self.game_id)}', str(channel_name_pR)) is None:
+                    async_to_sync(channel_layer.group_add)(RTables.GROUP_GAME(self.game_id), channel_name_pR)
+                    send_group(RTables.GROUP_CLIENT(self.game.pR.client_id), EventType.GAME, ResponseAction.JOIN_GAME)
+                both_joined += 1
+            if self.redis.hexists(RTables.HASH_CLIENT(self.game.pL.client_id), EventType.GAME.value):
+                channel_name_pL = self.redis.hget(name=RTables.HASH_CLIENT(self.game.pL.client_id), key=str(EventType.GAME.value))
+                channel_name_pL = channel_name_pL.decode('utf-8')
+                if self.redis.zscore(f'channels:group:{RTables.GROUP_GAME(self.game_id)}', str(channel_name_pL)) is None:
+                    async_to_sync(channel_layer.group_add)(RTables.GROUP_GAME(self.game_id), channel_name_pL)
+                    send_group(RTables.GROUP_CLIENT(self.game.pL.client_id), EventType.GAME, ResponseAction.JOIN_GAME)
+                both_joined += 1
+
+            if both_joined == 2:
+                self.game.rset_status(GameStatus.STARTING)
+                return True
+            else:
+                return False
 
     def _starting(self):
         if self.game.rget_status() is GameStatus.STARTING:

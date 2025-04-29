@@ -95,3 +95,4 @@ test_db.sqlite3
 staticfiles
 docker/staticdocker
 .coverage
+/Pipfile

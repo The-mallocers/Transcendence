@@ -20,11 +20,11 @@ class TournamentThread(Threads):
     def __init__(self, host, code):
         # Init
         self.code = code
-        super().__init__(f'Tournament_{self.code}')
+        super().__init__(f'TournamentThread[{self.code}]')
 
         # Tournaments settings
         self.host: Clients = host
-        self.clients = [host]
+        self.clients: list[Clients] = [host]
         self.max_players = self.get('max_players')
         self.title = self.get('title')
         self.public = self.get('public')
@@ -36,6 +36,8 @@ class TournamentThread(Threads):
         self.rounds = self.get('scoreboards.num_rounds')
         self.set('scoreboards.current_round', 1)
         self.current_round = self.get('scoreboards.current_round')
+        self.game_num = int(self.max_players - 1)
+        self.games: list[Game] = self.create_games()
 
     def main(self):
         try:
@@ -51,11 +53,13 @@ class TournamentThread(Threads):
         except Exception as e:
             self._logger.error(traceback.format_exc())
             self.set_status(TournamentStatus.ERROR)
-            send_group_error(RTables.GROUP_GAME(RTables.GROUP_TOURNAMENT(self.code)), ResponseError.EXCEPTION, close=True)
+            send_group_error(RTables.GROUP_TOURNAMENT(self.code), ResponseError.EXCEPTION, str(e), close=True)
         finally:
             self.stop()
 
     def cleanup(self):
+        for game in self.games:
+            self.redis.delete(RTables.JSON_GAME(game.code))
         self.redis.delete(RTables.JSON_TOURNAMENT(self.code))
         self.redis.expire(f'channels:group:{RTables.GROUP_TOURNAMENT(self.code)}', 0)
 
@@ -63,16 +67,19 @@ class TournamentThread(Threads):
 
     def _waitting(self):
         if self.status is TournamentStatus.WAITING:
-            send_group(RTables.GROUP_TOURNAMENT(self.code), EventType.TOURNAMENT, ResponseAction.TOURNAMENT_WAITTING_PLAYERS)
             queue = self.redis.hgetall(RTables.HASH_TOURNAMENT_QUEUE(self.code))
-            players = len(queue.items())
-            if players > len(self.clients):
-                last_client_id = list(queue.keys())[-1]
-                last_client = Clients.get_client_by_id(last_client_id.decode('utf-8'))
-                self.add_client(last_client)
-                send_group(RTables.GROUP_TOURNAMENT(self.code), EventType.TOURNAMENT, ResponseAction.TOURNAMENT_PLAYER_JOIN,
-                           {'id': str(last_client.id)})
-            if players == self.max_players:
+
+            for client_id_bytes, ready in queue.items():
+                client_id = client_id_bytes.decode('utf-8')
+                client = Clients.get_client_by_id(client_id)
+                if client and client not in self.clients and ready.decode('utf-8') == 'True':
+                    self.add_client(client_id)
+                    send_group(RTables.GROUP_TOURNAMENT(self.code),
+                               EventType.TOURNAMENT,
+                               ResponseAction.TOURNAMENT_PLAYER_JOIN,
+                               {'id': client_id})
+
+            if len(queue) >= self.max_players:
                 self.set_status(TournamentStatus.CREATING_MATCH)
                 send_group(RTables.GROUP_TOURNAMENT(self.code), EventType.TOURNAMENT, ResponseAction.TOURNAMENT_PLAYERS_READY)
                 return True
@@ -81,27 +88,18 @@ class TournamentThread(Threads):
     def _starting(self):
         if self.status is TournamentStatus.CREATING_MATCH:
             random.shuffle(self.clients)
-            match = 1
-            place = 0
-            game: Game = Game()
-            for client in self.clients:
-                if place == 0:
-                    game.pL = Player(client.id)
-                    place += 1
-                elif place == 1:
-                    game.pR = Player(client.id)
-                    place += 1
-                if place == 2:
-                    game.create_redis_game()
-                    # game.init_players()
-                    game.rset_status(GameStatus.STARTING)
-                    self.set(f'scoreboards.rounds.round_{self.current_round}.games.r{self.current_round}m{match}.game_code', game.code)
-                    GameThread(game=game)
-
-                    place = 0
-                    match += 1
-                    game = Game()
-            self.set_status(TournamentStatus.STARTING)
+            player = 0
+            for game in range(0, int(self.max_players / 2)):  # on init uniquement le premier round
+                self.games[game].pL = Player(str(self.clients[player].id))
+                player += 1
+                self.games[game].pR = Player(str(self.clients[player].id))
+                player += 1
+                self.games[game].init_players()
+                self.games[game].rset_status(GameStatus.MATCHMAKING)
+                send_group(RTables.HASH_CLIENT(self.games[game].pL.client_id), EventType.TOURNAMENT, ResponseAction.TOURNAMENT_GAME_READY)
+                send_group(RTables.HASH_CLIENT(self.games[game].pR.client_id), EventType.TOURNAMENT, ResponseAction.TOURNAMENT_GAME_READY)
+                GameThread(game=self.games[game]).start()
+            self.set_status(TournamentStatus.RUNNING)
             return True
         return False
 
@@ -117,6 +115,20 @@ class TournamentThread(Threads):
         self.stop()
 
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ FUNCTIONS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
+
+    def create_games(self) -> list[Game]:
+        games: list[Game] = []
+        for r in range(1, self.rounds + 1):
+            matches_in_round = self.redis.json().get(RTables.JSON_TOURNAMENT(self.code), Path(f'scoreboards.rounds.round_{r}.matches_total'))
+            for m in range(1, matches_in_round + 1):
+                game = Game()
+                game.tournament_code = self.code
+                game.create_redis_game()
+                game.rset_status(GameStatus.WAITING)
+                games.append(game)
+                self.redis.json().set(RTables.JSON_TOURNAMENT(self.code), Path(f'scoreboards.rounds.round_{r}.games.r{r}m{m}.game_code'),
+                                      game.code)
+        return games
 
     def is_running(self) -> bool:
         self.status = TournamentStatus(self.redis.json().get(RTables.JSON_TOURNAMENT(self.code), Path('status')))
@@ -151,8 +163,7 @@ class TournamentThread(Threads):
     def set(self, key, value):
         self.redis.json().set(RTables.JSON_TOURNAMENT(self.code), Path(key), value)
 
-    def add_client(self, client: Clients):
+    def add_client(self, client_id):
+        client = Clients.get_client_by_id(client_id)
         self.clients.append(client)
-        current_players = self.get('players')
-        current_players.append(str(client.id))
-        self.redis.json().set(RTables.JSON_TOURNAMENT(self.code), Path('players'), current_players)
+        self.redis.json().set(RTables.JSON_TOURNAMENT(self.code), Path('clients'), Clients.get_id_list(self.clients))

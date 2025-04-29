@@ -24,6 +24,7 @@ logger = logging.getLogger('django.server')
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 
 # Initialize Django ASGI application
+print('\n')
 logger.info('Initializing ASGI application')
 django_asgi_app = get_asgi_application()
 

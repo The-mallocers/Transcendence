@@ -54,6 +54,10 @@ class Clients(models.Model):
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ FUNCIONS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
 
     @staticmethod
+    def get_id_list(clients: list['Clients']) -> list[str]:
+        return [str(client.id) for client in clients]
+
+    @staticmethod
     def get_client_by_id(id: uuid.UUID):
         try:
             client = Clients.objects.get(id=id)

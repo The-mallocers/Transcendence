@@ -28,13 +28,11 @@ class Threads(threading.Thread, ABC):
         Threads.active_threads.append(self)
 
     def run(self):
-        self._logger.info(f"Starting thread [{self.name}]")
-        # asyncio.set_event_loop(self.loop)
-        # self.loop.run_until_complete(self.exec())
+        self._logger.warning(f"Starting thread [{self.name}]")
         self.main()
 
     def stop(self):
-        self._logger.info(f"Stopping thread [{self.name}]")
+        self._logger.warning(f"Stopping thread [{self.name}]")
         self._stop_event.set()
         self.cleanup()
 
