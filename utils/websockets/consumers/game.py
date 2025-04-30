@@ -1,5 +1,6 @@
 from json import JSONDecodeError, loads
 
+from apps.client.models import Clients
 from utils.enums import EventType, ResponseError, RTables
 from utils.websockets.channel_send import asend_group_error
 from utils.websockets.consumers.consumer import WsConsumer
@@ -20,7 +21,7 @@ class GameConsumer(WsConsumer):
             print(f"data : {data}")
             print(f" {data['event']} : Devrait etre egal a {EventType.GAME.value}")
             print(f"{self.event_type}: devrait etre {EventType.MATCHMAKING}")
-            if self.event_type is EventType.MATCHMAKING and data['event'] == EventType.GAME.value:
+            if self.event_type is EventType.GAME and data['event'] == EventType.GAME.value: #EventType.MATCHMAKING SHOULD BE THAT
                 self.event_type = EventType(data['event'])
                 self.service = GameService()
 
@@ -34,3 +35,4 @@ class GameConsumer(WsConsumer):
         except JSONDecodeError as e:
             self._logger.error(f'Json error: {e}')
             await asend_group_error(RTables.GROUP_CLIENT(self.client.id), ResponseError.JSON_ERROR)
+

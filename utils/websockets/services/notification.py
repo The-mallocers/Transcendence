@@ -313,4 +313,5 @@ class NotificationService(BaseServices):
             return await asend_group_error(self.service_group, ResponseError.INTERNAL_ERROR)
     
     async def disconnect(self, client):
+        print("in disconnect of notification")
         pass

@@ -48,6 +48,7 @@ class JWTMiddleware:
         return response
 
     def __call__(self, request: HttpRequest):
+        print("HELLO MIDDLEWARE HERE")
         if not self.is_path_matching(request.path_info, settings.PROTECTED_PATHS):
             return self.get_response(request)
 
@@ -56,6 +57,7 @@ class JWTMiddleware:
                 return self.get_response(request)
             else:
                 try:
+                    print("HELLO MIDDLEWARE HERE - TRYING HERE")
                     #If access token doesnt throw an exception, just returns the response
                     JWT.extract_token(request, JWTType.ACCESS)
                     return self.get_response(request)
@@ -63,12 +65,14 @@ class JWTMiddleware:
                     try:
                         return self._update_tokens(request)
                     except (jwt.ExpiredSignatureError, jwt.InvalidTokenError, jwt.InvalidKeyError) as e:
+                        print("HELLO MIDDLEWARE HERE -> Returning a response logout doesnt give a shit about")
                         #I want to add the refresh token to the naughty list here.
                         return JsonResponse({
                             'status': 'unauthorized',
                             'redirect': '/auth/login',
                             'message': str(e)}, status=status.HTTP_302_FOUND)
                 except jwt.InvalidKeyError as e:
+                    print("HELLO MIDDLEWARE HERE -> Returning a response logout doesnt give a shit about 2")
                     return JsonResponse({
                         'status': 'unauthorized',
                         'redirect': '/auth/login',
