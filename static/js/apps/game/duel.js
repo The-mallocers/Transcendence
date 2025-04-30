@@ -44,6 +44,17 @@ const startGameMessage = {
     }
 }
 
+// const message = {
+//     "event": "matchmaking",
+//     "data": {
+//         "action": "join_queue"
+//     }
+// }
+// gameSocket.onopen = () => {
+
+//     socket.send(JSON.stringify(message));
+// }
+
 gameSocket.onmessage = (e) => {
     const jsonData = JSON.parse(e.data);
 

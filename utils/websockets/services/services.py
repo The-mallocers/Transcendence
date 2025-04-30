@@ -37,6 +37,7 @@ class BaseServices(ABC):
         pass
 
     async def handle_disconnect(self, client):
+        logging.getLogger("inside disconnect")
         if client is None:
             return
         if self.redis is None:

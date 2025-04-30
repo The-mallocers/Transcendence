@@ -190,22 +190,22 @@ class NotificationService(BaseServices):
                                          'code': duel_code
                                      })
             
-    async def _handle_ask_duel(self, data, client):
-        target = await Clients.aget_client_by_username(data['data']['args']['target_name'])
-        if target is None:
-            return await asend_group_error(RTables.GROUP_CLIENT(client.id), ResponseError.USER_NOT_FOUND)
-        try:
-            return await asend_group(RTables.GROUP_CLIENT(target.id),
-                                    EventType.NOTIFICATION,
-                                    ResponseAction.ACK_ASK_DUEL,
-                                    {
-                                        "sender": str(client.id),
-                                        "username": await client.aget_profile_username() 
-                                    })
-        except Exception as e:
-            print(repr(e))
-            return await asend_group_error(RTables.GROUP_CLIENT(client.id), 
-                                           ResponseError.INTERNAL_ERROR)
+    # async def _handle_ask_duel(self, data, client):
+    #     target = await Clients.aget_client_by_username(data['data']['args']['target_name'])
+    #     if target is None:
+    #         return await asend_group_error(RTables.GROUP_CLIENT(client.id), ResponseError.USER_NOT_FOUND)
+    #     try:
+    #         return await asend_group(RTables.GROUP_CLIENT(target.id),
+    #                                 EventType.NOTIFICATION,
+    #                                 ResponseAction.ACK_ASK_DUEL,
+    #                                 {
+    #                                     "sender": str(client.id),
+    #                                     "username": await client.aget_profile_username() 
+    #                                 })
+    #     except Exception as e:
+    #         print(repr(e))
+    #         return await asend_group_error(RTables.GROUP_CLIENT(client.id), 
+    #                                        ResponseError.INTERNAL_ERROR)
 
     async def _handle_accept_duel(self, data, client):
         code = data['data']['args']['code']
@@ -294,23 +294,23 @@ class NotificationService(BaseServices):
             print(repr(e))
             return await asend_group_error(self.service_group, ResponseError.INTERNAL_ERROR)
         
-    async def _handle_unblock_friend(self, data, client):
-        try:
-            target = await Clients.aget_client_by_username(data['data']['args']['target_name'])
-            if target is None:
-                return await asend_group_error(self.service_group, ResponseError.USER_NOT_FOUND)
-            friend_table = await client.get_friend_table()
-            await friend_table.unblock_user(target)
-            await asend_group(self.service_group,
-                    EventType.NOTIFICATION,
-                    ResponseAction.FRIEND_UNBLOCKED,
-                    {
-                        "message" : "successfully unblock friend",
-                        "username" : await target.aget_profile_username()
-                    })
-        except Exception as e:
-            print(repr(e))
-            return await asend_group_error(self.service_group, ResponseError.INTERNAL_ERROR)
+    # async def _handle_unblock_friend(self, data, client):
+    #     try:
+    #         target = await Clients.aget_client_by_username(data['data']['args']['target_name'])
+    #         if target is None:
+    #             return await asend_group_error(self.service_group, ResponseError.USER_NOT_FOUND)
+    #         friend_table = await client.get_friend_table()
+    #         await friend_table.unblock_user(target)
+    #         await asend_group(self.service_group,
+    #                 EventType.NOTIFICATION,
+    #                 ResponseAction.FRIEND_UNBLOCKED,
+    #                 {
+    #                     "message" : "successfully unblock friend",
+    #                     "username" : await target.aget_profile_username()
+    #                 })
+    #     except Exception as e:
+    #         print(repr(e))
+    #         return await asend_group_error(self.service_group, ResponseError.INTERNAL_ERROR)
     
     async def disconnect(self, client):
         pass
