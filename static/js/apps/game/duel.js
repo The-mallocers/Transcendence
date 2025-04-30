@@ -1,6 +1,6 @@
 import { navigateTo } from "../../spa/spa.js";
 import { WebSocketManager } from "../../websockets/websockets.js";
-// import { notifSocket } from "../profile/profile.js";
+// import { notifSocket } from "../../spa/spa.js"; 
 
 let client_id;
 let clientId;

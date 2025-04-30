@@ -2,8 +2,31 @@ import {WebSocketManager} from "../websockets/websockets.js"
 import {isGameOver} from "../apps/game/VarGame.js"
 import * as html from "../utils/html_forms.js"
 import {routes} from "../utils/routes.js";
-// let notifSocket = null;
-// let clientId = null;
+// import {getClientId} from "../utils/profile.js";
+
+export let notifSocket = null;
+let client_id = null;
+
+
+async function getClientId() {
+    try {
+        const response = await fetch("/api/auth/getId/", {
+            method: "GET",
+            credentials: "include",
+        });
+        const data = await response.json();
+
+        if (data.client_id) {
+            client_id = data.client_id;
+            return client_id;
+        } else {
+            throw new Error(data.error);
+        }
+    } catch (error) {
+        console.error("Erreur lors de la récupération de l'ID :", error);
+        return null;
+    }
+}
 
 class Router {
     constructor(routes) {
@@ -13,6 +36,7 @@ class Router {
     }
 
     init() {
+        console.log("init router ||||||||||||||||||||||||||||||")
         window.addEventListener('popstate', () => this.handleLocation());
     }
 
@@ -21,6 +45,12 @@ class Router {
         // clientId = await getClientId();
         // notifSocket = await WebSocketManager.initNotifSocket(clientId);
         const path = window.location.pathname;
+
+        if (!WebSocketManager.notifSocket || WebSocketManager.notifSocket.readyState === WebSocket.CLOSED) {
+            console.log("creating a new socket");
+            const client_id = await getClientId();
+            notifSocket = await WebSocketManager.initNotifSocket(client_id);
+        }
 
         // console.log(window.location.search);
         // console.log("looking for the path: ", path)
