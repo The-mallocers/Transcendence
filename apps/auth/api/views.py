@@ -140,11 +140,11 @@ class LogoutApiView(APIView):
             response = Response({"message": "Successfully logged out."}, status=status.HTTP_200_OK)
             response.delete_cookie('access_token')
             response.delete_cookie('refresh_token')
-            #This will throw an exception if any of these token are invalid, but since it redirects to login anyway
-            #its probably fine.
-            JWT.extract_token(request, JWTType.REFRESH).invalidate_token()
-            # JWT.extract_token(request, JWTType.ACCESS).invalidate_token()
-                
+            try:
+                JWT.extract_token(request, JWTType.REFRESH).invalidate_token()
+            except Exception as e:
+                print("Couldnt invalidate the token, it was probably either deleted or modified")
+                print(f"error is {str(e)}")
             return response
         else:
             return Response({
