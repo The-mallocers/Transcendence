@@ -18,15 +18,15 @@ from utils.util import create_game_id
 from utils.websockets.channel_send import send_group
 
 
-class Rank(models.Model):
-    class Meta:
-        db_table = 'pong_ranks'
+# class Rank(models.Model):
+#     class Meta:
+#         db_table = 'pong_ranks'
 
-    name = CharField(primary_key=True, max_length=15, editable=False, null=False,
-                     choices=[(ranks.name, ranks.value) for ranks in Ranks])
-    icon = ImageField(upload_to='rank_icon/', null=False)
-    mmr_min = IntegerField(null=False)
-    mmr_max = IntegerField(null=False)
+#     name = CharField(primary_key=True, max_length=15, editable=False, null=False,
+#                      choices=[(ranks.name, ranks.value) for ranks in Ranks])
+#     icon = ImageField(upload_to='rank_icon/', null=False)
+#     mmr_min = IntegerField(null=False)
+#     mmr_max = IntegerField(null=False)
 
 
 class Game(models.Model):

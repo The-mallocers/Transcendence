@@ -230,6 +230,7 @@ class PongLogic:
                                             points_to_win=self.game.points_to_win, is_duel=self.game.rget_is_duel())
         
         #mmr gain would happen here.
+
         winner.client.stats.wins = F('wins') + 1
         loser.client.stats.losses = F('losses') + 1
         self.save_player_info(loser, finished_game)
@@ -242,3 +243,18 @@ class PongLogic:
         player.client.stats.total_game = F('total_game') + 1
         player.client.stats.save()
         player.save()
+    
+def compute_mmr_change(self, winner, loser, K=50):
+    winner_mmr = winner.client.stats.mmr
+    loser_mmr = loser.client.stats.mmr
+
+    expected_win = 1 / (1 + 10 ** ((loser_mmr - winner_mmr) / 120))
+    expected_loss = 1 / (1 + 10 ** ((winner_mmr - loser_mmr) / 120))
+
+    mmr_gain = round(K * (1 - expected_win))
+    mmr_loss = round(K * (0 - expected_loss))
+    print(f"mmr gain and loss for this match : {mmr_gain} - {mmr_loss}")
+    winner.client.stats.mmr = F('mmr') + mmr_gain
+    loser.client.stats.mmr = F('mmr') + max(0, loser.client.stats.mmr + mmr_loss)
+
+

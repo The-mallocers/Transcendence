@@ -6,8 +6,6 @@ from apps.game.models import Game
 
 
 def get(request):
-    # Need to rewrite this to be viable with the new DB
-
     client = Clients.get_client_by_request(request)
     game_id = request.GET.get("game", "game_not_found")
     found_game = Game.objects.filter(id=game_id).first()
