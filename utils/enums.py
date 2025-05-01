@@ -248,6 +248,13 @@ class Ranks(str, Enum):
     DIAMOND: str = 'diamond'
     CHAMPION: str = 'champion'
 
+class RanksThreshold(int, Enum):
+    BRONZE = 0
+    SILVER = 100
+    GOLD = 200
+    PLATINUM = 300
+    DIAMOND = 400
+    CHAMPION = 500
 
 class JWTType(str, Enum):
     ACCESS: str = 'access'

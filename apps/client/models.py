@@ -21,8 +21,6 @@ class Stats(models.Model):
     wins = models.IntegerField(default=0, blank=True)
     losses = models.IntegerField(default=0, blank=True)
     mmr = models.IntegerField(default=50, blank=True)
-    # rank = ForeignKey('pong.Rank', on_delete=models.SET_NULL, null=True, blank=True, default=Ranks.BRONZE.value)
-    rank = models.CharField(default=Ranks.BRONZE.value, max_length=100, blank=True)
     games = models.ManyToManyField('game.Game', blank=True)
 
 
