@@ -195,6 +195,7 @@ class ChatService(BaseServices):
                         {"rooms": formatted_messages})
 
     async def disconnect(self, client):
+        print("In disconnect of chat")
         await self.channel_layer.group_discard(RTables.GROUP_CHAT(uuid_global_room), self.channel_name)
         rooms = await Rooms.aget_room_id_by_client_id(client.id)
         for room in rooms:

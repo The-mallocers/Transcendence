@@ -37,21 +37,14 @@ class JWTMiddleware:
         return False
 
     def _update_tokens(self, request: HttpRequest):
-        refresh_token = JWT.extract_token(request, JWTType.REFRESH)
-        refresh_token.invalidate_token()
+        refresh_token = JWT.extract_token(request, JWTType.REFRESH) # if refresh is oudated, this will throw an exception
         client = Clients.get_client_by_id(refresh_token.SUB)
-
-        access = JWT(client, JWTType.ACCESS)
-        refresh = JWT(client, JWTType.REFRESH)
-
-        request.COOKIES['access_token'] = access.encode_token()
-        request.COOKIES['refresh_token'] = refresh.encode_token()
-
+        
+        new_access_token = JWT(client, JWTType.ACCESS)
+        request.COOKIES['access_token'] = new_access_token.encode_token()
+        
         response = self.get_response(request)
-
-        access.set_cookie(response)
-        refresh.set_cookie(response)
-
+        new_access_token.set_cookie(response)
         return response
 
     def __call__(self, request: HttpRequest):
@@ -63,16 +56,8 @@ class JWTMiddleware:
                 return self.get_response(request)
             else:
                 try:
-                    JWT.extract_token(request, JWTType.REFRESH)
-                    JWT.extract_token(request, JWTType.ACCESS).invalidate_token()
-                    return self._update_tokens(request)
-
-                except jwt.InvalidKeyError as e:
-                    return JsonResponse({
-                        'status': 'unauthorized',
-                        'redirect': '/auth/login',
-                        'message': str(e)}, status=status.HTTP_302_FOUND)
-
+                    JWT.extract_token(request, JWTType.ACCESS)
+                    return self.get_response(request)
                 except (jwt.InvalidTokenError, jwt.ExpiredSignatureError):
                     try:
                         return self._update_tokens(request)
@@ -81,3 +66,8 @@ class JWTMiddleware:
                             'status': 'unauthorized',
                             'redirect': '/auth/login',
                             'message': str(e)}, status=status.HTTP_302_FOUND)
+                except jwt.InvalidKeyError as e:
+                    return JsonResponse({
+                        'status': 'unauthorized',
+                        'redirect': '/auth/login',
+                        'message': str(e)}, status=status.HTTP_302_FOUND)

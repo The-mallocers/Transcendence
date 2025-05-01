@@ -140,10 +140,15 @@ class LogoutApiView(APIView):
             response = Response({"message": "Successfully logged out."}, status=status.HTTP_200_OK)
             response.delete_cookie('access_token')
             response.delete_cookie('refresh_token')
+            try:
+                JWT.extract_token(request, JWTType.REFRESH).invalidate_token()
+            except Exception as e:
+                print("Couldnt invalidate the token, it was probably either deleted or modified")
+                print(f"error is {str(e)}")
             return response
         else:
             return Response({
-                "error": "You are not log"
+                "error": "You are not logged in"
             }, status=status.HTTP_401_UNAUTHORIZED)
 
 
