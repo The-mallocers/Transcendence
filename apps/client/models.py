@@ -9,7 +9,7 @@ from django.http import HttpRequest
 from apps.auth.models import Password, TwoFA
 from apps.player.models import Player
 from apps.profile.models import Profile
-from utils.enums import Ranks, RTables, RanksThreshold
+from utils.enums import RTables, Ranks, RanksThreshold
 
 
 class Stats(models.Model):
@@ -159,11 +159,13 @@ class Clients(models.Model):
         except Clients.DoesNotExist:
             return None
     @staticmethod
-    def get_rank(score: int):
+    def get_rank(score: int) -> str:
+        i = len(RanksThreshold)
         for rank in reversed(RanksThreshold):
+            i -= 1
             if score >= rank.value:
-                return rank
-        return RanksThreshold.BRONZE
+                return list(Ranks)[i]
+        return Ranks.BRONZE
 
     @sync_to_async
     def aget_profile_username(self):

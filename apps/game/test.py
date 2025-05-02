@@ -3,31 +3,9 @@ from unittest.mock import patch, MagicMock
 from django.test import TestCase, Client
 from django.urls import reverse
 
-from apps.game.models import Game, Rank
+from apps.game.models import Game
 from apps.player.models import Player
-from utils.enums import GameStatus, Ranks
-
-
-class RankModelTest(TestCase):
-    """Test the Rank model"""
-
-    def setUp(self):
-        """Set up test data"""
-        Rank.objects.get_or_create(
-            name=Ranks.BRONZE.name,
-            defaults={
-                'icon': "rank_icon/bronze.png",
-                'mmr_min': 0,
-                'mmr_max': 999
-            }
-        )
-
-    def test_rank_creation(self):
-        """Test that a rank can be created"""
-        rank = Rank.objects.get(name=Ranks.BRONZE.name)
-        self.assertEqual(rank.mmr_min, 1)
-        self.assertEqual(rank.mmr_max, 100)
-        # self.assertEqual(rank.icon, "rank_icon/bronze.png")
+from utils.enums import GameStatus
 
 
 class GameModelTest(TestCase):

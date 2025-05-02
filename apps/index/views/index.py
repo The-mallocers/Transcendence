@@ -4,6 +4,7 @@ from django.template.loader import render_to_string
 
 from apps.client.models import Clients
 from apps.game.models import Game
+from config import settings
 
 
 def get(req):
@@ -16,7 +17,10 @@ def get(req):
     friends_pending = client.get_all_pending_request()
     rivals = get_rivals(client, games_played)
     ghistory = get_last_matches(client, games_played)
+    rank_picture = settings.MEDIA_URL + "/rank_icon/" + client.get_rank(client.stats.mmr) + ".png"
+    print(f"rank_picture : {rank_picture}")
     print("game history is:", ghistory)
+    print(f"rank_picture : {rank_picture}")
     if client is not None:
         winrate = get_winrate(client, games_played)
     context = {
@@ -29,7 +33,8 @@ def get(req):
         "csrf_token": get_token(req),
         "show_friend_request": False,
         "friends_list": friends_list,
-        "friends_pending" : friends_pending
+        "friends_pending" : friends_pending,
+        "rank_picture": rank_picture,
     }
     print("Feeding into the context rivals =", rivals)
     html_content = render_to_string("apps/profile/profile.html", context)
@@ -104,6 +109,4 @@ def get_rivals(client, games_played) -> dict:
     print("rivals after adding the maps")
     print(rivals)
     return rivals
-
-    
- 
+     

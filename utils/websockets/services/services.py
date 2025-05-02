@@ -50,7 +50,7 @@ class BaseServices(ABC):
             handler_method = None
             if not self._initialized:
                 self._initialized = await self.init(*args)
-            print(data)
+            # print(data)
             request_action = RequestAction(data['data']['action'])
             if request_action:
                 handler_method = getattr(self, f"_handle_{request_action.value}", None)

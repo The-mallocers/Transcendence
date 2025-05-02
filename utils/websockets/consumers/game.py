@@ -17,11 +17,11 @@ class GameConsumer(WsConsumer):
     async def receive(self, text_data=None, bytes_data=None):
         try:
             data = loads(text_data)
-            print("Salut la Team MAtchaming casse les couilles par ici")
-            print(f"data : {data}")
-            print(f" {data['event']} : Devrait etre egal a {EventType.GAME.value}")
-            print(f"{self.event_type}: devrait etre {EventType.MATCHMAKING}")
-            if self.event_type is EventType.GAME and data['event'] == EventType.GAME.value: #EventType.MATCHMAKING SHOULD BE THAT
+            # print("Salut la Team MAtchaming casse les couilles par ici")
+            # print(f"data : {data}")
+            # print(f" {data['event']} : Devrait etre egal a {EventType.GAME.value}")
+            # print(f"{self.event_type}: devrait etre {EventType.MATCHMAKING}")
+            if self.event_type is EventType.MATCHMAKING and data['event'] == EventType.GAME.value: #EventType.GAME IF you want duel to work, but it shouldnt be that
                 self.event_type = EventType(data['event'])
                 self.service = GameService()
 
