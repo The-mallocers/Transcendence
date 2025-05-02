@@ -3,10 +3,11 @@ import {navigateTo} from "../../spa/spa.js";
 import { toast_friend } from "./toast.js";
 import { toast_duel } from "./toast.js";
 import { toast_message } from "./toast.js";
+import { notifSocket } from "../../spa/spa.js";
 
 let client_id = null;
-const clientId = await getClientId();
-const notifSocket =  await WebSocketManager.initNotifSocket(clientId);
+// const clientId = await getClientId();
+// const notifSocket =  await WebSocketManager.initNotifSocket(clientId);
 
 const searchParams = new URLSearchParams(window.location.search);
 const pathname = window.location.pathname;
@@ -241,7 +242,6 @@ notifSocket.onmessage = (event) => {
         toast_message("DUEL don't exist");
     }
     else if(message.data.action == "USER_OFFLINE"){
-        console.log("the user trying to match is offline");
         const toast = document.querySelector(".toast");
         if(toast)
             toast.remove();
@@ -383,7 +383,7 @@ export async function apiFriends(endpoint) {
     }
 }
 
-export {notifSocket};
+// export {notifSocket};
 export {create_message_notif}
 export {getClientId}
 export {create_message_notif_block}

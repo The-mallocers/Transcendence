@@ -1,6 +1,7 @@
 
 
 function toast_friend(message, data, itemToDelete){
+    console.log("toast_friend ||||||||||||||||||||||||||||||||||||||||||||||||||||"); 
     const date = new Date();
     const hours = date.getHours().toString().padStart(2, '0');
     const minutes = date.getMinutes().toString().padStart(2, '0');
@@ -53,6 +54,8 @@ function toast_friend(message, data, itemToDelete){
 }
 
 function toast_duel(message, data, itemToDelete){
+    console.log("toast_duel ||||||||||||||||||||||||||||||||||||||||||||||||||||"); 
+
     const date = new Date();
     const hours = date.getHours().toString().padStart(2, '0');
     const minutes = date.getMinutes().toString().padStart(2, '0');
