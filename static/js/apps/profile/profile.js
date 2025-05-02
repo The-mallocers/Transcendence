@@ -242,7 +242,6 @@ notifSocket.onmessage = (event) => {
         toast_message("DUEL don't exist");
     }
     else if(message.data.action == "USER_OFFLINE"){
-        console.log("the user trying to match is offline");
         const toast = document.querySelector(".toast");
         if(toast)
             toast.remove();

@@ -182,7 +182,7 @@ class NotificationService(BaseServices):
             await asend_group(self.service_group, EventType.NOTIFICATION, ResponseAction.DUEL_CREATED, {
                 'code': duel_code
             })
-            return await asend_group(RTables.GROUP_NOTIF(client.id), EventType.NOTIFICATION, 
+            return await asend_group(RTables.GROUP_NOTIF(target.id), EventType.NOTIFICATION, 
                                      ResponseAction.ACK_ASK_DUEL,
                             {
                                 "sender": str(client.id),
@@ -276,25 +276,6 @@ class NotificationService(BaseServices):
         except Exception as e:
             print(repr(e))
             return await asend_group_error(self.service_group, ResponseError.INTERNAL_ERROR)
-        
-    # async def _handle_unblock_friend(self, data, client):
-    #     try:
-    #         target = await Clients.aget_client_by_username(data['data']['args']['target_name'])
-    #         if target is None:
-    #             return await asend_group_error(self.service_group, ResponseError.USER_NOT_FOUND)
-    #         friend_table = await client.get_friend_table()
-    #         await friend_table.unblock_user(target)
-    #         await asend_group(self.service_group,
-    #                 EventType.NOTIFICATION,
-    #                 ResponseAction.FRIEND_UNBLOCKED,
-    #                 {
-    #                     "message" : "successfully unblock friend",
-    #                     "username" : await target.aget_profile_username()
-    #                 })
-    #     except Exception as e:
-    #         print(repr(e))
-    #         return await asend_group_error(self.service_group, ResponseError.INTERNAL_ERROR)
-    
 
     async def _handle_ping(self, data, client):
         return await asend_group(self.service_group, EventType.NOTIFICATION, ResponseAction.PONG)
