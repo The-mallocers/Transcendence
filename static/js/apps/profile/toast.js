@@ -1,7 +1,6 @@
 
 
 function toast_friend(message, data, itemToDelete){
-    console.log("toast_friend ||||||||||||||||||||||||||||||||||||||||||||||||||||"); 
     const date = new Date();
     const hours = date.getHours().toString().padStart(2, '0');
     const minutes = date.getMinutes().toString().padStart(2, '0');
@@ -103,40 +102,6 @@ function toast_duel(message, data, itemToDelete){
         this.remove();
     });
 }
-
-// function toast_message(message){
-//     const date = new Date();
-//     const hours = date.getHours().toString().padStart(2, '0');
-//     const minutes = date.getMinutes().toString().padStart(2, '0');
-//     const time = `${hours}:${minutes}`;
-    
-//     const toastHtml = `
-//     <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-//         <div class="toast-header">
-//             <img src="/static/assets/imgs/chat.png" class="rounded me-2" alt="..." style="width: 20px; height: 20px; object-fit: contain;">
-//             <strong class="me-auto">Notification</strong>
-//             <small>${time}</small>
-//             <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-//         </div>
-//         <div class="toast-body">${message}</div>
-//     </div>`;
-    
-//     let toastContainer = document.querySelector('.toast-container');
-//     if (!toastContainer) {
-//         toastContainer = document.createElement('div');
-//         toastContainer.className = 'toast-container position-fixed bottom-0 end-0 p-3';
-//         document.body.appendChild(toastContainer);
-//     }
-//     toastContainer.innerHTML += toastHtml;
-    
-//     const newToast = toastContainer.lastChild;
-//     const toastBootstrap = new bootstrap.Toast(newToast);
-//     toastBootstrap.show();
-    
-//     newToast.addEventListener('hidden.bs.toast', function() {
-//         this.remove();
-//     });
-// }
 
 function toast_message(message) {
     const date = new Date();

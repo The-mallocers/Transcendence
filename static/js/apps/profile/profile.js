@@ -227,10 +227,17 @@ notifSocket.onmessage = (event) => {
     }
     else if(message.data.action == "DUEL_CREATED"){
         navigateTo('/pong/duel/');
-    }
-    else if(message.data.action == "DUEL_REFUSED"){
-        navigateTo("/pong/gamemodes/");
-        toast_message(`${message.data.content.username} refuses the duel`);
+        setTimeout(() => {
+            const opponentdiv = document.querySelector(".opponent_player");
+            if(opponentdiv) {
+                console.log('changing name of opponent');
+                opponentdiv.innerHTML = opponentName;
+            } else {
+                console.log('Opponent div not found even after delay');
+            }
+        }, 500);
+        // const socket = create_message_notif("get_opponent_name", message.data.content.opponent)
+        // notifSocket.send(JSON.stringify(socket));
     }
     else if(message.data.action == "DUEL_NOT_EXIST")
     {

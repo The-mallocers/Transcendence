@@ -180,7 +180,8 @@ class NotificationService(BaseServices):
             await self.redis.hset(name=RTables.HASH_DUEL_QUEUE(duel_code), key=str(client.id), value=str(True))
             await self.redis.hset(name=RTables.HASH_DUEL_QUEUE(duel_code), key=str(target.id), value=str(False))
             await asend_group(self.service_group, EventType.NOTIFICATION, ResponseAction.DUEL_CREATED, {
-                'code': duel_code
+                'code': duel_code,
+                'opponent' : await target.aget_profile_username()
             })
             return await asend_group(RTables.GROUP_NOTIF(target.id), EventType.NOTIFICATION, 
                                      ResponseAction.ACK_ASK_DUEL,
@@ -218,7 +219,6 @@ class NotificationService(BaseServices):
                     "code": duel_code,
                     "status": duel_status == 'True'
                 })
-
         await asend_group(self.service_group,
                           EventType.NOTIFICATION,
                           ResponseAction.ACK_PENDING_DUELS,
@@ -243,9 +243,51 @@ class NotificationService(BaseServices):
                         opponent_id = decoded_key
                         break
                 await asend_group(self.service_group, EventType.NOTIFICATION, ResponseAction.REFUSED_DUEL)
-                await asend_group(RTables.GROUP_NOTIF(opponent_id), EventType.NOTIFICATION, 
-                                ResponseAction.DUEL_REFUSED,
-                                {"username": await client.aget_profile_username()})
+                print(opponent_id)
+                await asend_group(RTables.GROUP_NOTIF(opponent_id), 
+                                    EventType.NOTIFICATION, 
+                                    ResponseAction.DUEL_REFUSED,
+                                    {
+                                        "username": await client.aget_profile_username()
+                                    })
+    
+    async def _handle_get_opponent_name(self, data, client):
+        opponent = data['data']['args']['target_name']
+        if not opponent:
+            return await asend_group_error(RTables.GROUP_NOTIF(client.id), ResponseError.OPPONENT_NOT_FOUND)
+        return await asend_group(RTables.GROUP_NOTIF(client.id),
+                        EventType.NOTIFICATION,
+                        ResponseAction.GET_OPPONENT,
+                        {
+                            "opponent" : opponent
+                        })
+    
+    async def get_opponent_username(self, duel_code, client_id):
+        if not await self.redis.exists(RTables.HASH_DUEL_QUEUE(duel_code)):
+            return None
+            
+        if await self.redis.hexists(RTables.HASH_DUEL_QUEUE(duel_code), str(client_id)) is False:
+            return None
+        
+        players = await self.redis.hgetall(RTables.HASH_DUEL_QUEUE(duel_code))
+        
+        opponent_id = None
+        for key, _ in players.items():
+            decoded_key = key.decode()
+            if decoded_key != str(client_id):
+                opponent_id = decoded_key
+                break
+        
+        if opponent_id is None:
+            return None
+        
+        # Get opponent client object
+        opponent = await Clients.aget_client_by_id(opponent_id)
+        if opponent is None:
+            return None
+        
+        # Return opponent's username
+        return await opponent.aget_profile_username()
     
     # manage friends block and unblock
     async def _handle_block_unblock_friend(self, data, client):

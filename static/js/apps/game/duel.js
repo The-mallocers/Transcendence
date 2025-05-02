@@ -1,18 +1,20 @@
 import { navigateTo } from "../../spa/spa.js";
 import { WebSocketManager } from "../../websockets/websockets.js";
-// import { notifSocket } from "../../spa/spa.js"; 
+import { notifSocket } from "../../spa/spa.js";
+import { toast_message } from "../profile/toast.js"; 
 
 let client_id;
 let clientId;
 
 clientId = await getClientId();
 const gameSocket = await WebSocketManager.initGameSocket(clientId);
-const cancel_duel = document.querySelector('.chatRooms');
-if(cancel_duel)
-{
-    
-}
 
+const cancelDuel = document.querySelector(".cancel-duel");
+if (cancelDuel){
+    cancelDuel.addEventListener('click', function(event){
+        navigateTo('/pong/gamemodes/')
+    })
+}
 
 let height = 500;
 const width = 1000;
@@ -60,6 +62,21 @@ const startGameMessage = {
 
 //     socket.send(JSON.stringify(message));
 // }
+
+window.onload() = function(){
+    const socket = create_message_notif("get_opponent_name", message.data.content.opponent)
+    notifSocket.send(JSON.stringify(socket));
+}
+
+notifSocket.onmessage = (event) => {
+    console.log(event.data);
+    const message = JSON.parse(event.data);
+
+    if(message.data.action == "DUEL_REFUSED"){
+        navigateTo("/pong/gamemodes/");
+        toast_message(`${message.data.content.username} refuses the duel`);
+    }
+}
 
 gameSocket.onmessage = (e) => {
     const jsonData = JSON.parse(e.data);
