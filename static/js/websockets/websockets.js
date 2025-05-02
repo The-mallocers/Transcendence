@@ -9,7 +9,17 @@ export const WebSocketManager = {
     // }
     if (!this.gameSocket || this.gameSocket.readyState === WebSocket.CLOSED) {
       this.gameSocket = new WebSocket(`wss://${window.location.host}/ws/game/?id=${client_id}`);
-      this.gameSocket.onopen = () => console.log("Game socket connected");
+      this.gameSocket.onopen = () =>
+      {
+        const message = {
+          "event": "matchmaking",
+          "data": {
+              "action": "ping"
+          }
+        }
+        console.log("Game socket connected");
+        this.gameSocket.send(JSON.stringify(message))
+      }
     }
     return this.gameSocket;
   },
@@ -20,17 +30,36 @@ export const WebSocketManager = {
     // }
     if (!this.chatSocket || this.chatSocket.readyState === WebSocket.CLOSED) {
       this.chatSocket = new WebSocket(`wss://${window.location.host}/ws/chat/?id=${client_id}`);
-      this.chatSocket.onopen = () => console.log("chat socket connected");
+      this.chatSocket.onopen = () => {
+        const message = {
+          "event": "chat",
+          "data": {
+              "action": "ping"
+          }
+        }
+        console.log("chat socket connected");
+        this.chatSocket.send(JSON.stringify(message))
+      }
     }
     return this.chatSocket;
   },
+
   async initNotifSocket(client_id) {
     // if (!client_id) {
     //   client_id = await getClientId();
     // }
     if (!this.notifSocket || this.notifSocket.readyState === WebSocket.CLOSED) {
       this.notifSocket = new WebSocket(`wss://${window.location.host}/ws/notification/?id=${client_id}`);
-      this.notifSocket.onopen = () => console.log("notif socket connected");
+      this.notifSocket.onopen = () => {
+        const message = {
+          "event": "notification",
+          "data": {
+              "action": "ping"
+          }
+        }
+        console.log("notif socket connected");
+        this.notifSocket.send(JSON.stringify(message))
+      }
     }
     return this.notifSocket;
   },

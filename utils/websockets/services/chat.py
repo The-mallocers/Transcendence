@@ -25,10 +25,10 @@ class ChatService(BaseServices):
 
 
 
-    async def process_action(self, data, *args):
-        if 'room_id' in data['data']['args'] and data['data']['args']['room_id'] == 'global':
-            data['data']['args']['room_id'] = uuid_global_room
-        return await super().process_action(data, *args)
+    # async def process_action(self, data, *args):
+    #     if 'room_id' in data['data']['args'] and data['data']['args']['room_id'] == 'global':
+    #         data['data']['args']['room_id'] = uuid_global_room
+    #     return await super().process_action(data, *args)
 
     async def _handle_create_room(self, data, client: Clients):
         try:
@@ -193,6 +193,9 @@ class ChatService(BaseServices):
                         EventType.CHAT, 
                         ResponseAction.ALL_ROOM_RECEIVED, 
                         {"rooms": formatted_messages})
+        
+    async def _handle_ping(self, data, client):
+        return await asend_group(self.service_group, EventType.CHAT, ResponseAction.PONG)
 
     async def disconnect(self, client):
         await self.channel_layer.group_discard(RTables.GROUP_CHAT(uuid_global_room), self.channel_name)

@@ -86,21 +86,16 @@ class MatchmakingThread(Threads):
         cursor, duels = self.redis.scan(cursor=cursor, match=RTables.HASH_DUEL_QUEUE('*'))
         for duel in duels:
             players = list(self.redis.hgetall(duel).items())
-            print("Checking duels in matchamking, current duel players: ", players)
             #We seems to pass twice in this shit for some reason.
-            print(f"len of players: {len(players)}")
             if len(players) >= 2:
-                print(f"players is {players}")
                 random.shuffle(players)
                 player_1, stat_p1 = players[0]
                 player_2, stat_p2 = players[1]
                 channel_p1 = self.redis.hget(name=RTables.HASH_CLIENT(player_1.decode('utf-8')), key=str(EventType.GAME.value))
                 channel_p2 = self.redis.hget(name=RTables.HASH_CLIENT(player_2.decode('utf-8')), key=str(EventType.GAME.value))
                 if not channel_p1 or not channel_p2:
-                    print(f"returning false because {channel_p1} or {channel_p2} is not cool")
                     return False
                 if stat_p1.decode('utf-8') == 'True' and stat_p2.decode('utf-8') == 'True':
-                    print("We have our two players, lets do a Duel")
                     game.is_duel = True
                     game.code = re.search(rf'{RTables.HASH_DUEL_QUEUE("")}(\w+)$', duel.decode('utf-8')).group(1)
                     game.game_key = RTables.JSON_GAME(game.code)

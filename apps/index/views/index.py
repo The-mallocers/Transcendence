@@ -19,6 +19,7 @@ def get(req):
     print("game history is:", ghistory)
     if client is not None:
         winrate = get_winrate(client, games_played)
+    print(winrate)
     context = {
         "client": client,
         "clients": Clients.objects.all(),

@@ -39,7 +39,6 @@ window.hide_modal = async function(usernameId){
         modal.hide();
         const message = create_message_duel("create_duel",usernameId);
         notifSocket.send(JSON.stringify(message));
-        navigateTo('/pong/duel/');
     }
     catch(error){
         console.log(error);

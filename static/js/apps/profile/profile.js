@@ -225,17 +225,30 @@ notifSocket.onmessage = (event) => {
         }
         toast_duel(`${message.data.content.username} wants a duel`, message.data, pendingElement);
     }
-    else if(message.data.action == "REFUSED_DUEL")
-    {
-        // const buttonToDelete = document.querySelector(`li.pending_item#${message.data.content.username}`);
-        // if(buttonToDelete)
-        // {
-        //     buttonToDelete.remove();
-        // }
+    else if(message.data.action == "DUEL_CREATED"){
+        navigateTo('/pong/duel/');
     }
     else if(message.data.action == "DUEL_REFUSED"){
         navigateTo("/pong/gamemodes/");
         toast_message(`${message.data.content.username} refuses the duel`);
+    }
+    else if(message.data.action == "DUEL_NOT_EXIST")
+    {
+        const toast = document.querySelector(".toast");
+        if(toast)
+            toast.remove();
+        
+        navigateTo("/")
+        toast_message("DUEL don't exist");
+    }
+    else if(message.data.action == "USER_OFFLINE"){
+        console.log("the user trying to match is offline");
+        const toast = document.querySelector(".toast");
+        if(toast)
+            toast.remove();
+
+        navigateTo('/pong/gamemodes/')
+        toast_message(`Player you want to duel is offline`);
     }
 }
 
