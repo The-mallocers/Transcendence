@@ -20,6 +20,7 @@ class Player(models.Model):
 
     # ━━ PLAYER INFOS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
     score = IntegerField(default=0)
+    mmr_change = IntegerField(default=0)
 
     # ═════════════════════════════════ Local Fields ═════════════════════════════════ #
     # def __init__(self, client_id=None, *args, **kwargs):
