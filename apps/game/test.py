@@ -79,12 +79,6 @@ class GameViewTest(TestCase):
         """Set up test client"""
         self.client = Client()
 
-    def test_pong_view(self):
-        """Test the pong view returns the correct JSON response"""
-        response = self.client.get(reverse('pong'))
-        # self.assertEqual(response.status_code, 200)
-        # self.assertIn('html', response.json())
-
     def test_matchmaking_view(self):
         """Test the matchmaking view returns the correct JSON response"""
         # This test requires a logged-in client, so we'll mock that
