@@ -9,6 +9,7 @@ from utils.websockets.services.services import BaseServices
 
 class MatchmakingService(BaseServices):
     async def init(self, client: Clients, *args):
+        print('init matchmaking')
         self.service_group = f'{EventType.GAME.value}_{client.id}'
         return await super().init(client)
 
@@ -66,6 +67,8 @@ class MatchmakingService(BaseServices):
     #                                      "username": await client.aget_profile_username(),
     #                                      'code': duel_code
     #                                  })
+    async def _handle_ping(self, data, client):
+        return await asend_group(self.service_group, EventType.MATCHMAKING, ResponseAction.PONG)
 
     async def _handle_leave_duel(self, data, client: Clients):
         queues = await Clients.acheck_in_queue(client, self.redis)
@@ -76,9 +79,7 @@ class MatchmakingService(BaseServices):
             return await asend_group_error(self.service_group, ResponseError.NOT_IN_QUEUE)
 
     async def disconnect(self, client):
-        print("COUCOU LES QUEUES")
         queues = await Clients.acheck_in_queue(client, self.redis)
-        print(queues)
         if queues:
             if queues is RTables.HASH_G_QUEUE:
                 await self.redis.hdel(RTables.HASH_G_QUEUE, str(client.id))

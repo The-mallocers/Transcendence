@@ -78,6 +78,8 @@ class RequestAction(str, Enum):
     BLOCK_FRIEND: str = "block_friend"
     UNBLOCK_FRIEND: str = "unblock_friend"
     BLOCK_UNBLOCK_FRIEND: str = "block_unblock_friend"
+    
+    PING: str = 'ping'
 
 # All the responses the server sends to the client
 class ResponseAction(str, Enum):
@@ -134,7 +136,7 @@ class ResponseAction(str, Enum):
     FRIEND_UNBLOCKED: str ="friend_unblocked"
     NOTIF_TEST = "notification_test"
 
-    TEST: str = 'test'
+    PONG: str = 'pong'
 
 
 # All the error messages sent to the client
