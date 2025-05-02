@@ -75,14 +75,14 @@ class NotificationService(BaseServices):
                                 "username": await target.aget_profile_username()
                               })
 
-            await asend_group(RTables.GROUP_CLIENT(target.id), EventType.NOTIFICATION,
+            await asend_group(RTables.GROUP_NOTIF(target.id), EventType.NOTIFICATION,
                               ResponseAction.ACK_ACCEPT_FRIEND_REQUEST,
                               {
                                 "sender": str(client.id),
                                 "username": await client.aget_profile_username(),
                                 "room": str(room.id)
                               })
-            await asend_group(RTables.GROUP_CLIENT(target.id), EventType.CHAT, 
+            await asend_group(RTables.GROUP_CHAT(target.id), EventType.CHAT, 
                               ResponseAction.NEW_FRIEND,
                               {
                                 "sender": str(client.id),
@@ -182,30 +182,13 @@ class NotificationService(BaseServices):
             await asend_group(self.service_group, EventType.NOTIFICATION, ResponseAction.DUEL_CREATED, {
                 'code': duel_code
             })
-            print("sending request to duel")
-            return await asend_group(RTables.GROUP_NOTIF(target.id), EventType.NOTIFICATION, ResponseAction.ACK_ASK_DUEL,
-                                     {
-                                         "sender": str(client.id),
-                                         "username": await client.aget_profile_username(),
-                                         'code': duel_code
-                                     })
-            
-    # async def _handle_ask_duel(self, data, client):
-    #     target = await Clients.aget_client_by_username(data['data']['args']['target_name'])
-    #     if target is None:
-    #         return await asend_group_error(RTables.GROUP_CLIENT(client.id), ResponseError.USER_NOT_FOUND)
-    #     try:
-    #         return await asend_group(RTables.GROUP_CLIENT(target.id),
-    #                                 EventType.NOTIFICATION,
-    #                                 ResponseAction.ACK_ASK_DUEL,
-    #                                 {
-    #                                     "sender": str(client.id),
-    #                                     "username": await client.aget_profile_username() 
-    #                                 })
-    #     except Exception as e:
-    #         print(repr(e))
-    #         return await asend_group_error(RTables.GROUP_CLIENT(client.id), 
-    #                                        ResponseError.INTERNAL_ERROR)
+            return await asend_group(RTables.GROUP_NOTIF(client.id), EventType.NOTIFICATION, 
+                                     ResponseAction.ACK_ASK_DUEL,
+                            {
+                                "sender": str(client.id),
+                                "username": await client.aget_profile_username(),
+                                'code': duel_code
+                            })
 
     async def _handle_accept_duel(self, data, client):
         code = data['data']['args']['code']
