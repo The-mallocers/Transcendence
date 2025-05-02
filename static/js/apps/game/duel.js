@@ -7,6 +7,12 @@ let clientId;
 
 clientId = await getClientId();
 const gameSocket = await WebSocketManager.initGameSocket(clientId);
+const cancel_duel = document.querySelector('.chatRooms');
+if(cancel_duel)
+{
+    
+}
+
 
 let height = 500;
 const width = 1000;

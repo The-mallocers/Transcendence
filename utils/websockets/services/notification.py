@@ -312,5 +312,9 @@ class NotificationService(BaseServices):
     #         print(repr(e))
     #         return await asend_group_error(self.service_group, ResponseError.INTERNAL_ERROR)
     
+
+    async def _handle_ping(self, data, client):
+        return await asend_group(self.service_group, EventType.NOTIFICATION, ResponseAction.PONG)
+    
     async def disconnect(self, client):
         pass
