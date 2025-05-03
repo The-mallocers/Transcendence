@@ -84,6 +84,8 @@ class Router {
 }
 
 window.onload = async () => {
+    //Adding the load of notif socket when we load our window.
+    await WebSocketManager.initNotifSocket(clientId);
     await router.handleLocation();
 }
 

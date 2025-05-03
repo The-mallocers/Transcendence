@@ -6,7 +6,7 @@ import { toast_message } from "./toast.js";
 
 let client_id = null;
 const clientId = await getClientId();
-const notifSocket =  await WebSocketManager.initNotifSocket(clientId);
+const notifSocket =  WebSocketManager.notifSocket; //Our notif socket is already loaded !
 
 const searchParams = new URLSearchParams(window.location.search);
 const pathname = window.location.pathname;
