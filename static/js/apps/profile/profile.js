@@ -373,11 +373,19 @@ export async function apiFriends(endpoint) {
     }
 }
 
+//Might keep this code, might not, in theory the online status should only be updated by the websocket !
 async function getOnlineStatus() {
     //We are online !
+    const status = document.getElementById("online-status");
     if (pathname == '/') {
+        status.innerHTML = "Online";
         return true;
     }
+    else {
+        status.innerHTML = "Offline";
+        return false;
+    }
+    //works in progress here;
     const online_status = await apiFriends("/api/friends/get_online_status/");
     console.log("oneline status:", online_status);
 }
