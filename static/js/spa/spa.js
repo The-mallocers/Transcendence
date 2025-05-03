@@ -16,11 +16,14 @@ class Router {
     }
 
     async handleLocation() {
-
-        // clientId = await getClientId();
-        // notifSocket = await WebSocketManager.initNotifSocket(clientId);
+        //Now making the notif ws in navigation
+        if (WebSocketManager.isSocketClosed(WebSocketManager.notifSocket)) {
+            const clientId = await getClientId();
+            if (clientId) {
+                await WebSocketManager.initNotifSocket(clientId);
+            }
+        }
         const path = window.location.pathname;
-
         // console.log(window.location.search);
         // console.log("looking for the path: ", path)
         const route = this.routes.find(r => r.path === path);
@@ -83,15 +86,6 @@ class Router {
 }
 
 window.onload = async () => {
-    //Adding the load of notif socket when we load our window.
-    console.log("Yoyo");
-    const notifsocket = WebSocketManager.notifSocket
-    if (WebSocketManager.isSocketClosed(notifsocket)) {
-        const clientId = await getClientId();
-        if (clientId) {
-            await WebSocketManager.initNotifSocket(clientId);
-        }
-    }
     await router.handleLocation();
 }
 
