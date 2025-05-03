@@ -2,8 +2,7 @@ import {WebSocketManager} from "../websockets/websockets.js"
 import {isGameOver} from "../apps/game/VarGame.js"
 import * as html from "../utils/html_forms.js"
 import {routes} from "../utils/routes.js";
-// let notifSocket = null;
-// let clientId = null;
+import { getClientId } from "../utils/utils.js";
 
 class Router {
     constructor(routes) {
@@ -85,7 +84,14 @@ class Router {
 
 window.onload = async () => {
     //Adding the load of notif socket when we load our window.
-    await WebSocketManager.initNotifSocket(clientId);
+    console.log("Yoyo");
+    const notifsocket = WebSocketManager.notifSocket
+    if (WebSocketManager.isSocketClosed(notifsocket)) {
+        const clientId = await getClientId();
+        if (clientId) {
+            await WebSocketManager.initNotifSocket(clientId);
+        }
+    }
     await router.handleLocation();
 }
 

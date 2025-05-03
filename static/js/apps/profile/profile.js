@@ -3,6 +3,7 @@ import {navigateTo} from "../../spa/spa.js";
 import { toast_friend } from "./toast.js";
 import { toast_duel } from "./toast.js";
 import { toast_message } from "./toast.js";
+import { getClientId } from "../../utils/utils.js";
 
 let client_id = null;
 const clientId = await getClientId();
@@ -238,25 +239,27 @@ notifSocket.onmessage = (event) => {
     }
 }
 
-async function getClientId() {
-    try {
-        const response = await fetch("/api/auth/getId/", {
-            method: "GET",
-            credentials: "include",
-        });
-        const data = await response.json();
+//This file is now in utils.js ! 
 
-        if (data.client_id) {
-            client_id = data.client_id;
-            return client_id;
-        } else {
-            throw new Error(data.error);
-        }
-    } catch (error) {
-        console.error("Erreur lors de la récupération de l'ID :", error);
-        return null;
-    }
-}
+// async function getClientId() {
+//     try {
+//         const response = await fetch("/api/auth/getId/", {
+//             method: "GET",
+//             credentials: "include",
+//         });
+//         const data = await response.json();
+
+//         if (data.client_id) {
+//             client_id = data.client_id;
+//             return client_id;
+//         } else {
+//             throw new Error(data.error);
+//         }
+//     } catch (error) {
+//         console.error("Erreur lors de la récupération de l'ID :", error);
+//         return null;
+//     }
+// }
 
 // Define the functions in the global scope (window)
 window.handleAskFriend = function(username) {
@@ -370,7 +373,18 @@ export async function apiFriends(endpoint) {
     }
 }
 
+async function getOnlineStatus() {
+    //We are online !
+    if (pathname == '/') {
+        return true;
+    }
+    const online_status = await apiFriends("/api/friends/get_online_status/");
+    console.log("oneline status:", online_status);
+}
+
+getOnlineStatus();
+
 export {notifSocket};
 export {create_message_notif}
-export {getClientId}
+// export {getClientId}
 export {create_message_notif_block}

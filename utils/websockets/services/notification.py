@@ -315,3 +315,10 @@ class NotificationService(BaseServices):
     async def disconnect(self, client):
         print("in disconnect of notification")
         pass
+    
+    async def is_client_online(self, client_id):
+        """Check if a client is currently online by checking their notification connection."""
+        return await self.redis.hget(
+            name=RTables.HASH_CLIENT(client_id), 
+            key=str(EventType.NOTIFICATION.value)
+        ) is not None
