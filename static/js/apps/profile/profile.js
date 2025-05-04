@@ -9,7 +9,7 @@ let client_id = null;
 const clientId = await getClientId();
 const notifSocket =  WebSocketManager.notifSocket; //Our notif socket is already loaded !
 
-const friends_online_status = JSON.parse(document.getElementById('friends-data').textContent);
+const friends_online_status = JSON.parse(document.getElementById('friends-data')?.textContent);
 const searchParams = new URLSearchParams(window.location.search);
 const pathname = window.location.pathname;
 console.log(pathname);
