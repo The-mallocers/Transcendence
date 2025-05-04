@@ -2,6 +2,7 @@ from utils.enums import EventType, ResponseAction
 from utils.websockets.channel_send import asend_group
 from utils.websockets.consumers.consumer import WsConsumer
 from utils.websockets.services.notification import NotificationService
+from channels.db import database_sync_to_async
 
 
 class NotificationfConsumer(WsConsumer):
@@ -9,25 +10,22 @@ class NotificationfConsumer(WsConsumer):
         super().__init__(*args, **kwargs)
         self.service = NotificationService()
         
-#Be very careful with implementing this for some reason ?
-#@database_sync_to_async we might need this !
+    #Sending the signal to all connected user that I am connecting
     async def connect(self):
         await super().connect()
-        # username = self.client.profile.username # This is no bueno without
-        #Since the way a notification group is like this:
-        # self.service_group = f'{EventType.NOTIFICATION.value}_{client.id}'
-        
-        #First do a query to get all the 
-        # # await asend_group(
-        # #     self.service_group,
-        # #     EventType.NOTIFICATION,
-        # #     ResponseAction.ACK_ONLINE_STATUS,
-        # #     {
-        # #         "username": username,
-        # #         "online": True
-        # #     }
-        # # )
-        # return True
+        username = await self.get_username()
+        online_clients = await self.get_all_online_clients()
+        for client in online_clients:
+            await asend_group(
+                client,
+                EventType.NOTIFICATION,
+                ResponseAction.ACK_ONLINE_STATUS,
+                {
+                    "username": username,
+                    "online": True
+                }
+            )
+        return True    
 
     # async def disconnect(self):
     #     super().connect()
@@ -41,3 +39,13 @@ class NotificationfConsumer(WsConsumer):
     #             "online": True
     #         }
     #     )
+    @database_sync_to_async
+    def get_username(self):
+        return self.client.profile.username
+    
+    async def get_all_online_clients(self):
+        client_keys = await self._redis.keys("client_*")
+        #Decode because this gets us the results in bytes
+        if client_keys and isinstance(client_keys[0], bytes):
+            client_keys = [key.decode() for key in client_keys]
+        return client_keys
