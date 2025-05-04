@@ -12,7 +12,7 @@ from utils.websockets.services.services import BaseServices
 class NotificationService(BaseServices):
     async def init(self, client, *args):
         self.service_group = f'{EventType.NOTIFICATION.value}_{client.id}'
-        return await super().init(client)
+        return await super().init(client)       
 
     # Client is the person that want to add a friend to his friend list
     # Target is the friends to add
@@ -312,13 +312,31 @@ class NotificationService(BaseServices):
             print(repr(e))
             return await asend_group_error(self.service_group, ResponseError.INTERNAL_ERROR)
     
-    async def disconnect(self, client):
-        print("in disconnect of notification")
-        pass
-    
-    async def is_client_online(self, client_id):
-        """Check if a client is currently online by checking their notification connection."""
-        return await self.redis.hget(
-            name=RTables.HASH_CLIENT(client_id), 
+    async def _handle_check_online_status(self, data, client):
+        target_username = data['data']['args']['target_name']
+        target = await Clients.aget_client_by_username(target_username) #async so async getter
+        
+        if target is None:
+            return await asend_group_error(self.service_group, ResponseError.USER_NOT_FOUND) #Sending back to the one who asked only
+        
+        # Check if the user has an active notification socket in Redis
+        is_online = await self.redis.hget(
+            name=RTables.HASH_CLIENT(target.id), 
             key=str(EventType.NOTIFICATION.value)
         ) is not None
+        
+        # Send response only to the requesting client
+        await asend_group(
+            self.service_group,  # This sends only to the requesting client
+            EventType.NOTIFICATION,
+            ResponseAction.ACK_ONLINE_STATUS,  # You'll need to add this to your ResponseAction enum
+            {
+                # "user_id": str(target.id), #Do i really want to send back the id ?
+                "username": target_username,
+                "online": is_online
+            }
+        )
+    
+    async def disconnect(self, client):
+        print("in disconnect of notification - Please see me !")
+        pass

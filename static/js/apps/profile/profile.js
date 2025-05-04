@@ -237,6 +237,23 @@ notifSocket.onmessage = (event) => {
         navigateTo("/pong/gamemodes/");
         toast_message(`${message.data.content.username} refuses the duel`);
     }
+    else if(message.data.action == "ACK_ONLINE_STATUS") {
+        const username =  message.data.content.username;
+        const online = message.data.content.online;
+        const status = document.getElementById("online-status");
+        const query_username = searchParams.get("username");
+        //In theory these online status update will be done by everyone eventually, so we need to check if we got our guy
+        if (pathname == '/') {
+            status.innerHTML = "Online";
+        }
+        if (username != query_username) {return;} //We dont care about the update if its not about our boy
+        if (online == true) {
+            status.innerHTML = "Online";
+        }
+        else {
+            status.innerHTML = "Offline";
+        }
+    }
 }
 
 //This file is now in utils.js ! 
@@ -353,6 +370,20 @@ function create_message_notif_block(action, targetUser, status)
     return message;
 }
 
+// Create a message to check online status
+function create_message_check_online(targetUser) {
+    const message = {
+        "event": "notification",
+        "data": {
+            "action": "check_online_status",
+            "args": {
+                "target_name": targetUser,
+            }
+        } 
+    }
+    return message;
+}
+
 export async function apiFriends(endpoint) {
     console.log("Getting client ID")
     try {
@@ -374,25 +405,38 @@ export async function apiFriends(endpoint) {
 }
 
 //Might keep this code, might not, in theory the online status should only be updated by the websocket !
-async function getOnlineStatus() {
-    //We are online !
+// async function getOnlineStatus() {
+//     //We are online !
+//     const status = document.getElementById("online-status");
+//     if (pathname == '/') {
+//         status.innerHTML = "Online";
+//         return true;
+//     }
+//     else {
+//         status.innerHTML = "Offline";
+//         return false;
+//     }
+//     //works in progress here;
+//     const online_status = await apiFriends("/api/friends/get_online_status/");
+//     console.log("oneline status:", online_status);
+// }
+
+// getOnlineStatus();
+
+export function checkUserOnlineWS(username) {
     const status = document.getElementById("online-status");
     if (pathname == '/') {
         status.innerHTML = "Online";
-        return true;
+        return ;
     }
-    else {
-        status.innerHTML = "Offline";
-        return false;
-    }
-    //works in progress here;
-    const online_status = await apiFriends("/api/friends/get_online_status/");
-    console.log("oneline status:", online_status);
+    const message = create_message_check_online(username);
+    notifSocket.send(JSON.stringify(message));
+    // The response will come through the notifSocket.onmessage handler
 }
 
-getOnlineStatus();
+checkUserOnlineWS(searchParams.get("username"));
 
 export {notifSocket};
-export {create_message_notif}
+export {create_message_notif};
+export {create_message_notif_block};
 // export {getClientId}
-export {create_message_notif_block}

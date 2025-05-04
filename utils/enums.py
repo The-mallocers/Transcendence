@@ -78,6 +78,7 @@ class RequestAction(str, Enum):
     BLOCK_FRIEND: str = "block_friend"
     UNBLOCK_FRIEND: str = "unblock_friend"
     BLOCK_UNBLOCK_FRIEND: str = "block_unblock_friend"
+    ONLINE_STATUS: str = "check_online_status"
 
 # All the responses the server sends to the client
 class ResponseAction(str, Enum):
@@ -130,6 +131,7 @@ class ResponseAction(str, Enum):
     ACK_REFUSE_FRIEND_REQUEST: str = "acknowledge_refuse_friend_request"
     ACK_DELETE_FRIEND: str = "ack_delete_friend"
     ACK_DELETE_FRIEND_HOST: str = "ack_delete_friend_host"
+    ACK_ONLINE_STATUS: str = "ack_online_status"
     FRIEND_BLOCKED: str = "friend_blocked"
     FRIEND_UNBLOCKED: str ="friend_unblocked"
     NOTIF_TEST = "notification_test"
