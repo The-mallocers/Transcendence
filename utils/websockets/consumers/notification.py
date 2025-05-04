@@ -9,28 +9,28 @@ class NotificationfConsumer(WsConsumer):
         super().__init__(*args, **kwargs)
         self.service = NotificationService()
         
-    async def connect(self):
-        super().connect()
-        username = self.client.profile.username
-        await asend_group(
-            self.service_group,
-            EventType.NOTIFICATION,
-            ResponseAction.ACK_ONLINE_STATUS,
-            {
-                "username": username,
-                "online": True
-            }
-        )
+    # async def connect(self):
+    #     super().connect()
+    #     username = self.client.profile.username
+    #     await asend_group(
+    #         self.service_group,
+    #         EventType.NOTIFICATION,
+    #         ResponseAction.ACK_ONLINE_STATUS,
+    #         {
+    #             "username": username,
+    #             "online": True
+    #         }
+    #     )
 
-    async def disconnect(self):
-        super().connect()
-        username = self.client.profile.username
-        await asend_group(
-            self.service_group,
-            EventType.NOTIFICATION,
-            ResponseAction.ACK_ONLINE_STATUS,
-            {
-                "username": username,
-                "online": True
-            }
-        )
+    # async def disconnect(self):
+    #     super().connect()
+    #     username = self.client.profile.username
+    #     await asend_group(
+    #         self.service_group,
+    #         EventType.NOTIFICATION,
+    #         ResponseAction.ACK_ONLINE_STATUS,
+    #         {
+    #             "username": username,
+    #             "online": True
+    #         }
+    #     )
