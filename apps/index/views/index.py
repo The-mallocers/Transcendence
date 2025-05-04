@@ -19,6 +19,7 @@ def get(req):
     friends_pending = client.get_all_pending_request()
     rivals = get_rivals(client, games_played)
     ghistory = get_last_matches(client, games_played)
+    friends_online_status = get_friends_online_status(friends_list)
     rank_picture = settings.MEDIA_URL + "/rank_icon/" + client.get_rank(client.stats.mmr) + ".png"
     online_status = "Online"
     if client is not None:
@@ -35,7 +36,8 @@ def get(req):
         "friends_list": friends_list,
         "friends_pending" : friends_pending,
         "rank_picture": rank_picture,
-        "online_status": online_status
+        "online_status": online_status,
+        "friends_online_status": friends_online_status,
     }
     html_content = render_to_string("apps/profile/profile.html", context)
     return JsonResponse({'html': html_content})
@@ -111,7 +113,12 @@ def get_rivals(client, games_played) -> dict:
 #Work in progress, Initializing once the status of friends then updating the JS to update on new updates
 #is def doable.
 def get_friends_online_status(friends):
-    pass
+    friend_status = []
     redis = RedisConnectionPool.get_sync_connection("Index_get")
     for friend in friends:
-        online_status = redis.hget(RTables.HASH_CLIENT(client.id), str(EventType.NOTIFICATION.value)) is not None
+        id = friend['client'].id
+        username = friend['username']
+        online_status = redis.hget(RTables.HASH_CLIENT(id), str(EventType.NOTIFICATION.value)) is not None
+        friend_status.append([username, online_status])
+    print("friend_status:", friend_status)
+    return friend_status
