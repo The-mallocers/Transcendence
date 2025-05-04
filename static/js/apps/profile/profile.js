@@ -238,15 +238,16 @@ notifSocket.onmessage = (event) => {
         toast_message(`${message.data.content.username} refuses the duel`);
     }
     else if(message.data.action == "ACK_ONLINE_STATUS") {
+        //TODO, Loop over the friend list and update the status of a friend if the username is a friend.
         const username =  message.data.content.username;
         const online = message.data.content.online;
         const status = document.getElementById("online-status");
         const query_username = searchParams.get("username");
-        //In theory these online status update will be done by everyone eventually, so we need to check if we got our guy
         if (pathname == '/') {
             status.innerHTML = "Online";
+            return ;
         }
-        if (username != query_username) {return;} //We dont care about the update if its not about our boy
+        if (username != query_username) {return;} //in theory useless but im afraid to delete it
         if (online == true) {
             status.innerHTML = "Online";
         }
@@ -370,20 +371,6 @@ function create_message_notif_block(action, targetUser, status)
     return message;
 }
 
-// Commenting this for now as Im not using it anymore but might come back
-// function create_message_check_online(targetUser) {
-//     const message = {
-//         "event": "notification",
-//         "data": {
-//             "action": "check_online_status",
-//             "args": {
-//                 "target_name": targetUser,
-//             }
-//         } 
-//     }
-//     return message;
-// }
-
 export async function apiFriends(endpoint) {
     console.log("Getting client ID")
     try {
@@ -398,44 +385,11 @@ export async function apiFriends(endpoint) {
             throw new Error(data.error);
         }
     } catch (error) {
-        console.error("Wesh je touche pas a ca mais on a pas de route api getAllFriends Chef")
+        // console.error("Wesh je touche pas a ca mais on a pas de route api getAllFriends Chef")
         console.error("Erreur lors de la récupération de l'ID :", error);
         return null;
     }
 }
-
-//Might keep this code, might not, in theory the online status should only be updated by the websocket !
-// async function getOnlineStatus() {
-//     //We are online !
-//     const status = document.getElementById("online-status");
-//     if (pathname == '/') {
-//         status.innerHTML = "Online";
-//         return true;
-//     }
-//     else {
-//         status.innerHTML = "Offline";
-//         return false;
-//     }
-//     //works in progress here;
-//     const online_status = await apiFriends("/api/friends/get_online_status/");
-//     console.log("oneline status:", online_status);
-// }
-
-// getOnlineStatus();
-
-//This isnt great, giving the initial state of connexion in the view instead
-// export function checkUserOnlineWS(username) {
-//     const status = document.getElementById("online-status");
-//     if (pathname == '/') {
-//         status.innerHTML = "Online";
-//         return ;
-//     }
-//     const message = create_message_check_online(username);
-//     notifSocket.send(JSON.stringify(message));
-//     // The response will come through the notifSocket.onmessage handler
-// }
-
-// checkUserOnlineWS(searchParams.get("username"));
 
 export {notifSocket};
 export {create_message_notif};
