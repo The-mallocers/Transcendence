@@ -108,6 +108,7 @@
         </div>
     </div>
 </div>
-<div id="friends" data-friends="{{ friends_online_status }}" style="display: none;"></div>
+<!-- <div id="friends" data-friends={{ friends_online_status|json_script:"friends-data" }} style="display: none;"></div> -->
+{{ friends_online_status|json_script:"friends-data" }}
 
 <script type="module" src="{% static '/js/apps/profile/profile.js' %}" defer></script>

@@ -113,12 +113,12 @@ def get_rivals(client, games_played) -> dict:
 #Work in progress, Initializing once the status of friends then updating the JS to update on new updates
 #is def doable.
 def get_friends_online_status(friends):
-    friend_status = []
+    friend_status = {}
     redis = RedisConnectionPool.get_sync_connection("Index_get")
     for friend in friends:
         id = friend['client'].id
         username = friend['username']
         online_status = redis.hget(RTables.HASH_CLIENT(id), str(EventType.NOTIFICATION.value)) is not None
-        friend_status.append([username, online_status])
+        friend_status[username] = "Online" if online_status else "Offline"
     print("friend_status:", friend_status)
     return friend_status

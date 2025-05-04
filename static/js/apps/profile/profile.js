@@ -9,7 +9,7 @@ let client_id = null;
 const clientId = await getClientId();
 const notifSocket =  WebSocketManager.notifSocket; //Our notif socket is already loaded !
 
-const friends_online_status = document.getElementById('friends').dataset.friends
+const friends_online_status = JSON.parse(document.getElementById('friends-data').textContent);
 const searchParams = new URLSearchParams(window.location.search);
 const pathname = window.location.pathname;
 console.log(pathname);
@@ -25,11 +25,14 @@ if(!searchParams.has('username') && pathname == '/')
     friends.forEach(friend => {
         const friends_group = document.querySelector('.friends_group');
         const parser = new DOMParser();
+        const status = friends_online_status[friend.username];
+        console.log("status:", status);
         const html_friend = 
         `<li class="list-group-item d-flex justify-content-between align-items-center">
             <div>${friend.username}</div>
             <div class="d-flex align-items-center">
                 <button type="button" class="type-intra-green delete_friend me-4" >delete</button>
+                <div id=${friend.username}_status >${status}</div>
             </div>
         </li>`
         const doc = parser.parseFromString(html_friend, "text/html");
@@ -244,6 +247,19 @@ notifSocket.onmessage = (event) => {
         const online = message.data.content.online;
         const status = document.getElementById("online-status");
         const query_username = searchParams.get("username");
+        const friend_div = document.getElementById(`${username}_status`);
+        // console.log(`the username is ${username}`);
+        // console.log(`the combo is ${username}_status`);
+        // console.log("Hello I got a message, friend div is", friend_div);
+        if (friend_div) {
+            if (online == true) {
+                friend_div.innerHTML = "Online";
+            }
+            else {
+                friend_div.innerHTML = "Offline";
+            }
+            return ;
+        }
         if (pathname == '/') {
             status.innerHTML = "Online";
             return ;
