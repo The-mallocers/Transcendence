@@ -32,7 +32,7 @@ def get(req):
     html_content = render_to_string("apps/profile/profile.html",
                             {"csrf_token": get_token(req), 
                                 "client": target,
-                                "show_friend_request": show_friend_request
+                                "show_friend_request": show_friend_request,
                             })
     
     return JsonResponse({'html': html_content,})

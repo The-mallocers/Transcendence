@@ -27,18 +27,19 @@ class NotificationfConsumer(WsConsumer):
             )
         return True    
 
-    # async def disconnect(self):
-    #     super().connect()
-    #     username = self.client.profile.username
-    #     await asend_group(
-    #         self.service_group,
-    #         EventType.NOTIFICATION,
-    #         ResponseAction.ACK_ONLINE_STATUS,
-    #         {
-    #             "username": username,
-    #             "online": True
-    #         }
-    #     )
+    async def disconnect(self, close_code):
+        await super().disconnect(close_code)
+        username = self.client.profile.username
+        await asend_group(
+            self.service_group,
+            EventType.NOTIFICATION,
+            ResponseAction.ACK_ONLINE_STATUS,
+            {
+                "username": username,
+                "online": False
+            }
+        )
+    
     @database_sync_to_async
     def get_username(self):
         return self.client.profile.username
