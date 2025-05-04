@@ -9,18 +9,25 @@ class NotificationfConsumer(WsConsumer):
         super().__init__(*args, **kwargs)
         self.service = NotificationService()
         
-    # async def connect(self):
-    #     super().connect()
-    #     username = self.client.profile.username
-    #     await asend_group(
-    #         self.service_group,
-    #         EventType.NOTIFICATION,
-    #         ResponseAction.ACK_ONLINE_STATUS,
-    #         {
-    #             "username": username,
-    #             "online": True
-    #         }
-    #     )
+#Be very careful with implementing this for some reason ?
+#@database_sync_to_async we might need this !
+    async def connect(self):
+        await super().connect()
+        # username = self.client.profile.username # This is no bueno without
+        #Since the way a notification group is like this:
+        # self.service_group = f'{EventType.NOTIFICATION.value}_{client.id}'
+        
+        #First do a query to get all the 
+        # # await asend_group(
+        # #     self.service_group,
+        # #     EventType.NOTIFICATION,
+        # #     ResponseAction.ACK_ONLINE_STATUS,
+        # #     {
+        # #         "username": username,
+        # #         "online": True
+        # #     }
+        # # )
+        # return True
 
     # async def disconnect(self):
     #     super().connect()

@@ -130,7 +130,7 @@ class LoginApiView(APIView):
                 JWT(client, JWTType.REFRESH).set_cookie(response)
             return response
 
-
+#TODO, add the fact that we disconnect the notif socket/Get rid of the client in redis
 class LogoutApiView(APIView):
     permission_classes = []
     authentication_classes = []

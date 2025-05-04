@@ -370,19 +370,19 @@ function create_message_notif_block(action, targetUser, status)
     return message;
 }
 
-// Create a message to check online status
-function create_message_check_online(targetUser) {
-    const message = {
-        "event": "notification",
-        "data": {
-            "action": "check_online_status",
-            "args": {
-                "target_name": targetUser,
-            }
-        } 
-    }
-    return message;
-}
+// Commenting this for now as Im not using it anymore but might come back
+// function create_message_check_online(targetUser) {
+//     const message = {
+//         "event": "notification",
+//         "data": {
+//             "action": "check_online_status",
+//             "args": {
+//                 "target_name": targetUser,
+//             }
+//         } 
+//     }
+//     return message;
+// }
 
 export async function apiFriends(endpoint) {
     console.log("Getting client ID")
@@ -423,18 +423,19 @@ export async function apiFriends(endpoint) {
 
 // getOnlineStatus();
 
-export function checkUserOnlineWS(username) {
-    const status = document.getElementById("online-status");
-    if (pathname == '/') {
-        status.innerHTML = "Online";
-        return ;
-    }
-    const message = create_message_check_online(username);
-    notifSocket.send(JSON.stringify(message));
-    // The response will come through the notifSocket.onmessage handler
-}
+//This isnt great, giving the initial state of connexion in the view instead
+// export function checkUserOnlineWS(username) {
+//     const status = document.getElementById("online-status");
+//     if (pathname == '/') {
+//         status.innerHTML = "Online";
+//         return ;
+//     }
+//     const message = create_message_check_online(username);
+//     notifSocket.send(JSON.stringify(message));
+//     // The response will come through the notifSocket.onmessage handler
+// }
 
-checkUserOnlineWS(searchParams.get("username"));
+// checkUserOnlineWS(searchParams.get("username"));
 
 export {notifSocket};
 export {create_message_notif};

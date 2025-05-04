@@ -18,9 +18,13 @@ class Router {
     async handleLocation() {
         //Now making the notif ws in navigation
         if (WebSocketManager.isSocketClosed(WebSocketManager.notifSocket)) {
+            console.log("I AM THINKING THAT NOTIF SOCKET IS CLOSED !");
             const clientId = await getClientId();
             if (clientId) {
                 await WebSocketManager.initNotifSocket(clientId);
+            }
+            else {
+                WebSocketManager.closeNotifSocket();
             }
         }
         const path = window.location.pathname;

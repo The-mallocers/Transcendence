@@ -18,6 +18,7 @@ def get(req):
     rivals = get_rivals(client, games_played)
     ghistory = get_last_matches(client, games_played)
     rank_picture = settings.MEDIA_URL + "/rank_icon/" + client.get_rank(client.stats.mmr) + ".png"
+    online_status = "Online" #For now in index its always true, will change that when merging with profile view
     print(f"rank_picture : {rank_picture}")
     print("game history is:", ghistory)
     print(f"rank_picture : {rank_picture}")
@@ -35,6 +36,7 @@ def get(req):
         "friends_list": friends_list,
         "friends_pending" : friends_pending,
         "rank_picture": rank_picture,
+        "online_status": online_status
     }
     print("Feeding into the context rivals =", rivals)
     html_content = render_to_string("apps/profile/profile.html", context)

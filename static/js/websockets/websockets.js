@@ -64,6 +64,11 @@ export const WebSocketManager = {
     }
   },
   isSocketClosed(socket) {
+    console.log("socket =", socket);
+    if (socket) {
+      console.log("Socket is not null, is rdy state is :", socket.readyState);
+      console.log("as a reminder, CLOSED value is:", WebSocket.CLOSED);
+    }
     return (!socket || socket.readyState === WebSocket.CLOSED)
   },
   isSocketOpen(socket) {
