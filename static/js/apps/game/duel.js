@@ -1,6 +1,7 @@
 import { navigateTo } from "../../spa/spa.js";
 import { WebSocketManager } from "../../websockets/websockets.js";
 // import { notifSocket } from "../profile/profile.js";
+import { getClientId } from "../../utils/utils.js";
 
 let client_id;
 let clientId;
@@ -79,22 +80,23 @@ gameSocket.onmessage = (e) => {
     }
 };
 
-async function getClientId() {
-    try {
-        const response = await fetch("/api/auth/getId/", {
-            method: "GET",
-            credentials: "include",
-        });
-        const data = await response.json();
+//This is now in utils.js !
+// async function getClientId() {
+//     try {
+//         const response = await fetch("/api/auth/getId/", {
+//             method: "GET",
+//             credentials: "include",
+//         });
+//         const data = await response.json();
 
-        if (data.client_id) {
-            client_id = data.client_id;
-            return client_id;
-        } else {
-            throw new Error(data.error);
-        }
-    } catch (error) {
-        console.error("Erreur lors de la récupération de l'ID :", error);
-        return null;
-    }
-}
+//         if (data.client_id) {
+//             client_id = data.client_id;
+//             return client_id;
+//         } else {
+//             throw new Error(data.error);
+//         }
+//     } catch (error) {
+//         console.error("Erreur lors de la récupération de l'ID :", error);
+//         return null;
+//     }
+// }

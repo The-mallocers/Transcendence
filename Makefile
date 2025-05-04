@@ -62,7 +62,3 @@ clean: dbclean
 re: down up
 
 redetach: down detach
-
-reload:
-	cp -r static/css ./docker/staticdocker
-	cp -r static/js ./docker/staticdocker

@@ -28,7 +28,7 @@
             </div>
             <div class="col-md-4 currentActivity box">
                 <div class="p-3 text-center minibox">
-                    <h2>Unavailable</h2>
+                    <h2 id="online-status">{{ online_status }}</h2>
                 </div>
             </div>
             <div class="col-md-4 mmr box">
@@ -108,5 +108,7 @@
         </div>
     </div>
 </div>
+<!-- <div id="friends" data-friends={{ friends_online_status|json_script:"friends-data" }} style="display: none;"></div> -->
+{{ friends_online_status|json_script:"friends-data" }}
 
 <script type="module" src="{% static '/js/apps/profile/profile.js' %}" defer></script>

@@ -7,7 +7,7 @@ export const WebSocketManager = {
     // if (!client_id) {
     //   client_id = await getClientId(); // Ensure client_id is available
     // }
-    if (!this.gameSocket || this.gameSocket.readyState === WebSocket.CLOSED) {
+    if (this.isSocketClosed(this.gameSocket)) {
       this.gameSocket = new WebSocket(`wss://${window.location.host}/ws/game/?id=${client_id}`);
       this.gameSocket.onopen = () => console.log("Game socket connected");
     }
@@ -18,7 +18,7 @@ export const WebSocketManager = {
     // if (!client_id) {
     //   client_id = await getClientId();
     // }
-    if (!this.chatSocket || this.chatSocket.readyState === WebSocket.CLOSED) {
+    if (this.isSocketClosed(this.chatSocket)) {
       this.chatSocket = new WebSocket(`wss://${window.location.host}/ws/chat/?id=${client_id}`);
       this.chatSocket.onopen = () => console.log("chat socket connected");
     }
@@ -28,7 +28,7 @@ export const WebSocketManager = {
     // if (!client_id) {
     //   client_id = await getClientId();
     // }
-    if (!this.notifSocket || this.notifSocket.readyState === WebSocket.CLOSED) {
+    if (this.isSocketClosed(this.notifSocket)) {
       this.notifSocket = new WebSocket(`wss://${window.location.host}/ws/notification/?id=${client_id}`);
       this.notifSocket.onopen = () => console.log("notif socket connected");
     }
@@ -42,7 +42,7 @@ export const WebSocketManager = {
   },
   
   closeGameSocket() {
-    if (this.gameSocket && this.gameSocket.readyState === WebSocket.OPEN) {
+    if (this.isSocketOpen(this.gameSocket)) {
       this.gameSocket.close();
       this.gameSocket = null;
       console.log("Game socket closed");
@@ -50,18 +50,26 @@ export const WebSocketManager = {
   },
   
   closeChatSocket() {
-    if (this.chatSocket && this.chatSocket.readyState === WebSocket.OPEN) {
+    if (this.isSocketOpen(this.chatSocket)) {
       this.chatSocket.close();
       this.chatSocket = null;
       console.log("chat socket closed");
     }
   },
   closeNotifSocket() {
-    if (this.notifSocket && this.notifSocket.readyState === WebSocket.OPEN) {
+    console.log("Trying to close notif socket")
+    console.log(this.isSocketOpen(this.notifSocket))
+    if (this.isSocketOpen(this.notifSocket)) {
       this.notifSocket.close();
       this.notifSocket = null;
       console.log("notif socket closed");
     }
+  },
+  isSocketClosed(socket) {
+    return (!socket || socket.readyState === WebSocket.CLOSED)
+  },
+  isSocketOpen(socket) {
+    return (socket && socket.readyState === WebSocket.OPEN)
   }
 };
 

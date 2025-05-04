@@ -5,22 +5,23 @@ from django.template.loader import render_to_string
 from apps.client.models import Clients
 from apps.game.models import Game
 from config import settings
+from utils.enums import EventType, RTables
+from utils.redis import RedisConnectionPool
 
 
 def get(req):
-    print("in index")
     client = Clients.get_client_by_request(req)
-    games_played = client.stats.games.all().order_by('-created_at')
     winrate = ghistory = rivals = None
+    games_played = client.stats.games.all().order_by('-created_at')
     ghistory = get_last_matches(client, games_played)
     friends_list = client.get_all_friends()
+    print("friends_list: ", friends_list)
     friends_pending = client.get_all_pending_request()
     rivals = get_rivals(client, games_played)
     ghistory = get_last_matches(client, games_played)
+    friends_online_status = get_friends_online_status(friends_list)
     rank_picture = settings.MEDIA_URL + "/rank_icon/" + client.get_rank(client.stats.mmr) + ".png"
-    print(f"rank_picture : {rank_picture}")
-    print("game history is:", ghistory)
-    print(f"rank_picture : {rank_picture}")
+    online_status = "Online"
     if client is not None:
         winrate = get_winrate(client, games_played)
     context = {
@@ -35,8 +36,9 @@ def get(req):
         "friends_list": friends_list,
         "friends_pending" : friends_pending,
         "rank_picture": rank_picture,
+        "online_status": online_status,
+        "friends_online_status": friends_online_status,
     }
-    print("Feeding into the context rivals =", rivals)
     html_content = render_to_string("apps/profile/profile.html", context)
     return JsonResponse({'html': html_content})
 
@@ -105,8 +107,18 @@ def get_rivals(client, games_played) -> dict:
             rivals[game.loser.client.id]["games_won"] += 1
         elif game.loser.client.id == client.id:
             rivals[game.winner.client.id]["games_lost"] += 1
-
-    print("rivals after adding the maps")
-    print(rivals)
     return rivals
-     
+
+
+#Work in progress, Initializing once the status of friends then updating the JS to update on new updates
+#is def doable.
+def get_friends_online_status(friends):
+    friend_status = {}
+    redis = RedisConnectionPool.get_sync_connection("Index_get")
+    for friend in friends:
+        id = friend['client'].id
+        username = friend['username']
+        online_status = redis.hget(RTables.HASH_CLIENT(id), str(EventType.NOTIFICATION.value)) is not None
+        friend_status[username] = "Online" if online_status else "Offline"
+    print("friend_status:", friend_status)
+    return friend_status
