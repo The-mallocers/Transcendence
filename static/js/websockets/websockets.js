@@ -57,6 +57,8 @@ export const WebSocketManager = {
     }
   },
   closeNotifSocket() {
+    console.log("Trying to close notif socket")
+    console.log(this.isSocketOpen(this.notifSocket))
     if (this.isSocketOpen(this.notifSocket)) {
       this.notifSocket.close();
       this.notifSocket = null;
@@ -64,11 +66,6 @@ export const WebSocketManager = {
     }
   },
   isSocketClosed(socket) {
-    console.log("socket =", socket);
-    if (socket) {
-      console.log("Socket is not null, is rdy state is :", socket.readyState);
-      console.log("as a reminder, CLOSED value is:", WebSocket.CLOSED);
-    }
     return (!socket || socket.readyState === WebSocket.CLOSED)
   },
   isSocketOpen(socket) {
