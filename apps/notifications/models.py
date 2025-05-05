@@ -12,11 +12,12 @@ class Friend(models.Model):
     # id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, null=False)
     email = models.EmailField(null=False, editable=True, blank=True)
-    friends = models.ManyToManyField(Clients, related_name='friend_requests_as_friend', blank=True)
-    pending_friends = models.ManyToManyField(Clients, related_name='friend_requests_as_pending', blank=True)
-    blocked_users = models.ManyToManyField(Clients, related_name='blocked_by', blank=True)
+    friends = models.ManyToManyField(Clients, related_name='friend_requests_as_friend', blank=True, db_table='notifications_user_friends')
+    pending_friends = models.ManyToManyField(Clients, related_name='friend_requests_as_pending', blank=True, db_table='notifications_user_pending_requests')
+    blocked_users = models.ManyToManyField(Clients, related_name='blocked_by', blank=True, db_table='notifications_user_blocks')
     
     class Meta:
+        db_table = 'notifications_friend_requests'
         # unique_together = ['friends', 'pending_friends']
         verbose_name_plural = 'Friend Requests'
 
