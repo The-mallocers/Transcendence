@@ -9,7 +9,7 @@ let client_id = null;
 const clientId = await getClientId();
 const notifSocket =  WebSocketManager.notifSocket; //Our notif socket is already loaded !
 
-const friends_online_status = JSON.parse(document.getElementById('friends-data')?.textContent);
+
 const searchParams = new URLSearchParams(window.location.search);
 const pathname = window.location.pathname;
 console.log(pathname);
@@ -21,6 +21,7 @@ if(!searchParams.has('username') && pathname == '/')
     const friends = await apiFriends("/api/friends/get_friends/");
     const pending_friends = await apiFriends("/api/friends/get_pending_friends/");
     const pending_duels = await apiFriends("/api/friends/get_pending_duels/");
+    const friends_online_status = JSON.parse(document.getElementById('friends-data')?.textContent);
     
     friends.forEach(friend => {
         const friends_group = document.querySelector('.friends_group');
@@ -246,6 +247,7 @@ notifSocket.onmessage = (event) => {
         const username =  message.data.content.username;
         const online = message.data.content.online;
         const status = document.getElementById("online-status");
+        if (status == null) {return ;} //Woopsie !
         const query_username = searchParams.get("username");
         const friend_div = document.getElementById(`${username}_status`);
         // console.log(`the username is ${username}`);

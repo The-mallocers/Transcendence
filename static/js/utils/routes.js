@@ -24,7 +24,6 @@ const routes = [
     // Ajoute ta route basique la bg !
     '/',
     '/auth/login',
-    '/pong/',
     '/admin/',
     '/auth/register',
     '/error/404/',
