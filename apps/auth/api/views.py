@@ -1,3 +1,4 @@
+from django.forms import ValidationError
 from django.http import HttpRequest
 from rest_framework import status
 from rest_framework.response import Response
@@ -5,6 +6,7 @@ from rest_framework.views import APIView
 
 from apps.auth.models import Password
 from apps.client.models import Clients
+from apps.profile.models import Profile
 from utils.enums import JWTType
 from utils.jwt.JWT import JWT
 from utils.serializers.auth import PasswordSerializer
@@ -53,10 +55,46 @@ class RegisterApiView(APIView):
                 print("\n\nException during save:", str(e))
                 logging.getLogger('MainThread').error(traceback.format_exc())
                 return Response({"error": str(e)},
-                                status=status.HTTP_500_INTERNAL_SERVER_ERROR)  # this is ia stuff, maybe shouldnt be 500 idk
+                                status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         else:
             print("Validation errors:", serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UpdateApiView(APIView):
+    def post(self, request, *args, **kwargs):
+        try:
+            data = request.data
+            #We get rid of the empty fields
+            for section in list(data.keys()):
+                if isinstance(data[section], dict):
+                    for key in list(data[section].keys()):
+                        if data[section][key] == "":
+                            del data[section][key]
+                    if not data[section]:
+                        del data[section]   
+
+            client = Clients.get_client_by_request(request)
+            
+            serializer = ClientSerializer(instance=client, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                # HANDLE EMAIL CASE
+                # IF A NEW EMAIL WAS GIVEN, IT MEANS WE ACTUALLY CREATED A NEW PROFILE.
+                if 'profile' in data and 'email' in data['profile']:
+                    old_email = client.profile.email
+                    new_email = data['profile']['email']
+                    client.profile = Profile.objects.filter(email=new_email).first()
+                    Profile.objects.filter(email=old_email).delete()
+                    client.save()
+                #else, we return ou profile that was updated naturally.
+                return Response({"message": "Infos updated succesfully"}, status=status.HTTP_200_OK)
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST) 
+        except ValidationError as e:
+            return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR) 
 
 
 class LoginApiView(APIView):
@@ -92,7 +130,7 @@ class LoginApiView(APIView):
                 JWT(client, JWTType.REFRESH).set_cookie(response)
             return response
 
-
+#TODO, add the fact that we disconnect the notif socket/Get rid of the client in redis
 class LogoutApiView(APIView):
     permission_classes = []
     authentication_classes = []
@@ -102,10 +140,15 @@ class LogoutApiView(APIView):
             response = Response({"message": "Successfully logged out."}, status=status.HTTP_200_OK)
             response.delete_cookie('access_token')
             response.delete_cookie('refresh_token')
+            try:
+                JWT.extract_token(request, JWTType.REFRESH).invalidate_token()
+            except Exception as e:
+                print("Couldnt invalidate the token, it was probably either deleted or modified")
+                print(f"error is {str(e)}")
             return response
         else:
             return Response({
-                "error": "You are not log"
+                "error": "You are not logged in"
             }, status=status.HTTP_401_UNAUTHORIZED)
 
 
@@ -160,7 +203,6 @@ def get_qrcode(user):
 
 
 def formulate_json_response(state, status, message, redirect):
-    print("what the heellll")
     return (JsonResponse({
         "success": state,
         "message": message,
@@ -171,7 +213,7 @@ def formulate_json_response(state, status, message, redirect):
 def post_twofa_code(req):
     email = req.COOKIES.get('email')
     client = Clients.get_client_by_email(email)
-    response = formulate_json_response(False, 400, "Error getting the user", "/auth/login")
+    response = formulate_json_response(False,    400, "Error getting the user", "/auth/login")
     if client is None:
         return response
     if req.method == "POST":
@@ -224,7 +266,8 @@ class UploadPictureApiView(APIView):
             if serializer.is_valid():
                 profile.profile_picture = serializer.validated_data['profile_picture']
                 profile.save()
-                return Response({"message": "Profile picture updated successfully"}, status=status.HTTP_200_OK)
+                return Response({"message": "Profile picture updated successfully",
+                                 "picture": profile.profile_picture.url}, status=status.HTTP_200_OK)
             else:
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:

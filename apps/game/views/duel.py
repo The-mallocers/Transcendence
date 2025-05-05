@@ -8,6 +8,7 @@ from apps.client.models import Clients
 def get(request):
     client = Clients.get_client_by_request(request)
     # friends_list = client.get_all_friends()
+    print("inside pong duel")
     html_content = render_to_string("apps/pong/duel.html",
                                     {"csrf_token": get_token(request),
                                      "client" : client})

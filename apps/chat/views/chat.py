@@ -17,23 +17,6 @@ def get(req):
     me = None
     if client:
         me = client.id
-    #     conversation = [
-    #     {
-    #         "sender": me,
-    #         "timestamp" : 345678567,
-    #         "content" : "yo la team"
-    #     },
-    #     {
-    #         "sender": "UUIDRDyrfhtyi!",
-    #         "timestamp" : 345678567,
-    #         "content" : "hellowwww"
-    #     },
-    #     {
-    #         "sender": "UUIDRDyrfhtyi!",
-    #         "timestamp" : 345678567,
-    #         "content" : "go faire une game"
-    #     }
-    # ]
     conversation = []
 
     html_content = render_to_string("apps/chat/chat.html", {

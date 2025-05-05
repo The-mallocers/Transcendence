@@ -21,6 +21,10 @@ class ProfileSerializer(serializers.ModelSerializer):
         RegexValidator(
             regex=r'^[a-zA-ZáàäâéèêëíìîïóòôöúùûüçñÁÀÄÂÉÈÊËÍÌÎÏÓÒÔÖÚÙÛÜÇÑ0-9_-]+$',
             message="Username can only contain letters, numbers, and underscores."
+        ),
+        UniqueValidator(
+            queryset=Profile.objects.all(),
+            message="This username is already taken."
         )
     ], required=True)
 

@@ -14,19 +14,18 @@
         border: 1px white solid;
     }
 
-    .nickname {
-        position: absolute;
+    .username {
         font-size: 6rem;
         color: #1d212b;
     }
 
-    #lnick {
+    #lusername {
         top: 52%;
         left: 33%;
         transform: translate(-50%, -50%);
     }
 
-    #rnick {
+    #rusername {
         top: 52%;
         right: 33%;
         transform: translate(50%, -50%);
@@ -34,8 +33,9 @@
 
     .score {
         position: absolute;
-        font-size: 6rem;
+        font-size: 20rem;
         color: #6d7892;
+        text-shadow: 2px 2px #000; /* Optional for extra retro contrast */
     }
 
     #scoreLeft {
@@ -49,16 +49,26 @@
         right: 10%;
         transform: translate(50%, -50%);
     }
+    .username-row {
+        display: flex;
+        justify-content: center; /* Center both usernames */
+        gap: 4rem; /* Controls how close they are; reduce this for closer spacing */
+        width: 1000px;
+        margin-bottom: 0.5rem;
+        margin-top: 0.5rem;       /* Add this */
+    }
+
 </style>
 
-<div class="arenaPage">
-
-
+<div class="arenaPage" style="background-image: url('{{ arena_picture }}');">
+    
+    <div class="username-row">
+        <div id="lusername" class="username"></div>
+        <div id="rusername" class="username"></div>
+    </div>
     <div id="scoreLeft" class="score">0</div>
     <div id="scoreRight" class="score">0</div>
 
-    <div id="lusername" class="username">ez2c</div>
-    <div id="rusername" class="username">tfreydie</div>
     <canvas id="pongCanvas" width="1000" height="500">
     </canvas>
 </div>

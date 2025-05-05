@@ -1,5 +1,6 @@
 import { navigateTo } from '../../spa/spa.js';
-
+import { WebSocketManager } from '../../websockets/websockets.js';
+import { getClientId } from '../../utils/utils.js';
 
 const AUTH_CONFIG = {
     clientId: 'u-s4t2ud-fba0f059cba0019f374c8bf89cb3a81ead9ef0cb218380d9344c21d99d1f9b3e',
@@ -119,21 +120,11 @@ if (login42Button) {
     });
 }
 
-// window.addEventListener('message', (event) => {
-//     console.log('Message received:', event.data);
-//     console.log('Sender origin:', event.origin);
-//     console.log('Expected origin:', window.location.origin);
-
-//     // Check the origin to ensure the message is from a trusted source
-//     if (event.origin !== window.location.origin) {
-//         console.error('Origin mismatch:', event.origin);
-//         return;
-//     }
-
-//     if (event.data === 'authenticated') {
-//         console.log('Authentication complete!');
-//         navigateTo('/'); // Navigate after authentication
-//     }
-// });
-
-
+//Little trick to deal with annoying edge case of logout per invalid jwt token not closing ws
+async function socketCheck() {
+    if (await getClientId() == null && WebSocketManager.isSocketOpen(WebSocketManager.notifSocket)) {
+        console.log("Allo");
+        WebSocketManager.closeNotifSocket();
+    }
+}
+await socketCheck();

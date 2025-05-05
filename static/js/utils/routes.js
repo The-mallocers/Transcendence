@@ -24,7 +24,6 @@ const routes = [
     // Ajoute ta route basique la bg !
     '/',
     '/auth/login',
-    '/pong/',
     '/admin/',
     '/auth/register',
     '/error/404/',
@@ -36,7 +35,8 @@ const routes = [
     '/auth/2fa',
     '/admin/monitoring/',
     '/chat/friendrequest/',
-    '/pong/disconnect/'
+    '/pong/disconnect/',
+    '/pong/duel/'
 ].map(route => {
     if (typeof route === 'object') return route;
 

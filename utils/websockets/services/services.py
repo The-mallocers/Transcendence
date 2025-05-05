@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 from typing import Dict, Any
 
 from channels.layers import get_channel_layer
+from redis import Redis
 
 from apps.client.models import Clients
 from utils.enums import RequestAction
@@ -22,7 +23,7 @@ class BaseServices(ABC):
         self._logger = logging.getLogger(self.__class__.__name__)
         self._initialized: bool = False
 
-        self.redis = None
+        self.redis: Redis = None
         self.channel_layer = get_channel_layer()
         self.service_group = None
 
@@ -33,6 +34,7 @@ class BaseServices(ABC):
 
     @abstractmethod
     async def disconnect(self, client):
+        print("In disconnect of the abstract method ?!")
         pass
 
     async def handle_disconnect(self, client):
@@ -48,11 +50,13 @@ class BaseServices(ABC):
             handler_method = None
             if not self._initialized:
                 self._initialized = await self.init(*args)
+            # print(data)
             request_action = RequestAction(data['data']['action'])
             if request_action:
                 handler_method = getattr(self, f"_handle_{request_action.value}", None)
             if not handler_method or not callable(handler_method):
-                raise ServiceError(f"Handler not found for this action : {request_action.value}")
+                
+                raise ServiceError(f"CALLER CLASS: {self.__class__.__name__}, Handler not found for this action : {request_action.value}")
             else:
                 return await handler_method(data, *args)
 

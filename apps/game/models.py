@@ -10,24 +10,12 @@ from redis.commands.json.path import Path
 from apps.client.models import Clients
 from apps.player.models import Player
 from apps.tournaments.models import Tournaments
-from utils.enums import EventType, ResponseAction, Ranks, RTables, PlayerSide
+from utils.enums import EventType, ResponseAction, RTables, PlayerSide
 from utils.enums import GameStatus
 from utils.redis import RedisConnectionPool
 from utils.serializers.player import PlayersRedisSerializer
 from utils.util import create_game_id
 from utils.websockets.channel_send import send_group
-
-
-class Rank(models.Model):
-    class Meta:
-        db_table = 'pong_ranks'
-
-    name = CharField(primary_key=True, max_length=15, editable=False, null=False,
-                     choices=[(ranks.name, ranks.value) for ranks in Ranks])
-    icon = ImageField(upload_to='rank_icon/', null=False)
-    mmr_min = IntegerField(null=False)
-    mmr_max = IntegerField(null=False)
-
 
 class Game(models.Model):
     class Meta:
@@ -67,6 +55,9 @@ class Game(models.Model):
         self.redis.json().set(self.game_key, Path.root_path(), serializer.data)
 
     def init_players(self):
+        print(f"My player r is {self.pR}")
+        print(f"My player l is {self.pL}")
+
         # On ajoute a la db de redis , a l'id de la game, les infos des deux joueurs
         players_serializer = PlayersRedisSerializer(instance={PlayerSide.LEFT: self.pL, PlayerSide.RIGHT: self.pR})
         existing_data = self.redis.json().get(self.game_key)
@@ -75,20 +66,25 @@ class Game(models.Model):
 
         # getting channel layer
         channel_layer = get_channel_layer()
-
+        print("We reached step 0")
         # Add two player in group of the new game
         channel_name_pL = self.redis.hget(name=RTables.HASH_CLIENT(self.pL.client_id), key=str(EventType.GAME.value))
+        print("We reached step 0,1")
         async_to_sync(channel_layer.group_add)(RTables.GROUP_GAME(self.code), channel_name_pL)
+        print("We reached step 0,2")
         channel_name_pR = self.redis.hget(name=RTables.HASH_CLIENT(self.pR.client_id), key=str(EventType.GAME.value))
-        async_to_sync(channel_layer.group_add)(RTables.GROUP_GAME(self.code), channel_name_pR)
-
+        print("We reached step 0,3")
+        print(f"Here are all of the variables passed into group add : {self.code}, {channel_name_pR}")
+        async_to_sync(channel_layer.group_add)(RTables.GROUP_GAME(self.code), channel_name_pR) #Bonjour je fais tout crash
+        print("We reached step 1")
         self.redis.hset(name=RTables.HASH_MATCHES, key=str(self.pL.client_id), value=str(self.code))
         self.redis.hset(name=RTables.HASH_MATCHES, key=str(self.pR.client_id), value=str(self.code))
-
+        print("We reached step 2")
         self.pL.leave_queue(self.code, self.is_duel)
         self.pR.leave_queue(self.code, self.is_duel)
 
         send_group(RTables.GROUP_GAME(self.code), EventType.GAME, ResponseAction.JOIN_GAME)
+        print("We reached the end of init_players !")
 
     def error_game(self):
         self.rset_status(GameStatus.ERROR)

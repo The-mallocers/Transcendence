@@ -17,8 +17,7 @@ from utils.pong.objects.paddle import Paddle
 from utils.pong.objects.score import Score
 from utils.serializers.game import PaddleSerializer, BallSerializer
 from utils.websockets.channel_send import send_group
-
-MAX_BOUNCE_ANGLE = math.radians(75)
+from django.db.models import F
 
 class PongLogic:
     def __init__(self, game: Game, redis):
@@ -201,10 +200,10 @@ class PongLogic:
                        self.score_pR.get_score())
 
     def set_result(self, disconnect=False):
-        winner_score = 0
-        winner_client = None
-        loser_score = 0
-        loser_client = None
+        winner = Player()
+        loser = Player()
+        winner.my_init()
+        loser.my_init()
 
         if disconnect is True:
             if self.redis.hget(name=RTables.HASH_CLIENT(self.game.pL.id), key=str(EventType.GAME.value)) is None:
@@ -215,25 +214,55 @@ class PongLogic:
                 self.score_pL.set_score(self.game.points_to_win)
 
         if self.score_pL.get_score() > self.score_pR.get_score():
-            winner_client = Clients.get_client_by_id(self.game.pL.client_id)
-            winner_score = self.score_pL.get_score()
-            loser_client = Clients.get_client_by_id(self.game.pR.client_id)
-            loser_score = self.score_pR.get_score()
+            winner.client = Clients.get_client_by_id(self.game.pL.client_id)
+            winner.score = self.score_pL.get_score()
+            loser.client = Clients.get_client_by_id(self.game.pR.client_id)
+            loser.score = self.score_pR.get_score()
         elif self.score_pL.get_score() < self.score_pR.get_score():
-            winner_client = Clients.get_client_by_id(self.game.pR.client_id)
-            winner_score = self.score_pR.get_score()
-            loser_client = Clients.get_client_by_id(self.game.pL.client_id)
-            loser_score = self.score_pL.get_score()
+            winner.client = Clients.get_client_by_id(self.game.pR.client_id)
+            winner.score = self.score_pR.get_score()
+            loser.client = Clients.get_client_by_id(self.game.pL.client_id)
+            loser.score = self.score_pL.get_score()
 
-        winner_player = Player.objects.create(client=winner_client, score=winner_score)
-        loser_player = Player.objects.create(client=loser_client, score=loser_score)
-        finished_game = Game.objects.create(id=self.game.code, winner=winner_player, loser=loser_player, points_to_win=self.game.points_to_win,
-                                            is_duel=self.game.rget_is_duel())
-        self.save_player_info(winner_player, finished_game)
-        self.save_player_info(loser_player, finished_game)
+        loser.save()
+        winner.save()
+        finished_game = Game.objects.create(id=self.game.code, winner=winner, loser=loser,
+                                            points_to_win=self.game.points_to_win, is_duel=self.game.rget_is_duel())
+        
+        #mmr gain would happen here.
+        self.compute_mmr_change(winner, loser)
+        winner.client.stats.wins = F('wins') + 1
+        loser.client.stats.losses = F('losses') + 1
+        self.save_player_info(loser, finished_game)
+        self.save_player_info(winner, finished_game)
 
     def save_player_info(self, player, finished_game):
         player.game = finished_game
         player.save()
         player.client.stats.games.add(finished_game)
+        player.client.stats.total_game = F('total_game') + 1
         player.client.stats.save()
+        player.save()
+    
+    def compute_mmr_change(self, winner, loser):
+        K = 50
+        winner_mmr = winner.client.stats.mmr
+        loser_mmr = loser.client.stats.mmr
+        print(f"winner and loser mmr : {winner} - {loser_mmr}")
+
+        expected_win = 1 / (1 + 10 ** ((loser_mmr - winner_mmr) / 120))
+        expected_loss = 1 / (1 + 10 ** ((winner_mmr - loser_mmr) / 120))
+
+        mmr_gain = round(K * (1 - expected_win))
+        mmr_loss = round(K * (0 - expected_loss))
+        if (loser_mmr - mmr_loss < 0):
+            mmr_loss = loser_mmr
+
+        print(f"mmr gain and loss for this match : {mmr_gain} - {mmr_loss}")
+        
+        winner.mmr_change = mmr_gain
+        loser.mmr_change = mmr_loss
+        winner.client.stats.mmr = F('mmr') + mmr_gain
+        loser.client.stats.mmr = F('mmr') + mmr_loss
+
+

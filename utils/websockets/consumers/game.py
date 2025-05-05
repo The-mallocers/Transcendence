@@ -1,5 +1,6 @@
 from json import JSONDecodeError, loads
 
+from apps.client.models import Clients
 from utils.enums import EventType, ResponseError, RTables
 from utils.websockets.channel_send import asend_group_error
 from utils.websockets.consumers.consumer import WsConsumer
@@ -16,7 +17,11 @@ class GameConsumer(WsConsumer):
     async def receive(self, text_data=None, bytes_data=None):
         try:
             data = loads(text_data)
-            if self.event_type is EventType.MATCHMAKING and data['event'] == EventType.GAME.value:
+            # print("Salut la Team MAtchaming casse les couilles par ici")
+            # print(f"data : {data}")
+            # print(f" {data['event']} : Devrait etre egal a {EventType.GAME.value}")
+            # print(f"{self.event_type}: devrait etre {EventType.MATCHMAKING}")
+            if self.event_type is EventType.MATCHMAKING and data['event'] == EventType.GAME.value: #EventType.GAME IF you want duel to work, but it shouldnt be that
                 self.event_type = EventType(data['event'])
                 self.service = GameService()
 
@@ -30,3 +35,4 @@ class GameConsumer(WsConsumer):
         except JSONDecodeError as e:
             self._logger.error(f'Json error: {e}')
             await asend_group_error(RTables.GROUP_CLIENT(self.client.id), ResponseError.JSON_ERROR)
+
