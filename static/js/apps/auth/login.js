@@ -53,8 +53,10 @@ function login(e) {
 let element = document.querySelector("#login-btn");
 
 element.addEventListener("click", (e)=>{login(e)} )
+let popRef = null
+let meow = document.querySelector("#cancel")
 
-//Add logic to redirect to 2fa screen if needed
+
 const login42Button = document.getElementById('auth42');
 if (login42Button) {
     login42Button.addEventListener('click', () => {
@@ -65,7 +67,56 @@ if (login42Button) {
             scope: 'public'
         });
 
-        window.location.href = `${AUTH_CONFIG.authorizationEndpoint}?${params}`;
+        window.location.href = `${AUTH_CONFIG.authorizationEndpoint}?${params}`
+
+
+        /// leaving this in comments in case i think i should go back later (i hope i wont tho)
+        // // Open the login page in a new tab
+        // const authWindow = window.open(
+        //     `${AUTH_CONFIG.authorizationEndpoint}?${params}`,
+        //     '42Auth',
+        //     'width=600,height=700'
+        // );
+
+        // const popRef = window.open(
+        //     `${AUTH_CONFIG.authorizationEndpoint}?${params}`,
+        // );
+        // );`;
+
+
+        // let meowInterval = setInterval(async ()=>{
+        //     const response = await fetch("/api/auth/getId/", {
+        //         method: "GET",
+        //         credentials: "include",
+        //     });
+
+        //     if (response.status == 200){
+        //         clearInterval(meowInterval)
+        //         navigateTo("/")
+        //     }
+                
+        //     console.log()
+        //     // if (document.cookie !== previousCookies) {
+        //     //     // console.log("Cookies changed!");
+        //     //     // previousCookies = document.cookie;
+        //     //     // // Do something with the new cookies
+
+  
+        //     // }
+
+        //     // console.log(document.cookie)
+        // },3000)
+
+        // setTimeout(() => {
+        //     popRef.close()
+        //     clearInterval(meowInterval)
+        //     // throw timeout error toast to notify user they should close the tab and 
+        // }, 10000);
+
+        // setTimeout(()=>{
+        //     navigateTo("/")
+        // }, 2000)
+
     });
 }
 
