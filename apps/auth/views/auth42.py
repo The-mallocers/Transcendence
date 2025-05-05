@@ -97,21 +97,22 @@ def auth42(request):
             raise IrreversibleError(f'Failed to create admin in migration file: '
                                     f'{format_validation_errors(serializer.errors)}')
 
-    # response = formulate_json_response(True, 302, "Login Successful", "/")
 
-    csrf_token = get_token(request)
+    # csrf_token = get_token(request)
 
 
-    html_content = render_to_string("apps/auth/42fallback.html", {
-        "csrf_token": csrf_token,
-    })
+    # html_content = render_to_string("apps/auth/42fallback.html", {
+    #     "csrf_token": csrf_token,
+    # })
 
-    response = JsonResponse({
-        'html': html_content,
-    })
+    # response = JsonResponse({
+    #     'html': html_content,
+    # })
 
     # response = formulate_json_response(True, 200, "Login Successful", "/")
+    response = formulate_json_response(True, 302, "Login Successful", "/")
 
+    response.set_cookie("oauthToken", access_token)
     JWT(client, JWTType.ACCESS).set_cookie(response)
     JWT(client, JWTType.REFRESH).set_cookie(response)
 
