@@ -140,6 +140,7 @@ class LogoutApiView(APIView):
             response = Response({"message": "Successfully logged out."}, status=status.HTTP_200_OK)
             response.delete_cookie('access_token')
             response.delete_cookie('refresh_token')
+            response.delete_cookie('oauthToken')
             try:
                 JWT.extract_token(request, JWTType.REFRESH).invalidate_token()
             except Exception as e:
