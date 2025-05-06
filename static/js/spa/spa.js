@@ -72,7 +72,7 @@ class Router {
         let splitedPath = path.split("/")
         console.log(splitedPath);
         if (splitedPath.includes("pong")) {
-            if (splitedPath.includes("duel") || splitedPath.includes("arena")) {
+            if (splitedPath.includes("duel") || splitedPath.includes("arena") || splitedPath.includes("matchmaking")) {
                 WebSocketManager.closeChatSocket();
             }
             else {
