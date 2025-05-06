@@ -63,7 +63,7 @@ def get(req):
         "rank_picture": rank_picture,
         "online_status": "Online" if online_status else "Offline", 
         "show_friend_request": show_friend_request,
-        "friends_online_status": {}
+        "friends_online_status": {}, #no friends
     }
     html_content = render_to_string("apps/profile/profile.html", context)
     return JsonResponse({'html': html_content})
