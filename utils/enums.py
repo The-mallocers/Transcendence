@@ -81,6 +81,7 @@ class RequestAction(str, Enum):
     GET_OPPONENT_NAME: str = "get_opponent_name"
     
     PING: str = 'ping'
+    ONLINE_STATUS: str = "check_online_status"
 
 # All the responses the server sends to the client
 class ResponseAction(str, Enum):
@@ -134,6 +135,7 @@ class ResponseAction(str, Enum):
     ACK_REFUSE_FRIEND_REQUEST: str = "acknowledge_refuse_friend_request"
     ACK_DELETE_FRIEND: str = "ack_delete_friend"
     ACK_DELETE_FRIEND_HOST: str = "ack_delete_friend_host"
+    ACK_ONLINE_STATUS: str = "ack_online_status"
     FRIEND_BLOCKED: str = "friend_blocked"
     FRIEND_UNBLOCKED: str ="friend_unblocked"
     NOTIF_TEST = "notification_test"
@@ -238,21 +240,22 @@ class PlayerSide(str, Enum):
     LEFT: str = 'player_left'
     RIGHT: str = 'player_right'
 
-
 class PaddleMove(str, Enum):
     UP: str = 'up'
     DOWN: str = 'down'
     IDLE: str = 'idle'
 
-
 class Ranks(str, Enum):
     BRONZE: str = 'bronze'
     SILVER: str = 'silver'
     GOLD: str = 'gold'
-    PLATINUM: str = 'platinum'
     DIAMOND: str = 'diamond'
-    CHAMPION: str = 'champion'
 
+class RanksThreshold(int, Enum):
+    BRONZE = 0
+    SILVER = 100
+    GOLD = 200
+    DIAMOND = 300
 
 class JWTType(str, Enum):
     ACCESS: str = 'access'

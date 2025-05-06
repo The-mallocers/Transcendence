@@ -2,31 +2,7 @@ import {WebSocketManager} from "../websockets/websockets.js"
 import {isGameOver} from "../apps/game/VarGame.js"
 import * as html from "../utils/html_forms.js"
 import {routes} from "../utils/routes.js";
-// import {getClientId} from "../utils/profile.js";
-
-export let notifSocket = null;
-let client_id = null;
-
-
-async function getClientId() {
-    try {
-        const response = await fetch("/api/auth/getId/", {
-            method: "GET",
-            credentials: "include",
-        });
-        const data = await response.json();
-
-        if (data.client_id) {
-            client_id = data.client_id;
-            return client_id;
-        } else {
-            throw new Error(data.error);
-        }
-    } catch (error) {
-        console.error("Erreur lors de la récupération de l'ID :", error);
-        return null;
-    }
-}
+import { getClientId } from "../utils/utils.js";
 
 class Router {
     constructor(routes) {
@@ -41,17 +17,14 @@ class Router {
     }
 
     async handleLocation() {
-
-        // clientId = await getClientId();
-        // notifSocket = await WebSocketManager.initNotifSocket(clientId);
-        const path = window.location.pathname;
-
-        if (!WebSocketManager.notifSocket || WebSocketManager.notifSocket.readyState === WebSocket.CLOSED) {
-            console.log("creating a new socket");
-            const client_id = await getClientId();
-            notifSocket = await WebSocketManager.initNotifSocket(client_id);
+        //Now making the notif ws in navigation
+        if (WebSocketManager.isSocketClosed(WebSocketManager.notifSocket)) {
+            const clientId = await getClientId();
+            if (clientId) {
+                await WebSocketManager.initNotifSocket(clientId);
+            }
         }
-
+        const path = window.location.pathname;
         // console.log(window.location.search);
         // console.log("looking for the path: ", path)
         const route = this.routes.find(r => r.path === path);

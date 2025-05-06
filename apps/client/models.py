@@ -9,7 +9,7 @@ from django.http import HttpRequest
 from apps.auth.models import Password, TwoFA
 from apps.player.models import Player
 from apps.profile.models import Profile
-from utils.enums import Ranks, RTables
+from utils.enums import RTables, Ranks, RanksThreshold
 
 
 class Stats(models.Model):
@@ -21,8 +21,6 @@ class Stats(models.Model):
     wins = models.IntegerField(default=0, blank=True)
     losses = models.IntegerField(default=0, blank=True)
     mmr = models.IntegerField(default=50, blank=True)
-    # rank = ForeignKey('pong.Rank', on_delete=models.SET_NULL, null=True, blank=True, default=Ranks.BRONZE.value)
-    rank = models.CharField(default=Ranks.BRONZE.value, max_length=100, blank=True)
     games = models.ManyToManyField('game.Game', blank=True)
 
 
@@ -160,6 +158,14 @@ class Clients(models.Model):
             return Clients.objects.select_related('player').get(id=client_id)
         except Clients.DoesNotExist:
             return None
+    @staticmethod
+    def get_rank(score: int) -> str:
+        i = len(RanksThreshold)
+        for rank in reversed(RanksThreshold):
+            i -= 1
+            if score >= rank.value:
+                return list(Ranks)[i]
+        return Ranks.BRONZE
 
     @sync_to_async
     def aget_profile_username(self):

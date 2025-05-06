@@ -45,6 +45,7 @@ class MatchmakingService(BaseServices):
             return await asend_group_error(self.service_group, ResponseError.NOT_IN_QUEUE)
 
     async def disconnect(self, client):
+        print("in disconnect of matchmaking")
         queues = await Clients.acheck_in_queue(client, self.redis)
         if queues:
             if queues is RTables.HASH_G_QUEUE:

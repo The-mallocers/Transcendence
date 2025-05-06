@@ -67,14 +67,17 @@ class JWT:
 
     @staticmethod
     def validate_token(token_key: str, token_type: JWTType):
+        token = None
         try:
             payload = JWT._decode_token(token_key)
             token = JWT._get_token(payload)
             if InvalidatedToken.objects.filter(jti=token.JTI).exists():
                 raise jwt.InvalidKeyError('Token has been invalidated')
-            if token.TYPE != token_type:
+            if token and token.TYPE != token_type:
                 raise jwt.InvalidTokenError(f'Validating token with type {token.TYPE} failed due to invalide token type.')
             return token
+        except jwt.DecodeError as e:
+            raise jwt.InvalidTokenError(f'Error decoding token, it is either invalid or expired. {str(e)}') 
         except jwt.ExpiredSignatureError as e:
             raise jwt.ExpiredSignatureError(f'Validating token with type {token_type.value} failed due to expired signature. {str(e)}')
         except (jwt.InvalidTokenError, jwt.DecodeError) as e:

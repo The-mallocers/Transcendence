@@ -3,11 +3,11 @@ import {navigateTo} from "../../spa/spa.js";
 import { toast_friend } from "./toast.js";
 import { toast_duel } from "./toast.js";
 import { toast_message } from "./toast.js";
-import { notifSocket } from "../../spa/spa.js";
+import { getClientId } from "../../utils/utils.js";
 
 let client_id = null;
-// const clientId = await getClientId();
-// const notifSocket =  await WebSocketManager.initNotifSocket(clientId);
+const clientId = await getClientId();
+const notifSocket =  WebSocketManager.notifSocket; 
 
 const searchParams = new URLSearchParams(window.location.search);
 const pathname = window.location.pathname;
@@ -20,15 +20,19 @@ if(!searchParams.has('username') && pathname == '/')
     const friends = await apiFriends("/api/friends/get_friends/");
     const pending_friends = await apiFriends("/api/friends/get_pending_friends/");
     const pending_duels = await apiFriends("/api/friends/get_pending_duels/");
+    const friends_online_status = JSON.parse(document.getElementById('friends-data')?.textContent);
     
     friends.forEach(friend => {
         const friends_group = document.querySelector('.friends_group');
         const parser = new DOMParser();
+        const status = friends_online_status[friend.username];
+        console.log("status:", status);
         const html_friend = 
         `<li class="list-group-item d-flex justify-content-between align-items-center">
             <div>${friend.username}</div>
             <div class="d-flex align-items-center">
                 <button type="button" class="type-intra-green delete_friend me-4" >delete</button>
+                <div id=${friend.username}_status >${status}</div>
             </div>
         </li>`
         const doc = parser.parseFromString(html_friend, "text/html");
@@ -240,6 +244,10 @@ notifSocket.onmessage = (event) => {
         navigateTo("/")
         toast_message("DUEL don't exist");
     }
+    else if(message.data.action == "DUEL_REFUSED"){
+        navigateTo("/pong/gamemodes/");
+        toast_message(`${message.data.content.username} refuses the duel`);
+    }
     else if(message.data.action == "USER_OFFLINE"){
         const toast = document.querySelector(".toast");
         if(toast)
@@ -248,27 +256,61 @@ notifSocket.onmessage = (event) => {
         navigateTo('/pong/gamemodes/')
         toast_message(`Player you want to duel is offline`);
     }
-}
-
-async function getClientId() {
-    try {
-        const response = await fetch("/api/auth/getId/", {
-            method: "GET",
-            credentials: "include",
-        });
-        const data = await response.json();
-
-        if (data.client_id) {
-            client_id = data.client_id;
-            return client_id;
-        } else {
-            throw new Error(data.error);
+    else if(message.data.action == "ACK_ONLINE_STATUS") {
+        //TODO, Loop over the friend list and update the status of a friend if the username is a friend.
+        const username =  message.data.content.username;
+        const online = message.data.content.online;
+        const status = document.getElementById("online-status");
+        if (status == null) {return ;} //Woopsie !
+        const query_username = searchParams.get("username");
+        const friend_div = document.getElementById(`${username}_status`);
+        // console.log(`the username is ${username}`);
+        // console.log(`the combo is ${username}_status`);
+        // console.log("Hello I got a message, friend div is", friend_div);
+        if (friend_div) {
+            if (online == true) {
+                friend_div.innerHTML = "Online";
+            }
+            else {
+                friend_div.innerHTML = "Offline";
+            }
+            return ;
         }
-    } catch (error) {
-        console.error("Erreur lors de la récupération de l'ID :", error);
-        return null;
+        if (pathname == '/') {
+            status.innerHTML = "Online";
+            return ;
+        }
+        if (username != query_username) {return;} //in theory useless but im afraid to delete it
+        if (online == true) {
+            status.innerHTML = "Online";
+        }
+        else {
+            status.innerHTML = "Offline";
+        }
     }
 }
+
+//This file is now in utils.js ! 
+
+// async function getClientId() {
+//     try {
+//         const response = await fetch("/api/auth/getId/", {
+//             method: "GET",
+//             credentials: "include",
+//         });
+//         const data = await response.json();
+
+//         if (data.client_id) {
+//             client_id = data.client_id;
+//             return client_id;
+//         } else {
+//             throw new Error(data.error);
+//         }
+//     } catch (error) {
+//         console.error("Erreur lors de la récupération de l'ID :", error);
+//         return null;
+//     }
+// }
 
 // Define the functions in the global scope (window)
 window.handleAskFriend = function(username) {
@@ -378,13 +420,12 @@ export async function apiFriends(endpoint) {
             throw new Error(data.error);
         }
     } catch (error) {
-        console.error("Wesh je touche pas a ca mais on a pas de route api getAllFriends Chef")
+        // console.error("Wesh je touche pas a ca mais on a pas de route api getAllFriends Chef")
         console.error("Erreur lors de la récupération de l'ID :", error);
         return null;
     }
 }
 
-// export {notifSocket};
 export {create_message_notif}
-export {getClientId}
+// export {getClientId}
 export {create_message_notif_block}

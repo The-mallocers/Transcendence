@@ -3,19 +3,16 @@
 <div class="informationsContainer">
     <img class="background" src="{% static 'assets/imgs/fire_coalition.jpg' %}">
 
+    
     <h3>{{ client.profile.username }}</h3>
-
     <div class="avatar">
-
-        <!-- <img  src="{% static 'assets/imgs/' %}{{ client.profile.profile_picture }}"> -->
         <img src="{{ client.profile.profile_picture.url }}">
-        <!-- <img src="{% static 'assets/imgs/' %}{{ client.profile.profile_picture }}"> -->
     </div>
     <div class="container infos">
         <div class="row">
             <div class="col-md-4 winrate box">
                 <div class="p-3 text-center minibox">
-                    <h2>winrate</h2>
+                    <h2>Winrate</h2>
                     <div class="progressBarContainer">
                         <!-- <div class="progressBar">
                             <div class="filler"></div>
@@ -31,13 +28,15 @@
             </div>
             <div class="col-md-4 currentActivity box">
                 <div class="p-3 text-center minibox">
-                    <h2>Unavailable</h2>
+                    <h2 id="online-status">{{ online_status }}</h2>
                 </div>
             </div>
             <div class="col-md-4 mmr box">
                 <div class="p-3 text-center minibox">
-                    <h2 class="p-3 text-center">Rank</h2>
-                    <img class="trophee" src="{% static "assets/imgs/bronze.png" %}">
+                    <!-- <h2 class="p-3 text-center">MMR : {{client.stats.mmr}} </h2> -->
+                    <h2 class="p-3 text-center">MMR : {{client.stats.mmr}}</h2>
+                    <img class="trophee" src="{{ rank_picture }}">
+                    <!-- <img class="trophee" src="{% static "assets/imgs/bronze.png" %}"> -->
                 </div>
             </div>
         </div>
@@ -70,7 +69,7 @@
                 <div class="lastGamesContainer">
                     {% for game in gamesHistory %}
                         <div class="lastGames container d-flex flex-row align-items-center justify-content-between">
-                            <span class="names d-flex flex-row justify-content-center">
+                            <span class="names d-flex flex-row justify-content-enter">
                                 <div class="nickname {% if game.won %}win{% else %} loss {% endif %}">{{ game.opponent }}</div>
                                 <div class="time">A day ago</div>
                             </span>
@@ -81,6 +80,7 @@
                             </span>
                         </div>
                     {% endfor %}
+                    <!-- <div data-route="/match-history">View full match history</div> -->
                 </div>
             </div>
         </div>
@@ -109,6 +109,8 @@
         </div>
     </div>
 </div>
+<!-- <div id="friends" data-friends={{ friends_online_status|json_script:"friends-data" }} style="display: none;"></div> -->
+{{ friends_online_status|json_script:"friends-data" }}
 
 <script type="module" src="{% static '/js/apps/profile/profile.js' %}" defer></script>
 {% comment %} <script type="module" src="{% static '/js/apps/profile/profile.js' %}?v={% now 'U' %}" defer></script> {% endcomment %}

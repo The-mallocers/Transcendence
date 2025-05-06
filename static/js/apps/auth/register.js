@@ -1,5 +1,6 @@
 import {navigateTo} from '../../spa/spa.js';
-
+import { WebSocketManager } from '../../websockets/websockets.js';
+import { getClientId } from '../../utils/utils.js';
 
 function register(event) {
     console.log("I am register.js")
@@ -123,3 +124,13 @@ function clearAllErrorMessages() {
     const errorMessages = document.querySelectorAll('.error-message');
     errorMessages.forEach(msg => msg.remove());
 }
+
+
+//Little trick to deal with annoying edge case of logout per invalid jwt token not closing ws
+async function socketCheck() {
+    if (await getClientId() == null && WebSocketManager.isSocketOpen(WebSocketManager.notifSocket)) {
+        console.log("Allo");
+        WebSocketManager.closeNotifSocket();
+    }
+}
+await socketCheck();
