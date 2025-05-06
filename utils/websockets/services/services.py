@@ -38,19 +38,13 @@ class BaseServices(ABC):
         pass
 
     async def handle_disconnect(self, client):
-        if client is None:
-            return
-        if self.redis is None:
-            return
-        else:
-            return await self.disconnect(client)
+        return await self.disconnect(client)
 
     async def process_action(self, data: Dict[str, Any], *args):
         try:
             handler_method = None
             if not self._initialized:
                 self._initialized = await self.init(*args)
-            # print(data)
             request_action = RequestAction(data['data']['action'])
             if request_action:
                 handler_method = getattr(self, f"_handle_{request_action.value}", None)

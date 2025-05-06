@@ -7,8 +7,7 @@ import { getClientId } from "../../utils/utils.js";
 
 let client_id = null;
 const clientId = await getClientId();
-const notifSocket =  WebSocketManager.notifSocket; //Our notif socket is already loaded !
-
+const notifSocket =  WebSocketManager.notifSocket; 
 
 const searchParams = new URLSearchParams(window.location.search);
 const pathname = window.location.pathname;
@@ -97,7 +96,7 @@ if(!searchParams.has('username') && pathname == '/')
                 parentListItem.remove();
             }
             console.log(duel.duel_id)
-            handleAcceptDuel(duel.duel_id);
+            handleAcceptDuel(duel.duel_id, duel.username);
         });
         
         const deleteButton = pendingElement.querySelector('.refuse_duel');
@@ -106,7 +105,7 @@ if(!searchParams.has('username') && pathname == '/')
             if (parentListItem) {
                 parentListItem.remove();
             }
-            handleRefuseDuel(duel.duel_id);
+            handleRefuseDuel(duel.duel_id, duel.username);
         });
         pending_group.appendChild(pendingElement);        
     })
@@ -118,35 +117,35 @@ notifSocket.onmessage = (event) => {
     
     if(message.data.action == "ACK_SEND_FRIEND_REQUEST") {
         const pending_group = document.querySelector('.pending_group');
+        const parser = new DOMParser();
+        const htmlString = 
+        `<li class="list-group-item pending_item d-flex justify-content-between align-items-center">
+        ${message.data.content.username}
+        <div class="btn-group d-grid gap-2 d-md-flex justify-content-md-end"  role="group" aria-label="Basic example">
+        <button type="button" class="type-intra-green accept_friend">accept</button>
+        <button type="button" class="type-intra-white refuse_friend">refuse</button>
+        </div>
+        </li>
+        `
+        const doc = parser.parseFromString(htmlString, "text/html");
+        const pendingElement = doc.body.firstChild;
+        
+        const acceptButton = pendingElement.querySelector('.accept_friend');
+        acceptButton.addEventListener('click', function(){
+            pendingElement.remove();
+            handleAcceptFriend(message.data.content.username);
+        });
+        
+        const deleteButton = pendingElement.querySelector('.refuse_friend');
+        deleteButton.addEventListener('click', function() {
+            pendingElement.remove();
+            handleRefuseFriend(message.data.content.username);
+        });
         if(pending_group)
         {
-            const parser = new DOMParser();
-            const htmlString = 
-            `<li class="list-group-item pending_item d-flex justify-content-between align-items-center">
-                ${message.data.content.username}
-                <div class="btn-group d-grid gap-2 d-md-flex justify-content-md-end"  role="group" aria-label="Basic example">
-                    <button type="button" class="type-intra-green accept_friend">accept</button>
-                    <button type="button" class="type-intra-white refuse_friend">refuse</button>
-                </div>
-            </li>
-            `
-            const doc = parser.parseFromString(htmlString, "text/html");
-            const pendingElement = doc.body.firstChild;
-
-            const acceptButton = pendingElement.querySelector('.accept_friend');
-            acceptButton.addEventListener('click', function(){
-                pendingElement.remove();
-                handleAcceptFriend(message.data.content.username);
-            });
-            
-            const deleteButton = pendingElement.querySelector('.refuse_friend');
-            deleteButton.addEventListener('click', function() {
-                pendingElement.remove();
-                handleRefuseFriend(message.data.content.username);
-            });
             pending_group.appendChild(pendingElement);
-            toast_friend(`New friend request from ${message.data.content.username}`, message.data, pendingElement);
         }
+        toast_friend(`New friend request from ${message.data.content.username}`, message.data, pendingElement);
     }
     else if(message.data.action == "ACK_ACCEPT_FRIEND_REQUEST_HOST" || message.data.action == "ACK_ACCEPT_FRIEND_REQUEST") {
         let friends_group = document.querySelector('.friends_group');
@@ -201,46 +200,61 @@ notifSocket.onmessage = (event) => {
             chatElement.parentElement.remove();
     }
     else if(message.data.action == "ACK_ASK_DUEL") {
+        console.log("dans handle l'opponent vaut: " + message.data.content.username);
         let pending_group = document.querySelector('.pending_group');
+        const parser = new DOMParser();
+        const htmlString = 
+        `<li class="list-group-item pending_item d-flex justify-content-between align-items-center">
+        ${message.data.content.username} wants to duel
+        <div class="btn-group d-grid gap-2 d-md-flex justify-content-md-end"  role="group" aria-label="Basic example">
+        <button type="button" class="type-intra-green accept_duel">accept</button>
+        <button type="button" class="type-intra-white refuse_duel">refuse</button>
+        </div>
+        </li>
+        `
+        const doc = parser.parseFromString(htmlString, "text/html");
+        const pendingElement = doc.body.firstChild;
+        
+        const acceptDuel = pendingElement.querySelector('.accept_duel');
+        acceptDuel.addEventListener('click', function() {
+            handleAcceptDuel(message.data.content.code, message.data.content.username);
+        });
+        const refuseDuel = pendingElement.querySelector('.refuse_duel');
+        refuseDuel.addEventListener('click', function() {
+            pendingElement.remove();
+            handleRefuseDuel(message.data.content.code, message.data.content.username);
+        });
         if(pending_group)
         {
-            const parser = new DOMParser();
-            const htmlString = 
-            `<li class="list-group-item pending_item d-flex justify-content-between align-items-center">
-                ${message.data.content.username} wants to duel
-                <div class="btn-group d-grid gap-2 d-md-flex justify-content-md-end"  role="group" aria-label="Basic example">
-                    <button type="button" class="type-intra-green accept_duel">accept</button>
-                    <button type="button" class="type-intra-white refuse_duel">refuse</button>
-                </div>
-            </li>
-            `
-            const doc = parser.parseFromString(htmlString, "text/html");
-            const pendingElement = doc.body.firstChild;
-
-            const acceptDuel = pendingElement.querySelector('.accept_duel');
-            acceptDuel.addEventListener('click', function() {
-                handleAcceptDuel(message.data.content.code);
-            });
-            const refuseDuel = pendingElement.querySelector('.refuse_duel');
-            refuseDuel.addEventListener('click', function() {
-                pendingElement.remove();
-                handleRefuseDuel(message.data.content.code);
-            });
             pending_group.appendChild(pendingElement);
-            toast_duel(`${message.data.content.username} wants a duel`, message.data, pendingElement);
         }
+        toast_duel(`${message.data.content.username} wants a duel`, message.data, pendingElement);
     }
-    else if(message.data.action == "REFUSED_DUEL")
+    else if(message.data.action == "DUEL_CREATED"){
+        navigateTo(`/pong/duel/?opponent=${message.data.content.opponent}`);
+        // const socket = create_message_notif("get_opponent_name", message.data.content.opponent)
+        // notifSocket.send(JSON.stringify(socket));
+    }
+    else if(message.data.action == "DUEL_NOT_EXIST")
     {
-        // const buttonToDelete = document.querySelector(`li.pending_item#${message.data.content.username}`);
-        // if(buttonToDelete)
-        // {
-        //     buttonToDelete.remove();
-        // }
+        const toast = document.querySelector(".toast");
+        if(toast)
+            toast.remove();
+        
+        navigateTo("/")
+        toast_message("DUEL don't exist");
     }
     else if(message.data.action == "DUEL_REFUSED"){
         navigateTo("/pong/gamemodes/");
         toast_message(`${message.data.content.username} refuses the duel`);
+    }
+    else if(message.data.action == "USER_OFFLINE"){
+        const toast = document.querySelector(".toast");
+        if(toast)
+            toast.remove();
+
+        navigateTo('/pong/gamemodes/')
+        toast_message(`Player you want to duel is offline`);
     }
     else if(message.data.action == "ACK_ONLINE_STATUS") {
         //TODO, Loop over the friend list and update the status of a friend if the username is a friend.
@@ -328,22 +342,23 @@ window.handleDeleteFriend = function(username) {
     notifSocket.send(JSON.stringify(message));
 };
 
-window.handleAcceptDuel = function(code) {
+window.handleAcceptDuel = function(code, targetName) {
     const toast = document.querySelector(".toast");
     
     if(toast)
         toast.remove();
-    const message = create_message_duel("accept_duel", code);
+    console.log(targetName);
+    const message = create_message_duel("accept_duel", code, targetName);
     notifSocket.send(JSON.stringify(message));
-    navigateTo('/pong/duel/');
+    navigateTo(`/pong/duel/?opponent=${targetName}`);
 };
 
-window.handleRefuseDuel = function(code) {
+window.handleRefuseDuel = function(code, targetName) {
     const toast = document.querySelector(".toast");
     
     if(toast)
         toast.remove();
-    const message = create_message_duel("refuse_duel", code);
+    const message = create_message_duel("refuse_duel", code, targetName);
     notifSocket.send(JSON.stringify(message));
 };
 
@@ -361,7 +376,7 @@ function create_message_notif(action, targetUser)
     return message;
 }
 
-function create_message_duel(action, code)
+function create_message_duel(action, code, targetName)
 {
     let message = {
         "event": "notification",
@@ -369,6 +384,7 @@ function create_message_duel(action, code)
             "action": action,
             "args": {
                 "code": code,
+                "username": targetName,
             }
         } 
     }
@@ -410,7 +426,6 @@ export async function apiFriends(endpoint) {
     }
 }
 
-export {notifSocket};
-export {create_message_notif};
-export {create_message_notif_block};
+export {create_message_notif}
 // export {getClientId}
+export {create_message_notif_block}

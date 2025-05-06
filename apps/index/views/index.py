@@ -24,6 +24,7 @@ def get(req):
     online_status = "Online"
     if client is not None:
         winrate = get_winrate(client, games_played)
+    print(winrate)
     context = {
         "client": client,
         "clients": Clients.objects.all(),

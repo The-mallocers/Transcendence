@@ -78,6 +78,9 @@ class RequestAction(str, Enum):
     BLOCK_FRIEND: str = "block_friend"
     UNBLOCK_FRIEND: str = "unblock_friend"
     BLOCK_UNBLOCK_FRIEND: str = "block_unblock_friend"
+    GET_OPPONENT_NAME: str = "get_opponent_name"
+    
+    PING: str = 'ping'
     ONLINE_STATUS: str = "check_online_status"
 
 # All the responses the server sends to the client
@@ -94,6 +97,7 @@ class ResponseAction(str, Enum):
     ACK_PENDING_DUELS = 'Response of pending duels'
     REFUSED_DUEL: str = 'You have refused the duel.'
     DUEL_REFUSED: str = 'Duel refused'
+    GET_OPPONENT: str = "get_opponent"
 
     # ── Tournaments ───────────────────────────────────────────────────────────────── #
     TOURNAMENT_CREATED: str = 'You have successfully create the tournament'
@@ -136,7 +140,7 @@ class ResponseAction(str, Enum):
     FRIEND_UNBLOCKED: str ="friend_unblocked"
     NOTIF_TEST = "notification_test"
 
-    TEST: str = 'test'
+    PONG: str = 'pong'
 
 
 # All the error messages sent to the client
@@ -191,7 +195,8 @@ class ResponseError(str, Enum):
     SERVICE_ERROR: str = 'An error occurred in the service.'
     TARGET_NOT_FOUND: str = 'Target not found.'
     USER_OFFLINE: str = 'User is offline.'
-
+    OPPONENT_NOT_FOUND: str = 'opponent_not_found'
+    
     # INTERNAL_ERROR = "Internal server error"
     # INVALID_ID: str = 'Player does not exist'
     # NOT_READY: str = 'Players are not ready'

@@ -12,6 +12,7 @@ class Router {
     }
 
     init() {
+        console.log("init router ||||||||||||||||||||||||||||||")
         window.addEventListener('popstate', () => this.handleLocation());
     }
 
