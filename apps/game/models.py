@@ -27,7 +27,7 @@ class GameRuntime:
 
         # ── Properties ───────────────────────────────────────────────────────────────── #
         self._code = None
-        self._tournament_id = None
+        self._tournament: Tournaments = None
         self._is_duel = False
         self._points_to_win = 3
 
@@ -42,12 +42,12 @@ class GameRuntime:
         self._code = value
 
     @property
-    def tournament_id(self):
-        return self._tournament_id
+    def tournament(self):
+        return self._tournament
 
-    @tournament_id.setter
-    def tournament_id(self, value):
-        self._tournament_id = value
+    @tournament.setter
+    def tournament(self, value):
+        self._tournament = value
 
     @property
     def is_duel(self):
@@ -61,24 +61,28 @@ class GameRuntime:
     def points_to_win(self):
         return self._points_to_win
 
+    @points_to_win.setter
+    def points_to_win(self, points):
+        self._points_to_win = points
+
     # ════════════════════════════════════ Functions ════════════════════════════════════ #
 
     @classmethod
-    def create_game(cls, tournament_id=None) -> 'Game':
-        if cls is GameRuntime:
+    def create_game(cls, tournament=None, runtime=False) -> 'Game':
+        if runtime or cls is GameRuntime:
             game = GameRuntime()
         else:
             game = cls()
 
         game.code = create_game_id()
         game.game_key = RTables.JSON_GAME(game.code)
-        game.tournament_id = tournament_id
+        game.tournament = tournament
         game.redis = RedisConnectionPool.get_sync_connection(game.__class__.__name__)
         return game
 
     def create_redis_game(self):
         from utils.serializers.game import GameSerializer
-        serializer = GameSerializer(self, context={'id': self.code, 'is_duel': self.is_duel, 'tournament_code': self.tournament_id})
+        serializer = GameSerializer(self, context={'id': self.code, 'is_duel': self.is_duel, 'tournament_code': self.tournament.code})
         self.redis.json().set(self.game_key, Path.root_path(), serializer.data)
 
     def init_players(self):
@@ -90,7 +94,7 @@ class GameRuntime:
         self.redis.hset(name=RTables.HASH_MATCHES, key=str(self.pL.client.id), value=str(self.code))
         self.redis.hset(name=RTables.HASH_MATCHES, key=str(self.pR.client.id), value=str(self.code))
 
-        if self.tournament_id is None:  # si la game n'est pas dans un tournois
+        if self.tournament is None:  # si la game n'est pas dans un tournois
             channel_layer = get_channel_layer()
 
             channel_name_pL = self.redis.hget(name=RTables.HASH_CLIENT(self.pL.client.id), key=str(EventType.GAME.value))
@@ -113,9 +117,9 @@ class GameRuntime:
 
     def rset_status(self, status):
         if self.rget_status() != status:
-            if self.tournament_id is not None:
+            if self.tournament is not None:
                 from utils.threads.tournament import TournamentThread
-                TournamentThread.set_game_status(self.tournament_id, self.code, status, self.redis)
+                TournamentThread.set_game_status(self.tournament.code, self.code, status, self.redis)
             self.redis.json().set(self.game_key, Path('status'), status)
 
     # ── Getter ────────────────────────────────────────────────────────────────────── #
@@ -145,7 +149,7 @@ class Game(models.Model, GameRuntime):
     # ━━ Game informations ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
     winner = ForeignKey(Player, on_delete=models.SET_NULL, related_name='winner', null=True)
     loser = ForeignKey(Player, on_delete=models.SET_NULL, related_name='loser', null=True)
-    tournament_id = ForeignKey(Tournaments, on_delete=models.SET_NULL, null=True, related_name='tournament', blank=True)
+    tournament = ForeignKey(Tournaments, on_delete=models.SET_NULL, null=True, related_name='tournament', blank=True)
     created_at = DateTimeField(default=timezone.now)
     is_duel = BooleanField(default=False)
     points_to_win = IntegerField(default=3)
@@ -162,8 +166,8 @@ class Game(models.Model, GameRuntime):
     def save(self, *args, **kwargs):
         if self._code is not None:
             self.code = self._code
-        if self._tournament_id is not None:
-            self.tournament_id = self._tournament_id
+        if self._tournament is not None:
+            self.tournament = self._tournament
         if self._is_duel is not None:
             self.is_duel = self._is_duel
         if self._points_to_win is not None:

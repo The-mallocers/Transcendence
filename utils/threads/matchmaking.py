@@ -2,28 +2,36 @@ import random
 import re
 import time
 import traceback
-
-from redis.commands.json.path import Path
+from queue import Queue, Empty
 
 from apps.client.models import Clients
 from apps.game.models import Game
 from apps.player.models import Player
-from utils.enums import GameStatus, ResponseError, RTables, EventType, TournamentStatus
+from apps.tournaments.models import Tournaments
+from utils.enums import GameStatus, ResponseError, RTables, EventType
 from utils.threads.game import GameThread
 from utils.threads.threads import Threads
 from utils.threads.tournament import TournamentThread
 from utils.websockets.channel_send import send_group_error
 
+tournament_queue = Queue()
 
 class MatchmakingThread(Threads):
+    def __init__(self, name):
+        super().__init__(name)
+        self.tournament = None
+
     def main(self):
-        game: Game = Game.create_game()
+        self.tournament: Tournaments = None
+        game: Game = Game.create_game(runtime=True)
 
         while not self._stop_event.is_set():
-            self.start_tournament()
             try:
+                if self.check_tournament():
+                    TournamentThread(self.tournament).start()
+
                 if game is None:
-                    game = Game.create_game()
+                    game = Game.create_game(runtime=True)
 
                 if self.select_players(game):
                     game.create_redis_game()
@@ -63,24 +71,12 @@ class MatchmakingThread(Threads):
 
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ FUNCTIONS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-    def start_tournament(self):
-        tournaments = self.redis.scan_iter(match=RTables.JSON_TOURNAMENT('*'))
-        for tournament in tournaments:
-            try:
-                code = tournament.decode('utf-8').split('_')[1]
-                status = self.redis.json().get(RTables.JSON_TOURNAMENT(code), Path('status'))
-                if TournamentStatus(status) is TournamentStatus.CREATING:
-                    # Get all entries and find first with 'True' value
-                    queue = self.redis.hgetall(RTables.HASH_TOURNAMENT_QUEUE(code))
-                    host_id = next((k.decode('utf-8') for k, v in queue.items() if v.decode('utf-8') == 'True'), None)
-                    if host_id:
-                        host = Clients.get_client_by_id(host_id)
-                        TournamentThread(host=host, code=code).start()
-                    else:
-                        self._logger.error(f"No host found for tournament {code}")
-                        self.redis.delete(RTables.JSON_TOURNAMENT(code))
-            except Exception as e:
-                self._logger.error(f"Error starting tournament: {traceback.format_exc()}")
+    def check_tournament(self) -> Tournaments:
+        try:
+            self.tournament = tournament_queue.get_nowait()
+            return True
+        except Empty:
+            return False
 
     def select_players(self, game):
         # First we check the global queue

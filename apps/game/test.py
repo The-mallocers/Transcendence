@@ -60,9 +60,9 @@ class GameModelTest(TestCase):
         """Test initializing players for a game"""
         # Mock player objects
         self.game.pL = MagicMock(spec=Player)
-        self.game.pL.client.id = "player1"
+        self.game.pL.client.code = "player1"
         self.game.pR = MagicMock(spec=Player)
-        self.game.pR.client.id = "player2"
+        self.game.pR.client.code = "player2"
 
         # Mock Redis methods
         self.mock_redis.json.return_value.get.return_value = {}

@@ -133,7 +133,7 @@ class Rooms(models.Model):
         try:
             with transaction.atomic():
                 client = Clients.objects.get(profile__username=username)
-                return str(client.id)  # Retourne l'ID sous forme de chaîne
+                return str(client.code)  # Retourne l'ID sous forme de chaîne
         except Clients.DoesNotExist:
             return None
 

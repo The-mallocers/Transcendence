@@ -205,8 +205,9 @@ def on_message(ws, message, client_id):
 
         # Handle ERROR events
         elif event == 'ERROR':
-            error_msg = content
-            print(f"[{client_id}] Error received: {error_msg}\n")
+            error_msg = msg_data.get('data', {}).get('error', {})
+            print(f"[{client_id}] Error received: {action}\n")
+            print(f'[{client_id}] Error message: {error_msg}\n')
             stop_event.set()
 
         else:
@@ -286,9 +287,9 @@ def create_tournament(client_id, num_clients):
             "action": "create_tournament",
             "args": {
                 "title": "Test Tournament",
-                "max_players": num_clients,
-                "public": True,
-                "bots": True,
+                "max_clients": num_clients,
+                "is_public": True,
+                "has_bots": True,
                 "points_to_win": 1,
                 "timer": 120
             }

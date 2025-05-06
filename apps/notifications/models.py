@@ -27,7 +27,7 @@ class Friend(models.Model):
         try:
             with transaction.atomic():
                 # if friend is not my friend i add it to pending_friend
-                if not self.friends.filter(id=client.id).exists() and not self.pending_friends.filter(id=client.id).exists():
+                if not self.friends.filter(id=client.code).exists() and not self.pending_friends.filter(id=client.code).exists():
                     print("entering in the adding pending friend")
                     self.pending_friends.add(client)
                     self.save()
@@ -41,12 +41,12 @@ class Friend(models.Model):
             with transaction.atomic():
                 print("in the accepting function")
                 # check if my friend is in pending
-                pending_friend = self.pending_friends.filter(id=client.id).exists()
+                pending_friend = self.pending_friends.filter(id=client.code).exists()
                 if not pending_friend:
                     print("no pending friend")
                     raise ValidationError("No pending friend with this id")
                 # check if my friend is already my friend
-                friend = self.friends.filter(id=client.id).exists()
+                friend = self.friends.filter(id=client.code).exists()
                 if friend:
                     print("already friends")
                     raise ValidationError("Already Friend")
@@ -74,7 +74,7 @@ class Friend(models.Model):
     def remove_friend(self, client):
         try:
             with transaction.atomic():
-                if not self.friends.filter(id=client.id).exists():
+                if not self.friends.filter(id=client.code).exists():
                     raise ValidationError("Not friend with this user")
                 self.friends.remove(client)
                 self.save()

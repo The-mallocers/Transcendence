@@ -56,3 +56,5 @@ clean: dbclean
 	docker compose -f ./$(DOCKER_COMPOSE_FILE) down --rmi all
 
 re: down up
+
+.PHONY: help up down test test-coverage logs status restart dbclean reload clean re

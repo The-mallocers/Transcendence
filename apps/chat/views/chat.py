@@ -12,11 +12,11 @@ def get(req):
     # message_content
 
     client = Clients.get_client_by_request(req)
-    rooms = Rooms.get_room_id_by_client_id(client.id)
+    rooms = Rooms.get_room_id_by_client_id(client.code)
 
     me = None
     if client:
-        me = client.id
+        me = client.code
     #     conversation = [
     #     {
     #         "sender": me,

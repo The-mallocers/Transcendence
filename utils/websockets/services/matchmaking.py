@@ -79,6 +79,6 @@ class MatchmakingService(BaseServices):
         queues = await Clients.acheck_in_queue(client, self.redis)
         if queues:
             if queues is RTables.HASH_G_QUEUE:
-                await self.redis.hdel(RTables.HASH_G_QUEUE, str(client.id))
+                await self.redis.hdel(RTables.HASH_G_QUEUE, str(client.code))
             else:
                 await self.redis.delete(queues)

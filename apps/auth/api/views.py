@@ -204,7 +204,7 @@ class GetClientIDApiView(APIView):
                 "message": "Could not retrieve user ID"
             }, status=status.HTTP_401_UNAUTHORIZED)
         return Response({
-            "client_id": client.id,
+            "client_id": client.code,
             "message": "ID retrieved succesfully"
         }, status=status.HTTP_200_OK)
 

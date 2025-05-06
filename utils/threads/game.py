@@ -22,7 +22,7 @@ class GameThread(Threads):
 
     def main(self):
         try:
-            while self.game.tournament_id is not None:
+            while self.game.tournament is not None:
                 if not self._waitting_players():
                     time.sleep(2)
                 else:
@@ -60,7 +60,7 @@ class GameThread(Threads):
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ EVENT ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
 
     def _waitting_players(self):
-        if self.game.rget_status() is GameStatus.MATCHMAKING and self.game.tournament_id is not None:
+        if self.game.rget_status() is GameStatus.MATCHMAKING and self.game.tournament is not None:
             channel_layer = get_channel_layer()
             both_joined = 0
 
@@ -113,9 +113,9 @@ class GameThread(Threads):
                 self.logic.set_result(disconnect=True)
                 send_group_error(RTables.GROUP_GAME(self.game_id), ResponseError.OPPONENT_LEFT, close=True)
 
-            if self.game.tournament_id is not None:
+            if self.game.tournament is not None:
                 from utils.threads.tournament import TournamentThread
-                TournamentThread.set_game_players(self.game.tournament_id, self.game.code, self.game.winner.id, self.game.loser.id, self.redis)
+                TournamentThread.set_game_players(self.game.tournament.code, self.game.code, self.game.winner.id, self.game.loser.id, self.redis)
 
             self._stop_event.set()
             self._stopping()

@@ -12,14 +12,14 @@ class TournamentSerializer(serializers.Serializer):
         max_length=40,
         error_messages={'blank': 'Tournament title cannot be empty'}
     )
-    max_players = serializers.IntegerField(
+    max_clients = serializers.IntegerField(
         validators=[
             MinValueValidator(2, message="Tournament must have at least 2 players"),
             MaxValueValidator(16, message="Tournament cannot have more than 16 players"),
         ]
     )
-    public = serializers.BooleanField()
-    bots = serializers.BooleanField()
+    is_public = serializers.BooleanField()
+    has_bots = serializers.BooleanField()
     points_to_win = serializers.IntegerField(
         validators=[
             MinValueValidator(1, message="Points to win must be at least 1"),
@@ -44,7 +44,7 @@ class TournamentSerializer(serializers.Serializer):
         data['status'] = TournamentStatus.CREATING
         data['created-at'] = timezone.now().isoformat()
         data['clients'] = [str(data['host'])]
-        data['scoreboards'] = self.generate_tournament_structure(data['max_players'])
+        data['scoreboards'] = self.generate_tournament_structure(data['max_clients'])
         return data
 
     # this will generate a json With all the matches that will be played during the tournament.

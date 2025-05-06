@@ -20,7 +20,7 @@ def create_tournament_id():
     from apps.tournaments.models import Tournaments
     while True:
         code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=5))  # Génère un code aléatoire de 5 caractères
-        if not Tournaments.objects.filter(id=code).exists():
+        if not Tournaments.objects.filter(code=code).exists():
             return code
 
 

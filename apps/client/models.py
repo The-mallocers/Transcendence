@@ -58,9 +58,9 @@ class Clients(models.Model):
         return [str(client.id) for client in clients]
 
     @staticmethod
-    def get_client_by_id(id: uuid.UUID) -> 'Clients':
+    def get_client_by_id(client_id) -> 'Clients':
         try:
-            client = Clients.objects.get(id=id)
+            client = Clients.objects.get(id=client_id)
             return client
         except:
             return None

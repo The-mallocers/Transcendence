@@ -162,6 +162,6 @@ class ChatService(BaseServices):
 
     async def disconnect(self, client):
         await self.channel_layer.group_discard(RTables.GROUP_CHAT(uuid_global_room), self.channel_name)
-        rooms = await Rooms.aget_room_id_by_client_id(client.id)
+        rooms = await Rooms.aget_room_id_by_client_id(client.code)
         for room in rooms:
             await self.channel_layer.group_discard(RTables.GROUP_CHAT(room), self.channel_name)

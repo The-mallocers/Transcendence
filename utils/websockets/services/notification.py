@@ -45,7 +45,7 @@ class NotificationService(BaseServices):
                           EventType.NOTIFICATION,
                           ResponseAction.ACK_SEND_FRIEND_REQUEST,
                           {
-                              "sender": str(client.id),
+                              "sender": str(client.code),
                               "username": await client.aget_profile_username()
                           })
 
@@ -76,7 +76,7 @@ class NotificationService(BaseServices):
             await asend_group(RTables.GROUP_CLIENT(target.code), EventType.NOTIFICATION,
                               ResponseAction.ACK_ACCEPT_FRIEND_REQUEST,
                               {
-                                  "sender": str(client.id),
+                                  "sender": str(client.code),
                                   "username": await client.aget_profile_username(),
                                   "room": str(room.code)
                               })
@@ -124,11 +124,11 @@ class NotificationService(BaseServices):
                               EventType.NOTIFICATION,
                               ResponseAction.ACK_DELETE_FRIEND,
                               {
-                                  "sender": str(client.id),
+                                  "sender": str(client.code),
                                   "username": await client.aget_profile_username()
                               })
             # get the room to delete
-            room = await Rooms.aget_room_by_client_id(client.id)
+            room = await Rooms.aget_room_by_client_id(client.code)
             if room is None:
                 return
             # First delete all messages corresponding to the two users
@@ -148,13 +148,13 @@ class NotificationService(BaseServices):
             return await asend_group_error(self.service_group, ResponseError.ALREADY_IN_QUEUE)
         if not await self.redis.exists(RTables.HASH_DUEL_QUEUE(code)):
             return await asend_group_error(self.service_group, ResponseError.DUEL_NOT_EXIST)
-        if await self.redis.hexists(RTables.HASH_DUEL_QUEUE(code), str(client.id)) is False:
+        if await self.redis.hexists(RTables.HASH_DUEL_QUEUE(code), str(client.code)) is False:
             return await asend_group_error(self.service_group, ResponseError.NOT_INVITED)
         else:
-            if await self.redis.hget(RTables.HASH_DUEL_QUEUE(code), str(client.id)) == 'True':
+            if await self.redis.hget(RTables.HASH_DUEL_QUEUE(code), str(client.code)) == 'True':
                 return await asend_group_error(self.service_group, ResponseError.ALREADY_JOIN_DUEL)
             else:
-                await self.redis.hset(RTables.HASH_DUEL_QUEUE(code), str(client.id), 'True')
+                await self.redis.hset(RTables.HASH_DUEL_QUEUE(code), str(client.code), 'True')
                 await asend_group(self.service_group, EventType.MATCHMAKING, ResponseAction.DUEL_JOIN)
             
     async def disconnect(self, client):
