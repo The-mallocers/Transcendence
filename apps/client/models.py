@@ -31,7 +31,7 @@ class Clients(models.Model):
 
     # Joined tables
     password = models.ForeignKey(Password, on_delete=models.CASCADE)
-    profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
+    profile = models.ForeignKey(Profile, on_delete=models.SET_NULL, null=True) #Changing profile deletes the old one, we change this so client doesnt get deleted.
     twoFa = models.ForeignKey(TwoFA, on_delete=models.CASCADE)
     rights = models.ForeignKey('admin.Rights', on_delete=models.CASCADE, null=True)
     stats = models.ForeignKey(Stats, on_delete=models.CASCADE, null=True)
