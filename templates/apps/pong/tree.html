@@ -1,10 +1,38 @@
 
 <style>
 
-    .treePage .slot {
-        width: 30rem;
+    .treePage {
+
     }
 
+    .treePage .round {
+        width: 50%;
+        background-color: white;
+        padding: 20px;
+    }
+
+    .treePage .players {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 15px;
+    }
+
+    .treePage .players .left,  .treePage .players .right{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+    }
+    .treePage .players img {
+        height: 25px;
+        width : 25px;
+        border-radius: 50%;
+    }
+
+    .treePage .players td {
+        padding: 10px;
+    }
 /* 
     .treePage .tag {
         padding: .5rem;
@@ -31,12 +59,12 @@
     } */
 
 </style>
-<div class="treePage">
+<!-- <div class="treePage">
     <h1 class="text-center"> xxxxxxxxxx's tournament</h1>
     <div class="container mt-5">
         <div class="d-flex justify-content-center gap-5">
         
-            <!-- Quarterfinals -->
+
             <div class="d-flex flex-column justify-content-around" style="height: 500px;">
             <div class="mb-5">
                 <div class="bg-light border text-center p-2 d-flex flex-row justify-content-between slot">
@@ -88,7 +116,7 @@
             </div>
             </div>
         
-            <!-- Semifinals -->
+
             <div class="d-flex flex-column justify-content-around" style="height: 500px;">
             <div class="mt-5 mb-5">
                 <div class="bg-secondary text-white text-center border p-2 d-flex flex-row justify-content-between slot">
@@ -116,7 +144,7 @@
             </div>
             </div>
         
-            <!-- Final -->
+
             <div class="d-flex flex-column justify-content-center" style="height: 500px;">
             <div>
                 <div class="bg-dark text-white text-center border p-2 d-flex flex-row justify-content-between slot">
@@ -134,4 +162,101 @@
         
         </div>
     </div> 
+</div> -->
+
+<div class="treePage d-flex flex-column justify-content-center align-items-center">
+
+    <div class="round mt-5">
+        <h2>Round 1</h2>
+        <table class="table">
+            <thead>
+            <tr>
+                <th scope="col"></th>
+                <th scope="col">First</th>
+                <th scope="col">Last</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td class="players">
+                    <div class="left">
+                        <img src="/static/img/img.png" alt="">
+                        <div>meow</div>
+                    </div>
+                    <div class="vs">VS</div>
+                    <div class="right">
+                        <img src="/static/img/img.png" alt="">
+                        <div>meow</div>
+                    </div>
+                </td>
+                <td>Mark</td>
+                <td>Otto</td>
+            </tr>
+            <tr>
+                <td class="players">
+                    <div class="left">
+                        <img src="/static/img/img.png" alt="">
+                        <div>meow</div>
+                    </div>
+                    <div class="vs">VS</div>
+                    <div class="right">
+                        <img src="/static/img/img.png" alt="">
+                        <div>meow</div>
+                    </div>
+                </td>
+                <td>Jacob</td>
+                <td>Thornton</td>
+            </tr>
+            <tr>
+                <td class="players">
+                    <div class="left">
+                        <img src="/static/img/img.png" alt="">
+                        <div>meow</div>
+                    </div>
+                    <div class="vs">VS</div>
+                    <div class="right">
+                        <img src="/static/img/img.png" alt="">
+                        <div>meow</div>
+                    </div>
+                </td>
+                <td>Larry</td>
+                <td>the Bird</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="round mt-4">
+        <h2>Round 1</h2>
+        <table class="table">
+            <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">First</th>
+                <th scope="col">Last</th>
+                <th scope="col">Handle</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <th scope="row">1</th>
+                <td>Mark</td>
+                <td>Otto</td>
+                <td>@mdo</td>
+            </tr>
+            <tr>
+                <th scope="row">2</th>
+                <td>Jacob</td>
+                <td>Thornton</td>
+                <td>@fat</td>
+            </tr>
+            <tr>
+                <th scope="row">3</th>
+                <td>Larry</td>
+                <td>the Bird</td>
+                <td>@twitter</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
 </div>
