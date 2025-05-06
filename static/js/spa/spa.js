@@ -70,9 +70,14 @@ class Router {
     navigate(path) {
 
         let splitedPath = path.split("/")
-        console.log(splitedPath)
+        console.log(splitedPath);
         if (splitedPath.includes("pong")) {
-            WebSocketManager.closeChatSocket()
+            if (splitedPath.includes("duel") || splitedPath.includes("arena")) {
+                WebSocketManager.closeChatSocket();
+            }
+            else {
+                WebSocketManager.closeAllSockets();
+            }
         } else {
             WebSocketManager.closeAllSockets(); //for now we close all
         }
