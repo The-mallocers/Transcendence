@@ -12,7 +12,7 @@ def create_game_id():
     redis = RedisConnectionPool.get_sync_connection('GameID')
     while True:
         code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=5))
-        if not Game.objects.filter(id=code).exists() and not redis.exists(RTables.JSON_GAME(code)):
+        if not Game.objects.filter(code=code).exists() and not redis.exists(RTables.JSON_GAME(code)):
             return code
 
 

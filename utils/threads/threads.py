@@ -17,7 +17,6 @@ class Threads(threading.Thread, ABC):
     def __init__(self, name):
         super().__init__(daemon=True, name=name)
         self.redis = RedisConnectionPool.get_sync_connection(name)
-        # self.loop = asyncio.new_event_loop()
 
         self._logger = logging.getLogger(self.__class__.__module__)
         self._stop_event = threading.Event()
@@ -55,7 +54,6 @@ class Threads(threading.Thread, ABC):
         if action_id not in self._completed_actions:
             action_func(*args, **kwargs)
             self._completed_actions.add(action_id)
-            self._logger.debug(f"Action '{action_id}' executed")
             return True
         return False
 

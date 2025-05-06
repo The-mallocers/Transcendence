@@ -44,25 +44,25 @@ class PlayerInformationSerializer(serializers.ModelSerializer):
         fields = ['client_id', 'username', 'player_profile', 'paddle']
 
     def get_client_id(self, instance):
-        return instance.client_id
+        return str(instance.client.id)
 
     def get_username(self, instance):
-        return instance.class_client.profile.username
+        return instance.client.profile.username
 
     def get_player_profile(self, instance):
-        return instance.class_client.profile.profile_picture.url
+        return instance.client.profile.profile_picture.url
 
     def get_paddle(self, instance):
         from utils.serializers.game import PaddleSerializer
         side = self.context.get('side')
         game_id = self.context.get('game_id')
-        player_id = instance.id
+        player_id = str(instance.id)
 
         # Create Paddle with necessary context
         x = self._get_paddle_x(side)
         paddle = Paddle(
             game_id=game_id,
-            player_id=player_id,
+            client_id=player_id,
             x=x
         )
 
@@ -90,8 +90,8 @@ class PlayersRedisSerializer(serializers.ModelSerializer):
         pl = instance.get(PlayerSide.LEFT)
         pr = instance.get(PlayerSide.RIGHT)
         return {
-            PlayerSide.LEFT: PlayerSerializer(pl, context={'paddle': paddle_left, 'id': str(pl.client_id)}).data,
-            PlayerSide.RIGHT: PlayerSerializer(pr, context={'paddle': paddle_right, 'id': str(pr.client_id)}).data
+            PlayerSide.LEFT: PlayerSerializer(pl, context={'paddle': paddle_left, 'id': str(pl.client.id)}).data,
+            PlayerSide.RIGHT: PlayerSerializer(pr, context={'paddle': paddle_right, 'id': str(pr.client.id)}).data
         }
 
 

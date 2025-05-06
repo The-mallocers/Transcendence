@@ -4,7 +4,7 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils import timezone
 from rest_framework import serializers
 
-from utils.enums import TournamentStatus
+from utils.enums import TournamentStatus, GameStatus
 
 
 class TournamentSerializer(serializers.Serializer):
@@ -74,6 +74,7 @@ class TournamentSerializer(serializers.Serializer):
                 game_id = f"r{round_num}m{match_num}"
                 tournament["rounds"][f"round_{round_num}"]["games"][game_id] = {
                     "game_code": "",  # Will be filled when game is created
+                    "status": GameStatus.CREATING,
                     "winner": None,
                     "loser": None
                 }

@@ -92,7 +92,7 @@ class ChatService(BaseServices):
                 return await asend_group_error(self.service_group, ResponseError.ROOM_NOT_FOUND)
 
             # Check if client is a member of the room
-            if room.id not in await Rooms.aget_room_id_by_client_id(client.id):
+            if room.code not in await Rooms.aget_room_id_by_client_id(client.id):
                 return await asend_group_error(self.service_group, ResponseError.NOT_ALLOWED)
 
             # Store the message

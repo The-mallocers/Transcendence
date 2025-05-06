@@ -48,7 +48,7 @@ class GameModelTest(TestCase):
 
     def test_game_creation(self):
         """Test that a game can be created"""
-        game = Game.objects.get(id="12345")
+        game = Game.objects.get(code="12345")
         self.assertEqual(game.points_to_win, 3)
         self.assertIsNone(game.winner)
         self.assertIsNone(game.loser)
@@ -60,9 +60,9 @@ class GameModelTest(TestCase):
         """Test initializing players for a game"""
         # Mock player objects
         self.game.pL = MagicMock(spec=Player)
-        self.game.pL.client_id = "player1"
+        self.game.pL.client.id = "player1"
         self.game.pR = MagicMock(spec=Player)
-        self.game.pR.client_id = "player2"
+        self.game.pR.client.id = "player2"
 
         # Mock Redis methods
         self.mock_redis.json.return_value.get.return_value = {}

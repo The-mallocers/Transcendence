@@ -52,7 +52,7 @@ class Rooms(models.Model):
     def get_id(room):
         try:
             with transaction.atomic():
-                return room.id
+                return room.code
         except Rooms.DoesNotExist:
             return None
 
@@ -173,7 +173,7 @@ class Messages(models.Model):
     @staticmethod
     def get_message_by_room(room):
         try:
-            return list(Messages.objects.filter(room__id=room.id))
+            return list(Messages.objects.filter(room__id=room.code))
         except Rooms.DoesNotExist:
             return []
 
@@ -182,7 +182,7 @@ class Messages(models.Model):
     def aget_message_by_room(room):
         try:
             with transaction.atomic():
-                return list(Messages.objects.filter(room__id=room.id))
+                return list(Messages.objects.filter(room__id=room.code))
         except Rooms.DoesNotExist:
             return []
 

@@ -51,7 +51,7 @@ class Command(BaseCommand):
                 stats = Stats.objects.create()
 
                 # Create client
-                client = Clients.objects.create(
+                client: Clients = Clients.objects.create(
                     profile=profile,
                     password=password_obj,
                     twoFa=two_fa,

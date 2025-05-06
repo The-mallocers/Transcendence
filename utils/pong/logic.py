@@ -4,6 +4,8 @@ import math
 import random
 import time
 
+from django.db.models import F
+
 from apps.client.models import Clients
 from apps.game.models import Game
 from apps.player.models import Player
@@ -30,11 +32,11 @@ class PongLogic:
 
         # ── Objects ───────────────────────────────────────────────────────────────────
         self.ball: Ball = Ball(game_id=self.game_id, redis=redis)
-        self.paddle_pL: Paddle = Paddle(game_id=self.game_id, redis=redis, player_id=self.game.pL.client_id, x=OFFSET_PADDLE)
-        self.paddle_pR: Paddle = Paddle(game_id=self.game_id, redis=redis, player_id=self.game.pR.client_id, x=CANVAS_WIDTH - OFFSET_PADDLE -
+        self.paddle_pL: Paddle = Paddle(game_id=self.game_id, redis=redis, client_id=self.game.pL.client.id, x=OFFSET_PADDLE)
+        self.paddle_pR: Paddle = Paddle(game_id=self.game_id, redis=redis, client_id=self.game.pR.client.id, x=CANVAS_WIDTH - OFFSET_PADDLE -
                                                                                                                PADDLE_WIDTH)
-        self.score_pL: Score = Score(game_id=self.game_id, redis=redis, player_id=self.game.pL.client_id)
-        self.score_pR: Score = Score(game_id=self.game_id, redis=redis, player_id=self.game.pR.client_id)
+        self.score_pL: Score = Score(game_id=self.game_id, redis=redis, client_id=self.game.pL.client.id)
+        self.score_pR: Score = Score(game_id=self.game_id, redis=redis, client_id=self.game.pR.client.id)
         self.points_to_win = self.game.points_to_win
 
     def game_task(self):
@@ -201,10 +203,8 @@ class PongLogic:
                        self.score_pR.get_score())
 
     def set_result(self, disconnect=False):
-        winner_score = 0
-        winner_client = None
-        loser_score = 0
-        loser_client = None
+        winner = Player.create_player()
+        loser = Player.create_player()
 
         if disconnect is True:
             if self.redis.hget(name=RTables.HASH_CLIENT(self.game.pL.id), key=str(EventType.GAME.value)) is None:
@@ -215,25 +215,34 @@ class PongLogic:
                 self.score_pL.set_score(self.game.points_to_win)
 
         if self.score_pL.get_score() > self.score_pR.get_score():
-            winner_client = Clients.get_client_by_id(self.game.pL.client_id)
-            winner_score = self.score_pL.get_score()
-            loser_client = Clients.get_client_by_id(self.game.pR.client_id)
-            loser_score = self.score_pR.get_score()
+            winner.client = Clients.get_client_by_id(self.game.pL.client.id)
+            winner.score = self.score_pL.get_score()
+            loser.client = Clients.get_client_by_id(self.game.pR.client.id)
+            loser.score = self.score_pR.get_score()
         elif self.score_pL.get_score() < self.score_pR.get_score():
-            winner_client = Clients.get_client_by_id(self.game.pR.client_id)
-            winner_score = self.score_pR.get_score()
-            loser_client = Clients.get_client_by_id(self.game.pL.client_id)
-            loser_score = self.score_pL.get_score()
+            winner.client = Clients.get_client_by_id(self.game.pR.client.id)
+            winner.score = self.score_pR.get_score()
+            loser.client = Clients.get_client_by_id(self.game.pL.client.id)
+            loser.score = self.score_pL.get_score()
 
-        winner_player = Player.objects.create(client=winner_client, score=winner_score)
-        loser_player = Player.objects.create(client=loser_client, score=loser_score)
-        finished_game = Game.objects.create(id=self.game.code, winner=winner_player, loser=loser_player, points_to_win=self.game.points_to_win,
-                                            is_duel=self.game.rget_is_duel())
-        self.save_player_info(winner_player, finished_game)
-        self.save_player_info(loser_player, finished_game)
+        loser.save()
+        winner.save()
+        finished_game = Game.objects.create(code=self.game.code, winner=winner, loser=loser,
+                                            points_to_win=self.game.points_to_win, is_duel=self.game.rget_is_duel())
+
+        # mmr gain would happen here.
+        winner.client.stats.wins = F('wins') + 1
+        loser.client.stats.losses = F('losses') + 1
+        self.save_player_info(loser, finished_game)
+        self.game.loser = loser
+        self.save_player_info(winner, finished_game)
+        self.game.winner = winner
+        print(f'Game {self.game.code} saved !!!')
 
     def save_player_info(self, player, finished_game):
         player.game = finished_game
         player.save()
         player.client.stats.games.add(finished_game)
+        player.client.stats.total_game = F('total_game') + 1
         player.client.stats.save()
+        player.save()

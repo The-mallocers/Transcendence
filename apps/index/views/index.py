@@ -56,8 +56,8 @@ def get_last_matches(client, games_played) -> list:
     for game in games_played:
         if (i >= 4):
             break
-        print(game.id)
-        game = Game.objects.get(id=game.id)
+        print(game.code)
+        game = Game.objects.get(code=game.code)
         print(game.winner.score)
         continue
 
@@ -66,8 +66,8 @@ def get_last_matches(client, games_played) -> list:
         myPoints = 0
         enemyPoints = 0
         oponnent = ""
-        print(client.player.id, game.winner.id)
-        if (client.player.id == game.winner.id):
+        print(client.player.code, game.winner.code)
+        if (client.player.code == game.winner.code):
             myPoints = game.winner_score
             enemyPoints = game.loser_score
             oponnent = game.loser.nickname
@@ -78,7 +78,7 @@ def get_last_matches(client, games_played) -> list:
 
         ghistory.append({
             "opponent": oponnent,
-            "won": client.player.id == game.winner.id,
+            "won": client.player.code == game.winner.code,
             "myPoints": myPoints,
             "enemyPoints": enemyPoints,
             "when": game.created_at
@@ -94,10 +94,10 @@ def get_rivals(client, games_played) -> dict:
     # getting all opponents
     for game in games_played:
         currOpponent = None
-        if game.winner.id == client.player.id:
-            currOpponent = game.loser.id
+        if game.winner.code == client.player.code:
+            currOpponent = game.loser.code
         else:
-            currOpponent = game.winner.id
+            currOpponent = game.winner.code
         if currOpponent not in opponents:
             opponents.append(currOpponent)
 
@@ -111,10 +111,10 @@ def get_rivals(client, games_played) -> dict:
         }
 
     for game in games_played:
-        if game.winner.id == client.player.id:
-            rivals[game.loser.id]["games_won"] += 1
-        elif game.loser.id == client.player.id:
-            rivals[game.winner.id]["games_lost"] += 1
+        if game.winner.code == client.player.code:
+            rivals[game.loser.code]["games_won"] += 1
+        elif game.loser.code == client.player.code:
+            rivals[game.winner.code]["games_lost"] += 1
 
     print("rivals after adding the maps")
     print(rivals)

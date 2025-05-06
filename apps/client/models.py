@@ -58,7 +58,7 @@ class Clients(models.Model):
         return [str(client.id) for client in clients]
 
     @staticmethod
-    def get_client_by_id(id: uuid.UUID):
+    def get_client_by_id(id: uuid.UUID) -> 'Clients':
         try:
             client = Clients.objects.get(id=id)
             return client
@@ -222,7 +222,7 @@ class Clients(models.Model):
     def aget_pending_request_by_client(self, target):
         try:
             for friend in self.friend.pending_friends.all():
-                if friend.id == target.id:
+                if friend.code == target.code:
                     return friend
             return None
         except Exception as e:

@@ -77,135 +77,170 @@ def create_test_account(index):
     return client_uuid
 
 
+def join_game(client_id, is_tournament=False):
+    """Send a message to join a game"""
+    if client_id not in client_connections:
+        print(f"[{client_id}] Not connected")
+        return
+
+    ws = client_connections[client_id]
+    join_msg = {
+        "event": "game",
+        "data": {
+            "action": "join_game",
+            "args": {
+                "is_tournament": is_tournament
+            }
+        }
+    }
+
+    print(f"[{client_id}] Joining game...")
+    ws.send(json.dumps(join_msg))
+
+
+def create_game_connection(client_id):
+    """Create a separate game WebSocket connection"""
+    url = f"wss://localhost:8000/ws/game/?id={client_id}"
+
+    # Create WebSocket connection with SSL verification disabled
+    ws = websocket.WebSocketApp(
+        url,
+        on_open=lambda ws: on_open(ws, f"{client_id}_game"),
+        on_message=lambda ws, msg: on_message(ws, msg, f"{client_id}_game"),
+        on_error=lambda ws, err: on_error(ws, err, f"{client_id}_game"),
+        on_close=lambda ws, code, msg: on_close(ws, code, msg, f"{client_id}_game")
+    )
+
+    # Run the WebSocket connection with SSL context
+    ws_thread = threading.Thread(
+        target=ws.run_forever,
+        kwargs={"sslopt": {"cert_reqs": ssl.CERT_NONE}}
+    )
+    ws_thread.daemon = True
+    ws_thread.start()
+    ws_threads.append(ws_thread)
+
+    return ws
+
+
 def on_message(ws, message, client_id):
-    # Parse the message
     try:
         msg_data = json.loads(message)
         event = msg_data.get('event')
         action = msg_data.get('data', {}).get('action')
         content = msg_data.get('data', {}).get('content', {})
 
-        # print(f"Client {client_id} received: {event} - {action}")
-
         # Handle TOURNAMENT events
         if event == 'TOURNAMENT':
             if action == 'TOURNAMENT_CREATED':
                 global tournament_code
                 tournament_code = content.get('code')
-                print(f"Tournament created with code: {tournament_code}\n")
+                print(f"[{client_id}] Tournament created with code: {tournament_code}\n")
             elif action == 'TOURNAMENT_JOIN':
-                print(f"Client {client_id} successfully joined the tournament\n")
+                print(f"[{client_id}] Successfully joined the tournament\n")
             elif action == 'TOURNAMENT_PLAYER_JOIN':
                 player_id = content.get('id')
-                print(f"Player joined tournament: {player_id}\n")
+                print(f"[{client_id}] Player joined tournament: {player_id}\n")
             elif action == 'TOURNAMENT_LEFT':
-                print(f"Client {client_id} successfully left the tournament\n")
+                print(f"[{client_id}] Successfully left the tournament\n")
             elif action == 'TOURNAMENT_WAITTING_PLAYERS':
-                print(f"Tournament is waiting for players\n")
+                print(f"[{client_id}] Tournament is waiting for players\n")
             elif action == 'TOURNAMENT_PLAYERS_READY':
-                print(f"All players are ready, tournament can start\n")
+                print(f"[{client_id}] All players are ready, tournament can start\n")
+            elif action == 'TOURNAMENT_LOSE_GAME':
+                print(f"[{client_id}] Lost the tournament game - closing this tournament connection\n")
+                ws.close()
+                del client_connections[client_id]
+                # Don't return here, allow the function to continue processing
+            elif action == 'TOURNAMENT_GAME_FINISH':
+                print(f"[{client_id}] Tournament game finished\n")
+                # If this is a game websocket, close it
+                if client_id.endswith('_game'):
+                    print(f"[{client_id}] Closing game websocket connection\n")
+                    ws.close(status=1000, reason="TOURNAMENT_GAME_FINISH")
+                    del client_connections[client_id]
+                # Don't return here, allow the function to continue processing
             elif action == 'TOURNAMENT_GAME_READY':
-                print('Tournament is ready to start your game!\n')
+                print('Tournament is ready to start your game!')
+                if not client_id.endswith('_game'):  # Prevent recursive game connections
+                    base_client_id = client_id.split('_')[0]  # Get original client ID
+                    game_ws = create_game_connection(base_client_id)
+                    client_connections[f"{base_client_id}_game"] = game_ws
+
 
         # Handle GAME events
         elif event == 'GAME':
             if action == 'JOIN_GAME':
-                print(f"Client {client_id} successfully joined the game\n")
+                print(f"[{client_id}] Successfully joined the game\n")
             elif action == 'LEFT_GAME':
-                print(f"Client {client_id} successfully left the game\n")
+                print(f"[{client_id}] Successfully left the game\n")
             elif action == 'STARTING':
-                print(f"Game is about to start\n")
+                print(f"[{client_id}] Game is about to start\n")
             elif action == 'STARTED':
-                print(f"Game has started\n")
+                print(f"[{client_id}] Game has started\n")
             elif action == 'GAME_ENDING':
-                print(f"Game has ended\n")
+                print(f"[{client_id}] Game has ended\n")
 
         # Handle UPDATE events
         elif event == 'UPDATE':
             if action == 'PLAYER_INFOS':
-                print(f"Received player information update\n")
-            elif action == 'BALL_UPDATE':
-                print(f"Received ball position update\n")
-            elif action == 'PADDLE_LEFT_UPDATE':
-                print(f"Received left paddle update\n")
-            elif action == 'PADDLE_RIGHT_UPDATE':
-                print(f"Received right paddle update\n")
-            elif action == 'SCORE_LEFT_UPDATE':
-                score = content.get('score', 0)
-                print(f"Left player score updated: {score}\n")
-            elif action == 'SCORE_RIGHT_UPDATE':
-                score = content.get('score', 0)
-                print(f"Right player score updated: {score}\n")
-
-        # Handle CHAT events
-        elif event == 'CHAT':
-            if action == 'ROOM_CREATED':
-                print(f"Chat room created successfully\n")
-            elif action == 'MESSAGE_RECEIVED':
-                sender = content.get('sender', 'Unknown')
-                message_text = content.get('message', '')
-                print(f"New message from {sender}: {message_text}\n")
-            elif action == 'HISTORY_RECEIVED':
-                print(f"Received chat history\n")
-            elif action == 'ALL_ROOM_RECEIVED':
-                print(f"Received list of all chat rooms\n")
+                print(f"[{client_id}] Received player information update\n")
 
         # Handle NOTIFICATION events
         elif event == 'NOTIFICATION':
             if action == 'ACK_SEND_FRIEND_REQUEST':
-                print(f"Friend request sent successfully\n")
+                print(f"[{client_id}] Friend request sent successfully\n")
             elif action == 'ACK_ACCEPT_FRIEND_REQUEST':
-                print(f"Friend request accepted\n")
+                print(f"[{client_id}] Friend request accepted\n")
             elif action == 'ACK_ACCEPT_FRIEND_REQUEST_HOST':
-                print(f"Your friend request was accepted\n")
+                print(f"[{client_id}] Your friend request was accepted\n")
             elif action == 'ACK_REFUSE_FRIEND_REQUEST':
-                print(f"Friend request refused\n")
+                print(f"[{client_id}] Friend request refused\n")
             elif action == 'ACK_DELETE_FRIEND':
-                print(f"Friend deleted successfully\n")
+                print(f"[{client_id}] Friend deleted successfully\n")
             elif action == 'ACK_DELETE_FRIEND_HOST':
-                print(f"You were removed from someone's friend list\n")
+                print(f"[{client_id}] You were removed from someone's friend list\n")
             elif action == 'NOTIF_TEST':
-                print(f"Received test notification\n")
+                print(f"[{client_id}] Received test notification\n")
 
         # Handle ERROR events
         elif event == 'ERROR':
             error_msg = content
-            print(f"Error received: {error_msg}\n")
-            stop_event.set()  # Signal to stop all threads
+            print(f"[{client_id}] Error received: {error_msg}\n")
+            stop_event.set()
 
-        # Handle unknown events
         else:
-            print(f"Received unknown event: {event} with action: {action}")
-            print(f"Full message: {msg_data}")
+            print(f"[{client_id}] Received unknown event: {event} with action: {action}")
+            print(f"[{client_id}] Full message: {msg_data}")
 
     except json.JSONDecodeError:
-        print(f"Invalid JSON received: {message}")
+        print(f"[{client_id}] Invalid JSON received: {message}")
 
 
 def on_error(ws, error, client_id):
-    """Handle WebSocket errors"""
-    print(f"Client {client_id} error: {error}")
-    # Remove client from connections if it's there but errored
+    print(f"[{client_id}] Error: {error}")
     if client_id in client_connections and client_connections[client_id] == ws:
-        print(f"Removing client {client_id} from connections due to error")
+        print(f"[{client_id}] Removing client from connections due to error")
         del client_connections[client_id]
 
 
 def on_close(ws, close_status_code, close_msg, client_id):
-    """Handle WebSocket connection close"""
-    print(f"Client {client_id} connection closed: {close_status_code} - {close_msg}")
-    # Remove client from connections if it's there but closed
+    print(f"[{client_id}] Connection closed: {close_status_code} - {close_msg}")
+
+    # Remove the connection from our tracking dictionary
     if client_id in client_connections and client_connections[client_id] == ws:
-        print(f"Removing client {client_id} from connections due to closure")
+        print(f"[{client_id}] Removing client from connections due to closure")
         del client_connections[client_id]
+
+        # Only set stop_event if this wasn't from a game connection or tournament loss
+        # if not (client_id.endswith('_game') or (close_msg and 'TOURNAMENT_LOSE_GAME' in str(close_msg))):
+        #     stop_event.set()
 
 
 def on_open(ws, client_id, is_host=False):
-    """Handle WebSocket connection open"""
     client_connections[client_id] = ws
-    print(f"Client {client_id} connected successfully\n")
+    print(f"[{client_id}] Connected successfully\n")
 
-    # If this is the host client, create a tournament
     if is_host and not stop_event.is_set():
         global num_clients
         create_tournament(client_id, num_clients)
@@ -254,7 +289,7 @@ def create_tournament(client_id, num_clients):
                 "max_players": num_clients,
                 "public": True,
                 "bots": True,
-                "points_to_win": 11,
+                "points_to_win": 1,
                 "timer": 120
             }
         }
@@ -265,14 +300,11 @@ def create_tournament(client_id, num_clients):
 
 
 def join_tournament(client_id, code):
-    """Send a message to join a tournament"""
     if client_id not in client_connections:
-        print(f"Client {client_id} not connected")
+        print(f"[{client_id}] Not connected")
         return
 
     ws = client_connections[client_id]
-
-    # Join tournament message
     join_msg = {
         "event": "tournament",
         "data": {
@@ -283,8 +315,19 @@ def join_tournament(client_id, code):
         }
     }
 
-    print(f"Client {client_id} joining tournament {code}...")
+    print(f"[{client_id}] Joining tournament {code}...")
     ws.send(json.dumps(join_msg))
+
+
+def close_game_connection(client_id):
+    """Helper function to close game connection"""
+    game_client_id = f"{client_id}_game"
+    if game_client_id in client_connections:
+        try:
+            game_ws = client_connections[game_client_id]
+            game_ws.close()
+        except:
+            print(f"[{game_client_id}] Error while closing game connection\n")
 
 
 def cleanup():
@@ -292,7 +335,8 @@ def cleanup():
     print("Cleaning up...")
 
     # Close all WebSocket connections
-    for client_id, ws in client_connections.items():
+    # Create a copy of the dictionary items to avoid "dictionary changed size during iteration" error
+    for client_id, ws in list(client_connections.items()):
         try:
             ws.close()
         except:

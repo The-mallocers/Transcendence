@@ -11,7 +11,7 @@ class ProfilePermission(BasePermission):
         return request.user and request.user.is_authenticated
 
     def has_object_permission(self, request: HttpRequest, view, obj: Profile):
-        client: Clients = Clients.get_client_by_id(request.user.id)
+        client: Clients = Clients.get_client_by_id(request.user.code)
 
         if client.profile_id is obj.id or client.rights.is_admin:
             return True

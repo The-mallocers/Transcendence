@@ -12,13 +12,11 @@ class GameStatus(str, Enum):
     ERROR: str = 'error'
 
 
-status_order = list(GameStatus)
-
+game_status_order = list(GameStatus)
 
 class TournamentStatus(str, Enum):
     CREATING: str = 'creating'
     WAITING: str = 'waiting'
-    CREATING_MATCH: str = 'creating_match'
     STARTING: str = 'starting'
     RUNNING: str = 'running'
     ENDING: str = 'ending'
@@ -97,6 +95,8 @@ class ResponseAction(str, Enum):
     TOURNAMENT_WAITTING_PLAYERS: str = 'Waiting players for tournament'
     TOURNAMENT_PLAYERS_READY: str = 'Players are ready'
     TOURNAMENT_GAME_READY: str = 'Game is ready'
+    TOURNAMENT_GAME_FINISH: str = 'Game is finished'
+    TOURNAMENT_LOSE_GAME: str = "You're kick from tournament due to losing game."
 
     # ── Game Actions ──────────────────────────────────────────────────────────────────
     JOIN_GAME: str = 'You have successfully joined the game'

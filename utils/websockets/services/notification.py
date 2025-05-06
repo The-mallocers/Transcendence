@@ -41,7 +41,7 @@ class NotificationService(BaseServices):
         # if I am already his friend 
         if askfriend is None:
             return await asend_group_error(self.service_group, ResponseError.USER_ALREADY_MY_FRIEND)
-        await asend_group(RTables.GROUP_CLIENT(target.id),
+        await asend_group(RTables.GROUP_CLIENT(target.code),
                           EventType.NOTIFICATION,
                           ResponseAction.ACK_SEND_FRIEND_REQUEST,
                           {
@@ -69,16 +69,16 @@ class NotificationService(BaseServices):
             await asend_group(self.service_group, EventType.NOTIFICATION,
                               ResponseAction.ACK_ACCEPT_FRIEND_REQUEST_HOST,
                               {
-                                  "sender": str(target.id),
+                                  "sender": str(target.code),
                                   "username": await target.aget_profile_username()
                               })
 
-            await asend_group(RTables.GROUP_CLIENT(target.id), EventType.NOTIFICATION,
+            await asend_group(RTables.GROUP_CLIENT(target.code), EventType.NOTIFICATION,
                               ResponseAction.ACK_ACCEPT_FRIEND_REQUEST,
                               {
                                   "sender": str(client.id),
                                   "username": await client.aget_profile_username(),
-                                  "room": str(room.id)
+                                  "room": str(room.code)
                               })
 
         except:
@@ -95,7 +95,7 @@ class NotificationService(BaseServices):
             await asend_group(self.service_group, EventType.NOTIFICATION,
                               ResponseAction.ACK_REFUSE_FRIEND_REQUEST,
                               {
-                                  "sender": str(target.id),
+                                  "sender": str(target.code),
                                   "username": await target.aget_profile_username()
                               })
         except:
@@ -116,11 +116,11 @@ class NotificationService(BaseServices):
                               EventType.NOTIFICATION,
                               ResponseAction.ACK_DELETE_FRIEND_HOST,
                               {
-                                  "sender": str(target.id),
+                                  "sender": str(target.code),
                                   "username": await target.aget_profile_username()
                               })
 
-            await asend_group(RTables.GROUP_CLIENT(target.id),
+            await asend_group(RTables.GROUP_CLIENT(target.code),
                               EventType.NOTIFICATION,
                               ResponseAction.ACK_DELETE_FRIEND,
                               {

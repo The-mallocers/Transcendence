@@ -17,13 +17,13 @@ from utils.websockets.channel_send import send_group_error
 
 class MatchmakingThread(Threads):
     def main(self):
-        game: Game = Game()
+        game: Game = Game.create_game()
 
         while not self._stop_event.is_set():
             self.start_tournament()
             try:
                 if game is None:
-                    game = Game()
+                    game = Game.create_game()
 
                 if self.select_players(game):
                     game.create_redis_game()
@@ -84,33 +84,35 @@ class MatchmakingThread(Threads):
 
     def select_players(self, game):
         # First we check the global queue
-        players_queue = self.redis.hgetall(RTables.HASH_G_QUEUE)
-        players = [player.decode('utf-8') for player in players_queue]
-        if len(players) >= 2:  # il faudra ce base sur les mmr
-            selected_players = players[:2]  # this gets the first 2 players of the list
-            random.shuffle(selected_players)
+        clients_queue = self.redis.hgetall(RTables.HASH_G_QUEUE)
+        clients = [Clients.get_client_by_id(client.decode('utf-8')) for client in clients_queue]
+        if len(clients) >= 2:  # il faudra ce base sur les mmr
+            selected_clients = clients[:2]  # this gets the first 2 players of the list
+            random.shuffle(selected_clients)
             game.is_duel = False
-            game.pL = Player(selected_players[0])
-            game.pR = Player(selected_players[1])
+            game.pL = Player.create_player(selected_clients[0])
+            game.pR = Player.create_player(selected_clients[1])
             if game.pL is not None and game.pR is not None:
                 return True
         # second we check the duel for start game
         cursor = 0
         cursor, duels = self.redis.scan(cursor=cursor, match=RTables.HASH_DUEL_QUEUE('*'))
         for duel in duels:
-            players = list(self.redis.hgetall(duel).items())
-            random.shuffle(players)
-            player_1, stat_p1 = players[0]
-            player_2, stat_p2 = players[1]
-            channel_p1 = self.redis.hget(name=RTables.HASH_CLIENT(player_1.decode('utf-8')), key=str(EventType.GAME.value))
-            channel_p2 = self.redis.hget(name=RTables.HASH_CLIENT(player_2.decode('utf-8')), key=str(EventType.GAME.value))
+            clients = list(self.redis.hgetall(duel).items())
+            random.shuffle(clients)
+            client_1, stat_p1 = clients[0]
+            client_2, stat_p2 = clients[1]
+            client_1 = Clients.get_client_by_id(client_1)
+            client_2 = Clients.get_client_by_id(client_2)
+            channel_p1 = self.redis.hget(name=RTables.HASH_CLIENT(client_1.id), key=str(EventType.GAME.value))
+            channel_p2 = self.redis.hget(name=RTables.HASH_CLIENT(client_2.id), key=str(EventType.GAME.value))
             if not channel_p1 or not channel_p2:
                 return False
             if stat_p1.decode('utf-8') == 'True' and stat_p2.decode('utf-8') == 'True':
                 game.is_duel = True
                 game.code = re.search(rf'{RTables.HASH_DUEL_QUEUE("")}(\w+)$', duel.decode('utf-8')).group(1)
                 game.game_key = RTables.JSON_GAME(game.code)
-                game.pL = Player(player_1.decode('utf-8'))
-                game.pR = Player(player_2.decode('utf-8'))
+                game.pL = Player.create_player(client_1)
+                game.pR = Player.create_player(client_2)
                 return True
         return False

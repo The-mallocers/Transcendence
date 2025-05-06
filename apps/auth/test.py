@@ -21,7 +21,7 @@ class PasswordModelTest(TestCase):
     def test_password_creation(self):
         """Test that a password is created and hashed"""
         # Get the password from the database
-        password = Password.objects.get(id=self.password.id)
+        password = Password.objects.get(id=self.password.code)
 
         # Check that the password is hashed (starts with bcrypt prefix)
         self.assertTrue(password.password.startswith('$2b$'))
@@ -32,7 +32,7 @@ class PasswordModelTest(TestCase):
     def test_check_pwd(self):
         """Test password verification"""
         # Get the password from the database
-        password = Password.objects.get(id=self.password.id)
+        password = Password.objects.get(id=self.password.code)
 
         # Check that the correct password verifies
         self.assertTrue(password.check_pwd("testpassword123"))
