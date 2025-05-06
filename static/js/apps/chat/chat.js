@@ -1,5 +1,4 @@
 import { WebSocketManager } from "../../websockets/websockets.js"
-import { notifSocket } from "../../spa/spa.js";
 import { navigateTo } from "../../spa/spa.js";
 import { create_message_duel } from "../game/gamemode.js";
 import { create_message_notif_block } from "../profile/profile.js";
@@ -8,7 +7,7 @@ import { getClientId } from "../../utils/utils.js";
 
 let client_id = null;
 let room_id = null;
-
+const notifSocket = WebSocketManager.notifSocket;
 
 function scrollToBottom(element){
     element.scrollTop = element.scrollHeight;
