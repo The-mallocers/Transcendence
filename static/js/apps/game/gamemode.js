@@ -1,8 +1,9 @@
 import { navigateTo } from "../../spa/spa.js";
-import { notifSocket } from "../../spa/spa.js";
 import { apiFriends } from "../profile/profile.js";
+import { WebSocketManager } from "../../websockets/websockets.js";
 
 const pathname = window.location.pathname;
+const notifSocket = WebSocketManager.notifSocket;
 
 if(pathname == "/pong/gamemodes/")
 {
