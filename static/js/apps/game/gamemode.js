@@ -3,14 +3,24 @@ import { notifSocket } from "../../spa/spa.js";
 import { apiFriends } from "../profile/profile.js";
 
 const pathname = window.location.pathname;
-console.log(pathname);
 
 if(pathname == "/pong/gamemodes/")
 {
     const friends = await apiFriends("/api/friends/get_friends/");
     const duelFriends = document.querySelector(".friends-to-duel");
+    console.log(friends);
+    if(!friends.length)
+    {
+        const parser = new DOMParser();
+        const html =
+        `<li class="list-group-item d-flex justify-content-between align-items-center">
+            <div>No friend to duel</div>
+        </li>`
+        const doc = parser.parseFromString(html, "text/html");
+        const friendElement = doc.body.firstChild;
+        duelFriends.appendChild(friendElement);
+    }
     friends.forEach(friend => {
-        console.log(friend);
         const parser = new DOMParser();
         const html =
         `<li class="list-group-item d-flex justify-content-between align-items-center">

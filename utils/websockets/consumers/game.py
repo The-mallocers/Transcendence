@@ -16,7 +16,6 @@ class GameConsumer(WsConsumer):
     async def receive(self, text_data=None, bytes_data=None):
         try:
             data = loads(text_data)
-            print("dans la game")
             if self.event_type is EventType.MATCHMAKING and data['event'] == EventType.GAME.value:
                 self.event_type = EventType(data['event'])
                 self.service = GameService()

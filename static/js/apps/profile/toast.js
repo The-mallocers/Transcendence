@@ -53,7 +53,6 @@ function toast_friend(message, data, itemToDelete){
 }
 
 function toast_duel(message, data, itemToDelete){
-    console.log("toast_duel ||||||||||||||||||||||||||||||||||||||||||||||||||||"); 
 
     const date = new Date();
     const hours = date.getHours().toString().padStart(2, '0');
@@ -86,14 +85,14 @@ function toast_duel(message, data, itemToDelete){
     const newToast = toastContainer.lastChild;
     const acceptDuel = newToast.querySelector('.accept_duel');
     acceptDuel.addEventListener('click', function() {
-        window.handleAcceptDuel(data.content.code);
+        window.handleAcceptDuel(data.content.code, data.content.username);
     });
     const refuseDuel = newToast.querySelector('.refuse_duel');
     refuseDuel.addEventListener('click', function() {
         if (itemToDelete) {
             itemToDelete.remove();
         }
-        window.handleRefuseDuel(data.content.code);
+        window.handleRefuseDuel(data.content.code, data.content.username);
     });
     const toastBootstrap = new bootstrap.Toast(newToast);
     toastBootstrap.show();

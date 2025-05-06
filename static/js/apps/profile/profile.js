@@ -196,6 +196,7 @@ notifSocket.onmessage = (event) => {
             chatElement.parentElement.remove();
     }
     else if(message.data.action == "ACK_ASK_DUEL") {
+        console.log("dans handle l'opponent vaut: " + message.data.content.username);
         let pending_group = document.querySelector('.pending_group');
         const parser = new DOMParser();
         const htmlString = 
@@ -212,12 +213,12 @@ notifSocket.onmessage = (event) => {
         
         const acceptDuel = pendingElement.querySelector('.accept_duel');
         acceptDuel.addEventListener('click', function() {
-            handleAcceptDuel(message.data.content.code);
+            handleAcceptDuel(message.data.content.code, message.data.content.username);
         });
         const refuseDuel = pendingElement.querySelector('.refuse_duel');
         refuseDuel.addEventListener('click', function() {
             pendingElement.remove();
-            handleRefuseDuel(message.data.content.code);
+            handleRefuseDuel(message.data.content.code, message.data.content.username);
         });
         if(pending_group)
         {
@@ -226,16 +227,7 @@ notifSocket.onmessage = (event) => {
         toast_duel(`${message.data.content.username} wants a duel`, message.data, pendingElement);
     }
     else if(message.data.action == "DUEL_CREATED"){
-        navigateTo('/pong/duel/');
-        setTimeout(() => {
-            const opponentdiv = document.querySelector(".opponent_player");
-            if(opponentdiv) {
-                console.log('changing name of opponent');
-                opponentdiv.innerHTML = opponentName;
-            } else {
-                console.log('Opponent div not found even after delay');
-            }
-        }, 500);
+        navigateTo(`/pong/duel/?opponent=${message.data.content.opponent}`);
         // const socket = create_message_notif("get_opponent_name", message.data.content.opponent)
         // notifSocket.send(JSON.stringify(socket));
     }
@@ -308,22 +300,23 @@ window.handleDeleteFriend = function(username) {
     notifSocket.send(JSON.stringify(message));
 };
 
-window.handleAcceptDuel = function(code) {
+window.handleAcceptDuel = function(code, targetName) {
     const toast = document.querySelector(".toast");
     
     if(toast)
         toast.remove();
-    const message = create_message_duel("accept_duel", code);
+    console.log(targetName);
+    const message = create_message_duel("accept_duel", code, targetName);
     notifSocket.send(JSON.stringify(message));
-    navigateTo('/pong/duel/');
+    navigateTo(`/pong/duel/?opponent=${targetName}`);
 };
 
-window.handleRefuseDuel = function(code) {
+window.handleRefuseDuel = function(code, targetName) {
     const toast = document.querySelector(".toast");
     
     if(toast)
         toast.remove();
-    const message = create_message_duel("refuse_duel", code);
+    const message = create_message_duel("refuse_duel", code, targetName);
     notifSocket.send(JSON.stringify(message));
 };
 
@@ -341,7 +334,7 @@ function create_message_notif(action, targetUser)
     return message;
 }
 
-function create_message_duel(action, code)
+function create_message_duel(action, code, targetName)
 {
     let message = {
         "event": "notification",
@@ -349,6 +342,7 @@ function create_message_duel(action, code)
             "action": action,
             "args": {
                 "code": code,
+                "username": targetName,
             }
         } 
     }
