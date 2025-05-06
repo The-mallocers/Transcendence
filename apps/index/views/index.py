@@ -15,7 +15,6 @@ def get(req):
     games_played = client.stats.games.all().order_by('-created_at')
     ghistory = get_last_matches(client, games_played)
     friends_list = client.get_all_friends()
-    print("friends_list: ", friends_list)
     friends_pending = client.get_all_pending_request()
     rivals = get_rivals(client, games_played)
     ghistory = get_last_matches(client, games_played)

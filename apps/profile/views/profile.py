@@ -14,7 +14,6 @@ from utils.redis import RedisConnectionPool
 def get(req):
     #Profile specific code
     requestUsername = req.GET.get("username", "minimeow")
-    # print(requestUsername)
     target = Clients.get_client_by_username(requestUsername)
     # do something if client not found
     if target is None : 
@@ -26,11 +25,14 @@ def get(req):
     #test if I have a friend
     #If I have it i dont display the friend request button
     client = Clients.get_client_by_request(req)
+    me = Clients.get_client_by_request(req)
     is_friend = client.is_friend_by_id(target)
     
     show_friend_request = False
     if is_friend is False or None:
         show_friend_request = True
+    if requestUsername == me.profile.username:
+        show_friend_request = False
     #End of specific profile content
     
     client = target #The client is not us its the target we are looking at !

@@ -3,10 +3,7 @@ import {navigateTo} from "../../spa/spa.js";
 import { toast_friend } from "./toast.js";
 import { toast_duel } from "./toast.js";
 import { toast_message } from "./toast.js";
-import { getClientId } from "../../utils/utils.js";
 
-let client_id = null;
-const clientId = await getClientId();
 const notifSocket =  WebSocketManager.notifSocket; 
 
 const searchParams = new URLSearchParams(window.location.search);
@@ -290,28 +287,6 @@ notifSocket.onmessage = (event) => {
     }
 }
 
-//This file is now in utils.js ! 
-
-// async function getClientId() {
-//     try {
-//         const response = await fetch("/api/auth/getId/", {
-//             method: "GET",
-//             credentials: "include",
-//         });
-//         const data = await response.json();
-
-//         if (data.client_id) {
-//             client_id = data.client_id;
-//             return client_id;
-//         } else {
-//             throw new Error(data.error);
-//         }
-//     } catch (error) {
-//         console.error("Erreur lors de la récupération de l'ID :", error);
-//         return null;
-//     }
-// }
-
 // Define the functions in the global scope (window)
 window.handleAskFriend = function(username) {
     console.log("the friend to add is " + username);
@@ -427,5 +402,4 @@ export async function apiFriends(endpoint) {
 }
 
 export {create_message_notif}
-// export {getClientId}
 export {create_message_notif_block}
