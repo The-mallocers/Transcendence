@@ -96,7 +96,7 @@ if(!searchParams.has('username') && pathname == '/')
                 parentListItem.remove();
             }
             console.log(duel.duel_id)
-            handleAcceptDuel(duel.duel_id);
+            handleAcceptDuel(duel.duel_id, duel.username);
         });
         
         const deleteButton = pendingElement.querySelector('.refuse_duel');
@@ -105,7 +105,7 @@ if(!searchParams.has('username') && pathname == '/')
             if (parentListItem) {
                 parentListItem.remove();
             }
-            handleRefuseDuel(duel.duel_id);
+            handleRefuseDuel(duel.duel_id, duel.username);
         });
         pending_group.appendChild(pendingElement);        
     })
