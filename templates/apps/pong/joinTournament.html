@@ -12,15 +12,16 @@
           {% for room in rooms %}
             <div class="col room d-flex justify-content-center align-items-center">
                 <div class="cardContainer">
-                    <div class="front d-flex align-items-center justify-content-center border">
-                        <div class="d-flex flex-column align-items-center justify-content-center">
-                            <img class="roomAvatar" src='/static{{room.leaderAvatar}}' alt="">
-                            <div class="p-3 text-center">{{ room.name }}</div>
+                    <h4>Minimeow'w tournament</h4>
+
+                    
+                    <div class="d-flex flex-row align-items-center justify-content-between">
+                        <div class="btn joinBtn">join</div>
+                        <div class="avatarsContainer mt-2">
+                            <img src="/static/img/img.png" alt="">
+                            <img src="/static/img/img.png" alt="">
+                            <img src="/static/img/img.png" alt="">
                         </div>
-                        <div class="p-3 text-center players">{{ room.players }} / 8</div>
-                    </div>
-                    <div class="back d-flex justify-content-center align-items-center">
-                        <div class="btn joinBtn">Join Game</div>
                     </div>
                 </div>
             </div>
