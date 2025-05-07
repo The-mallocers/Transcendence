@@ -163,6 +163,24 @@
 
 }
 
-.joinTournamentContainer .avatarsContainer img:not(:first-of-type){
+.joinTournamentContainer .avatarsContainer .imgContainer:not(:first-of-type){
     margin-left: -15px;
+}
+
+.joinTournamentContainer .avatarsContainer .imgContainer:last-of-type{
+    position: relative;
+}
+
+.joinTournamentContainer .avatarsContainer .imgContainer:last-of-type img{
+    filter: brightness(0.3);
+}
+
+
+.joinTournamentContainer .avatarsContainer .more{
+    /* margin-left: -15px; */
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #fff;
 }
