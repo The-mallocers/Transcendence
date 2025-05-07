@@ -158,9 +158,13 @@
 .joinTournamentContainer .avatarsContainer img {
     height: 40px;
     width: 40px;
+    border-radius: 50%;
+}
+
+
+.joinTournamentContainer .avatarsContainer .imgContainer{
     border: 2px solid #fff;
     border-radius: 50%;
-
 }
 
 .joinTournamentContainer .avatarsContainer .imgContainer:not(:first-of-type){
@@ -169,6 +173,7 @@
 
 .joinTournamentContainer .avatarsContainer .imgContainer:last-of-type{
     position: relative;
+    overflow: hidden;
 }
 
 .joinTournamentContainer .avatarsContainer .imgContainer:last-of-type img{
