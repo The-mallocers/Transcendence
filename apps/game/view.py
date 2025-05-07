@@ -42,6 +42,11 @@ def inTournamentRoom(req):
     from apps.game.views.tournaments import inRoom
     return inRoom(req)
 
+@require_http_methods(["GET"])
+def inTournamentTree(req):
+    from apps.game.views.tournaments import tournamentTree
+    return tournamentTree(req)
+
 
 @require_http_methods(["GET"])
 def disconnect_get(req):

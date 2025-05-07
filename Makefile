@@ -59,6 +59,10 @@ reload:
 clean: dbclean
 	docker compose -f ./$(DOCKER_COMPOSE_FILE) down --rmi all
 
+reload:
+	cp -r static/css ./docker/staticdocker
+	cp -r static/js ./docker/staticdocker
+
 re: down up
 
 redetach: down detach

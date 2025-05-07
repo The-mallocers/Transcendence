@@ -1,19 +1,35 @@
 <div class="joinTournamentContainer">
     <div class="container">
+        <h1 class="text-center mt-5">Create tournament lobby</h1>
+        <div class="gamemodeCardContainer" data-route="/pong/tournament/create/">
+            <div class="d-flex flex-column align-items-center justify-content-center gamemodeCard  front">
+                <h2>Tournament</h2>
+                <img src="/static/assets/imgs/diamond.png" alt="">
+            </div>
+        </div> 
         <h1 class="text-center mt-5">Join a room</h1>
         <div class="row row-cols-3 d-flex justify-content-start roomsContainer">
           {% for room in rooms %}
             <div class="col room d-flex justify-content-center align-items-center">
                 <div class="cardContainer">
-                    <div class="front d-flex align-items-center justify-content-center border">
-                        <div class="d-flex flex-column align-items-center justify-content-center">
-                            <img class="roomAvatar" src='/static{{room.leaderAvatar}}' alt="">
-                            <div class="p-3 text-center">{{ room.name }}</div>
+                    <h4>{{ room.name }}</h4>
+
+                    
+                    <div class="d-flex flex-row align-items-center justify-content-between">
+                        <div class="btn joinBtn">join</div>
+                        <div class="avatarsContainer mt-2">
+                            
+                            <div class="imgContainer">
+                                <img src="/static/img/img.png" alt="">
+                            </div>
+                            <div class="imgContainer">
+                                <img src="/static/img/img.png" alt="">
+                            </div>
+                            <div class="imgContainer">
+                                <img src="/static/img/img.png" alt="">
+                                <div class="more">+6</div>
+                            </div>
                         </div>
-                        <div class="p-3 text-center players">{{ room.players }} / 8</div>
-                    </div>
-                    <div class="back d-flex justify-content-center align-items-center">
-                        <div class="btn joinBtn">Join Game</div>
                     </div>
                 </div>
             </div>

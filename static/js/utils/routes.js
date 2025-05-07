@@ -20,6 +20,18 @@ const routes = [
             return await fetchRoute(`/pages/auth/auth42${query}`);
         }
     },
+    {
+        path: '/pong/tournament/',
+        template: async (query) => {
+            return await fetchRoute(`/pages/pong/tournament/${query}`);
+        },
+    },
+    {
+        path: '/pong/tournament/tree/',
+        template: async (query) => {
+            return await fetchRoute(`/pages/pong/tournament/tree/${query}`);
+        },
+    },
 
     // Ajoute ta route basique la bg !
     '/',
@@ -36,7 +48,9 @@ const routes = [
     '/admin/monitoring/',
     '/chat/friendrequest/',
     '/pong/disconnect/',
-    '/pong/duel/'
+    '/pong/duel/',
+    '/pong/tournament/create/',
+    '/pong/tournament/join/'
 ].map(route => {
     if (typeof route === 'object') return route;
 

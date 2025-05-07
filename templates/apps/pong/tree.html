@@ -1,0 +1,154 @@
+<style>
+    
+    .treePage {
+
+    }
+
+    .treePage .round {
+        width: 50%;
+        background-color: white;
+        border: rgb(228, 228, 228) 1px solid;
+        border-radius: 20px;
+        padding: 20px;
+    }
+
+    .treePage .players {
+        display: flex;
+        align-items: center;
+        justify-content: space-evenly;
+        padding: 20px 100px;
+    }
+
+    .treePage .players .left,  .treePage .players .right{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+    }
+
+    .treePage .players img {
+        height: 40px;
+        width : 40px;
+        border-radius: 50%;
+    }
+
+    .treePage .players td {
+        display: flex;
+    }
+
+    .treePage th {
+        vertical-align: middle;
+        text-align: center;
+    }
+
+    .treePage td {
+        vertical-align: middle;
+        text-align: center;
+        padding: 25px;
+    }
+
+    .treePage .winner {
+        color: green;
+    }
+
+    .treePage .loser {
+        color: red;
+    }
+
+</style>
+
+<div class="treePage d-flex flex-column justify-content-center align-items-center">
+
+    <div class="round mt-5">
+        <h2>Round 1</h2>
+        <table class="table mt-2">
+            <thead>
+            <tr>
+                <th scope="col">Players</th>
+                <th scope="col">Status</th>
+                <th scope="col">Scores</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td class="players">
+                    <div class="left">
+                        <img src="/static/img/img.png" alt="">
+                        <div>meow</div>
+                    </div>
+                    <div class="vs">VS</div>
+                    <div class="right">
+                        <img src="/static/img/img.png" alt="">
+                        <div>meow</div>
+                    </div>
+                </td>
+                <td><span class="badge bg-success">Played</span></td>
+                <td><span class="left-score winner">5</span> - <span class="right-score loser">0</span></td>
+            </tr>
+            <tr>
+                <td class="players">
+                    <div class="left">
+                        <img src="/static/img/img.png" alt="">
+                        <div>meow</div>
+                    </div>
+                    <div class="vs">VS</div>
+                    <div class="right">
+                        <img src="/static/img/img.png" alt="">
+                        <div>meow</div>
+                    </div>
+                </td>
+                <td><span class="badge bg-success">Played</span></td>
+                <td><span class="left-score winner">5</span> - <span class="right-score loser">0</span></td>
+            </tr>
+            <tr>
+                <td class="players">
+                    <div class="left">
+                        <img src="/static/img/img.png" alt="">
+                        <div>brrbrrpatapim</div>
+                    </div>
+                    <div class="vs">VS</div>
+                    <div class="right">
+                        <img src="/static/img/img.png" alt="">
+                        <div>trallalerotralala</div>
+                    </div>
+                </td>
+                <td><span class="badge bg-success">Played</span></td>
+                <td><span class="left-score winner">5</span> - <span class="right-score loser">0</span></td>
+            </tr>
+            <tr>
+                <td class="players">
+                    <div class="left">
+                        <img src="/static/img/img.png" alt="">
+                        <div>brrbrrpatapim</div>
+                    </div>
+                    <div class="vs">VS</div>
+                    <div class="right">
+                        <img src="/static/img/img.png" alt="">
+                        <div>trallalerotralala</div>
+                    </div>
+                </td>
+                <td><span class="badge bg-success">Played</span></td>
+                <td><span class="left-score winner">5</span> - <span class="right-score loser">0</span></td>
+            </tr>
+            <tr>
+                <td class="players">
+                    <div class="left">
+                        <img src="/static/img/img.png" alt="">
+                        <div>brrbrrpatapim</div>
+                    </div>
+                    <div class="vs">VS</div>
+                    <div class="right">
+                        <img src="/static/img/img.png" alt="">
+                        <div>trallalerotralala</div>
+                    </div>
+                </td>
+                <td><span class="badge bg-success">Played</span></td>
+                <td><span class="left-score winner">5</span> - <span class="right-score loser">0</span></td>
+            </tr>
+            <!-- we can add a tr for every competitor of the tournament for each round  -->
+            <!-- should dynamicaly do so when socket updates with atresall -->
+            </tbody>
+        </table>
+    </div>
+
+</div>
