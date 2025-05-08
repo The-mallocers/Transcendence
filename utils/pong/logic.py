@@ -176,26 +176,28 @@ class PongLogic:
 
     def _game_update(self, changes):
         if changes['ball']:
-            self.ball.update()
+            # self.ball.update()
             send_group(RTables.GROUP_GAME(self.game_id), EventType.UPDATE, ResponseAction.BALL_UPDATE, BallSerializer(self.ball).data)
 
         if changes['paddle_pL']:
-            self.paddle_pL.update()
+            print("Hello I do indeed think theres changes in paddle left")
+            print(changes['paddle_pL'])
+            # self.paddle_pL.update()
             send_group(RTables.GROUP_GAME(self.game_id), EventType.UPDATE, ResponseAction.PADDLE_LEFT_UPDATE,
                        PaddleSerializer(self.paddle_pL).data)
 
         if changes['paddle_pR']:
-            self.paddle_pR.update()
+            # self.paddle_pR.update()
             send_group(RTables.GROUP_GAME(self.game_id), EventType.UPDATE, ResponseAction.PADDLE_RIGHT_UPDATE,
                        PaddleSerializer(self.paddle_pR).data)
 
         if changes['score_pL']:
-            self.score_pL.update()
+            # self.score_pL.update()
             send_group(RTables.GROUP_GAME(self.game_id), EventType.UPDATE, ResponseAction.SCORE_LEFT_UPDATE,
                        self.score_pL.get_score())
 
         if changes['score_pR']:
-            self.score_pR.update()
+            # self.score_pR.update()
             send_group(RTables.GROUP_GAME(self.game_id), EventType.UPDATE, ResponseAction.SCORE_RIGHT_UPDATE,
                        self.score_pR.get_score())
 
