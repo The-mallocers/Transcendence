@@ -1,32 +1,37 @@
 import { WebSocketManager } from "../../websockets/websockets.js";
 import { navigateTo } from '../../spa/spa.js';
 import { isGameOver } from "./VarGame.js"
+// import { apiFriends } from "../profile/profile.js";
 
 const socket = WebSocketManager.gameSocket;
 let canvas = document.getElementById("pongCanvas");
 let ctx = canvas.getContext("2d");
-let lusername = document.getElementById("lusername");
-let rusername = document.getElementById("rusername");
+const lusername = document.getElementById("lusername");
+const rusername = document.getElementById("rusername");
 let lscore = document.getElementById("scoreLeft");
 let rscore = document.getElementById("scoreRight");
-let height = 500;
+
+const height = 500;
 const width = 1000;
 const ballSize = 10;
 const paddleThickness = 20;
-let paddleHeight = 100;
+const paddleHeight = 100;
 canvas.width = width;
 canvas.height = height;
+const PADDLE_SPEED = 300; // pixels per second
+
 let is_gameplay_start = false;
 let last_time = 0;
 let did_tab_out = false;
 let delta = 0;
-const PADDLE_SPEED = 300; // pixels per second
-let lastUpdateTime = 0;
 let frameCount = 0;
-let pleft_last_move = "idle";
-let rleft_last_move = "idle";
-//Need to add an API call so that I know which fucking paddle I am;
+let left_last_move = "idle";
+let right_last_move = "idle";
 
+//Below code might be useful one day.
+// const name_data = await apiFriends("/api/friends/whoami/");
+// console.log("my name is", name_data);
+// const my_name = name_data.data.username;
 
 //Si un petit malin va sur la page sans raison
 if (!socket || socket.readyState === WebSocket.CLOSED) {
@@ -62,18 +67,18 @@ if (!socket || socket.readyState === WebSocket.CLOSED) {
             }
             if (jsonData.data.action == "PADDLE_LEFT_UPDATE") {
                 console.log("move from server:", jsonData.data.content.move);
-                window.GameState.left.y = jsonData.data.content.y;
-                // current_move = jsonData.data.content.move 
-                // if (current_move != pleft_last_move) {
-                //     pleft_last_move = current_move;
-                // }
+                const current_move = jsonData.data.content.move 
+                if (current_move != left_last_move) {
+                    window.GameState.left.y = jsonData.data.content.y;
+                    left_last_move = current_move;
+                }
             } else if (jsonData.data.action == "PADDLE_RIGHT_UPDATE") {
-                window.GameState.right.y = jsonData.data.content.y
                 console.log("move from server:", jsonData.data.content.move);
-                // current_move = jsonData.data.content.move 
-                // if (current_move != rleft_last_move) {
-                //     rleft_last_move = current_move;
-                // }
+                const current_move = jsonData.data.content.move 
+                if (current_move != right_last_move) {
+                    window.GameState.right.y = jsonData.data.content.y
+                    right_last_move = current_move;
+                }
             } else if (jsonData.data.action == "BALL_UPDATE") {
                 // console.log("Ball update is :", jsonData.data);
                 //We only update if we changed direction, this makes things smoother.
@@ -162,12 +167,19 @@ function updatePaddles() {
     } else {
         direction = 'idle';
     }
-    if (direction != previous_direction) {
-        console.log("previous direction :", previous_direction);
-        console.log("direction :", direction);
-    }
-    // (direction && previous_direction != direction) || frameCount % 10 === 0
-    if (direction) { //Had to do this for some reason otherwise its shitty
+    //the code below might be useful later, idk it doesnt work rn
+    // if (my_name == lusername) {
+    //     left_last_move = direction;
+    // }
+    // else if (my_name == rusername) {
+    //     right_last_move = direction;
+    // }
+    // if (direction != previous_direction) {
+    //     console.log("previous direction :", previous_direction);
+    //     console.log("direction :", direction);
+    // }
+    // (direction && previous_direction != direction) || frameCount % 5 === 0
+    if ((direction && previous_direction != direction) || frameCount % 5 === 0) { //Trying to send less updates
         previous_direction = direction;
         console.log("Sending to server direction :", direction);
         const message = {
@@ -223,15 +235,46 @@ const drawBall = () => {
 
 const render = () => {
     clearArena();
-
     drawArena();
-    //Work in progress//
-    //
-    drawPaddle(10, window.GameState.left.y);
-    drawPaddle(width - paddleThickness - 10, window.GameState.right.y);
+    drawPaddles();
     drawBall();
 };
 
+function drawPaddles() {
+    const left_next_y = window.GameState.left.y + computeSpeed(left_last_move) * delta;
+    const right_next_y = window.GameState.right.y + computeSpeed(right_last_move) * delta;
+    window.GameState.left.y = handleWallCollision(left_next_y);
+    window.GameState.right.y = handleWallCollision(right_next_y);
+    drawPaddle(10, window.GameState.left.y);
+    drawPaddle(width - paddleThickness - 10, window.GameState.right.y);
+}
+
+function handleWallCollision(y) {
+    if (y < 0) {
+        return 0;
+    }
+    else if (y + paddleHeight > height) {
+        return height - paddleHeight;
+    }
+    else {
+        return y
+    }
+}
+
+
+function computeSpeed(last_move) {
+    let speed = 0;
+    if (last_move == "up") {
+        speed = -1 * PADDLE_SPEED;
+    }
+    else if (last_move == "down") {
+        speed = PADDLE_SPEED;
+    }
+    else {
+        speed = 0;
+    }
+    return speed;
+}
 
 function computeDelta() {
     const curr_time = performance.now();
