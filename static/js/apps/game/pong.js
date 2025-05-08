@@ -1,6 +1,6 @@
-import {WebSocketManager} from "../../websockets/websockets.js";
-import {navigateTo} from '../../spa/spa.js';
-import {isGameOver} from "./VarGame.js"
+import { WebSocketManager } from "../../websockets/websockets.js";
+import { navigateTo } from '../../spa/spa.js';
+import { isGameOver } from "./VarGame.js"
 
 const socket = WebSocketManager.gameSocket;
 let canvas = document.getElementById("pongCanvas");
@@ -23,6 +23,8 @@ let delta = 0;
 const PADDLE_SPEED = 300; // pixels per second
 let lastUpdateTime = 0;
 let frameCount = 0;
+let pleft_last_move = "idle";
+let rleft_last_move = "idle";
 //Need to add an API call so that I know which fucking paddle I am;
 
 
@@ -59,9 +61,19 @@ if (!socket || socket.readyState === WebSocket.CLOSED) {
                 last_time = performance.now();
             }
             if (jsonData.data.action == "PADDLE_LEFT_UPDATE") {
-                window.GameState.left.y = jsonData.data.content.y
+                console.log("move from server:", jsonData.data.content.move);
+                window.GameState.left.y = jsonData.data.content.y;
+                // current_move = jsonData.data.content.move 
+                // if (current_move != pleft_last_move) {
+                //     pleft_last_move = current_move;
+                // }
             } else if (jsonData.data.action == "PADDLE_RIGHT_UPDATE") {
                 window.GameState.right.y = jsonData.data.content.y
+                console.log("move from server:", jsonData.data.content.move);
+                // current_move = jsonData.data.content.move 
+                // if (current_move != rleft_last_move) {
+                //     rleft_last_move = current_move;
+                // }
             } else if (jsonData.data.action == "BALL_UPDATE") {
                 // console.log("Ball update is :", jsonData.data);
                 //We only update if we changed direction, this makes things smoother.
@@ -135,29 +147,29 @@ function updatePaddles() {
     //This might look confusing, but this is to simulate strafing keys
     if (keys.up && keys.down) {
         if (previous_keys.up) {
-            direction = 'down'
+            direction = 'down';
         } else if (previous_keys.down) {
-            direction = 'up'
+            direction = 'up';
         }
     } else if (keys.up) {
-        direction = 'up'
+        direction = 'up';
         previous_keys.up = true;
         previous_keys.down = false;
     } else if (keys.down) {
-        direction = 'down'
+        direction = 'down';
         previous_keys.down = true;
         previous_keys.up = false;
     } else {
-        direction = 'idle'
+        direction = 'idle';
     }
     if (direction != previous_direction) {
         console.log("previous direction :", previous_direction);
         console.log("direction :", direction);
     }
-
-    if ((direction && previous_direction != direction) || frameCount % 10 === 0) { //Had to do this for some reason otherwise its shitty
+    // (direction && previous_direction != direction) || frameCount % 10 === 0
+    if (direction) { //Had to do this for some reason otherwise its shitty
         previous_direction = direction;
-        
+        console.log("Sending to server direction :", direction);
         const message = {
             "event": "game",
             "data": {
@@ -213,6 +225,8 @@ const render = () => {
     clearArena();
 
     drawArena();
+    //Work in progress//
+    //
     drawPaddle(10, window.GameState.left.y);
     drawPaddle(width - paddleThickness - 10, window.GameState.right.y);
     drawBall();
