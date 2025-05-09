@@ -81,6 +81,37 @@ class Rooms(models.Model):
 
     @staticmethod
     @sync_to_async
+    def get_user_info_by_room_id(room_id):
+        global_room = "00000000-0000-0000-0000-000000000000"
+        try:
+            with transaction.atomic():
+                # Si on demande la global room, retourner tous les utilisateurs
+                if room_id == global_room:
+                    users = Clients.objects.all().select_related('profile')
+                else:
+                    # Sinon, retourner les utilisateurs dans la room spécifiée
+                    users = Clients.objects.filter(rooms__id=room_id).select_related('profile')
+                
+                user_info = []
+                for user in users:
+                    profile_pic_url = user.profile.profile_picture.url if user.profile.profile_picture else "/static/assets/imgs/profile/default.png"
+                    user_info.append({
+                        'id': str(user.id),
+                        'username': user.profile.username,
+                        'profile_picture': profile_pic_url
+                    })
+                
+                print(f"Final users count: {len(user_info)}")
+                print(f"|||||||||||||||||| {user_info}")
+                return user_info
+        except Exception as e:
+            print(f"Error in get_user_info_by_room_id: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            return []
+    
+    @staticmethod
+    @sync_to_async
     def Aget_room_by_client_id(client_id):
         global_room = "00000000-0000-0000-0000-000000000000"
         try:

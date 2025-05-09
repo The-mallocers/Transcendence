@@ -47,7 +47,9 @@ chatSocket.onmessage = (event) => {
     else if(message.data.action == "NEW_FRIEND") {
         create_front_chat_room(message.data.content.room,
                                 message.data.content.username, 
-                                message.data.content.sender, "Block");
+                                message.data.content.sender, 
+                                "Block",
+                                message.data.content.profile_picture);
     }
     else if(message.data.action == "MESSAGE_RECEIVED") {
         if (message.data.content.room_id === room_id) {
@@ -190,21 +192,25 @@ async function displayRooms(rooms) {
         else{
             create_front_chat_room(rooms[i].room, 
                                 rooms[i].player[0].username, 
-                                rooms[i].player[0].id, rooms[i].player[0].status)
+                                rooms[i].player[0].id, 
+                                rooms[i].player[0].status,
+                                rooms[i].player[0].profile_picture)
         }
     }
     scrollToBottom(chatRooms);
 }
 
-function create_front_chat_room(room, username, usernameId, status){
+function create_front_chat_room(room, username, usernameId, status, profilePicture = null){
     const newChat = document.querySelector('.chatRooms');
     if(newChat)
     {
+        const imgSrc = profilePicture;
+
         const parser = new DOMParser();
         const htmlChat = 
         `<div class="roomroom container d-flex align-items-center justify-content-between">
             <button class="chat-${username} chat-button btn d-flex align-items-center gap-3">
-                <img src="/static/assets/imgs/profile/default.png">
+                <img src="${imgSrc}" alt="${username}'s profile picture">
                 <div>${username}</div>
             </button>
             

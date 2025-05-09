@@ -173,22 +173,25 @@ class ChatService(BaseServices):
     async def _handle_get_all_room_by_client(self, data, client: Clients):
         rooms = await Rooms.aget_room_id_by_client_id(client.id)
         formatted_messages = []
-        for room in rooms:
-            #retrieve all users from on room
-            users = await Rooms.get_usernames_by_room_id(room)
-            players = []
-            for user in users:
-                if str(client.id) != await Rooms.get_client_id_by_username(user):
-                    stringblock = "Block"
-                    player = await client.get_friend_table()
-                    if await player.user_is_block(await Clients.aget_client_by_username(user)):
-                        stringblock = "Unblock"
-                    players.append({
-                        "username": user, 
-                        "id": await Rooms.get_client_id_by_username(user),
-                        "status" : stringblock
-                    })
-            formatted_messages.append({"room": str(room), "player": players})
+        for room_id in rooms:
+            room = await Rooms.get_room_by_id(room_id)
+            if room:
+                users = await Rooms.get_user_info_by_room_id(room_id)
+                print("||||||||||||||||||",users)
+                # Filter out the current client
+                other_users = [user for user in users if str(user['id']) != str(client.id)]
+                if other_users:  # Only add rooms with other users
+                    for user in other_users:
+                        status = "Unblock" if await client.ais_blocked(user['id']) else "Block"
+                        formatted_messages.append({
+                            'room': str(room_id),
+                            'player': [{
+                                'id': user['id'],
+                                'username': user['username'],
+                                'profile_picture': user['profile_picture'],
+                                'status': status
+                            }]
+                        })
         await asend_group(self.service_group, 
                         EventType.CHAT, 
                         ResponseAction.ALL_ROOM_RECEIVED, 
