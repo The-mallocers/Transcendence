@@ -85,12 +85,13 @@ class Rooms(models.Model):
         global_room = "00000000-0000-0000-0000-000000000000"
         try:
             with transaction.atomic():
-                # Si on demande la global room, retourner tous les utilisateurs
                 if room_id == global_room:
-                    users = Clients.objects.all().select_related('profile')
-                else:
-                    # Sinon, retourner les utilisateurs dans la room spécifiée
-                    users = Clients.objects.filter(rooms__id=room_id).select_related('profile')
+                    return []
+                
+                # Simplement récupérer les utilisateurs de la room spécifiée
+                users = Clients.objects.filter(
+                    rooms__id=room_id
+                ).select_related('profile').distinct()
                 
                 user_info = []
                 for user in users:
