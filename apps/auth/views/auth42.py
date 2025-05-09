@@ -62,6 +62,7 @@ def auth42(request):
     print(token_response)
     token_data = token_response.json()
     access_token = token_data.get('access_token')
+    print("acess token")
     print(access_token)
     user_response = requests.get(
         'https://api.intra.42.fr/v2/me',
