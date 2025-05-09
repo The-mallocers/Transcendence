@@ -50,7 +50,10 @@ class RegisterApiView(APIView):
             try:
                 client = serializer.save()  # this can fail so we added a catch
                 logger.info(f'Client create successfully: {client}')
-                return Response(ClientSerializer(client).data, status=status.HTTP_201_CREATED)
+                response = Response(ClientSerializer(client).data, status=status.HTTP_201_CREATED)
+                JWT(client, JWTType.ACCESS).set_cookie(response) # vous aviez raison la team c'est mieux
+                JWT(client, JWTType.REFRESH).set_cookie(response)
+                return response
             except Exception as e:
                 import traceback
                 print("\n\nException during save:", str(e))
