@@ -23,6 +23,12 @@ class Friend(models.Model):
     # def __str__(self):
     #     return f"Friend Request with {self.id}"
 
+    def delete(self, *args, **kwargs):
+        self.friends.clear()
+        self.pending_friends.clear()
+        self.blocked_users.clear()
+        super().delete(*args, **kwargs)
+
     @sync_to_async
     def add_pending_friend(self, client):
         try:

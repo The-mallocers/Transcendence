@@ -44,7 +44,22 @@ class Clients(models.Model):
 
     def __str__(self):
         return f"Client data => Email:{self.profile.email}, Username:{self.profile.username}"
-
+    
+    #J'overide delete pour que ca supprime tout les trucs associer quand on supprime un client
+    #Hopefully it doesnt break anything else
+    def delete(self, *args, **kwargs):
+        self.password.delete()
+        if self.profile:
+            self.profile.delete()
+        self.twoFa.delete()
+        if self.stats:
+            self.stats.delete()
+        if self.friend:
+            self.friend.delete()
+        if self.rights:
+            self.rights.delete()
+        super().delete(*args, **kwargs)
+        
     @property
     def is_authenticated(self):
         return True

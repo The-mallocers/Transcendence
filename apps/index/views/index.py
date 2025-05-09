@@ -17,7 +17,6 @@ def get(req):
     friends_list = client.get_all_friends()
     friends_pending = client.get_all_pending_request()
     rivals = get_rivals(client, games_played)
-    ghistory = get_last_matches(client, games_played)
     friends_online_status = get_friends_online_status(friends_list)
     rank_picture = settings.MEDIA_URL + "/rank_icon/" + client.get_rank(client.stats.mmr) + ".png"
     online_status = "Online"
@@ -57,11 +56,19 @@ def get_last_matches(client, games_played) -> list:
         if (i >= 4):
             break
         game = Game.objects.get(id=game.id)
-        print(game.winner.score)
         myPoints = 0
         enemyPoints = 0
         opponent = ""
-        if (client.id == game.winner.client.id):
+
+        if (game.winner.client == None):
+            myPoints = game.loser.score
+            enemyPoints = game.winner.score
+            opponent = "[REDACTED]"
+        elif (game.loser.client == None):
+            myPoints = game.winner.score
+            enemyPoints = game.loser.score
+            opponent = "[REDACTED]"
+        elif (client.id == game.winner.client.id):
             myPoints = game.winner.score
             enemyPoints = game.loser.score
             opponent = game.loser.client.profile.username
@@ -72,7 +79,7 @@ def get_last_matches(client, games_played) -> list:
 
         ghistory.append({
             "opponent": opponent,
-            "won": client.id == game.winner.client.id,
+            "won": myPoints > enemyPoints,
             "myPoints": myPoints,
             "enemyPoints": enemyPoints,
             "when": game.created_at
@@ -82,7 +89,12 @@ def get_last_matches(client, games_played) -> list:
 
 def get_rivals(client, games_played) -> dict:
     opponents = []
+    valid_games = []
+    for game in games_played:
+        if game.winner.client is not None and game.loser.client is not None:
+            valid_games.append(game)
 
+    games_played = valid_games
     # getting all opponents
     for game in games_played:
         currOpponent = None
@@ -90,7 +102,7 @@ def get_rivals(client, games_played) -> dict:
             currOpponent = game.loser.client
         else:
             currOpponent = game.winner.client
-        if currOpponent not in opponents:
+        if currOpponent and currOpponent not in opponents:
             opponents.append(currOpponent)
 
     rivals = {}
@@ -107,11 +119,16 @@ def get_rivals(client, games_played) -> dict:
             rivals[game.loser.client.id]["games_won"] += 1
         elif game.loser.client.id == client.id:
             rivals[game.winner.client.id]["games_lost"] += 1
-    return rivals
+    sorted_rivals = sorted(
+        rivals.items(),
+        key=lambda item: item[1]["games_won"] + item[1]["games_lost"],
+        reverse=True
+    )
 
+    top_3_rivals = dict(sorted_rivals[:3])
 
-#Work in progress, Initializing once the status of friends then updating the JS to update on new updates
-#is def doable.
+    return top_3_rivals
+
 def get_friends_online_status(friends):
     friend_status = {}
     redis = RedisConnectionPool.get_sync_connection("Index_get")
