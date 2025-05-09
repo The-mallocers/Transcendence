@@ -18,7 +18,7 @@
         font-size: 6rem;
         color: #1d212b;
     }
-
+/* 
     #lusername {
         top: 52%;
         left: 33%;
@@ -29,8 +29,19 @@
         top: 52%;
         right: 33%;
         transform: translate(50%, -50%);
+    } */
+
+    .lmeow{
+        top: 52%;
+        left: 33%;
+        transform: translate(-50%, -50%);
     }
 
+    .rmeow{
+        top: 52%;
+        right: 33%;
+        transform: translate(50%, -50%);
+    }
     .score {
         position: absolute;
         font-size: 20rem;
@@ -58,14 +69,38 @@
         margin-top: 0.5rem;       /* Add this */
     }
 
+    #rpicture {
+        top: 42%;
+        right: 10%;
+        transform: translate(50%, -50%);
+    }
+    #lpicture {
+        top: 42%;
+        left: 10%;
+        transform: translate(-50%, -50%);
+    } 
+
 </style>
 
 <div class="arenaPage" style="background-image: url('{{ arena_picture }}');">
     
     <div class="username-row">
-        <div id="lusername" class="username"></div>
-        <div id="rusername" class="username"></div>
-    </div>
+        
+        <div class="lmeow">
+            <div id="lusername" class="username"></div>
+            <div class="avatar">
+                <img id="lpicture" src="">
+            </div>
+        </div>
+
+        <div class="rmeow">
+            <div id="rusername" class="username"></div>
+            <div class="avatar">
+                <img id="rpicture" src="">
+            </div>
+        </div>
+
+    </div>  
     <div id="scoreLeft" class="score">0</div>
     <div id="scoreRight" class="score">0</div>
 

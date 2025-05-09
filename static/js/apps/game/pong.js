@@ -8,6 +8,8 @@ let canvas = document.getElementById("pongCanvas");
 let ctx = canvas.getContext("2d");
 const lusername = document.getElementById("lusername");
 const rusername = document.getElementById("rusername");
+const lpicture = document.getElementById("lpicture");
+const rpicture = document.getElementById("rpicture");
 let lscore = document.getElementById("scoreLeft");
 let rscore = document.getElementById("scoreRight");
 
@@ -38,8 +40,13 @@ if (!socket || socket.readyState === WebSocket.CLOSED) {
     navigateTo("/");
 } else {
     console.log(window.GameState);
-    lusername.innerHTML = window.GameState.left.username
-    rusername.innerHTML = window.GameState.right.username
+    lusername.innerHTML = window.GameState.left.username;
+    rusername.innerHTML = window.GameState.right.username;
+    console.log("WHAT ARE THE URLS:");
+    console.log(window.GameState.left.picture);
+    console.log(window.GameState.right.picture);
+    lpicture.src = window.GameState.left.picture;
+    rpicture.src = window.GameState.right.picture;
 
     socket.onmessage = (e) => {
         const jsonData = JSON.parse(e.data);
