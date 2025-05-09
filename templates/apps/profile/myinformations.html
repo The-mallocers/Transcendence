@@ -42,6 +42,7 @@
                         <img src="{{ client.profile.profile_picture.url }}" id="profile_picture">
                         <div class="type-intra-green mt-4" id="upload-img-btn">Upload new profile picture</div>
                         <div class="type-intra-green mt-4" id="logout-btn">Log out</div>
+                        <div class="type-intra-green mt-4" id="delete-btn">Delete your account</div>
 
                         <input type="file" id="file_input" style="display: none;"/>
                     </div>
@@ -94,6 +95,7 @@
     </div>
 </div>
 <script type="module" src="{% static 'js/apps/auth/logout.js' %}"></script>
+<script type="module" src="{% static 'js/apps/auth/delete.js' %}"></script>
 <script type="module" src="{% static 'js/apps/auth/upload_img.js' %}"></script>
 <script type="module" src="{% static 'js/apps/auth/update_infos.js' %}"></script>
 

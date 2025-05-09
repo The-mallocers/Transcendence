@@ -3,6 +3,7 @@ from django.http import HttpRequest
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from werkzeug import Client
 
 from apps.auth.models import Password
 from apps.client.models import Clients
@@ -273,3 +274,27 @@ class UploadPictureApiView(APIView):
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+#Maybe later add the check to see if the player is in a tournament or something.
+#This code essentially logs out THEN delete the account.
+
+class DeleteApiView(APIView):
+    def post(self, request: HttpRequest, *args, **kwargs):
+        if request.COOKIES.get('access_token') is not None:
+            response = Response({"message": "Successfully deleted your account."}, status=status.HTTP_200_OK)
+            response.delete_cookie('access_token')
+            response.delete_cookie('refresh_token')
+            response.delete_cookie('oauthToken')
+            try:
+                JWT.extract_token(request, JWTType.REFRESH).invalidate_token()
+            except Exception as e:
+                print("Couldnt invalidate the token, it was probably either deleted or modified")
+                print(f"error is {str(e)}")
+            client = Clients.get_client_by_request(request)
+            client.delete()
+            return response
+        else:
+            return Response({
+                "error": "You are not logged in"
+            }, status=status.HTTP_401_UNAUTHORIZED)
+
