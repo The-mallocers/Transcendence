@@ -14,10 +14,10 @@ def get(req):
     winrate = ghistory = rivals = None
     games_played = client.stats.games.all().order_by('-created_at')
     ghistory = get_last_matches(client, games_played)
-    friends_list = None #client.get_all_friends()
-    friends_pending = None #client.get_all_pending_request()
+    friends_list = client.get_all_friends()
+    friends_pending = client.get_all_pending_request()
     rivals = get_rivals(client, games_played)
-    friends_online_status = None #get_friends_online_status(friends_list)
+    friends_online_status = get_friends_online_status(friends_list)
     rank_picture = settings.MEDIA_URL + "/rank_icon/" + client.get_rank(client.stats.mmr) + ".png"
     online_status = "Online"
     if client is not None:
