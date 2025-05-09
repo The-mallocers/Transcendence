@@ -30,7 +30,7 @@ class Game(models.Model):
     winner = ForeignKey(Player, on_delete=models.SET_NULL, related_name='winner', null=True)
     loser = ForeignKey(Player, on_delete=models.SET_NULL, related_name='loser', null=True)
     tournament_id = ForeignKey(Tournaments, on_delete=models.SET_NULL,
-                               null=True, related_name='tournament', blank=True)
+                                null=True, related_name='tournament', blank=True)
     created_at = DateTimeField(default=timezone.now)
     is_duel = BooleanField(default=False)
 

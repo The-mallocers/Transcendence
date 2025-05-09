@@ -45,6 +45,7 @@ def generate_password():
 
 def auth42(request):
     auth_code = request.GET.get('code')
+
     print("lalalalalala", auth_code)
     token_params = {
         'grant_type': 'authorization_code',
@@ -53,13 +54,15 @@ def auth42(request):
         'code': auth_code,
         'redirect_uri': 'https://localhost:8000/auth/auth42'
     }
-    
+
     token_response = requests.post(
-        'https://api.intra.42.fr/oauth/token', 
+        'https://api.intra.42.fr/oauth/token',
         json=token_params
     )
+    if token_response.status_code != 200 :
+        response = formulate_json_response(True, 302, "Login Unsuccessful", "/")
+        return response
 
-    print(token_response)
     token_data = token_response.json()
     access_token = token_data.get('access_token')
     print("acess token")
@@ -69,8 +72,22 @@ def auth42(request):
         headers={'Authorization': f'Bearer {access_token}'}
     )
     user_data = user_response.json()
+    id = user_data.get('id')
     email = user_data.get('email')
     username = user_data.get('login')
+
+    print("////////// : ",id)
+
+    # GET /v2/users/:user_id/coalitions
+    coa_response = requests.get(
+        f'https://api.intra.42.fr/v2/users/{id}/coalitions',
+        headers={'Authorization': f'Bearer {access_token}'})
+
+    coa_data = coa_response.json()
+    coa = user_data.get('name')
+    
+    print("am gonna throw a tantrum...",dir(coa_data))
+    print("am gonna throw a tantrum...",coa_data)
 
     client = Clients.get_client_by_email(email)
 
@@ -84,7 +101,8 @@ def auth42(request):
                 'first_name': username,
                 'last_name': 'test',
                 'email': email,
-                'username': username
+                'username': username,
+                'coalition': coa
             },
             'password': {
                 'password': generated_pwd,
@@ -94,9 +112,9 @@ def auth42(request):
         serializer = ClientSerializer(data=data, context={'is_admin': False})
         if serializer.is_valid():
             client = serializer.save()
-        else:
-            raise IrreversibleError(f'Failed to create admin in migration file: '
-                                    f'{format_validation_errors(serializer.errors)}')
+        # else:
+        #     raise IrreversibleError(f'Failed to create admin in migration file: '
+        #                             f'{format_validation_errors(serializer.errors)}')
 
 
     # csrf_token = get_token(request)
