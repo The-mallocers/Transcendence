@@ -1,113 +1,206 @@
 {% load static %}
 <style>
-
-
+    /* General styling */
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: 'Orbitron', sans-serif;
+        overflow: hidden;
+    }
+    
     .arenaPage {
         display: flex;
         align-items: center;
         justify-content: center;
         flex-direction: column;
         position: relative;
+        min-height: 100vh;
+        background-size: cover;
+        background-position: center;
+        padding: 20px;
     }
-
+    
+    /* Game canvas styling */
     #pongCanvas {
-        border: 1px white solid;
+        border: 3px solid rgba(255, 255, 255, 0.7);
+        border-radius: 8px;
+        box-shadow: 0 0 20px rgba(0, 100, 255, 0.5);
+        margin: 20px 0;
+        background-color: rgba(0, 0, 0, 0.4);
     }
-
-    .username {
-        font-size: 6rem;
-        color: #1d212b;
-    }
-/* 
-    #lusername {
-        top: 52%;
-        left: 33%;
-        transform: translate(-50%, -50%);
-    }
-
-    #rusername {
-        top: 52%;
-        right: 33%;
-        transform: translate(50%, -50%);
-    } */
-
-    .lmeow{
-        top: 52%;
-        left: 33%;
-        transform: translate(-50%, -50%);
-    }
-
-    .rmeow{
-        top: 52%;
-        right: 33%;
-        transform: translate(50%, -50%);
-    }
-    .score {
-        position: absolute;
-        font-size: 20rem;
-        color: #6d7892;
-        text-shadow: 2px 2px #000; /* Optional for extra retro contrast */
-    }
-
-    #scoreLeft {
-        top: 52%;
-        left: 10%;
-        transform: translate(-50%, -50%);
-    }
-
-    #scoreRight {
-        top: 52%;
-        right: 10%;
-        transform: translate(50%, -50%);
-    }
-    .username-row {
+    
+    /* Player information containers */
+    .player-container {
         display: flex;
-        justify-content: center; /* Center both usernames */
-        gap: 4rem; /* Controls how close they are; reduce this for closer spacing */
+        justify-content: space-between;
         width: 1000px;
-        margin-bottom: 0.5rem;
-        margin-top: 0.5rem;       /* Add this */
+        margin-bottom: 15px;
     }
-
-    #rpicture {
-        top: 42%;
-        right: 10%;
-        transform: translate(50%, -50%);
+    
+    .player-info {
+        display: flex;
+        align-items: center;
+        background: linear-gradient(135deg, rgba(20, 30, 48, 0.8), rgba(36, 59, 85, 0.8));
+        border-radius: 15px;
+        padding: 10px 20px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        width: 45%;
+        border: 2px solid rgba(100, 149, 237, 0.5);
     }
-    #lpicture {
-        top: 42%;
-        left: 10%;
+    
+    .player-left {
+        flex-direction: row;
+    }
+    
+    .player-right {
+        flex-direction: row-reverse;
+    }
+    
+    /* Avatar styling */
+    .avatar {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        overflow: hidden;
+        border: 3px solid #4a90e2;
+        box-shadow: 0 0 10px rgba(74, 144, 226, 0.7);
+        flex-shrink: 0;
+        position: relative;
+    }
+    
+    .avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        position: absolute;
+        top: 0;
+        left: 0;
+    }
+    
+    /* Username styling */
+    .username {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #ffffff;
+        text-shadow: 0 0 5px rgba(0, 100, 255, 0.7);
+        margin: 0 15px;
+        flex-grow: 1;
+        text-align: center;
+    }
+    
+    /* Score display */
+    .score-container {
+        display: flex;
+        justify-content: space-between;
+        width: 1000px;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .score-display {
+        background: linear-gradient(135deg, rgba(20, 30, 48, 0.9), rgba(36, 59, 85, 0.9));
+        border-radius: 15px;
+        width: 120px;
+        height: 120px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+        border: 3px solid rgba(100, 149, 237, 0.7);
+        position: relative;
+    }
+    
+    .score {
+        font-size: 4.5rem;
+        font-weight: bold;
+        color: #ffffff;
+        text-shadow: 0 0 10px rgba(0, 100, 255, 0.8);
+    }
+    
+    /* VS indicator */
+    .vs-indicator {
+        position: absolute;
+        top: 50%;
+        left: 50%;
         transform: translate(-50%, -50%);
-    } 
-
+        background: linear-gradient(135deg, #ff3300, #ff9900);
+        border-radius: 50%;
+        width: 60px;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 0 15px rgba(255, 100, 0, 0.7);
+        border: 2px solid rgba(255, 255, 255, 0.7);
+        z-index: 2;
+    }
+    
+    .vs-text {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: white;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    }
+    
+    /* Game title */
+    .game-title {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #ffffff;
+        text-shadow: 0 0 10px rgba(0, 100, 255, 0.8);
+        margin-bottom: 10px;
+        background: linear-gradient(135deg, rgba(20, 30, 48, 0.8), rgba(36, 59, 85, 0.8));
+        padding: 10px 30px;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        border: 2px solid rgba(100, 149, 237, 0.5);
+    }
 </style>
 
+<!-- Google Fonts for Orbitron - Perfect for futuristic/gaming interfaces -->
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+
 <div class="arenaPage" style="background-image: url('{{ arena_picture }}');">
+    <!-- Game title -->
+    <div class="game-title">CYBER PONG ARENA</div>
     
-    <div class="username-row">
-        
-        <div class="lmeow">
+    <!-- Player information row -->
+    <div class="player-container">
+        <!-- Left player -->
+        <div class="player-info player-left">
+            <div class="avatar">
+                <img id="lpicture" src="" alt="Left player">
+            </div>
             <div id="lusername" class="username"></div>
-            <div class="avatar">
-                <img id="lpicture" src="">
-            </div>
         </div>
-
-        <div class="rmeow">
+        
+        <!-- Right player -->
+        <div class="player-info player-right">
+            <div class="avatar">
+                <img id="rpicture" src="" alt="Right player">
+            </div>
             <div id="rusername" class="username"></div>
-            <div class="avatar">
-                <img id="rpicture" src="">
-            </div>
         </div>
-
-    </div>  
-    <div id="scoreLeft" class="score">0</div>
-    <div id="scoreRight" class="score">0</div>
-
-    <canvas id="pongCanvas" width="1000" height="500">
-    </canvas>
+    </div>
+    
+    <!-- Score display -->
+    <div class="score-container">
+        <div class="score-display">
+            <div id="scoreLeft" class="score">0</div>
+        </div>
+        
+        <!-- VS indicator -->
+        <div class="vs-indicator">
+            <div class="vs-text">VS</div>
+        </div>
+        
+        <div class="score-display">
+            <div id="scoreRight" class="score">0</div>
+        </div>
+    </div>
+    
+    <!-- Game canvas -->
+    <canvas id="pongCanvas" width="1000" height="500"></canvas>
 </div>
 
-
 <script type="module" src="{% static '/js/apps/game/pong.js' %}"></script>
-
