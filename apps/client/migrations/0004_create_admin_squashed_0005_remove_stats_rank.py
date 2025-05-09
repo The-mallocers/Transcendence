@@ -46,7 +46,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('client', '0003_clients_friend'),
-        ('profile', '0002_profile_coalition'),
+        ('profile', '__latest__'),
     ]
 
     operations = [
