@@ -206,12 +206,11 @@ class PongLogic:
         loser = Player()
         winner.my_init()
         loser.my_init()
-
         if disconnect is True:
-            if self.redis.hget(name=RTables.HASH_CLIENT(self.game.pL.id), key=str(EventType.GAME.value)) is None:
+            if self.redis.hget(name=RTables.HASH_CLIENT(self.game.pL.client_id), key=str(EventType.GAME.value)) is None:
                 self.score_pL.set_score(0)
                 self.score_pR.set_score(self.game.points_to_win)
-            if self.redis.hget(name=RTables.HASH_CLIENT(self.game.pR.id), key=str(EventType.GAME.value)) is None:
+            if self.redis.hget(name=RTables.HASH_CLIENT(self.game.pR.client_id), key=str(EventType.GAME.value)) is None:
                 self.score_pR.set_score(0)
                 self.score_pL.set_score(self.game.points_to_win)
 
@@ -250,7 +249,6 @@ class PongLogic:
         K = 50
         winner_mmr = winner.client.stats.mmr
         loser_mmr = loser.client.stats.mmr
-        print(f"winner and loser mmr : {winner} - {loser_mmr}")
 
         expected_win = 1 / (1 + 10 ** ((loser_mmr - winner_mmr) / 120))
         expected_loss = 1 / (1 + 10 ** ((winner_mmr - loser_mmr) / 120))
@@ -260,8 +258,6 @@ class PongLogic:
         if (loser_mmr - mmr_loss < 0):
             mmr_loss = loser_mmr
 
-        print(f"mmr gain and loss for this match : {mmr_gain} - {mmr_loss}")
-        
         winner.mmr_change = mmr_gain
         loser.mmr_change = mmr_loss
         winner.client.stats.mmr = F('mmr') + mmr_gain
