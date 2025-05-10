@@ -14,6 +14,7 @@ from utils.serializers.client import ClientSerializer
 from utils.serializers.permissions.auth import PasswordPermission
 from utils.serializers.picture import ProfilePictureValidator
 
+import random
 
 class PasswordApiView(APIView):
     permission_classes = [PasswordPermission]
@@ -44,6 +45,9 @@ class RegisterApiView(APIView):
     authentication_classes = []
 
     def post(self, request, *args, **kwargs):
+        options = ["Fire", "Earth", "Water", "Air"]
+        coa = random.choice(options)
+        request.data['profile']['coalition'] = coa
         serializer = ClientSerializer(data=request.data)
         if serializer.is_valid():
             try:
@@ -72,10 +76,9 @@ class UpdateApiView(APIView):
                         if data[section][key] == "":
                             del data[section][key]
                     if not data[section]:
-                        del data[section]   
+                        del data[section]
 
             client = Clients.get_client_by_request(request)
-            
             serializer = ClientSerializer(instance=client, data=request.data, partial=True)
             if serializer.is_valid():
                 serializer.save()
