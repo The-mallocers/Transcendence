@@ -1,0 +1,19 @@
+from django.db import migrations
+import uuid
+
+def remove_global_room(apps, schema_editor):
+    Rooms = apps.get_model('chat', 'Rooms')
+    try:
+        global_room_id = uuid.UUID('00000000-0000-0000-0000-000000000000')
+        Rooms.objects.filter(id=global_room_id).delete()
+    except Exception as e:
+        print(f"Error removing global room: {e}")
+
+class Migration(migrations.Migration):
+    dependencies = [
+        ('chat', '0004_messages_block_user'),
+    ]
+
+    operations = [
+        migrations.RunPython(remove_global_room, migrations.RunPython.noop)
+    ]

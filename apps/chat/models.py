@@ -82,17 +82,9 @@ class Rooms(models.Model):
     @staticmethod
     @sync_to_async
     def get_user_info_by_room_id(room_id):
-        global_room = "00000000-0000-0000-0000-000000000000"
         try:
             with transaction.atomic():
-                if room_id == global_room:
-                    return []
-                
-                # Simplement récupérer les utilisateurs de la room spécifiée
-                users = Clients.objects.filter(
-                    rooms__id=room_id
-                ).select_related('profile').distinct()
-                
+                users = Clients.objects.filter(rooms__id=room_id).select_related('profile').distinct()
                 user_info = []
                 for user in users:
                     profile_pic_url = user.profile.profile_picture.url if user.profile.profile_picture else "/static/assets/imgs/profile/default.png"
@@ -101,7 +93,6 @@ class Rooms(models.Model):
                         'username': user.profile.username,
                         'profile_picture': profile_pic_url
                     })
-                
                 print(f"Final users count: {len(user_info)}")
                 print(f"|||||||||||||||||| {user_info}")
                 return user_info
@@ -114,12 +105,9 @@ class Rooms(models.Model):
     @staticmethod
     @sync_to_async
     def Aget_room_by_client_id(client_id):
-        global_room = "00000000-0000-0000-0000-000000000000"
         try:
             with transaction.atomic():
                 query = Rooms.objects.filter(clients__id=client_id)
-                if query is not None:
-                    query = query.exclude(id=global_room)
                 return query.first()
         except Exception as e:
             raise Exception(f"Error getting room by client ID: {e}")

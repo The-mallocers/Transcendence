@@ -10,7 +10,7 @@ from apps.notifications.models import Friend
 from apps.profile.models import Profile
 from utils.serializers.auth import PasswordSerializer
 from utils.serializers.profile import ProfileSerializer
-from utils.websockets.services.chat import uuid_global_room
+# from utils.websockets.services.chat import uuid_global_room
 
 
 class ClientSerializer(serializers.ModelSerializer):
@@ -40,8 +40,8 @@ class ClientSerializer(serializers.ModelSerializer):
                 stats = Stats.objects.create()
                 client = Clients.objects.create(profile=profile, password=password, twoFa=two_fa, rights=right, friend=friend, stats=stats)
 
-                global_room = Rooms.objects.get(id=uuid_global_room)
-                global_room.clients.add(client)
+                # global_room = Rooms.objects.get(id=uuid_global_room)
+                # global_room.clients.add(client)
 
                 if validated_data.get('is_admin', False):
                     client.rights.is_admin = True

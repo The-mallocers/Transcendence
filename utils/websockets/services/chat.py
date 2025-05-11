@@ -17,18 +17,12 @@ class ChatService(BaseServices):
         self.channel_name = await self.redis.hget(name=RTables.HASH_CLIENT(client.id), key=str(EventType.CHAT.value))
         self.channel_name = self.channel_name.decode('utf-8')
 
-        await self.channel_layer.group_add(RTables.GROUP_CHAT(uuid_global_room), self.channel_name)
+        # await self.channel_layer.group_add(RTables.GROUP_CHAT(uuid_global_room), self.channel_name)
         rooms = await Rooms.aget_room_id_by_client_id(client.id)
         for room in rooms:
             await self.channel_layer.group_add(RTables.GROUP_CHAT(room), self.channel_name)
         return True
 
-
-
-    # async def process_action(self, data, *args):
-    #     if 'room_id' in data['data']['args'] and data['data']['args']['room_id'] == 'global':
-    #         data['data']['args']['room_id'] = uuid_global_room
-    #     return await super().process_action(data, *args)
 
     async def _handle_create_room(self, data, client: Clients):
         try:
@@ -49,8 +43,6 @@ class ChatService(BaseServices):
             rooms_target = await Rooms.aget_room_id_by_client_id(target.id)
 
             common_rooms = set(rooms_admin) & set(rooms_target)  # Optimized set intersection
-
-            common_rooms.remove(uuid_global_room)
 
             if common_rooms:
                 # Use an existing common room
