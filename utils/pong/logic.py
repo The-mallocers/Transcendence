@@ -9,6 +9,7 @@ from django.db.models import F
 from apps.client.models import Clients
 from apps.game.models import Game
 from apps.player.models import Player
+from apps.tournaments.models import Tournaments
 from utils.enums import EventType, ResponseAction, RTables
 from utils.enums import GameStatus
 from utils.enums import PaddleMove
@@ -227,8 +228,9 @@ class PongLogic:
 
         loser.save()
         winner.save()
+        tournament = Tournaments.get_tournament_by_code(self.game.tournament.code)
         finished_game = Game.objects.create(code=self.game.code, winner=winner, loser=loser,
-                                            points_to_win=self.game.points_to_win, is_duel=self.game.rget_is_duel())
+                                            points_to_win=self.game.points_to_win, is_duel=self.game.rget_is_duel(), tournament=tournament)
 
         # mmr gain would happen here.
         winner.client.stats.wins = F('wins') + 1
@@ -237,7 +239,6 @@ class PongLogic:
         self.game.loser = loser
         self.save_player_info(winner, finished_game)
         self.game.winner = winner
-        print(f'Game {self.game.code} saved !!!')
 
     def save_player_info(self, player, finished_game):
         player.game = finished_game

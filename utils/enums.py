@@ -20,7 +20,6 @@ class TournamentStatus(str, Enum):
     STARTING: str = 'starting'
     RUNNING: str = 'running'
     ENDING: str = 'ending'
-    DESTROYING: str = 'destroying'
     FINISHED: str = 'finished'
     ERROR: str = 'error'
 
@@ -91,12 +90,14 @@ class ResponseAction(str, Enum):
     TOURNAMENT_CREATED: str = 'You have successfully create the tournament'
     TOURNAMENT_JOIN: str = 'You have successfully joined the tournament'
     TOURNAMENT_PLAYER_JOIN: str = 'Player join the tournament.'
+    TOURNAMENT_PLAYER_LEFT: str = 'Player left the tournament.'
     TOURNAMENT_LEFT: str = 'You have successfully left the tournament'
     TOURNAMENT_WAITTING_PLAYERS: str = 'Waiting players for tournament'
     TOURNAMENT_PLAYERS_READY: str = 'Players are ready'
     TOURNAMENT_GAME_READY: str = 'Game is ready'
     TOURNAMENT_GAME_FINISH: str = 'Game is finished'
     TOURNAMENT_LOSE_GAME: str = "You're kick from tournament due to losing game."
+    TOURNAMENT_CLOSING: str = 'Tournament close.'
 
     # ── Game Actions ──────────────────────────────────────────────────────────────────
     JOIN_GAME: str = 'You have successfully joined the game'

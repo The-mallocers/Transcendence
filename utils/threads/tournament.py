@@ -40,7 +40,9 @@ class TournamentThread(Threads):
         except Exception as e:
             self._logger.error(traceback.format_exc())
             self.set_status(TournamentStatus.ERROR)
+            print('error1')
             send_group_error(RTables.GROUP_TOURNAMENT(self.tournament.code), ResponseError.EXCEPTION, str(e), close=True)
+            print('error2')
         finally:
             self.stoping()
 
@@ -48,7 +50,7 @@ class TournamentThread(Threads):
         for game in self.games:
             if game.rget_status() is GameStatus.WAITING:
                 self.redis.delete(RTables.JSON_GAME(game.code))
-        # self.redis.delete(RTables.JSON_TOURNAMENT(self.tournament.code))
+        self.redis.delete(RTables.JSON_TOURNAMENT(self.tournament.code))
         self.redis.expire(f'channels:group:{RTables.GROUP_TOURNAMENT(self.tournament.code)}', 0)
 
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ EVENT ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
@@ -67,6 +69,7 @@ class TournamentThread(Threads):
                                ResponseAction.TOURNAMENT_PLAYER_JOIN,
                                {'id': str(client.id)})
 
+            self.check_players()
             if len(queue) >= self.tournament.max_clients:
                 self.set_status(TournamentStatus.STARTING)
                 send_group(RTables.GROUP_TOURNAMENT(self.tournament.code), EventType.TOURNAMENT, ResponseAction.TOURNAMENT_PLAYERS_READY)
@@ -77,7 +80,7 @@ class TournamentThread(Threads):
         if self.tournament.status is TournamentStatus.STARTING:
             random.shuffle(self.tournament.clients)
             player = 0
-            for game in self.games[:int(self.tournament.max_clients / 2)]:  # get the first game for round 1
+            for game in self.games[:int(self.tournament.max_clients / 2)]:
                 game.pL = Player.create_player(self.tournament.clients[player])
                 player += 1
                 game.pR = Player.create_player(self.tournament.clients[player])
@@ -93,22 +96,22 @@ class TournamentThread(Threads):
 
     def _running(self):
         if self.tournament.status is TournamentStatus.RUNNING:
-
-            if self.get_match_complete() == self.get_total_matches():
+            if self.get_match_complete() == self.get_total_matches() and self.get_current_round() <= self.rounds:
                 self.set_current_round(self.get_current_round() + 1)
                 self.place_players()
+            elif self.get_current_round() == self.rounds:
+                self.set_status(TournamentStatus.ENDING)
+                return True
             else:
                 self.manage_games()
-
-            # if self.get_current_round() == self.rounds:
-            #     return True
+            # todo, il faut que je fasse le systeme de classment, on se base sur le nombre de points marque, si il y a egalite, on se base sur celui
+            # qui a perdu le plus tot
         return False
 
     def stoping(self):
         if self.tournament.status is TournamentStatus.ENDING:
-            return True
+            pass
         self.stop()
-        return False
 
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ STATICS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
 
@@ -181,6 +184,7 @@ class TournamentThread(Threads):
                     'loser': str(game.loser.client.id)
                 })
                 send_group(RTables.GROUP_TOURNAMENT(game.loser.client.id), EventType.TOURNAMENT, ResponseAction.TOURNAMENT_LOSE_GAME)
+                #TODO envoyer a quel place on a fini
                 self.del_client(game.loser.client)
                 self.games.remove(game)
                 break
@@ -199,6 +203,29 @@ class TournamentThread(Threads):
             send_group(RTables.HASH_CLIENT(game.pL.client.id), EventType.TOURNAMENT, ResponseAction.TOURNAMENT_GAME_READY)
             send_group(RTables.HASH_CLIENT(game.pR.client.id), EventType.TOURNAMENT, ResponseAction.TOURNAMENT_GAME_READY)
             GameThread(game=game).start()
+
+    def check_players(self):
+        rlist_clients = self.get('clients')
+        rhash_clients = self.redis.hgetall(RTables.HASH_TOURNAMENT_QUEUE(self.tournament.code))
+        rhash_clients_keys = [key.decode('utf-8') for key in rhash_clients.keys()]
+        missing_clients = [client for client in rlist_clients if client not in rhash_clients_keys]
+
+        for client_id in missing_clients:
+            client = Clients.get_client_by_id(client_id)
+            if client.id == self.tournament.host.id:
+                send_group_error(
+                    RTables.GROUP_TOURNAMENT(self.tournament.code),
+                    ResponseError.HOST_LEAVE, close=True)
+                self._stop_event.set()
+            else:
+                send_group(
+                    RTables.GROUP_TOURNAMENT(self.tournament.code),
+                    EventType.TOURNAMENT,
+                    ResponseAction.TOURNAMENT_PLAYER_LEFT,
+                    {'id': str(client.id)}
+                )
+                self.del_client(client)
+
 
     # ━━ GETTER / SETTER ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
 
@@ -232,11 +259,11 @@ class TournamentThread(Threads):
     def get_winner_match(self, rounds, game_id):
         match_code = self.get(f'scoreboards.rounds.round_{rounds}.games.{game_id}.game_code')
         game = Game.get_game_by_id(match_code)
-        return game.winner
+        return game.winner.client
 
     # ── Adder / Deleter ────────────────────────────────────────────────────────────── #
 
-    def del_client(self, client):
+    def del_client(self, client: Clients):
         self.tournament.clients.remove(client)
         self.redis.json().set(RTables.JSON_TOURNAMENT(self.tournament.code), Path('clients'), Clients.get_id_list(self.tournament.clients))
 

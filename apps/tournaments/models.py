@@ -133,6 +133,12 @@ class TournamentRuntime:
             tournament.has_bots = tournament.serializer.validated_data['has_bots']
             tournament.points_to_win = tournament.serializer.validated_data['points_to_win']
             tournament.timer = tournament.serializer.validated_data['timer']
+
+            # ── Creating Tournament In Database ───────────────────────────────────────
+            await Tournaments.objects.acreate(code=tournament.code, host=tournament.host, title=tournament.title,
+                                              max_clients=tournament.max_clients, is_public=tournament.is_public, has_bots=tournament.has_bots,
+                                              points_to_win=tournament.points_to_win, timer=timedelta(seconds=tournament.timer))
+
             return tournament
         else:
             for field, errors in tournament.serializer.errors.items():
@@ -149,14 +155,14 @@ class Tournaments(models.Model, TournamentRuntime):
 
     # ── Tournaments Informations ───────────────────────────────────────────────────────────── #
     created_at = DateTimeField(default=timezone.now)  # I think its () at the end.
-    status = CharField(max_length=20, choices=[(status.name, status.value) for status in TournamentStatus], default=TournamentStatus.CREATING.value)
+    scoreboards = JSONField(default=list)
 
     # ── Settings Of Tournaments ───────────────────────────────────────────────────── #
     title = TextField(max_length=30, null=False, default=f"{code}'s tournaments")
-    host = ForeignKey(Clients, on_delete=models.SET_NULL, null=True)
     max_clients = IntegerField(default=8, validators=[validate_even])
+    host = ForeignKey(Clients, on_delete=models.SET_NULL, null=True, related_name='host')
+    winner = ForeignKey(Clients, on_delete=models.SET_NULL, null=True, blank=True, related_name='winner')
     clients = models.ManyToManyField(Clients, related_name='tournaments_players', blank=True)
-    scoreboards = JSONField(default=list)
     is_public = BooleanField(default=True)
     has_bots = BooleanField(default=False)
 
@@ -187,3 +193,11 @@ class Tournaments(models.Model, TournamentRuntime):
         if self._points_to_win is not None:
             self.points_to_win = self._points_to_win
         super().save(*args, **kwargs)
+
+    @staticmethod
+    def get_tournament_by_code(code):
+        try:
+            tournament = Tournaments.objects.get(code=code)
+            return tournament
+        except Tournaments.DoesNotExist:
+            return None
