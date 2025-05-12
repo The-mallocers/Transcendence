@@ -54,9 +54,6 @@ class WsConsumer(AsyncWebsocketConsumer):
             return False
 
     async def disconnect(self, close_code):
-        print(f"DISCONNECTING A WEBSOCKET FROM {self.__class__.__name__}")
-        print(f"{self.service} is the name of the service currently used ")
-        print(f"{self.event_type} is the name of the event type currently used ")
         logging.getLogger('websocket.client').info(f'WebSocket disconnected with code {close_code}')
         await self.service.handle_disconnect(self.client)
         await self.channel_layer.group_discard(RTables.GROUP_ERROR, self.channel_name)
