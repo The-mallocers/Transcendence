@@ -1,53 +1,146 @@
-import { navigateTo } from "../../spa/spa.js";
-import {WebSocketManager} from "../../websockets/websockets.js"
+import {navigateTo} from "../../spa/spa.js";
+import {WebSocketManager} from "../../websockets/websockets.js";
+import {toast_message} from "../profile/toast.js";
+import {getClientId} from "../../utils/utils.js";
 
-let client_id = null;
-const clientId = await getClientId()
-const gameSocket = WebSocketManager.initGameSocket(clientId);
+let clientId;
 
-const urlParams = new URLSearchParams(window.location.search);
-const targetUsername = urlParams.get('target');
-console.log("Target username:", targetUsername);
-const opponent = document.querySelector(".opponent_player")
-if (opponent)
-{
-    opponent.innerHTML = targetUsername;
+clientId = await getClientId();
+const gameSocket = await WebSocketManager.initGameSocket(clientId);
+const notifSocket = WebSocketManager.notifSocket;
+
+const cancelDuel = document.querySelector(".cancel-duel");
+if (cancelDuel) {
+    cancelDuel.addEventListener('click', function (event) {
+        navigateTo('/pong/gamemodes/')
+    })
 }
 
-gameSocket.onmessage = (event) => {
-
+const opponentDiv = document.querySelector(".opponent_player");
+if (opponentDiv) {
+    const urlParams = new URLSearchParams(window.location.search);
+    const opponentName = urlParams.get("opponent");
+    opponentDiv.innerHTML = opponentName;
 }
 
-async function getClientId() {
-    try {
-        const response = await fetch("/api/auth/getId/", {
-            method: "GET",
-            credentials: "include",
-        });
-        const data = await response.json();
+let height = 500;
+const width = 1000;
 
-        if (data.client_id) {
-            client_id = data.client_id;
-            return client_id;
-        } else {
-            throw new Error(data.error);
+const paddleHeight = 100;
+
+let paddleDefaultPos = 250 - (paddleHeight / 2)
+
+window.GameState = {
+    ballY: height / 2,
+    ballX: width / 2,
+
+    left: {
+        x: paddleDefaultPos,
+        y: paddleDefaultPos,
+        username: "",
+        id: ""
+    },
+    right: {
+        x: paddleDefaultPos,
+        y: paddleDefaultPos,
+        username: "",
+        id: ""
+    }
+}
+
+window.GameInfos = {
+    left: {}
+}
+
+const startGameMessage = {
+    "event": "game",
+    "data": {
+        "action": "start_game"
+    }
+}
+
+// const message = {
+//     "event": "matchmaking",
+//     "data": {
+//         "action": "join_queue"
+//     }
+// }
+// gameSocket.onopen = () => {
+
+//     socket.send(JSON.stringify(message));
+// }
+
+
+notifSocket.onmessage = (event) => {
+    console.log(event.data);
+    const message = JSON.parse(event.data);
+
+    if (message.data.action == "DUEL_REFUSED") {
+        navigateTo("/pong/gamemodes/");
+        toast_message(`${message.data.content.username} refuses the duel`);
+    } else if (message.data.action == "DUEL_JOIN") {
+        const pendingDiv = document.querySelector(".state-of-player");
+        if (pendingDiv) {
+            pendingDiv.innerHTML = "join";
+            pendingDiv.style.backgroundColor = "#00babc";
         }
-    } catch (error) {
-        console.error("Erreur lors de la récupération de l'ID :", error);
-        return null;
+    } else if (message.data.action == "DUEL_CREATED") {
+        navigateTo(`/pong/duel/?opponent=${message.data.content.opponent}`);
     }
 }
 
-function create_message_duel(action, targetUser)
-{
-    let message = {
-        "event": "game",
-        "data": {
-            "action": action,
-            "args": {
-                "target": targetUser,
+gameSocket.onmessage = (e) => {
+    const jsonData = JSON.parse(e.data);
+
+    console.log(jsonData.data.action);
+    //We should only get the response that a match was found
+
+    //On message on regarde si c'est que la game a commencer
+    //on renvois le json approprie
+    if (jsonData.data.action == "PLAYER_INFOS") {
+        console.log("PLAYER INFOS IS:")
+        console.log(jsonData.data.content)
+        window.GameState = {
+            ballY: height / 2,
+            ballX: width / 2,
+
+            left: {
+                x: jsonData.data.content.left.paddle.x,
+                y: jsonData.data.content.left.paddle.y,
+                username: jsonData.data.content.left.username,
+                id: ""
+            },
+            right: {
+                x: jsonData.data.content.right.paddle.x,
+                y: jsonData.data.content.right.paddle.y,
+                username: jsonData.data.content.right.username,
+                id: ""
             }
-        } 
+        }
     }
-    return message;
-}
+    if (jsonData.data.action == "STARTING") {
+        navigateTo("/pong/arena/");
+        gameSocket.send(JSON.stringify(startGameMessage))
+    }
+};
+
+//This is now in utils.js !
+// async function getClientId() {
+//     try {
+//         const response = await fetch("/api/auth/getId/", {
+//             method: "GET",
+//             credentials: "include",
+//         });
+//         const data = await response.json();
+
+//         if (data.client_id) {
+//             client_id = data.client_id;
+//             return client_id;
+//         } else {
+//             throw new Error(data.error);
+//         }
+//     } catch (error) {
+//         console.error("Erreur lors de la récupération de l'ID :", error);
+//         return null;
+//     }
+// }

@@ -17,7 +17,12 @@ help:
 
 up:
 	rm -rf ./docker/staticdocker
-	docker compose -f ./$(DOCKER_COMPOSE_FILE) up  --build --attach django-web
+	docker compose -f ./$(DOCKER_COMPOSE_FILE) up --build --attach django-web
+
+detach:
+	rm -rf ./docker/staticdocker
+	docker compose -f ./$(DOCKER_COMPOSE_FILE) up -d --build --no-attach mailhog --no-attach alertmanager --no-attach grafana
+
 down:
 	docker compose -f ./$(DOCKER_COMPOSE_FILE) down
 
@@ -56,5 +61,7 @@ clean: dbclean
 	docker compose -f ./$(DOCKER_COMPOSE_FILE) down --rmi all
 
 re: down up
+
+redetach: down detach
 
 .PHONY: help up down test test-coverage logs status restart dbclean reload clean re

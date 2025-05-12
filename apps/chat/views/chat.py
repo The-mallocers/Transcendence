@@ -12,28 +12,11 @@ def get(req):
     # message_content
 
     client = Clients.get_client_by_request(req)
-    rooms = Rooms.get_room_id_by_client_id(client.code)
+    rooms = Rooms.get_room_id_by_client_id(client.id)
 
     me = None
     if client:
-        me = client.code
-    #     conversation = [
-    #     {
-    #         "sender": me,
-    #         "timestamp" : 345678567,
-    #         "content" : "yo la team"
-    #     },
-    #     {
-    #         "sender": "UUIDRDyrfhtyi!",
-    #         "timestamp" : 345678567,
-    #         "content" : "hellowwww"
-    #     },
-    #     {
-    #         "sender": "UUIDRDyrfhtyi!",
-    #         "timestamp" : 345678567,
-    #         "content" : "go faire une game"
-    #     }
-    # ]
+        me = client.id
     conversation = []
 
     html_content = render_to_string("apps/chat/chat.html", {

@@ -52,7 +52,7 @@ class Rooms(models.Model):
     def get_id(room):
         try:
             with transaction.atomic():
-                return room.code
+                return room.id
         except Rooms.DoesNotExist:
             return None
 
@@ -95,28 +95,6 @@ class Rooms(models.Model):
             return None
 
     @staticmethod
-    def get_room_by_client_id(client_id):
-        try:
-            return list(Rooms.objects.filter(clients__id=client_id))
-        except Clients.DoesNotExist:
-            return []
-
-    @staticmethod
-    @sync_to_async
-    def aget_room_by_client_id(client_id):
-        global_room = "00000000-0000-0000-0000-000000000000"
-        try:
-            with transaction.atomic():
-                query = Rooms.objects.filter(clients__id=client_id)
-                if query is not None:
-                    query = query.exclude(id=global_room)
-                return query.first()
-        except Clients.DoesNotExist:
-            return None
-        except Exception as e:
-            raise Exception(f"Error getting room by client ID: {e}")
-
-    @staticmethod
     @sync_to_async
     def get_usernames_by_room_id(room_id):
         try:
@@ -129,12 +107,35 @@ class Rooms(models.Model):
 
     @staticmethod
     @sync_to_async
+    def aget_user_by_room_id(room_id):
+        try:
+            with transaction.atomic():
+                user_list = list(
+                    Clients.objects.filter(rooms__id=room_id).values_list('id', flat=True))
+                return user_list
+        except Rooms.DoesNotExist:
+            return []
+
+    @staticmethod
+    @sync_to_async
     def get_client_id_by_username(username):
         try:
             with transaction.atomic():
                 client = Clients.objects.get(profile__username=username)
-                return str(client.code)  # Retourne l'ID sous forme de chaîne
+                return str(client.id)  # Retourne l'ID sous forme de chaîne
         except Clients.DoesNotExist:
+            return None
+
+    @sync_to_async
+    def aget_target_by_room_id(self, client):
+        try:
+            with transaction.atomic():
+                targetUser = Clients.objects.filter(rooms__id=self.id)
+                if targetUser is not None:
+                    targetUser = targetUser.exclude(id=client.id)
+                return targetUser.first()
+        except Exception as e:
+            print(f"Error retrieving target id in the room: {e}")
             return None
 
     @sync_to_async
@@ -173,18 +174,19 @@ class Messages(models.Model):
     @staticmethod
     def get_message_by_room(room):
         try:
-            return list(Messages.objects.filter(room__id=room.code))
+            return list(Messages.objects.filter(room__id=room.id))
         except Rooms.DoesNotExist:
             return []
 
     @staticmethod
     @sync_to_async
-    def aget_message_by_room(room):
+    def aget_message_by_room(room, target):
         try:
             with transaction.atomic():
-                return list(Messages.objects.filter(room__id=room.code))
-        except Rooms.DoesNotExist:
-            return []
+                return list(Messages.objects.filter(room__id=room.id))
+        except Exception as e:
+            print(f"Error ROOM: {e}")
+            return None
 
     @sync_to_async
     def get_sender_id(self):

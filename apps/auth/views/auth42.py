@@ -1,139 +1,104 @@
-
-# import requests
-# from rest_framework import status
-
-# from django.conf import settings
-# from django.contrib.auth import login
-# from django.shortcuts import redirect
-# from django.http import HttpResponse, JsonResponse
-
-# from rest_framework.response import Response
-
-# from django.views.decorators.csrf import csrf_exempt
-# from django.contrib.auth.models import User
-# import json
-
-# from apps.auth.api.views import formulate_json_response, get_qrcode
-# from apps.shared.api.serializers import ClientSerializer
-# from apps.shared.models import Clients
-# from utils.jwt.JWT import JWTType
-# from utils.jwt.JWTGenerator import JWTGenerator
-
-
-# def auth42(request):
-#     # Existing token exchange logic remains the same
-#     # This view now handles both the redirect and token exchange
-#     # Extract authorization code from the GET parameters
-#     print("meow")
-#     auth_code = request.GET.get('code')
-#     print("lalalalalala", auth_code)
-#     token_params = {
-#         'grant_type': 'authorization_code',
-#         'client_id': 'u-s4t2ud-fba0f059cba0019f374c8bf89cb3a81ead9ef0cb218380d9344c21d99d1f9b3e',
-#         'client_secret': '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',
-#         'code': auth_code,
-#         'redirect_uri': 'https://localhost:8000/auth/auth42'
-#     }
-    
-#     # Exchange code for access token
-#     token_response = requests.post(
-#         'https://api.intra.42.fr/oauth/token', 
-#         json=token_params
-#     )
-
-#     print(token_response)
-#     token_data = token_response.json()
-#     access_token = token_data.get('access_token')
-#     print(access_token)
-#     user_response = requests.get(
-#         'https://api.intra.42.fr/v2/me',
-#         headers={'Authorization': f'Bearer {access_token}'}
-#     )
-#     # Extract relevant user information
-#     user_data = user_response.json()
-#     email = user_data.get('email')
-#     username = user_data.get('login')
-
-#     # Check if user exists or create
-#     client = Clients.get_client_by_email(email)
-#     if not client:
-#         client = Clients.create_client(username, email, "Matboyer@42")
-
-
-#     # Create JWT tokens
-#     response = formulate_json_response(True, 302, "Login Successful", "/")
-    
-#     JWTGenerator(client, JWTType.ACCESS).set_cookie(response)
-#     JWTGenerator(client, JWTType.REFRESH).set_cookie(response)
-
-#     return response
+import os
+import random
+import string
 
 import requests
-from rest_framework import status
 
-from django.conf import settings
-from django.contrib.auth import login
-from django.shortcuts import redirect
-from django.http import HttpResponse, JsonResponse
-
-from rest_framework.response import Response
-
-from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth.models import User
-import json
-
-from apps.auth.api.views import formulate_json_response, get_qrcode
+from apps.auth.api.views import formulate_json_response
 # from apps.shared.api.serializers import ClientSerializer
 # from apps.shared.models import Clients
 from apps.client.models import Clients
-from utils.jwt.JWT import JWTType
 from utils.jwt.JWT import JWT
+from utils.jwt.JWT import JWTType
 from utils.serializers.client import ClientSerializer
 
 
-def auth42(request):
-    # Existing token exchange logic remains the same
-    # This view now handles both the redirect and token exchange
-    # Extract authorization code from the GET parameters
+def generate_password():
+    length = random.randint(8, 32)
+    characters = string.ascii_letters + string.digits + string.punctuation
+    password = ''.join(random.choice(characters) for _ in range(length))
+    return password
 
+
+def add_suffix_until_unique(username):
+    i = 1
+    username = username + str(i)
+    while (Clients.get_client_by_username(username) is not None):
+        username = username[:-len(str(i))]
+        username = username + str(i)
+        i += 1
+    return username
+
+
+# print(generate_password())
+
+def auth42(request):
     auth_code = request.GET.get('code')
-    print("lalalalalala", auth_code)
     token_params = {
         'grant_type': 'authorization_code',
-        'client_id': 'u-s4t2ud-fba0f059cba0019f374c8bf89cb3a81ead9ef0cb218380d9344c21d99d1f9b3e',
-        'client_secret': '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',
+        'client_id': os.environ.get('AUTH_42_CLIENT'),
+        'client_secret': os.environ.get('AUTH_42_SECRET'),
         'code': auth_code,
         'redirect_uri': 'https://localhost:8000/auth/auth42'
     }
-    
-    # Exchange code for access token
+
     token_response = requests.post(
-        'https://api.intra.42.fr/oauth/token', 
+        'https://api.intra.42.fr/oauth/token',
         json=token_params
     )
+    if token_response.status_code != 200:
+        response = formulate_json_response(True, 302, "Login Unsuccessful", "/")
+        return response
 
-    print(token_response)
     token_data = token_response.json()
     access_token = token_data.get('access_token')
-    print(access_token)
     user_response = requests.get(
         'https://api.intra.42.fr/v2/me',
         headers={'Authorization': f'Bearer {access_token}'}
     )
-    # Extract relevant user information
     user_data = user_response.json()
+    id = user_data.get('id')
     email = user_data.get('email')
+    first_name = user_data.get('first_name')
+    last_name = user_data.get('last_name')
+
     username = user_data.get('login')
+    if (Clients.get_client_by_username(username) is not None):
+        username = add_suffix_until_unique(username)
 
-    # Check if user exists or create
+    # GET /v2/users/:user_id/coalitions
+    coa_response = requests.get(
+        f'https://api.intra.42.fr/v2/users/{id}/coalitions',
+        headers={'Authorization': f'Bearer {access_token}'})
+
+    coa_data = coa_response.json()
+    coa = coa_data[0].get('name')
     client = Clients.get_client_by_email(email)
+
+    serializer = None
     if not client:
-        client = Clients.create_client(username, email, "Matboyer@42")
+        generated_pwd = generate_password()
+        data = {
+            'profile': {
+                'first_name': first_name,
+                'last_name': last_name,
+                'email': email,
+                'username': username,
+                'coalition': coa
+            },
+            'password': {
+                'password': generated_pwd,
+                'passwordcheck': generated_pwd,
+            }
+        }
 
+        serializer = ClientSerializer(data=data, context={'is_admin': False})
 
-    # Create JWT tokens
+        if serializer.is_valid():
+            client = serializer.save()
     response = formulate_json_response(True, 302, "Login Successful", "/")
-    
+
+    response.set_cookie("oauthToken", access_token)
     JWT(client, JWTType.ACCESS).set_cookie(response)
     JWT(client, JWTType.REFRESH).set_cookie(response)
 

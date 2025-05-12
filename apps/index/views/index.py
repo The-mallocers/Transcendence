@@ -4,30 +4,39 @@ from django.template.loader import render_to_string
 
 from apps.client.models import Clients
 from apps.game.models import Game
+from config import settings
+from utils.enums import EventType, RTables
+from utils.redis import RedisConnectionPool
 
 
 def get(req):
-    print("yipeeeeeeeeee")
     client = Clients.get_client_by_request(req)
-    print(client.stats, "meowmeoowwmeowmeoooooooooowwwwwwww")
-    games_played = client.stats.games.all().order_by('-created_at')
     winrate = ghistory = rivals = None
+    games_played = client.stats.games.all().order_by('-created_at')
     ghistory = get_last_matches(client, games_played)
     friends_list = client.get_all_friends()
     friends_pending = client.get_all_pending_request()
+    rivals = get_rivals(client, games_played)
+    friends_online_status = get_friends_online_status(friends_list)
+    rank_picture = settings.MEDIA_URL + "/rank_icon/" + client.get_rank(client.stats.mmr) + ".png"
+    online_status = "Online"
     if client is not None:
         winrate = get_winrate(client, games_played)
+    print(winrate)
     context = {
         "client": client,
         "clients": Clients.objects.all(),
         "gamesHistory": ghistory,
         "winrate": winrate,
-        "winrate_angle": 42,  # int((winrate / 100) * 360),
+        "winrate_angle": int((winrate / 100) * 360),
         "rivals": rivals,
         "csrf_token": get_token(req),
         "show_friend_request": False,
         "friends_list": friends_list,
-        "friends_pending" : friends_pending
+        "friends_pending": friends_pending,
+        "rank_picture": rank_picture,
+        "online_status": online_status,
+        "friends_online_status": friends_online_status,
     }
     html_content = render_to_string("apps/profile/profile.html", context)
     return JsonResponse({'html': html_content})
@@ -37,17 +46,7 @@ def get_winrate(client, games_played) -> int:
 
     total_games = games_played.count()
     if total_games == 0:
-        return 0
-
-    # TFREYDIE Note -> If someone can explain to me why the code below doesnt work I will love you 4 ever.
-    # for game in games_played:
-    #     print("game is:", game)
-    #     # print("in get winrate, winner is :", game.winner)
-    #     if game.winner == None :
-    #         print("UUHHH")
-    #     elif client.id == game.winner.client.id:
-    #         won_games += 1
-    # print("won games:", won_games)
+        return 0  # We dont want to divide by zero
     return int((wins / games_played.count()) * 100)
 
 def get_last_matches(client, games_played) -> list:
@@ -56,29 +55,31 @@ def get_last_matches(client, games_played) -> list:
     for game in games_played:
         if (i >= 4):
             break
-        print(game.code)
-        game = Game.objects.get(code=game.code)
-        print(game.winner.score)
-        continue
-
-
-
+        game = Game.objects.get(id=game.id)
         myPoints = 0
         enemyPoints = 0
-        oponnent = ""
-        print(client.player.code, game.winner.code)
-        if (client.player.code == game.winner.code):
-            myPoints = game.winner_score
-            enemyPoints = game.loser_score
-            oponnent = game.loser.nickname
+        opponent = ""
+
+        if (game.winner.client == None):
+            myPoints = game.loser.score
+            enemyPoints = game.winner.score
+            opponent = "[REDACTED]"
+        elif (game.loser.client == None):
+            myPoints = game.winner.score
+            enemyPoints = game.loser.score
+            opponent = "[REDACTED]"
+        elif (client.id == game.winner.client.id):
+            myPoints = game.winner.score
+            enemyPoints = game.loser.score
+            opponent = game.loser.client.profile.username
         else:
-            myPoints = game.loser_score
-            enemyPoints = game.winner_score
-            oponnent = game.winner.nickname
+            myPoints = game.loser.score
+            enemyPoints = game.winner.score
+            opponent = game.winner.client.profile.username
 
         ghistory.append({
-            "opponent": oponnent,
-            "won": client.player.code == game.winner.code,
+            "opponent": opponent,
+            "won": myPoints > enemyPoints,
             "myPoints": myPoints,
             "enemyPoints": enemyPoints,
             "when": game.created_at
@@ -86,57 +87,56 @@ def get_last_matches(client, games_played) -> list:
         i += 1
     return ghistory
 
-# Eventually this will return a dictionnary with all the
-# rivals and their associated winrates in series.
 def get_rivals(client, games_played) -> dict:
     opponents = []
+    valid_games = []
+    for game in games_played:
+        if game.winner.client is not None and game.loser.client is not None:
+            valid_games.append(game)
 
+    games_played = valid_games
     # getting all opponents
     for game in games_played:
         currOpponent = None
-        if game.winner.code == client.player.code:
-            currOpponent = game.loser.code
+        if game.winner.client.id == client.id:
+            currOpponent = game.loser.client
         else:
-            currOpponent = game.winner.code
-        if currOpponent not in opponents:
+            currOpponent = game.winner.client
+        if currOpponent and currOpponent not in opponents:
             opponents.append(currOpponent)
 
     rivals = {}
     for opponent in opponents:
-        currentClient = Clients.get_client_by_player(opponent)
-        rivals[opponent] = {
+        rivals[opponent.id] = {
             "games_won": 0,
             "games_lost": 0,
-            "profile_pic": currentClient.profile.profile_picture
+            "username": opponent.profile.username,
+            "profile_picture": opponent.profile.profile_picture.url,
         }
 
     for game in games_played:
-        if game.winner.code == client.player.code:
-            rivals[game.loser.code]["games_won"] += 1
-        elif game.loser.code == client.player.code:
-            rivals[game.winner.code]["games_lost"] += 1
+        if game.winner.client.id == client.id:
+            rivals[game.loser.client.id]["games_won"] += 1
+        elif game.loser.client.id == client.id:
+            rivals[game.winner.client.id]["games_lost"] += 1
+    sorted_rivals = sorted(
+        rivals.items(),
+        key=lambda item: item[1]["games_won"] + item[1]["games_lost"],
+        reverse=True
+    )
 
-    print("rivals after adding the maps")
-    print(rivals)
+    top_3_rivals = dict(sorted_rivals[:3])
 
-    # I want my dictionnary to be like
-    # rivals = {
-    #     'opponent_id' = [
-    #         games_won = number
-    #         games_lost = number
-    #     ],
-    #     'opponent_id' = [
-    #         games_won = number
-    #         games_lost = number
-    #     ]
-    # }
-    return opponents
+    return top_3_rivals
 
-# if (client.player.id == game.winner.id):
-#     myPoints = game.winner_score
-#     enemyPoints =  game.loser_score
-#     oponnent = game.loser.nickname
-# else :
-#     myPoints = game.loser_score
-#     enemyPoints =  game.winner_score
-#     oponnent = game.winner.nickname
+
+def get_friends_online_status(friends):
+    friend_status = {}
+    redis = RedisConnectionPool.get_sync_connection("Index_get")
+    for friend in friends:
+        id = friend['client'].id
+        username = friend['username']
+        online_status = redis.hget(RTables.HASH_CLIENT(id), str(EventType.NOTIFICATION.value)) is not None
+        friend_status[username] = "Online" if online_status else "Offline"
+    print("friend_status:", friend_status)
+    return friend_status

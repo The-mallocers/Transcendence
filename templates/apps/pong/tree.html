@@ -1,112 +1,154 @@
-
 <style>
 
-    .treePage .slot {
-        width: 30rem;
+    .treePage {
+
+    }
+
+    .treePage .round {
+        width: 50%;
+        background-color: white;
+        border: rgb(228, 228, 228) 1px solid;
+        border-radius: 20px;
+        padding: 20px;
+    }
+
+    .treePage .players {
+        display: flex;
+        align-items: center;
+        justify-content: space-evenly;
+        padding: 20px 100px;
+    }
+
+    .treePage .players .left, .treePage .players .right {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+    }
+
+    .treePage .players img {
+        height: 40px;
+        width: 40px;
+        border-radius: 50%;
+    }
+
+    .treePage .players td {
+        display: flex;
+    }
+
+    .treePage th {
+        vertical-align: middle;
+        text-align: center;
+    }
+
+    .treePage td {
+        vertical-align: middle;
+        text-align: center;
+        padding: 25px;
+    }
+
+    .treePage .winner {
+        color: green;
+    }
+
+    .treePage .loser {
+        color: red;
     }
 
 </style>
-<div class="treePage">
-    <h1 class="text-center"> xxxxxxxxxx's tournament</h1>
-    <div class="container mt-5">
-        <div class="d-flex justify-content-center gap-5">
-        
-            <!-- Quarterfinals -->
-            <div class="d-flex flex-column justify-content-around" style="height: 500px;">
-            <div class="mb-5">
-                <div class="bg-light border text-center p-2 d-flex flex-row justify-content-between slot">
-                    <div>Player 1</div>
-                    <div class="score">0</div>
-                    <div class="tag">playing</div>
-                </div>
-                <div class="bg-light border text-center p-2 d-flex mt-1 flex-row justify-content-between slot">
-                    <div>Player 2</div>
-                    <div class="score">0</div>
-                    <div class="tag">playing</div>
-                </div>
-            </div>
-            <div class="mb-5">
-                <div class="bg-light border text-center p-2 d-flex flex-row justify-content-between slot">
-                    <div>Player 3</div>
-                    <div class="score">0</div>
-                    <div class="tag">played</div>
-                </div>
-                <div class="bg-light border text-center p-2 d-flex mt-1 flex-row justify-content-between slot">
-                    <div>Player 4</div>
-                    <div class="score">0</div>
-                    <div class="tag">playing</div>
-                </div>
-            </div>
-            <div class="mb-5">
-                <div class="bg-light border text-center p-2 d-flex flex-row justify-content-between slot">
-                    <div>Player 5</div>
-                    <div class="score">0</div>
-                    <div class="tag">playing</div>
-                </div>
-                <div class="bg-light border text-center p-2 d-flex mt-1 flex-row justify-content-between slot">
-                    <div>Player 6</div>
-                    <div class="score">0</div>
-                    <div class="tag">played</div>
-                </div>
-            </div>
-            <div>
-                <div class="bg-light border text-center p-2 d-flex flex-row justify-content-between slot">
-                    <div>Player 7</div>
-                    <div class="score">0</div>
-                    <div class="tag">played</div>
-                </div>
-                <div class="bg-light border text-center p-2 d-flex mt-1 flex-row justify-content-between slot">
-                    <div>Player 8</div>
-                    <div class="score">0</div>
-                    <div class="tag">playing</div>
-                </div>
-            </div>
-            </div>
-        
-            <!-- Semifinals -->
-            <div class="d-flex flex-column justify-content-around" style="height: 500px;">
-            <div class="mt-5 mb-5">
-                <div class="bg-secondary text-white text-center border p-2 d-flex flex-row justify-content-between slot">
-                    <div>winner 1</div>
-                    <div class="score">0</div>
-                    <div class="tag">not played</div>
-                </div>
-                <div class="bg-secondary text-white text-center border p-2 d-flex mt-1 flex-row justify-content-between slot">
-                    <div>winner 2</div>
-                    <div class="score">0</div>
-                    <div class="tag">not played</div>
-                </div>
-            </div>
-            <div>
-                <div class="bg-secondary text-white text-center border p-2 d-flex flex-row justify-content-between slot">
-                    <div>winner 3</div>
-                    <div class="score">0</div>
-                    <div class="tag">not played</div>
-                </div>
-                <div class="bg-secondary text-white text-center border p-2 d-flex mt-1 flex-row justify-content-between slot">
-                    <div>winner 4</div>
-                    <div class="score">0</div>
-                    <div class="tag">not played</div>
-                </div>
-            </div>
-            </div>
-        
-            <!-- Final -->
-            <div class="d-flex flex-column justify-content-center" style="height: 500px;">
-            <div>
-                <div class="bg-dark text-white text-center border p-2 d-flex flex-row justify-content-between slot">
-                    <div>finalist 1</div>
-                    <div class="score">0</div>
-                    <div class="tag">not played</div>
-                </div>
-                <div class="bg-dark text-white text-center border p-2 d-flex mt-1 flex-row justify-content-between slot">
-                    <div>finalist 2</div>
-                    <div class="score">0</div>
-                    <div class="tag">not played</div>
-                </div>
-            </div>
-            </div>
-        
-        </div>
-    </div> 
+
+<div class="treePage d-flex flex-column justify-content-center align-items-center">
+
+    <div class="round mt-5">
+        <h2>Round 1</h2>
+        <table class="table mt-2">
+            <thead>
+            <tr>
+                <th scope="col">Players</th>
+                <th scope="col">Status</th>
+                <th scope="col">Scores</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td class="players">
+                    <div class="left">
+                        <img src="/static/img/img.png" alt="">
+                        <div>meow</div>
+                    </div>
+                    <div class="vs">VS</div>
+                    <div class="right">
+                        <img src="/static/img/img.png" alt="">
+                        <div>meow</div>
+                    </div>
+                </td>
+                <td><span class="badge bg-success">Played</span></td>
+                <td><span class="left-score winner">5</span> - <span class="right-score loser">0</span></td>
+            </tr>
+            <tr>
+                <td class="players">
+                    <div class="left">
+                        <img src="/static/img/img.png" alt="">
+                        <div>meow</div>
+                    </div>
+                    <div class="vs">VS</div>
+                    <div class="right">
+                        <img src="/static/img/img.png" alt="">
+                        <div>meow</div>
+                    </div>
+                </td>
+                <td><span class="badge bg-success">Played</span></td>
+                <td><span class="left-score winner">5</span> - <span class="right-score loser">0</span></td>
+            </tr>
+            <tr>
+                <td class="players">
+                    <div class="left">
+                        <img src="/static/img/img.png" alt="">
+                        <div>brrbrrpatapim</div>
+                    </div>
+                    <div class="vs">VS</div>
+                    <div class="right">
+                        <img src="/static/img/img.png" alt="">
+                        <div>trallalerotralala</div>
+                    </div>
+                </td>
+                <td><span class="badge bg-success">Played</span></td>
+                <td><span class="left-score winner">5</span> - <span class="right-score loser">0</span></td>
+            </tr>
+            <tr>
+                <td class="players">
+                    <div class="left">
+                        <img src="/static/img/img.png" alt="">
+                        <div>brrbrrpatapim</div>
+                    </div>
+                    <div class="vs">VS</div>
+                    <div class="right">
+                        <img src="/static/img/img.png" alt="">
+                        <div>trallalerotralala</div>
+                    </div>
+                </td>
+                <td><span class="badge bg-success">Played</span></td>
+                <td><span class="left-score winner">5</span> - <span class="right-score loser">0</span></td>
+            </tr>
+            <tr>
+                <td class="players">
+                    <div class="left">
+                        <img src="/static/img/img.png" alt="">
+                        <div>brrbrrpatapim</div>
+                    </div>
+                    <div class="vs">VS</div>
+                    <div class="right">
+                        <img src="/static/img/img.png" alt="">
+                        <div>trallalerotralala</div>
+                    </div>
+                </td>
+                <td><span class="badge bg-success">Played</span></td>
+                <td><span class="left-score winner">5</span> - <span class="right-score loser">0</span></td>
+            </tr>
+            <!-- we can add a tr for every competitor of the tournament for each round  -->
+            <!-- should dynamicaly do so when socket updates with atresall -->
+            </tbody>
+        </table>
+    </div>
+
 </div>

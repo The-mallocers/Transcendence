@@ -148,7 +148,15 @@
     background-color: #045f61;
 }
 
+.roomroom.active-room {
+    background-color: #5e7e82;
+}
+
 #messageInput:focus {
     outline: none;
     outline: 2px solid #000;
-  }
+}
+
+.no-caret::after {
+    display: none !important;
+}

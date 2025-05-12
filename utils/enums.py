@@ -44,6 +44,7 @@ class RequestAction(str, Enum):
     CREATE_DUEL: str = 'create_duel'
     LEAVE_DUEL: str = 'leave_duel'
     ACCEPT_DUEL: str = 'accept_duel'
+    REFUSE_DUEL: str = 'refuse_duel'
     # ACK_ASK_DUEL: str = 'ack_ask_duel'
 
     # ── Game Actions ──────────────────────────────────────────────────────────────────
@@ -72,7 +73,13 @@ class RequestAction(str, Enum):
     ACCEPT_FRIEND_REQUEST: str = "accept_friend_request"
     REFUSE_FRIEND_REQUEST: str = "refuse_friend_request"
     DELETE_FRIEND: str = "delete_friend"
+    BLOCK_FRIEND: str = "block_friend"
+    UNBLOCK_FRIEND: str = "unblock_friend"
+    BLOCK_UNBLOCK_FRIEND: str = "block_unblock_friend"
+    GET_OPPONENT_NAME: str = "get_opponent_name"
 
+    PING: str = 'ping'
+    ONLINE_STATUS: str = "check_online_status"
 
 # All the responses the server sends to the client
 class ResponseAction(str, Enum):
@@ -85,6 +92,10 @@ class ResponseAction(str, Enum):
     DUEL_JOIN: str = 'You have successfully joined the duel'
     DUEL_LEFT: str = 'You have successfully left the duel'
     ACK_ASK_DUEL: str = 'Response of asking to join a duel'
+    ACK_PENDING_DUELS = 'Response of pending duels'
+    REFUSED_DUEL: str = 'You have refused the duel.'
+    DUEL_REFUSED: str = 'Duel refused'
+    GET_OPPONENT: str = "get_opponent"
 
     # ── Tournaments ───────────────────────────────────────────────────────────────── #
     TOURNAMENT_CREATED: str = 'You have successfully create the tournament'
@@ -115,11 +126,13 @@ class ResponseAction(str, Enum):
     SCORE_RIGHT_UPDATE: str = 'score_right_update'
 
     # ── Chat Actions ──────────────────────────────────────────────────────────────────
-    ROOM_CREATED = "You have successfully created a chat room"
-    MESSAGE_RECEIVED = "New message received"
-    HISTORY_RECEIVED = "history_received"
-    ALL_ROOM_RECEIVED = "all_room_received"
-
+    ROOM_CREATED: str = "You have successfully created a chat room"
+    MESSAGE_RECEIVED: str = "New message received"
+    HISTORY_RECEIVED: str = "history_received"
+    ALL_ROOM_RECEIVED: str = "all_room_received"
+    NEW_FRIEND: str = "new_friend"
+    ERROR_MESSAGE_USER_BLOCK: str = "error_message_user_block"
+    
     # ── NOTIFICATION ACTION ───────────────────────────────────────────────────────────
     ACK_SEND_FRIEND_REQUEST: str = "acknowledge_send_friend_request"
     ACK_ACCEPT_FRIEND_REQUEST: str = "acknowledge_accept_friend_request"
@@ -127,10 +140,12 @@ class ResponseAction(str, Enum):
     ACK_REFUSE_FRIEND_REQUEST: str = "acknowledge_refuse_friend_request"
     ACK_DELETE_FRIEND: str = "ack_delete_friend"
     ACK_DELETE_FRIEND_HOST: str = "ack_delete_friend_host"
-
+    ACK_ONLINE_STATUS: str = "ack_online_status"
+    FRIEND_BLOCKED: str = "friend_blocked"
+    FRIEND_UNBLOCKED: str = "friend_unblocked"
     NOTIF_TEST = "notification_test"
 
-    TEST: str = 'test'
+    PONG: str = 'pong'
 
 
 # All the error messages sent to the client
@@ -148,6 +163,7 @@ class ResponseError(str, Enum):
     DUEL_NOT_EXIST: str = 'Duel you try to join not exist.'
     NOT_INVITED: str = 'You are not invited to this duel.'
     ALREADY_JOIN_DUEL: str = 'You try to join duel already joined.'
+    CANNOT_REFUSE_DUEL: str = "You can't refuse a duel you already joined."
 
     # ── Tournaments ───────────────────────────────────────────────────────────────── #
     KEY_ERROR: str = 'Error in tournament key.'
@@ -185,7 +201,8 @@ class ResponseError(str, Enum):
     SERVICE_ERROR: str = 'An error occurred in the service.'
     TARGET_NOT_FOUND: str = 'Target not found.'
     USER_OFFLINE: str = 'User is offline.'
-
+    OPPONENT_NOT_FOUND: str = 'opponent_not_found'
+    
     # INTERNAL_ERROR = "Internal server error"
     # INVALID_ID: str = 'Player does not exist'
     # NOT_READY: str = 'Players are not ready'
@@ -229,21 +246,23 @@ class PlayerSide(str, Enum):
     LEFT: str = 'player_left'
     RIGHT: str = 'player_right'
 
-
 class PaddleMove(str, Enum):
     UP: str = 'up'
     DOWN: str = 'down'
     IDLE: str = 'idle'
 
-
 class Ranks(str, Enum):
     BRONZE: str = 'bronze'
     SILVER: str = 'silver'
     GOLD: str = 'gold'
-    PLATINUM: str = 'platinum'
     DIAMOND: str = 'diamond'
-    CHAMPION: str = 'champion'
 
+
+class RanksThreshold(int, Enum):
+    BRONZE = 0
+    SILVER = 100
+    GOLD = 200
+    DIAMOND = 300
 
 class JWTType(str, Enum):
     ACCESS: str = 'access'

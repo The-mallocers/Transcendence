@@ -181,3 +181,47 @@ ul.friends_group .list-group-item{
     font-family: "futura-pt", "Helvetica", "Sans serif";
     font-weight: bold;
 }
+
+#upload-img-btn {
+    font-weight: bold;
+    width: 30%;
+    display: inline-block;
+    text-align: center;
+    box-sizing: border-box;
+    margin-right: auto;
+}
+
+#logout-btn, #delete-btn {
+    font-weight: bold;
+    width: 20%;
+    display: inline-block;
+    text-align: center;
+    box-sizing: border-box;
+    margin-left: auto;
+    background-color: #c0392b;
+    color: white;
+    padding: 1rem;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    cursor: pointer;
+}
+
+#logout-btn:hover, #delete-btn:hover {
+    background-color: #161216;
+    transform: scale(1.03);
+}
+
+#update-btn {
+    font-weight: bold;
+    width: 30%;
+    display: inline-block;
+    text-align: center;
+    box-sizing: border-box;
+    margin-right: auto;
+}
+
+#profile_picture {
+    margin-right: auto;
+}

@@ -85,7 +85,6 @@ class PlayerRuntime:
         # Return None if player not found
         return None
 
-
 class Player(models.Model, PlayerRuntime):
     class Meta:
         db_table = 'pong_players'
@@ -99,6 +98,7 @@ class Player(models.Model, PlayerRuntime):
 
     # ━━ PLAYER INFOS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
     score = IntegerField(default=0)
+    mmr_change = IntegerField(default=0)
 
     def __str__(self):
         if self._client is not None:

@@ -68,6 +68,7 @@ class TournamentService(BaseServices):
         pass
 
     async def disconnect(self, client):
+        print("In disconnect of tournament service")
         queues = await Clients.acheck_in_queue(client, self.redis)
         if queues and RTables.HASH_TOURNAMENT_QUEUE('') in str(queues):
             code = re.search(rf'{RTables.HASH_TOURNAMENT_QUEUE("")}(\w+)$', queues.decode('utf-8')).group(1)

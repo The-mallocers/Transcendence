@@ -28,6 +28,7 @@ class GameState:
         paddle_pL_copy.x = logic.paddle_pL.x
         paddle_pL_copy.y = logic.paddle_pL.y
         paddle_pL_copy.speed = logic.paddle_pL.speed
+        paddle_pL_copy.move = logic.paddle_pL.move  # Added for frontend rendering
 
         paddle_pR_copy = Paddle()
         paddle_pR_copy.width = logic.paddle_pR.width
@@ -35,6 +36,7 @@ class GameState:
         paddle_pR_copy.x = logic.paddle_pR.x
         paddle_pR_copy.y = logic.paddle_pR.y
         paddle_pR_copy.speed = logic.paddle_pR.speed
+        paddle_pR_copy.move = logic.paddle_pR.move
 
         score_pL_copy = Score()
         score_pL_copy.score = logic.score_pL.score
@@ -73,31 +75,31 @@ class GameState:
                     differences['ball'][attr] = {
                         'previous': prev_val,
                         'current': curr_val,
-                        'diff': curr_val - prev_val
+                        # 'diff': curr_val - prev_val
                     }
 
         # Compare Paddle 1 properties
         if current_state.paddle_pL and previous_state.paddle_pL:
-            for attr in ['x', 'y', 'width', 'height', 'speed']:
+            for attr in ['x', 'y', 'width', 'height', 'speed', 'move']:
                 curr_val = getattr(current_state.paddle_pL, attr)
                 prev_val = getattr(previous_state.paddle_pL, attr)
                 if curr_val != prev_val:
                     differences['paddle_pL'][attr] = {
                         'previous': prev_val,
                         'current': curr_val,
-                        'diff': curr_val - prev_val
+                        # 'diff': curr_val - prev_val #Doing this with move is nonsense, but we never actually use diff
                     }
 
         # Compare Paddle 2 properties
         if current_state.paddle_pR and previous_state.paddle_pR:
-            for attr in ['x', 'y', 'width', 'height', 'speed']:
+            for attr in ['x', 'y', 'width', 'height', 'speed', 'move']:
                 curr_val = getattr(current_state.paddle_pR, attr)
                 prev_val = getattr(previous_state.paddle_pR, attr)
                 if curr_val != prev_val:
                     differences['paddle_pR'][attr] = {
                         'previous': prev_val,
                         'current': curr_val,
-                        'diff': curr_val - prev_val
+                        # 'diff': curr_val - prev_val #Doing this with move is nonsense, but we never actually use diff
                     }
 
         # Compare Score 1
@@ -108,7 +110,7 @@ class GameState:
                 differences['score_pL']['score'] = {
                     'previous': prev_score,
                     'current': curr_score,
-                    'diff': curr_score - prev_score
+                    # 'diff': curr_score - prev_score
                 }
 
         # Compare Score 2
@@ -119,7 +121,7 @@ class GameState:
                 differences['score_pR']['score'] = {
                     'previous': prev_score,
                     'current': curr_score,
-                    'diff': curr_score - prev_score
+                    # 'diff': curr_score - prev_score
                 }
 
         return differences

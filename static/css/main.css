@@ -113,6 +113,12 @@ main {
 
 .informationsContainer h3 {
     color: aliceblue;
+    position: absolute;
+    left: 5%; /* Moved slightly to the right */
+    top: 15%; /* Positioned higher up */
+    margin: 0;
+    font-size: 3.9rem; /* Increased size */
+    z-index: 2; /* Ensure it appears above other elements */
 }
 
 .avatar {

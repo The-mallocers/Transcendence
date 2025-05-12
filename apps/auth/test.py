@@ -21,7 +21,7 @@ class PasswordModelTest(TestCase):
     def test_password_creation(self):
         """Test that a password is created and hashed"""
         # Get the password from the database
-        password = Password.objects.get(id=self.password.code)
+        password = Password.objects.get(id=self.password.id)
 
         # Check that the password is hashed (starts with bcrypt prefix)
         self.assertTrue(password.password.startswith('$2b$'))
@@ -32,7 +32,7 @@ class PasswordModelTest(TestCase):
     def test_check_pwd(self):
         """Test password verification"""
         # Get the password from the database
-        password = Password.objects.get(id=self.password.code)
+        password = Password.objects.get(id=self.password.id)
 
         # Check that the correct password verifies
         self.assertTrue(password.check_pwd("testpassword123"))
@@ -111,9 +111,7 @@ class InvalidatedTokenModelTest(TestCase):
         # Check the active token
         token = InvalidatedToken.objects.get(jti=self.token.jti)
         self.assertEqual(token.type, JWTType.ACCESS.name)
-        self.assertEqual(token.token, "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.dozjgNryP4J3jVmNHl0w5N_XgL0n3I9PlFUP0THsR8U")
-
-        # Check the expired token
+        self.assertEqual(token.token, self.token.token)
         expired = InvalidatedToken.objects.get(jti=self.expired_token.jti)
         self.assertEqual(expired.type, JWTType.REFRESH.name)
 

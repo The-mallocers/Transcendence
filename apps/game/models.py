@@ -1,7 +1,7 @@
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 from django.db import models
-from django.db.models import IntegerField, ForeignKey, CharField, ImageField
+from django.db.models import IntegerField, ForeignKey, CharField
 from django.db.models.fields import DateTimeField, BooleanField
 from django.utils import timezone
 from redis import DataError
@@ -10,7 +10,7 @@ from redis.commands.json.path import Path
 from apps.client.models import Clients
 from apps.player.models import Player
 from apps.tournaments.models import Tournaments
-from utils.enums import EventType, ResponseAction, Ranks, RTables, PlayerSide
+from utils.enums import EventType, ResponseAction, RTables, PlayerSide
 from utils.enums import GameStatus
 from utils.redis import RedisConnectionPool
 from utils.serializers.player import PlayersRedisSerializer
@@ -138,7 +138,6 @@ class GameRuntime:
         except DataError:
             return None
 
-
 class Game(models.Model, GameRuntime):
     class Meta:
         db_table = 'pong_games'
@@ -181,14 +180,3 @@ class Game(models.Model, GameRuntime):
             return game
         except:
             return None
-
-
-class Rank(models.Model):
-    class Meta:
-        db_table = 'pong_ranks'
-
-    name = CharField(primary_key=True, max_length=15, editable=False, null=False,
-                     choices=[(ranks.name, ranks.value) for ranks in Ranks])
-    icon = ImageField(upload_to='rank_icon/', null=False)
-    mmr_min = IntegerField(null=False)
-    mmr_max = IntegerField(null=False)

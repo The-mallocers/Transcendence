@@ -1,5 +1,6 @@
 import {navigateTo} from '../../spa/spa.js';
-
+import {WebSocketManager} from '../../websockets/websockets.js';
+import {getClientId} from '../../utils/utils.js';
 
 function register(event) {
     console.log("I am register.js")
@@ -52,12 +53,12 @@ function register(event) {
 
 let element = document.querySelector("#register-btn");
 
-element.addEventListener("click", (e) => {
+element?.addEventListener("click", (e) => {
     register(e)
 })
 
 //This is a frontend check to avoid needing to ask the backend for validation, even if we still do.
-function isPasswordcheckValid(password, passwordcheck) {
+export function isPasswordcheckValid(password, passwordcheck) {
     if (password === passwordcheck) {
         return true
     }
@@ -69,7 +70,7 @@ function isPasswordcheckValid(password, passwordcheck) {
     }
 }
 
-function handleErrorFront(errorData) {
+export function handleErrorFront(errorData) {
     clearAllErrorMessages();
     
     if ("profile" in errorData) {
@@ -97,7 +98,7 @@ function handleErrorFront(errorData) {
 }
 
 
-function displayErrorMessage(fieldId, message) {
+export function displayErrorMessage(fieldId, message) {
     const field = document.getElementById(fieldId);
     if (!field) return;
     
@@ -123,3 +124,14 @@ function clearAllErrorMessages() {
     const errorMessages = document.querySelectorAll('.error-message');
     errorMessages.forEach(msg => msg.remove());
 }
+
+
+//Little trick to deal with annoying edge case of logout per invalid jwt token not closing ws
+async function socketCheck() {
+    if (await getClientId() == null && WebSocketManager.isSocketOpen(WebSocketManager.notifSocket)) {
+        console.log("Allo");
+        WebSocketManager.closeNotifSocket();
+    }
+}
+
+await socketCheck();

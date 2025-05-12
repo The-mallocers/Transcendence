@@ -123,7 +123,7 @@ REST_FRAMEWORK = {
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ SECURITY SETTINGS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'z1r2p5']
 CSRF_TRUSTED_ORIGINS = ['https://localhost:8000', 'https://127.0.0.1:8000']
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 SECURE_SSL_REDIRECT = True
@@ -138,6 +138,7 @@ PROTECTED_PATHS = [
 EXCLUDED_PATHS = [
     '/api/auth/login',
     '/api/auth/register',
+    '/api/auth/2facode',
     '/pages/auth/login',
     '/pages/auth/register',
     '/pages/auth/2fa',

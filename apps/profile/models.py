@@ -9,9 +9,12 @@ class Profile(models.Model):
     username = models.CharField(null=False, max_length=50, editable=True)
     first_name = models.CharField(null=True, max_length=50, editable=True)
     last_name = models.CharField(null=True, max_length=50, editable=True)
+
     profile_picture = models.ImageField(upload_to='profile/',
                                         default="profile/default.png",
                                         editable=True, null=True)
+    # I want to add this !
+    coalition = models.CharField(null=True, max_length=50, editable=True)
 
     class Meta:
         db_table = "client_profile"

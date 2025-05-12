@@ -75,18 +75,15 @@
 } */
 
 .joinTournamentContainer .room {
-    padding: .5rem;
-    /* aspect-ratio: 1 / 1; */
-    height: 25rem;
-    transform-style: preserve-3d; /* Allows 3D transformations on child elements */
-    transition: transform 0.75s; /* Smooth flip transition */
-
+    padding: 1rem;
 }
 
 .joinTournamentContainer .cardContainer {
     position: relative;
-    height: 80%;
-    width: 80%; 
+    width: 100%;
+    border: 1px solid #dcdcdc;
+    border-radius: 5px;
+    padding: 1rem;
 }
 
 .joinTournamentContainer .room .front,
@@ -150,4 +147,45 @@
     background-color: #00BABB;
     color: white;
     align-self: center;
+}
+
+.joinTournamentContainer .avatarsContainer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.joinTournamentContainer .avatarsContainer img {
+    height: 40px;
+    width: 40px;
+    border-radius: 50%;
+}
+
+
+.joinTournamentContainer .avatarsContainer .imgContainer {
+    border: 2px solid #fff;
+    border-radius: 50%;
+}
+
+.joinTournamentContainer .avatarsContainer .imgContainer:not(:first-of-type) {
+    margin-left: -15px;
+}
+
+.joinTournamentContainer .avatarsContainer .imgContainer:last-of-type {
+    position: relative;
+    overflow: hidden;
+}
+
+.joinTournamentContainer .avatarsContainer .imgContainer:last-of-type img {
+    filter: brightness(0.3);
+}
+
+
+.joinTournamentContainer .avatarsContainer .more {
+    /* margin-left: -15px; */
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #fff;
 }

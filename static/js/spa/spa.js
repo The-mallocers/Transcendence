@@ -2,8 +2,7 @@ import {WebSocketManager} from "../websockets/websockets.js"
 import {isGameOver} from "../apps/game/VarGame.js"
 import * as html from "../utils/html_forms.js"
 import {routes} from "../utils/routes.js";
-// let notifSocket = null;
-// let clientId = null;
+import {getClientId} from "../utils/utils.js";
 
 class Router {
     constructor(routes) {
@@ -13,15 +12,19 @@ class Router {
     }
 
     init() {
+        console.log("init router ||||||||||||||||||||||||||||||")
         window.addEventListener('popstate', () => this.handleLocation());
     }
 
     async handleLocation() {
-
-        // clientId = await getClientId();
-        // notifSocket = await WebSocketManager.initNotifSocket(clientId);
+        //Now making the notif ws in navigation
+        if (WebSocketManager.isSocketClosed(WebSocketManager.notifSocket)) {
+            const clientId = await getClientId();
+            if (clientId) {
+                await WebSocketManager.initNotifSocket(clientId);
+            }
+        }
         const path = window.location.pathname;
-
         // console.log(window.location.search);
         // console.log("looking for the path: ", path)
         const route = this.routes.find(r => r.path === path);
@@ -67,9 +70,13 @@ class Router {
     navigate(path) {
 
         let splitedPath = path.split("/")
-        console.log(splitedPath)
+        console.log(splitedPath);
         if (splitedPath.includes("pong")) {
-            WebSocketManager.closeChatSocket()
+            if (splitedPath.includes("duel") || splitedPath.includes("arena") || splitedPath.includes("matchmaking")) {
+                WebSocketManager.closeChatSocket();
+            } else {
+                WebSocketManager.closeAllSockets();
+            }
         } else {
             WebSocketManager.closeAllSockets(); //for now we close all
         }

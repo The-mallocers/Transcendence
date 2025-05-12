@@ -54,6 +54,9 @@ class WsConsumer(AsyncWebsocketConsumer):
             return False
 
     async def disconnect(self, close_code):
+        print(f"DISCONNECTING A WEBSOCKET FROM {self.__class__.__name__}")
+        print(f"{self.service} is the name of the service currently used ")
+        print(f"{self.event_type} is the name of the event type currently used ")
         logging.getLogger('websocket.client').info(f'WebSocket disconnected with code {close_code}')
         await self.service.handle_disconnect(self.client)
         await self.channel_layer.group_discard(RTables.GROUP_ERROR, self.channel_name)
@@ -78,7 +81,7 @@ class WsConsumer(AsyncWebsocketConsumer):
             await asend_group_error(RTables.GROUP_CLIENT(self.client.id), ResponseError.JSON_ERROR)
 
         except ServiceError as e:
-            self._logger.error(traceback.format_exc())
+            self._logger.error(f"{self.__class__.__name__} {traceback.format_exc()}")
             await asend_group_error(RTables.GROUP_CLIENT(self.client.id), ResponseError.SERVICE_ERROR, content=str(e))
 
         except Exception as e:

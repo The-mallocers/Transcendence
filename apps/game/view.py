@@ -1,12 +1,5 @@
 from django.views.decorators.http import require_http_methods
 
-
-@require_http_methods(["GET"])
-def pong_get(req):
-    from apps.game.views.pong import get
-    return get(req)
-
-
 @require_http_methods(["GET"])
 def gamemodes_get(req):
     from apps.game.views.gamemodes import get

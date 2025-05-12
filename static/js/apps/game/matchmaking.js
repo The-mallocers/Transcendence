@@ -99,13 +99,16 @@ socket.onmessage = (e) => {
                 x: jsonData.data.content.left.paddle.x,
                 y: jsonData.data.content.left.paddle.y,
                 username: jsonData.data.content.left.username,
-                id: ""
+                id: "",
+                picture: jsonData.data.content.left.player_profile,
+
             },
             right: {
                 x: jsonData.data.content.right.paddle.x,
                 y: jsonData.data.content.right.paddle.y,
                 username: jsonData.data.content.right.username,
-                id: ""
+                id: "",
+                picture: jsonData.data.content.right.player_profile,
             }
         }
     }
