@@ -15,7 +15,7 @@ class PlayerRuntime:
 
         # ── Properties ───────────────────────────────────────────────────────────────── #
         self._client: Clients = None
-        self._score = 0
+        self._score = None
 
     # ═══════════════════════════════════ Properties ═══════════════════════════════════ #
 
@@ -118,6 +118,7 @@ class Player(models.Model, PlayerRuntime):
         if self._client is not None:
             self.client = self._client
         if self._score is not None:
+            # print(f"self.score used to be {self.score}, now its {self._score}")
             self.score = self._score
         super().save(*args, **kwargs)
 

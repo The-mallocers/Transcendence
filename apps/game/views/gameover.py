@@ -9,7 +9,7 @@ from apps.game.models import Game
 def get(request):
     client = Clients.get_client_by_request(request)
     game_id = request.GET.get("game", "game_not_found")
-    found_game = Game.objects.filter(id=game_id).first()
+    found_game = Game.objects.filter(code=game_id).first()
     client_player_name = client.profile.username
     mmr_change = message = client_score = opponent_score = opponent = None
     if found_game.winner.client.id == client.id:

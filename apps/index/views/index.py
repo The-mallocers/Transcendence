@@ -55,7 +55,7 @@ def get_last_matches(client, games_played) -> list:
     for game in games_played:
         if (i >= 4):
             break
-        game = Game.objects.get(id=game.id)
+        game = Game.objects.get(code=game.code)
         myPoints = 0
         enemyPoints = 0
         opponent = ""
