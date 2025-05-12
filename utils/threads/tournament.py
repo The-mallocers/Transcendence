@@ -95,6 +95,7 @@ class TournamentThread(Threads):
         return False
 
     def _running(self):
+        return False
         if self.tournament.status is TournamentStatus.RUNNING:
             if self.get_match_complete() == self.get_total_matches() and self.get_current_round() <= self.rounds:
                 self.set_current_round(self.get_current_round() + 1)

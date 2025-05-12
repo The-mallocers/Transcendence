@@ -82,7 +82,10 @@ class GameRuntime:
 
     def create_redis_game(self):
         from utils.serializers.game import GameSerializer
-        serializer = GameSerializer(self, context={'id': self.code, 'is_duel': self.is_duel, 'tournament_code': self.tournament.code})
+        if self.tournament is None:
+            serializer = GameSerializer(self, context={'id': self.code, 'is_duel': self.is_duel})
+        else:
+            serializer = GameSerializer(self, context={'id': self.code, 'is_duel': self.is_duel, 'tournament_code': self.tournament.code})
         self.redis.json().set(self.game_key, Path.root_path(), serializer.data)
 
     def init_players(self):

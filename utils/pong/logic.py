@@ -222,7 +222,9 @@ class PongLogic:
 
         loser.save()
         winner.save()
-        tournament = Tournaments.get_tournament_by_code(self.game.tournament.code)
+        tournament = None
+        if self.game.tournament:
+            tournament = Tournaments.get_tournament_by_code(self.game.tournament.code) #ATTENTION !
         finished_game = Game.objects.create(code=self.game.code, winner=winner, loser=loser,
                                             points_to_win=self.game.points_to_win, is_duel=self.game.rget_is_duel(), tournament=tournament)
 

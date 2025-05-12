@@ -349,3 +349,6 @@ class NotificationService(BaseServices):
                 "online": is_online
             }
         )
+    async def disconnect(self, client):
+        print("in disconnect of notification - Please see me !")
+        pass

@@ -245,7 +245,7 @@ class Clients(models.Model):
     def aget_pending_request_by_client(self, target):
         try:
             for friend in self.friend.pending_friends.all():
-                if friend.code == target.code:
+                if friend.id == target.id:
                     return friend
             return None
         except Exception as e:

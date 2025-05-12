@@ -46,6 +46,9 @@ def auth42(request):
         'https://api.intra.42.fr/oauth/token',
         json=token_params
     )
+
+    print("WOOOOOOOOOO", token_response.status_code)
+
     if token_response.status_code != 200:
         response = formulate_json_response(True, 302, "Login Unsuccessful", "/")
         return response
@@ -96,6 +99,7 @@ def auth42(request):
 
         if serializer.is_valid():
             client = serializer.save()
+    print("WOOOOOOOOOO")
     response = formulate_json_response(True, 302, "Login Successful", "/")
 
     response.set_cookie("oauthToken", access_token)
