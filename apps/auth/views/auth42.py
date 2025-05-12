@@ -40,12 +40,18 @@ def generate_password():
     password = ''.join(random.choice(characters) for _ in range(length))
     return password
 
+def add_suffix_until_unique(username):
+    i = 1
+    username = username + str(i)
+    while (Clients.get_client_by_username(username) is not None):
+        username = username[:-len(str(i))]
+        username = username + str(i)
+        i += 1
+    return username
 # print(generate_password())
-
 
 def auth42(request):
     auth_code = request.GET.get('code')
-    print("lalalalalala", auth_code)
     token_params = {
         'grant_type': 'authorization_code',
         'client_id': os.environ.get('AUTH_42_CLIENT'),
@@ -53,64 +59,61 @@ def auth42(request):
         'code': auth_code,
         'redirect_uri': 'https://localhost:8000/auth/auth42'
     }
-    
+
     token_response = requests.post(
-        'https://api.intra.42.fr/oauth/token', 
+        'https://api.intra.42.fr/oauth/token',
         json=token_params
     )
+    if token_response.status_code != 200 :
+        response = formulate_json_response(True, 302, "Login Unsuccessful", "/")
+        return response
 
-    print(token_response)
     token_data = token_response.json()
     access_token = token_data.get('access_token')
-    print("acess token")
-    print(access_token)
     user_response = requests.get(
         'https://api.intra.42.fr/v2/me',
         headers={'Authorization': f'Bearer {access_token}'}
     )
     user_data = user_response.json()
+    id = user_data.get('id')
     email = user_data.get('email')
+    first_name = user_data.get('first_name')
+    last_name = user_data.get('last_name')
+
     username = user_data.get('login')
+    if (Clients.get_client_by_username(username) is not None):
+        username = add_suffix_until_unique(username)
 
+    # GET /v2/users/:user_id/coalitions
+    coa_response = requests.get(
+        f'https://api.intra.42.fr/v2/users/{id}/coalitions',
+        headers={'Authorization': f'Bearer {access_token}'})
+
+    coa_data = coa_response.json()
+    coa = coa_data[0].get('name')
     client = Clients.get_client_by_email(email)
-
-    print(username, client)
 
     serializer = None
     if not client:
         generated_pwd = generate_password()
         data = {
             'profile': {
-                'first_name': username,
-                'last_name': 'test',
+                'first_name': first_name,
+                'last_name': last_name,
                 'email': email,
-                'username': username
+                'username': username,
+                'coalition': coa
             },
             'password': {
                 'password': generated_pwd,
                 'passwordcheck': generated_pwd,
             }
         }
+
         serializer = ClientSerializer(data=data, context={'is_admin': False})
+
         if serializer.is_valid():
             client = serializer.save()
-        else:
-            raise IrreversibleError(f'Failed to create admin in migration file: '
-                                    f'{format_validation_errors(serializer.errors)}')
-
-
-    # csrf_token = get_token(request)
-
-
-    # html_content = render_to_string("apps/auth/42fallback.html", {
-    #     "csrf_token": csrf_token,
-    # })
-
-    # response = JsonResponse({
-    #     'html': html_content,
-    # })
-
-    # response = formulate_json_response(True, 200, "Login Successful", "/")
     response = formulate_json_response(True, 302, "Login Successful", "/")
 
     response.set_cookie("oauthToken", access_token)
