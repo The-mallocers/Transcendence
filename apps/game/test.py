@@ -63,7 +63,7 @@ class GameModelTest(TestCase):
 
     def test_rset_status(self):    
         return True
-    """Test setting game status in Redis"""
+        """Test setting game status in Redis"""
         # Mock Redis methods
         self.mock_redis.json.return_value.get.return_value = GameStatus.STARTING.value
 

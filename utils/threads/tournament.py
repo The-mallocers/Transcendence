@@ -40,9 +40,7 @@ class TournamentThread(Threads):
         except Exception as e:
             self._logger.error(traceback.format_exc())
             self.set_status(TournamentStatus.ERROR)
-            print('error1')
             send_group_error(RTables.GROUP_TOURNAMENT(self.tournament.code), ResponseError.EXCEPTION, str(e), close=True)
-            print('error2')
         finally:
             self.stoping()
 
@@ -50,7 +48,7 @@ class TournamentThread(Threads):
         for game in self.games:
             if game.rget_status() is GameStatus.WAITING:
                 self.redis.delete(RTables.JSON_GAME(game.code))
-        self.redis.delete(RTables.JSON_TOURNAMENT(self.tournament.code))
+        # self.redis.delete(RTables.JSON_TOURNAMENT(self.tournament.code))
         self.redis.expire(f'channels:group:{RTables.GROUP_TOURNAMENT(self.tournament.code)}', 0)
 
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ EVENT ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
@@ -95,7 +93,6 @@ class TournamentThread(Threads):
         return False
 
     def _running(self):
-        return False
         if self.tournament.status is TournamentStatus.RUNNING:
             if self.get_match_complete() == self.get_total_matches() and self.get_current_round() <= self.rounds:
                 self.set_current_round(self.get_current_round() + 1)

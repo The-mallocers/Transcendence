@@ -149,7 +149,7 @@ def on_message(ws, message, client_id):
                 print(f"[{client_id}] All players are ready, tournament can start\n")
             elif action == 'TOURNAMENT_LOSE_GAME':
                 print(f"[{client_id}] Lost the tournament game - closing this tournament connection\n")
-                ws.close()
+                ws.close() #TODO une fois une game perdu, si tu te deco de /tournament/ws tu peut pas te reco et tu ne peut plus voir la suite du tournois
                 del client_connections[client_id]
                 # Don't return here, allow the function to continue processing
             elif action == 'TOURNAMENT_GAME_FINISH':
@@ -157,10 +157,10 @@ def on_message(ws, message, client_id):
                 # If this is a game websocket, close it
                 if client_id.endswith('_game'):
                     print(f"[{client_id}] Closing game websocket connection\n")
-                    ws.close(status=1000, reason="TOURNAMENT_GAME_FINISH")
+                    ws.close(status=1000, reason="TOURNAMENT_GAME_FINISH") #TODO une fois qu'une game est fini, il faut retourner sur la page tournois
                     del client_connections[client_id]
                 # Don't return here, allow the function to continue processing
-            elif action == 'TOURNAMENT_GAME_READY':
+            elif action == 'TOURNAMENT_GAME_READY': #TODO Redirige vers la page matchmaking et normalement tous ce fait tout seul
                 print('Tournament is ready to start your game!')
                 if not client_id.endswith('_game'):  # Prevent recursive game connections
                     base_client_id = client_id.split('_')[0]  # Get original client ID
@@ -241,6 +241,14 @@ def on_close(ws, close_status_code, close_msg, client_id):
 def on_open(ws, client_id, is_host=False):
     client_connections[client_id] = ws
     print(f"[{client_id}] Connected successfully\n")
+    
+    ping_msg = {
+        "event": "matchmaking",
+            "data": {
+                "action": "ping"
+            }
+    }
+    ws.send(json.dumps(ping_msg))
 
     if is_host and not stop_event.is_set():
         global num_clients
