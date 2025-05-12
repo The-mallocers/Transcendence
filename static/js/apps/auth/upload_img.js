@@ -28,7 +28,7 @@ file_input.addEventListener('change', async () => {
                 console.log(data);
                 const newImg = new Image();
                 newImg.src = data.picture + `?t=${Date.now()}`;
-                
+
                 newImg.onload = () => {
                     const profilePic = document.getElementById("profile_picture");
                     profilePic.src = newImg.src;

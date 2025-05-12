@@ -1,6 +1,5 @@
 from json import JSONDecodeError, loads
 
-from apps.client.models import Clients
 from utils.enums import EventType, ResponseError, RTables
 from utils.websockets.channel_send import asend_group_error
 from utils.websockets.consumers.consumer import WsConsumer

@@ -1,6 +1,7 @@
 from django.urls import path
 
-from apps.auth.api.views import PasswordApiView, LoginApiView, RegisterApiView, LogoutApiView, GetClientIDApiView, UploadPictureApiView, UpdateApiView, DeleteApiView
+from apps.auth.api.views import PasswordApiView, LoginApiView, RegisterApiView, LogoutApiView, GetClientIDApiView, UploadPictureApiView, \
+    UpdateApiView, DeleteApiView
 from . import views
 
 urlpatterns = [

@@ -12,7 +12,7 @@ from utils.redis import RedisConnectionPool
 
 
 def get(req):
-    #Profile specific code
+    # Profile specific code
     requestUsername = req.GET.get("username", "minimeow")
     target = Clients.get_client_by_username(requestUsername)
     # do something if client not found
@@ -33,9 +33,9 @@ def get(req):
         show_friend_request = True
     if requestUsername == me.profile.username:
         show_friend_request = False
-    #End of specific profile content
-    
-    client = target #The client is not us its the target we are looking at !
+    # End of specific profile content
+
+    client = target  # The client is not us its the target we are looking at !
     winrate = ghistory = rivals = None
     games_played = client.stats.games.all().order_by('-created_at')
     ghistory = get_last_matches(client, games_played)
@@ -49,7 +49,7 @@ def get(req):
     online_status = redis.hget(RTables.HASH_CLIENT(client.id), str(EventType.NOTIFICATION.value)) is not None
     if client is not None:
         winrate = get_winrate(client, games_played)
-        
+
     context = {
         "client": client,
         "clients": Clients.objects.all(),
@@ -59,11 +59,11 @@ def get(req):
         "rivals": rivals,
         "csrf_token": get_token(req),
         "friends_list": friends_list,
-        "friends_pending" : friends_pending,
+        "friends_pending": friends_pending,
         "rank_picture": rank_picture,
-        "online_status": "Online" if online_status else "Offline", 
+        "online_status": "Online" if online_status else "Offline",
         "show_friend_request": show_friend_request,
-        "friends_online_status": {}, #no friends
+        "friends_online_status": {},  # no friends
     }
     html_content = render_to_string("apps/profile/profile.html", context)
     return JsonResponse({'html': html_content})
@@ -137,4 +137,3 @@ def delete(request, client_id):
             'success': False,
             'message': 'Account not found'
         }, status=404)
-    

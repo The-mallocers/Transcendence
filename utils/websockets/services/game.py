@@ -1,7 +1,7 @@
 from redis.commands.json.path import Path
 
 from apps.client.models import Clients
-from utils.enums import GameStatus, ResponseError, status_order, RTables, PlayerSide, EventType
+from utils.enums import GameStatus, ResponseError, game_status_order, RTables, PlayerSide, EventType
 from utils.websockets.channel_send import asend_group_error
 from utils.websockets.services.services import BaseServices
 
@@ -25,9 +25,9 @@ class GameService(BaseServices):
 
     async def _handle_start_game(self, data, client: Clients):
         status = GameStatus(await self.redis.json().get(self.game_key, Path('status')))
-        if status_order.index(status) < status_order.index(GameStatus.STARTING):
+        if game_status_order.index(status) < game_status_order.index(GameStatus.STARTING):
             await asend_group_error(self.service_group, ResponseError.NOT_READY_TO_START)
-        elif status_order.index(status) > status_order.index(GameStatus.STARTING):
+        elif game_status_order.index(status) > game_status_order.index(GameStatus.STARTING):
             await asend_group_error(self.service_group, ResponseError.ALREADY_START)
         elif status is GameStatus.STARTING:
             await self.redis.json().set(self.game_key, Path('status'), GameStatus.STARTING)

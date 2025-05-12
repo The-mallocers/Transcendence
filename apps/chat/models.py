@@ -187,6 +187,7 @@ class Messages(models.Model):
         except Exception as e:
             print(f"Error ROOM: {e}")
             return None
+
     @sync_to_async
     def get_sender_id(self):
         try:

@@ -1,6 +1,6 @@
 import {navigateTo} from '../../spa/spa.js';
-import { WebSocketManager } from '../../websockets/websockets.js';
-import { getClientId } from '../../utils/utils.js';
+import {WebSocketManager} from '../../websockets/websockets.js';
+import {getClientId} from '../../utils/utils.js';
 
 function register(event) {
     console.log("I am register.js")
@@ -133,4 +133,5 @@ async function socketCheck() {
         WebSocketManager.closeNotifSocket();
     }
 }
+
 await socketCheck();

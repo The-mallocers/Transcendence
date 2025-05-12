@@ -33,7 +33,7 @@ def get(req):
         "csrf_token": get_token(req),
         "show_friend_request": False,
         "friends_list": friends_list,
-        "friends_pending" : friends_pending,
+        "friends_pending": friends_pending,
         "rank_picture": rank_picture,
         "online_status": online_status,
         "friends_online_status": friends_online_status,
@@ -45,8 +45,8 @@ def get_winrate(client, games_played) -> int:
     wins = games_played.filter(winner__client=client).count()
 
     total_games = games_played.count()
-    if total_games == 0: 
-        return 0 #We dont want to divide by zero
+    if total_games == 0:
+        return 0  # We dont want to divide by zero
     return int((wins / games_played.count()) * 100)
 
 def get_last_matches(client, games_played) -> list:
@@ -55,7 +55,7 @@ def get_last_matches(client, games_played) -> list:
     for game in games_played:
         if (i >= 4):
             break
-        game = Game.objects.get(id=game.id)
+        game = Game.objects.get(code=game.code)
         myPoints = 0
         enemyPoints = 0
         opponent = ""
@@ -128,6 +128,7 @@ def get_rivals(client, games_played) -> dict:
     top_3_rivals = dict(sorted_rivals[:3])
 
     return top_3_rivals
+
 
 def get_friends_online_status(friends):
     friend_status = {}

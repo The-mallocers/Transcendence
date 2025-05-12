@@ -13,7 +13,7 @@ class Profile(models.Model):
     profile_picture = models.ImageField(upload_to='profile/',
                                         default="profile/default.png",
                                         editable=True, null=True)
-    #I want to add this !
+    # I want to add this !
     coalition = models.CharField(null=True, max_length=50, editable=True)
 
     class Meta:

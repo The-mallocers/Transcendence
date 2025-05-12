@@ -1,10 +1,10 @@
-from django.forms import ValidationError
 from asgiref.sync import sync_to_async
+from django.forms import ValidationError
 
 from apps.chat.models import Rooms, Messages
 from apps.client.models import Clients
-from utils.util import create_game_id
 from utils.enums import EventType, ResponseAction, ResponseError, RTables
+from utils.util import create_game_id
 from utils.websockets.channel_send import asend_group, asend_group_error
 from utils.websockets.services.services import BaseServices
 
@@ -12,7 +12,7 @@ from utils.websockets.services.services import BaseServices
 class NotificationService(BaseServices):
     async def init(self, client, *args):
         self.service_group = f'{EventType.NOTIFICATION.value}_{client.id}'
-        return await super().init(client)       
+        return await super().init(client)
 
     # Client is the person that want to add a friend to his friend list
     # Target is the friends to add
@@ -71,23 +71,23 @@ class NotificationService(BaseServices):
             await asend_group(self.service_group, EventType.NOTIFICATION,
                               ResponseAction.ACK_ACCEPT_FRIEND_REQUEST_HOST,
                               {
-                                "sender": str(target.id),
-                                "username": await target.aget_profile_username()
+                                  "sender": str(target.id),
+                                  "username": await target.aget_profile_username()
                               })
 
             await asend_group(RTables.GROUP_NOTIF(target.id), EventType.NOTIFICATION,
                               ResponseAction.ACK_ACCEPT_FRIEND_REQUEST,
                               {
-                                "sender": str(client.id),
-                                "username": await client.aget_profile_username(),
-                                "room": str(room.id)
+                                  "sender": str(client.id),
+                                  "username": await client.aget_profile_username(),
+                                  "room": str(room.id)
                               })
-            await asend_group(RTables.GROUP_CHAT(target.id), EventType.CHAT, 
+            await asend_group(RTables.GROUP_CHAT(target.id), EventType.CHAT,
                               ResponseAction.NEW_FRIEND,
                               {
-                                "sender": str(client.id),
-                                "username": await client.aget_profile_username(),
-                                "room": str(room.id)
+                                  "sender": str(client.id),
+                                  "username": await client.aget_profile_username(),
+                                  "room": str(room.id)
                               })
 
         except:
@@ -152,7 +152,7 @@ class NotificationService(BaseServices):
             print(repr(e))
             return await asend_group_error(self.service_group, ResponseError.INTERNAL_ERROR)
 
-    #====================================DUELS=========================================
+    # ====================================DUELS=========================================
 
     async def _handle_create_duel(self, data, client: Clients):
         print("in the function of creating a duel")
@@ -181,15 +181,15 @@ class NotificationService(BaseServices):
             await self.redis.hset(name=RTables.HASH_DUEL_QUEUE(duel_code), key=str(target.id), value=str(False))
             await asend_group(self.service_group, EventType.NOTIFICATION, ResponseAction.DUEL_CREATED, {
                 'code': duel_code,
-                'opponent' : await target.aget_profile_username()
+                'opponent': await target.aget_profile_username()
             })
-            return await asend_group(RTables.GROUP_NOTIF(target.id), EventType.NOTIFICATION, 
+            return await asend_group(RTables.GROUP_NOTIF(target.id), EventType.NOTIFICATION,
                                      ResponseAction.ACK_ASK_DUEL,
-                            {
-                                "sender": str(client.id),
-                                "username": await client.aget_profile_username(),
-                                'code': duel_code
-                            })
+                                     {
+                                         "sender": str(client.id),
+                                         "username": await client.aget_profile_username(),
+                                         'code': duel_code
+                                     })
 
     async def _handle_accept_duel(self, data, client):
         code = data['data']['args']['code']
@@ -208,7 +208,7 @@ class NotificationService(BaseServices):
                 await self.redis.hset(RTables.HASH_DUEL_QUEUE(code), str(client.id), 'True')
                 await asend_group(self.service_group, EventType.MATCHMAKING, ResponseAction.DUEL_JOIN)
                 await asend_group(RTables.GROUP_NOTIF(target.id), EventType.NOTIFICATION, ResponseAction.DUEL_JOIN)
-                
+
     async def _handle_pending_duels(self, data, client):
         if await Clients.acheck_in_queue(client, self.redis):
             return await asend_group_error(self.service_group, ResponseError.ALREADY_IN_QUEUE)
@@ -247,51 +247,51 @@ class NotificationService(BaseServices):
                         break
                 await asend_group(self.service_group, EventType.NOTIFICATION, ResponseAction.REFUSED_DUEL)
                 print(opponent_id)
-                await asend_group(RTables.GROUP_NOTIF(opponent_id), 
-                                    EventType.NOTIFICATION, 
-                                    ResponseAction.DUEL_REFUSED,
-                                    {
-                                        "username": await client.aget_profile_username()
-                                    })
-    
+                await asend_group(RTables.GROUP_NOTIF(opponent_id),
+                                  EventType.NOTIFICATION,
+                                  ResponseAction.DUEL_REFUSED,
+                                  {
+                                      "username": await client.aget_profile_username()
+                                  })
+
     async def _handle_get_opponent_name(self, data, client):
         opponent = data['data']['args']['target_name']
         if not opponent:
             return await asend_group_error(RTables.GROUP_NOTIF(client.id), ResponseError.OPPONENT_NOT_FOUND)
         return await asend_group(RTables.GROUP_NOTIF(client.id),
-                        EventType.NOTIFICATION,
-                        ResponseAction.GET_OPPONENT,
-                        {
-                            "opponent" : opponent
-                        })
-    
+                                 EventType.NOTIFICATION,
+                                 ResponseAction.GET_OPPONENT,
+                                 {
+                                     "opponent": opponent
+                                 })
+
     async def get_opponent_username(self, duel_code, client_id):
         if not await self.redis.exists(RTables.HASH_DUEL_QUEUE(duel_code)):
             return None
-            
+
         if await self.redis.hexists(RTables.HASH_DUEL_QUEUE(duel_code), str(client_id)) is False:
             return None
-        
+
         players = await self.redis.hgetall(RTables.HASH_DUEL_QUEUE(duel_code))
-        
+
         opponent_id = None
         for key, _ in players.items():
             decoded_key = key.decode()
             if decoded_key != str(client_id):
                 opponent_id = decoded_key
                 break
-        
+
         if opponent_id is None:
             return None
-        
+
         # Get opponent client object
         opponent = await Clients.aget_client_by_id(opponent_id)
         if opponent is None:
             return None
-        
+
         # Return opponent's username
         return await opponent.aget_profile_username()
-    
+
     # manage friends block and unblock
     async def _handle_block_unblock_friend(self, data, client):
         try:
@@ -303,41 +303,41 @@ class NotificationService(BaseServices):
             if status == "block":
                 await friend_table.block_user(target)
                 await asend_group(RTables.GROUP_CHAT(client.id),
-                                EventType.CHAT,
-                                ResponseAction.FRIEND_BLOCKED,
-                                {
-                                    "message" : "successfully block friend",
-                                    "username" : await target.aget_profile_username()
-                                })
+                                  EventType.CHAT,
+                                  ResponseAction.FRIEND_BLOCKED,
+                                  {
+                                      "message": "successfully block friend",
+                                      "username": await target.aget_profile_username()
+                                  })
             elif status == "unblock":
                 await friend_table.unblock_user(target)
                 await asend_group(self.service_group,
-                        EventType.NOTIFICATION,
-                        ResponseAction.FRIEND_UNBLOCKED,
-                        {
-                            "message" : "successfully unblock friend",
-                            "username" : await target.aget_profile_username()
-                        })
+                                  EventType.NOTIFICATION,
+                                  ResponseAction.FRIEND_UNBLOCKED,
+                                  {
+                                      "message": "successfully unblock friend",
+                                      "username": await target.aget_profile_username()
+                                  })
         except Exception as e:
             print(repr(e))
             return await asend_group_error(self.service_group, ResponseError.INTERNAL_ERROR)
 
     async def _handle_ping(self, data, client):
         return await asend_group(self.service_group, EventType.NOTIFICATION, ResponseAction.PONG)
-    
+
     async def _handle_check_online_status(self, data, client):
         target_username = data['data']['args']['target_name']
-        target = await Clients.aget_client_by_username(target_username) #async so async getter
-        
+        target = await Clients.aget_client_by_username(target_username)  # async so async getter
+
         if target is None:
-            return await asend_group_error(self.service_group, ResponseError.USER_NOT_FOUND) #Sending back to the one who asked only
-        
+            return await asend_group_error(self.service_group, ResponseError.USER_NOT_FOUND)  # Sending back to the one who asked only
+
         # Check if the user has an active notification socket in Redis
         is_online = await self.redis.hget(
-            name=RTables.HASH_CLIENT(target.id), 
+            name=RTables.HASH_CLIENT(target.id),
             key=str(EventType.NOTIFICATION.value)
         ) is not None
-        
+
         # Send response only to the requesting client
         await asend_group(
             self.service_group,  # This sends only to the requesting client
@@ -349,7 +349,6 @@ class NotificationService(BaseServices):
                 "online": is_online
             }
         )
-    
     async def disconnect(self, client):
         print("in disconnect of notification - Please see me !")
         pass

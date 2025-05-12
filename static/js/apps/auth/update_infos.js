@@ -1,5 +1,4 @@
-import { handleErrorFront } from './register.js';
-import { isPasswordcheckValid } from './register.js';
+import {handleErrorFront, isPasswordcheckValid} from './register.js';
 
 async function update() {
     const form = document.querySelector("form");
@@ -10,8 +9,10 @@ async function update() {
     const passwordcheck = document.getElementById('password_check').value;
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-    if (!isPasswordcheckValid(password, passwordcheck)) {return ;}
-    
+    if (!isPasswordcheckValid(password, passwordcheck)) {
+        return;
+    }
+
     try {
         const dataForm = {
             profile: {
@@ -37,17 +38,17 @@ async function update() {
         if (response.ok) {
             error.textContent = "Informations updated succesfully";
             updateFrontInformation();
-            error.style.color = "green"; 
+            error.style.color = "green";
         } else {
             error.textContent = "Error updating";
-            error.style.color = "red"; 
+            error.style.color = "red";
             handleErrorFront(data);
         }
     } catch (e) {
         console.log("Error with the fetch operation");
         console.log(e);
         error.textContent = "Error updating";
-        error.style.color = "red"; 
+        error.style.color = "red";
     }
 }
 

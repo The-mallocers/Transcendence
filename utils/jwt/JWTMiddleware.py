@@ -37,9 +37,9 @@ class JWTMiddleware:
         return False
 
     def _update_tokens(self, request: HttpRequest):
-        refresh_token = JWT.extract_token(request, JWTType.REFRESH) # if refresh is oudated, this will throw an exception
+        refresh_token = JWT.extract_token(request, JWTType.REFRESH)  # if refresh is oudated, this will throw an exception
         client = Clients.get_client_by_id(refresh_token.SUB)
-        
+
         new_access_token = JWT(client, JWTType.ACCESS)
         request.COOKIES['access_token'] = new_access_token.encode_token()
         

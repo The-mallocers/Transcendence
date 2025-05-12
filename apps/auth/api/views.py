@@ -1,9 +1,10 @@
+import random
+
 from django.forms import ValidationError
 from django.http import HttpRequest
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from werkzeug import Client
 
 from apps.auth.models import Password
 from apps.client.models import Clients
@@ -15,7 +16,6 @@ from utils.serializers.client import ClientSerializer
 from utils.serializers.permissions.auth import PasswordPermission
 from utils.serializers.picture import ProfilePictureValidator
 
-import random
 
 class PasswordApiView(APIView):
     permission_classes = [PasswordPermission]
@@ -55,7 +55,7 @@ class RegisterApiView(APIView):
                 client = serializer.save()  # this can fail so we added a catch
                 logger.info(f'Client create successfully: {client}')
                 response = Response(ClientSerializer(client).data, status=status.HTTP_201_CREATED)
-                JWT(client, JWTType.ACCESS).set_cookie(response) # vous aviez raison la team c'est mieux
+                JWT(client, JWTType.ACCESS).set_cookie(response)  # vous aviez raison la team c'est mieux
                 JWT(client, JWTType.REFRESH).set_cookie(response)
                 return response
             except Exception as e:
@@ -73,7 +73,7 @@ class UpdateApiView(APIView):
     def post(self, request, *args, **kwargs):
         try:
             data = request.data
-            #We get rid of the empty fields
+            # We get rid of the empty fields
             for section in list(data.keys()):
                 if isinstance(data[section], dict):
                     for key in list(data[section].keys()):
@@ -94,10 +94,10 @@ class UpdateApiView(APIView):
                     client.profile = Profile.objects.filter(email=new_email).first()
                     Profile.objects.filter(email=old_email).delete()
                     client.save()
-                #else, we return ou profile that was updated naturally.
+                # else, we return ou profile that was updated naturally.
                 return Response({"message": "Infos updated succesfully"}, status=status.HTTP_200_OK)
             else:
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST) 
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except ValidationError as e:
             return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
@@ -137,7 +137,8 @@ class LoginApiView(APIView):
                 JWT(client, JWTType.REFRESH).set_cookie(response)
             return response
 
-#TODO, add the fact that we disconnect the notif socket/Get rid of the client in redis
+
+# TODO, add the fact that we disconnect the notif socket/Get rid of the client in redis
 class LogoutApiView(APIView):
     permission_classes = []
     authentication_classes = []
@@ -221,7 +222,7 @@ def formulate_json_response(state, status, message, redirect):
 def post_twofa_code(req):
     email = req.COOKIES.get('email')
     client = Clients.get_client_by_email(email)
-    response = formulate_json_response(False,    400, "Error getting the user", "/auth/login")
+    response = formulate_json_response(False, 400, "Error getting the user", "/auth/login")
     if client is None:
         return response
     if req.method == "POST":
@@ -280,9 +281,10 @@ class UploadPictureApiView(APIView):
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
-#Maybe later add the check to see if the player is in a tournament or something.
-#This code essentially logs out THEN delete the account.
+
+
+# Maybe later add the check to see if the player is in a tournament or something.
+# This code essentially logs out THEN delete the account.
 
 class DeleteApiView(APIView):
     def post(self, request: HttpRequest, *args, **kwargs):
@@ -303,4 +305,3 @@ class DeleteApiView(APIView):
             return Response({
                 "error": "You are not logged in"
             }, status=status.HTTP_401_UNAUTHORIZED)
-

@@ -3,7 +3,7 @@
 <div class="informationsContainer">
     <img class="background" src="{% static 'assets/imgs/'|add:client.profile.coalition|add:'.jpg' %}">
 
-    
+
     <h3>{{ client.profile.username }}</h3>
     <div class="avatar">
         <img src="{{ client.profile.profile_picture.url }}">
@@ -34,7 +34,7 @@
             <div class="col-md-4 mmr box">
                 <div class="p-3 text-center minibox">
                     <!-- <h2 class="p-3 text-center">MMR : {{client.stats.mmr}} </h2> -->
-                    <h2 class="p-3 text-center">MMR : {{client.stats.mmr}}</h2>
+                    <h2 class="p-3 text-center">MMR : {{ client.stats.mmr }}</h2>
                     <img class="trophee" src="{{ rank_picture }}">
                     <!-- <img class="trophee" src="{% static "assets/imgs/bronze.png" %}"> -->
                 </div>

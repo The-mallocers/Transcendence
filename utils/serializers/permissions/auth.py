@@ -11,7 +11,7 @@ class PasswordPermission(BasePermission):
         return request.user and request.user.is_authenticated
 
     def has_object_permission(self, request: HttpRequest, view, obj: Password):
-        client: Clients = Clients.get_client_by_id(request.user.id)
+        client: Clients = Clients.get_client_by_id(request.user.code)
 
         if client.password_id is obj.id or client.rights.is_admin:
             return True

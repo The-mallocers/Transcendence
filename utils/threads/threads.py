@@ -12,13 +12,13 @@ from utils.redis import RedisConnectionPool
 class Threads(threading.Thread, ABC):
     instance = None
     active_threads = []
+    _shutdown_lock = threading.Lock()
 
     def __init__(self, name):
         super().__init__(daemon=True, name=name)
-        self.redis = RedisConnectionPool.get_sync_connection(self.__class__.__name__)
-        # self.loop = asyncio.new_event_loop()
+        self.redis = RedisConnectionPool.get_sync_connection(name)
 
-        self._logger = logging.getLogger(self.__class__.__name__)
+        self._logger = logging.getLogger(self.__class__.__module__)
         self._stop_event = threading.Event()
         self._completed_actions = set()
         self._channel_layer = get_channel_layer()
@@ -27,15 +27,15 @@ class Threads(threading.Thread, ABC):
         Threads.active_threads.append(self)
 
     def run(self):
-        self._logger.info(f"Starting thread [{self.name}]")
-        # asyncio.set_event_loop(self.loop)
-        # self.loop.run_until_complete(self.exec())
+        self._logger.warning(f"Starting thread [{self.name}]")
         self.main()
 
     def stop(self):
-        self._logger.info(f"Stopping thread [{self.name}]")
+        self._logger.warning(f"Stopping thread [{self.name}]")
         self._stop_event.set()
         self.cleanup()
+
+        RedisConnectionPool.close_sync_connection(self.name)
 
         # Remove this thread from the active threads list
         if self in Threads.active_threads:
@@ -54,14 +54,8 @@ class Threads(threading.Thread, ABC):
         if action_id not in self._completed_actions:
             action_func(*args, **kwargs)
             self._completed_actions.add(action_id)
-            self._logger.debug(f"Action '{action_id}' executed")
             return True
         return False
-
-    # async def exec(self):
-    #     self.redis = await RedisConnectionPool.get_async_connection(self.name)
-    #     await self.main()
-    #     await RedisConnectionPool.close_connection(self.name)
 
     @abstractmethod
     def main(self):
@@ -71,23 +65,15 @@ class Threads(threading.Thread, ABC):
     def cleanup(self):
         pass
 
-    @staticmethod
-    def stop_all_threads(except_thread=None):
-        """
-        Stop all active threads except the specified thread.
-
-        Args:
-            except_thread: The thread to exclude from stopping (usually the calling thread)
-        """
-        import logging
-        logger = logging.getLogger("Threads")
+    @classmethod
+    def stop_all_threads(cls, except_thread=None):
+        logger = logging.getLogger(cls.__module__)
 
         active_count = sum(1 for t in Threads.active_threads if t != except_thread and t.is_alive())
         logger.info(f"Stopping all active threads ({active_count} threads)...")
 
         for thread in list(Threads.active_threads):
             if thread != except_thread and thread.is_alive():
-                logger.info(f"Stopping thread [{thread.name}]")
                 thread.stop()
 
         remaining = sum(1 for t in Threads.active_threads if t != except_thread and t.is_alive())

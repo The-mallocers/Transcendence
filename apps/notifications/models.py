@@ -15,7 +15,7 @@ class Friend(models.Model):
     friends = models.ManyToManyField(Clients, related_name='friend_requests_as_friend', blank=True)
     pending_friends = models.ManyToManyField(Clients, related_name='friend_requests_as_pending', blank=True)
     blocked_users = models.ManyToManyField(Clients, related_name='blocked_by', blank=True)
-    
+
     class Meta:
         # unique_together = ['friends', 'pending_friends']
         verbose_name_plural = 'Friend Requests'
@@ -84,8 +84,8 @@ class Friend(models.Model):
                 self.save()
         except Exception as e:
             raise ValidationError("Failed to remove friend")
-        
-    #add friend to duel
+
+    # add friend to duel
     @sync_to_async
     def add_prending_duel(self, client):
         try:
@@ -97,7 +97,7 @@ class Friend(models.Model):
         except Exception as e:
             print(f"Error adding pending duel: {e}")
             return None
-    
+
     @sync_to_async
     def get_blocked_users(self):
         try:
@@ -106,7 +106,7 @@ class Friend(models.Model):
         except Exception as e:
             print(f"Error getting blocked users: {e}")
             return None
-        
+
     @sync_to_async
     def block_user(self, target):
         try:
@@ -128,7 +128,7 @@ class Friend(models.Model):
         except Exception as e:
             print(f"Error unblock user: {e}")
             return None
-        
+
     @sync_to_async
     def user_is_block(self, target):
         try:

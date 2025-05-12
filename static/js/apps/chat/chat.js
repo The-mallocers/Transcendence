@@ -1,9 +1,9 @@
-import { WebSocketManager } from "../../websockets/websockets.js"
-import { navigateTo } from "../../spa/spa.js";
-import { create_message_duel } from "../game/gamemode.js";
-import { create_message_notif_block } from "../profile/profile.js";
-import { toast_message } from "../profile/toast.js";
-import { getClientId } from "../../utils/utils.js";
+import {WebSocketManager} from "../../websockets/websockets.js"
+import {navigateTo} from "../../spa/spa.js";
+import {create_message_duel} from "../game/gamemode.js";
+import {create_message_notif_block} from "../profile/profile.js";
+import {toast_message} from "../profile/toast.js";
+import {getClientId} from "../../utils/utils.js";
 
 let client_id = null;
 let room_id = null;
@@ -43,13 +43,11 @@ chatSocket.onmessage = (event) => {
     }
     else if(message.data.action == "ALL_ROOM_RECEIVED") {
         displayRooms(message.data.content.rooms);
-    }
-    else if(message.data.action == "NEW_FRIEND") {
+    } else if (message.data.action == "NEW_FRIEND") {
         create_front_chat_room(message.data.content.room,
-                                message.data.content.username, 
-                                message.data.content.sender, "Block");
-    }
-    else if(message.data.action == "MESSAGE_RECEIVED") {
+            message.data.content.username,
+            message.data.content.sender, "Block");
+    } else if (message.data.action == "MESSAGE_RECEIVED") {
         if (message.data.content.room_id === room_id) {
         let chatHistory = document.querySelector('.chatHistory');
 
@@ -62,8 +60,7 @@ chatSocket.onmessage = (event) => {
         scrollToBottom(chatHistory);
         //Do things to show the new message on the front
         }
-    }
-    else if(message.data.action == "ERROR_MESSAGE_USER_BLOCK"){
+    } else if (message.data.action == "ERROR_MESSAGE_USER_BLOCK") {
         toast_message("You cant send message to block Friend")
     }
 }
@@ -90,7 +87,7 @@ document.getElementById("messageInput").addEventListener("keydown", function (ev
     }
 });
 
-window.clickRoom = function(room){
+window.clickRoom = function (room) {
     room_id = room
     const message = {
         "event": "chat",
@@ -101,31 +98,27 @@ window.clickRoom = function(room){
             }
         }
     };
-    if(chatSocket.readyState === WebSocket.OPEN) {
+    if (chatSocket.readyState === WebSocket.OPEN) {
         chatSocket.send(JSON.stringify(message));
     }
 }
-window.handleChatProfile = function(username)
-{
+window.handleChatProfile = function (username) {
     navigateTo(`/profile/?username=${username}`)
 }
 
-window.handleChatBlock = function(username)
-{
+window.handleChatBlock = function (username) {
     const message = create_message_notif_block("block_unblock_friend", username, "block");
     notifSocket.send(JSON.stringify(message));
 }
 
-window.handleChatUnblock = function(username)
-{
+window.handleChatUnblock = function (username) {
     const message = create_message_notif_block("block_unblock_friend", username, "unblock");
     notifSocket.send(JSON.stringify(message));
 }
 
-window.handleChatDuel = function(usernameId)
-{
+window.handleChatDuel = function (usernameId) {
     console.log(usernameId);
-    const message = create_message_duel("create_duel",usernameId);
+    const message = create_message_duel("create_duel", usernameId);
     notifSocket.send(JSON.stringify(message));
     navigateTo('/pong/duel/');
 }
@@ -171,8 +164,7 @@ async function displayRooms(rooms) {
     let chatRooms = document.querySelector('.chatRooms');
     
     for (let i = 0; i < rooms.length; i++) {
-        if(rooms[i].player.length > 1)
-        {
+        if (rooms[i].player.length > 1) {
             console.log("not displaying global room!!!");
             // const parser = new DOMParser();
             // const htmlString = 
@@ -186,23 +178,21 @@ async function displayRooms(rooms) {
             //     clickRoom(rooms[i].room)
             // })
             // chatRooms.appendChild(roomElement);
-        }
-        else{
-            create_front_chat_room(rooms[i].room, 
-                                rooms[i].player[0].username, 
-                                rooms[i].player[0].id, rooms[i].player[0].status)
+        } else {
+            create_front_chat_room(rooms[i].room,
+                rooms[i].player[0].username,
+                rooms[i].player[0].id, rooms[i].player[0].status)
         }
     }
     scrollToBottom(chatRooms);
 }
 
-function create_front_chat_room(room, username, usernameId, status){
+function create_front_chat_room(room, username, usernameId, status) {
     const newChat = document.querySelector('.chatRooms');
-    if(newChat)
-    {
+    if (newChat) {
         const parser = new DOMParser();
-        const htmlChat = 
-        `<div class="roomroom container d-flex align-items-center justify-content-between">
+        const htmlChat =
+            `<div class="roomroom container d-flex align-items-center justify-content-between">
             <button class="chat-${username} chat-button btn d-flex align-items-center gap-3">
                 <img src="/static/assets/imgs/profile/default.png">
                 <div>${username}</div>
@@ -226,12 +216,12 @@ function create_front_chat_room(room, username, usernameId, status){
         const chatBlock = chatElement.querySelector(`.chat-block`);
         const chatDuel = chatElement.querySelector(`.chat-duel`);
 
-        chatButton.addEventListener('click', function() {
+        chatButton.addEventListener('click', function () {
             console.log(room);
             const roomroomDiv = this.closest('.roomroom');
-    
+
             roomroomDiv.classList.add('active-room');
-            
+
             document.querySelectorAll('.roomroom.active-room').forEach(div => {
                 if (div !== roomroomDiv) {
                     div.classList.remove('active-room');
@@ -239,21 +229,20 @@ function create_front_chat_room(room, username, usernameId, status){
             });
             clickRoom(room)
         })
-        chatProfile.addEventListener('click', function(){
+        chatProfile.addEventListener('click', function () {
             handleChatProfile(username);
         })
-        chatBlock.addEventListener('click', function(){
-            if(this.innerHTML == "Block"){
+        chatBlock.addEventListener('click', function () {
+            if (this.innerHTML == "Block") {
                 this.innerHTML = "Unblock"
                 handleChatBlock(username);
-            }
-            else{
+            } else {
                 this.innerHTML = "Block"
                 handleChatUnblock(username);
             }
-            
+
         })
-        chatDuel.addEventListener('click', function(){
+        chatDuel.addEventListener('click', function () {
             handleChatDuel(usernameId);
         })
         newChat.appendChild(chatElement);

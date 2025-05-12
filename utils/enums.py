@@ -3,25 +3,23 @@ from enum import Enum
 
 class GameStatus(str, Enum):
     CREATING: str = 'creating'
+    WAITING: str = 'waiting'
     MATCHMAKING: str = 'matchmaking'
     STARTING: str = 'starting'
     RUNNING: str = 'running'
     ENDING: str = 'ending'
-    DESTROYING: str = 'destroying'
     FINISHED: str = 'finished'
     ERROR: str = 'error'
 
 
-status_order = list(GameStatus)
-
+game_status_order = list(GameStatus)
 
 class TournamentStatus(str, Enum):
     CREATING: str = 'creating'
-    MATCHMAKING: str = 'matchmaking'
+    WAITING: str = 'waiting'
     STARTING: str = 'starting'
     RUNNING: str = 'running'
     ENDING: str = 'ending'
-    DESTROYING: str = 'destroying'
     FINISHED: str = 'finished'
     ERROR: str = 'error'
 
@@ -79,7 +77,7 @@ class RequestAction(str, Enum):
     UNBLOCK_FRIEND: str = "unblock_friend"
     BLOCK_UNBLOCK_FRIEND: str = "block_unblock_friend"
     GET_OPPONENT_NAME: str = "get_opponent_name"
-    
+
     PING: str = 'ping'
     ONLINE_STATUS: str = "check_online_status"
 
@@ -103,7 +101,14 @@ class ResponseAction(str, Enum):
     TOURNAMENT_CREATED: str = 'You have successfully create the tournament'
     TOURNAMENT_JOIN: str = 'You have successfully joined the tournament'
     TOURNAMENT_PLAYER_JOIN: str = 'Player join the tournament.'
+    TOURNAMENT_PLAYER_LEFT: str = 'Player left the tournament.'
     TOURNAMENT_LEFT: str = 'You have successfully left the tournament'
+    TOURNAMENT_WAITTING_PLAYERS: str = 'Waiting players for tournament'
+    TOURNAMENT_PLAYERS_READY: str = 'Players are ready'
+    TOURNAMENT_GAME_READY: str = 'Game is ready'
+    TOURNAMENT_GAME_FINISH: str = 'Game is finished'
+    TOURNAMENT_LOSE_GAME: str = "You're kick from tournament due to losing game."
+    TOURNAMENT_CLOSING: str = 'Tournament close.'
 
     # ── Game Actions ──────────────────────────────────────────────────────────────────
     JOIN_GAME: str = 'You have successfully joined the game'
@@ -137,7 +142,7 @@ class ResponseAction(str, Enum):
     ACK_DELETE_FRIEND_HOST: str = "ack_delete_friend_host"
     ACK_ONLINE_STATUS: str = "ack_online_status"
     FRIEND_BLOCKED: str = "friend_blocked"
-    FRIEND_UNBLOCKED: str ="friend_unblocked"
+    FRIEND_UNBLOCKED: str = "friend_unblocked"
     NOTIF_TEST = "notification_test"
 
     PONG: str = 'pong'
@@ -161,10 +166,11 @@ class ResponseError(str, Enum):
     CANNOT_REFUSE_DUEL: str = "You can't refuse a duel you already joined."
 
     # ── Tournaments ───────────────────────────────────────────────────────────────── #
-    MISSING_KEY: str = 'Some keys are missing'
+    KEY_ERROR: str = 'Error in tournament key.'
     TOURNAMENT_NOT_CREATE: str = 'There is error when you try to create tournaments.'
     TOURNAMENT_NOT_EXIST: str = 'Tournament you try to join not exist.'
     ALREADY_JOIN_TOURNAMENT: str = 'You try to join tournament already joined.'
+    HOST_LEAVE: str = 'Host leave tournament.'
 
     # ── Game ──────────────────────────────────────────────────────────────────────────
     GAME_FULL: str = 'The game is currently full.'
@@ -250,6 +256,7 @@ class Ranks(str, Enum):
     SILVER: str = 'silver'
     GOLD: str = 'gold'
     DIAMOND: str = 'diamond'
+
 
 class RanksThreshold(int, Enum):
     BRONZE = 0

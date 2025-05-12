@@ -1,15 +1,11 @@
-from asgiref.sync import sync_to_async
-
 from apps.client.models import Clients
 from utils.enums import EventType, ResponseAction, ResponseError, RTables
-from utils.util import create_game_id
 from utils.websockets.channel_send import asend_group, asend_group_error
 from utils.websockets.services.services import BaseServices
 
 
 class MatchmakingService(BaseServices):
     async def init(self, client: Clients, *args):
-        print('init matchmaking')
         self.service_group = f'{EventType.GAME.value}_{client.id}'
         return await super().init(client)
 
@@ -32,7 +28,7 @@ class MatchmakingService(BaseServices):
             return await asend_group_error(self.service_group, ResponseError.NOT_IN_QUEUE)
 
     # ════════════════════════════════════ Duels ═════════════════════════════════════ #
-    
+
     async def _handle_ping(self, data, client):
         return await asend_group(self.service_group, EventType.MATCHMAKING, ResponseAction.PONG)
 
@@ -45,7 +41,6 @@ class MatchmakingService(BaseServices):
             return await asend_group_error(self.service_group, ResponseError.NOT_IN_QUEUE)
 
     async def disconnect(self, client):
-        print("in disconnect of matchmaking")
         queues = await Clients.acheck_in_queue(client, self.redis)
         if queues:
             if queues is RTables.HASH_G_QUEUE:

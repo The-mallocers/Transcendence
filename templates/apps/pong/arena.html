@@ -18,26 +18,27 @@
         font-size: 6rem;
         color: #1d212b;
     }
-/* 
-    #lusername {
+
+    /*
+        #lusername {
+            top: 52%;
+            left: 33%;
+            transform: translate(-50%, -50%);
+        }
+
+        #rusername {
+            top: 52%;
+            right: 33%;
+            transform: translate(50%, -50%);
+        } */
+
+    .lmeow {
         top: 52%;
         left: 33%;
         transform: translate(-50%, -50%);
     }
 
-    #rusername {
-        top: 52%;
-        right: 33%;
-        transform: translate(50%, -50%);
-    } */
-
-    .lmeow{
-        top: 52%;
-        left: 33%;
-        transform: translate(-50%, -50%);
-    }
-
-    .rmeow{
+    .rmeow {
         top: 52%;
         right: 33%;
         transform: translate(50%, -50%);
@@ -60,13 +61,14 @@
         right: 10%;
         transform: translate(50%, -50%);
     }
+
     .username-row {
         display: flex;
         justify-content: center; /* Center both usernames */
         gap: 4rem; /* Controls how close they are; reduce this for closer spacing */
         width: 1000px;
         margin-bottom: 0.5rem;
-        margin-top: 0.5rem;       /* Add this */
+        margin-top: 0.5rem; /* Add this */
     }
 
     #rpicture {
@@ -74,6 +76,7 @@
         right: 10%;
         transform: translate(50%, -50%);
     }
+
     #lpicture {
         top: 42%;
         left: 10%;
@@ -83,9 +86,9 @@
 </style>
 
 <div class="arenaPage" style="background-image: url('{{ arena_picture }}');">
-    
+
     <div class="username-row">
-        
+
         <div class="lmeow">
             <div id="lusername" class="username"></div>
             <div class="avatar">
@@ -100,7 +103,7 @@
             </div>
         </div>
 
-    </div>  
+    </div>
     <div id="scoreLeft" class="score">0</div>
     <div id="scoreRight" class="score">0</div>
 
