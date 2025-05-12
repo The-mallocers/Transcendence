@@ -20,7 +20,7 @@ class GameModelTest(TestCase):
 
         # Create a game instance
         self.game = Game.objects.create(
-            id="12345",
+            code="12345",
             points_to_win=3
         )
 
