@@ -68,6 +68,29 @@ chatSocket.onmessage = (event) => {
     else if(message.data.action == "ERROR_MESSAGE_USER_BLOCK"){
         toast_message("You cant send message to block Friend")
     }
+    // else if(message.data.action == "ACK_ACCEPT_FRIEND_REQUEST_HOST") {
+    //     let friends_group = document.querySelector('.friends_group');
+    //     if(friends_group)
+    //     {
+    //         const parser = new DOMParser();
+    //         const add_to_friend = 
+    //         `<li class="list-group-item d-flex justify-content-between align-items-center">
+    //             <div>${message.data.content.username}</div>
+    //             <div class="d-flex align-items-center">
+    //                 <button type="button" class="type-intra-green delete_friend me-4">delete</button>
+    //             </div>
+    //         </li>`
+    //         const doc = parser.parseFromString(add_to_friend, "text/html");
+    //         const friendElement = doc.body.firstChild;
+
+    //         const deleteButton = friendElement.querySelector('.delete_friend');
+    //         deleteButton.addEventListener('click', function() {
+    //             friendElement.remove();
+    //             handleDeleteFriend(message.data.content.username);
+    //         });
+    //         friends_group.appendChild(friendElement);
+    //     }
+    // }
 }
 
 document.getElementById("messageInput").addEventListener("keydown", function (event) {

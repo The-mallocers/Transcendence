@@ -268,8 +268,6 @@ class Clients(models.Model):
         """
         try:
             with transaction.atomic():
-                # Assuming there's a relationship model for blocked users
-                # This implementation depends on your data model
                 is_blocked = self.blocked_users.filter(id=user_id).exists()
                 return is_blocked
         except Exception as e:

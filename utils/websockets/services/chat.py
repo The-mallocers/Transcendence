@@ -172,9 +172,16 @@ class ChatService(BaseServices):
                 print("||||||||||||||||||",users)
                 # Filter out the current client
                 other_users = [user for user in users if str(user['id']) != str(client.id)]
+                friend = await client.get_friend_table()
                 if other_users:  # Only add rooms with other users
                     for user in other_users:
-                        status = "Unblock" if await client.ais_blocked(user['id']) else "Block"
+                        status = "Unblock" if await friend.ais_blocked(user['id']) else "Block"
+
+                        # status = ""
+                        # if await friend.ais_blocked(user['id']):
+                        #     status = "Unblock"
+                        # else:
+                        #     status = "Block"
                         formatted_messages.append({
                             'room': str(room_id),
                             'player': [{
@@ -184,6 +191,7 @@ class ChatService(BaseServices):
                                 'status': status
                             }]
                         })
+                        print(formatted_messages)
         await asend_group(self.service_group, 
                         EventType.CHAT, 
                         ResponseAction.ALL_ROOM_RECEIVED, 

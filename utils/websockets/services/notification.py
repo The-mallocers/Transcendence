@@ -295,6 +295,7 @@ class NotificationService(BaseServices):
     # manage friends block and unblock
     async def _handle_block_unblock_friend(self, data, client):
         try:
+            print(data)
             target = await Clients.aget_client_by_username(data['data']['args']['target_name'])
             if target is None:
                 return await asend_group_error(self.service_group, ResponseError.USER_NOT_FOUND)

@@ -133,3 +133,17 @@ class Friend(models.Model):
         except Exception as e:
             print(f"Error unblock user: {e}")
             return None
+        
+    @sync_to_async
+    def ais_blocked(self, user_id):
+        """
+        Asynchronously check if a user is blocked
+        Returns True if the user is blocked, False otherwise
+        """
+        try:
+            with transaction.atomic():
+                is_blocked = self.blocked_users.filter(id=user_id).exists()
+                return is_blocked
+        except Exception as e:
+            print(f"Error checking blocked status: {e}")
+            return False
