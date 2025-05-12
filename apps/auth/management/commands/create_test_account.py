@@ -3,11 +3,9 @@ from django.db import transaction
 
 from apps.admin.models import Rights
 from apps.auth.models import Password, TwoFA
-from apps.chat.models import Rooms
 from apps.client.models import Clients, Stats
 from apps.notifications.models import Friend
 from apps.profile.models import Profile
-from utils.websockets.services.chat import uuid_global_room
 
 
 class Command(BaseCommand):
@@ -59,13 +57,6 @@ class Command(BaseCommand):
                     friend=friend,
                     stats=stats
                 )
-
-                # Add client to global chat room
-                try:
-                    global_room = Rooms.objects.get(id=uuid_global_room)
-                    global_room.clients.add(client)
-                except Rooms.DoesNotExist:
-                    self.stdout.write(self.style.WARNING('Global chat room not found. Client not added to chat.'))
 
                 # Output the client ID for the bash script to use
                 self.stdout.write(self.style.SUCCESS(f'{client.id}'))
