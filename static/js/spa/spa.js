@@ -24,6 +24,13 @@ class Router {
                 await WebSocketManager.initNotifSocket(clientId);
             }
         }
+        if (WebSocketManager.isSocketClosed(WebSocketManager.tournamentSocket)) {
+            const clientId = await getClientId();
+            if (clientId) {
+                console.log("COUCOU WEBSOCKET TOURNOI ICI");
+                await WebSocketManager.initTournamentSocket(clientId);
+            }
+        }
         const path = window.location.pathname;
         // console.log(window.location.search);
         // console.log("looking for the path: ", path)

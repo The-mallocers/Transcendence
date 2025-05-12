@@ -13,7 +13,7 @@
 }
 
 
-.createTournamentContainer, .createTournamentContainer .points, .createTournamentContainer .counter{
+.createTournamentContainer, .createTournamentContainer .points, .createTournamentContainer .counter, .createTournamentContainer .playNum{
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -25,7 +25,7 @@
 }
 
 
-.createTournamentContainer .roomNameContainer, .createTournamentContainer .points {
+.createTournamentContainer .roomNameContainer, .createTournamentContainer .points, .createTournamentContainer .playNum {
     justify-content: space-between;
     padding: 0 10rem;
 }
