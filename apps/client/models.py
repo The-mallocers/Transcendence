@@ -181,6 +181,7 @@ class Clients(models.Model):
 
     @staticmethod
     def get_rank(score: int) -> str:
+        # return "bronze" #While we fix this shit
         i = len(RanksThreshold)
         for rank in reversed(RanksThreshold):
             i -= 1
@@ -294,10 +295,11 @@ class Clients(models.Model):
                 
                 result = []
                 for client in clients:
-                    rank = client.get_rank(client.stats.mmr)
+                    rank = client.get_rank(client.stats.mmr).value
+                    print(f"rank is {rank}")
                     
                     info = {
-                        # "id": client.id,
+                        "id": str(client.id),
                         "nickname": client.profile.username,
                         "avatar": client.profile.profile_picture.url,
                         "trophee": f'/media/rank_icon/{rank}.png',

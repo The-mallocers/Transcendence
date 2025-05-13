@@ -32,7 +32,7 @@ tournamentSocket.onmessage = ((msg)=>{
     console.log("BONJOUR:", message.data.action);
     console.log("2 BONJOUR:", message.data);
     if (message.event == "TOURNAMENT" && message.data.action == "TOURNAMENT_INFO") {
-        tournament_data = message.data;
+        tournament_data = message.data.content;
         console.log("Bonjour :", message.data);
         populateTournament(message.data.content.max_clients)
         //message.data has everything we need
@@ -91,16 +91,19 @@ function populateTournament(max_clients){
                         </div>
                     </div>
         `
+
+        console.log("mini meow: ", clientsDiv[i])
     });
     clientsDiv.forEach(htmlString => {
     const temp = document.createElement("div");
     temp.innerHTML = htmlString; 
 
-    // while (temp.firstChild) {
+    while (temp.firstChild) {
+        console.log(temp.firstChild)
         clientsInTournament.appendChild(temp.firstChild);
-    // }
+    }
 
-    console.log("gigameow : ", tournament_data)
+    console.log("gigameow : ", tournament_data.players_infos)
     });
 }
 

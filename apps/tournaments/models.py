@@ -8,9 +8,10 @@ from django.utils import timezone
 
 from apps.client.models import Clients
 from apps.player.models import Player
-from utils.enums import TournamentStatus
+from utils.enums import RTables, TournamentStatus
 from utils.serializers.tournament import TournamentSerializer
 from utils.util import create_tournament_id, validate_even
+from redis.commands.json.path import Path
 
 
 class TournamentRuntime:
@@ -113,7 +114,7 @@ class TournamentRuntime:
     # ═══════════════════════════════════ Functions ════════════════════════════════════ #
 
     @classmethod
-    async def create_tournament(cls, data, runtime=False) -> 'Tournaments':
+    async def create_tournament(cls, data, redis, runtime=False) -> 'Tournaments':
         if runtime or cls is TournamentRuntime:
             tournament = TournamentRuntime()
         else:
@@ -138,7 +139,7 @@ class TournamentRuntime:
             await Tournaments.objects.acreate(code=tournament.code, host=tournament.host, title=tournament.title,
                                               max_clients=tournament.max_clients, is_public=tournament.is_public, has_bots=tournament.has_bots,
                                               points_to_win=tournament.points_to_win, timer=timedelta(seconds=tournament.timer))
-
+            await redis.json().set(RTables.JSON_TOURNAMENT(tournament.code), Path.root_path(), tournament.serializer.data) #Brand new moved line !
             return tournament
         else:
             for field, errors in tournament.serializer.errors.items():

@@ -18,7 +18,6 @@ class TournamentThread(Threads):
     def __init__(self, tournament: Tournaments):
         super().__init__(f'TournamentThread[{tournament.code}]')
         self.tournament: Tournaments = tournament
-        self.redis.json().set(RTables.JSON_TOURNAMENT(self.tournament.code), Path.root_path(), self.tournament.serializer.data)
 
         self.rounds = self.get('scoreboards.num_rounds')
         self.set('scoreboards.current_round', 1)

@@ -30,7 +30,7 @@ class TournamentService(BaseServices):
         else:
             try:
                 data['data']['args']['host'] = str(client.id)
-                tournament = await Tournaments.create_tournament(data['data']['args'], runtime=True)
+                tournament = await Tournaments.create_tournament(data['data']['args'], self.redis, runtime=True)
                 tournament_queue.put(tournament)
                 await self.channel_layer.group_add(RTables.GROUP_TOURNAMENT(tournament.code), self.channel_name)
                 await self.redis.hset(name=RTables.HASH_TOURNAMENT_QUEUE(tournament.code), key=str(client.id), value=str(True))
@@ -76,7 +76,6 @@ class TournamentService(BaseServices):
     
     
     async def _handle_tournament_info(self, data, client):
-        sleep(1)
         queues = await Clients.acheck_in_queue(client, self.redis)
         if queues and RTables.HASH_TOURNAMENT_QUEUE('') in str(queues):
             code = re.search(rf'{RTables.HASH_TOURNAMENT_QUEUE("")}(\w+)$', queues.decode('utf-8')).group(1)
@@ -158,3 +157,5 @@ class TournamentService(BaseServices):
             code = re.search(rf'{RTables.HASH_TOURNAMENT_QUEUE("")}(\w+)$', queues.decode('utf-8')).group(1)
             await self.channel_layer.group_discard(RTables.GROUP_TOURNAMENT(code), self.channel_name)
             await self.redis.hdel(RTables.HASH_TOURNAMENT_QUEUE(code), str(client.id))
+            # tournament = Tournaments.get_tournament_by_code(code)
+        #ADD the fact we want to change the status of the tournament from DB
