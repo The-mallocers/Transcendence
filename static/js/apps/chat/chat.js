@@ -14,15 +14,30 @@ const clientId = await getClientId();
 export const chatSocket = await WebSocketManager.initChatSocket(clientId);
 
 
+function showActiveChat(show) {
+    const noChat = document.getElementById('no-chat-selected');
+    const activeChat = document.getElementById('active-chat');
+    
+    if (show) {
+        noChat.classList.add('d-none');
+        activeChat.classList.remove('d-none');
+    } else {
+        noChat.classList.remove('d-none');
+        activeChat.classList.add('d-none');
+    }
+}
+
 chatSocket.onmessage = (event) => {
     const message = JSON.parse(event.data);
     console.log(event.data);
     
     if (message.data.action == "HISTORY_RECEIVED") {
+        showActiveChat(true);
         displayHistory(message.data.content.messages);
     }
     else if(message.data.action == "NO_HISTORY")
         {
+        showActiveChat(true);
         displayHistory([])
     }
     else if(message.data.action == "ALL_ROOM_RECEIVED") {
