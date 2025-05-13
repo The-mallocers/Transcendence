@@ -89,13 +89,6 @@ class NotificationService(BaseServices):
                                 "room": str(room.id),
                                 "profile_picture": profile_picture_source
                               })
-            # await asend_group(RTables.GROUP_CHAT(target.id), EventType.CHAT, 
-            #                   ResponseAction.NEW_FRIEND,
-            #                   {
-            #                     "sender": str(client.id),
-            #                     "username": await client.aget_profile_username(),
-            #                     "room": str(room.id)
-            #                   })
 
         except:
             return await asend_group_error(self.service_group, ResponseError.USER_ALREADY_FRIEND_OR_NOT_PENDING_FRIEND)

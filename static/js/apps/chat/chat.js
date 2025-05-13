@@ -46,13 +46,6 @@ chatSocket.onmessage = (event) => {
         remove_toast();
         toast_message("You cant send message to block Friend")
     }
-    // else if(message.data.action == "NEW_FRIEND") {
-    //     create_front_chat_room(message.data.content.room,
-    //                             message.data.content.username, 
-    //                             message.data.content.sender, 
-    //                             "Block",
-    //                             message.data.content.profile_picture);
-    // }
     else if(message.data.action == "ACK_ACCEPT_FRIEND_REQUEST_HOST") {
         create_front_chat_room(message.data.content.room,
                                 message.data.content.username, 
