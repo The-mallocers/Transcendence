@@ -1,4 +1,5 @@
 import re
+from time import sleep
 import traceback
 
 from redis.commands.json.path import Path
@@ -72,16 +73,78 @@ class TournamentService(BaseServices):
             await asend_group(self.service_group, EventType.TOURNAMENT, ResponseAction.TOURNAMENT_PLAYERS_LIST, clients)
         else:
             await asend_group_error(self.service_group, ResponseError.NOT_IN_TOURNAMENT)
+    
+    
+    async def _handle_tournament_info(self, data, client):
+        sleep(1)
+        queues = await Clients.acheck_in_queue(client, self.redis)
+        if queues and RTables.HASH_TOURNAMENT_QUEUE('') in str(queues):
+            code = re.search(rf'{RTables.HASH_TOURNAMENT_QUEUE("")}(\w+)$', queues.decode('utf-8')).group(1)
+            tournament_info = await self.redis.json().get(RTables.JSON_TOURNAMENT(code))
+            # try:
+            tournament_info = await self.tournament_info_helper(tournament_info)
+            # except:
+            #     print("EXCEPTION CASSE LES C")
+            #     await asend_group_error(self.service_group, ResponseError.NOT_IN_TOURNAMENT)
+            #     return
+            print(tournament_info)
+            await asend_group(self.service_group, EventType.TOURNAMENT, ResponseAction.TOURNAMENT_INFO, tournament_info)
+        else:
+            print("CHUIS PAS DANS LA QUEUE ?")
+            await asend_group_error(self.service_group, ResponseError.NOT_IN_TOURNAMENT)
 
-    # async def _handle_list_tournament(self, data, client):
-    #     cursor, keys = await self.redis.scan(cursor=cursor, match=RTables.JSON_TOURNAMENT('*'))
-    #     for key in keys:
-    #         ready = redis.hget(key, str(client.id))
-    #         if ready and ready.decode('utf-8') == 'True':
-    #             return key
-    #     if cursor == 0:
-    #         break
-    #     pass
+    @staticmethod
+    async def tournament_info_helper(tournament):
+        tournament_ids = tournament['clients']
+        title = tournament['title']
+        max_clients = int(tournament['max_clients'])
+        players_infos = await Clients.get_tournament_clients_infos(tournament_ids)
+        roomInfos = {
+            "title": title,
+            "max_clients": max_clients,
+            "players_infos": players_infos
+        }
+        return roomInfos
+
+
+    # @staticmethod
+    # async def tournament_info_helper(tournament):
+    #     print("tournament = ", tournament)
+    #     tournament_ids = tournament['clients']
+    #     title = tournament['title']
+    #     max_clients = int(tournament['max_clients'])
+
+    #     print("tournament", tournament)
+    #     print("title:", title)
+    #     print("tournament_players:", tournament_ids)
+    #     players_infos = [] 
+    #     for id in tournament_ids:
+    #         client = await Clients.aget_client_by_id(id)
+    #         infos  = { 
+    #             "id" : client.id,
+    #             "nickname" : client.profile.username,
+    #             "avatar" : client.profile.profile_picture.url,
+    #             "trophee" : '/media/rank_icon/' + client.get_rank(client.stats.mmr) + ".png",
+    #             "mmr" : client.stats.mmr,
+    #         }
+    #         players_infos.append(infos)
+
+    #     roomInfos = {
+    #         "title" : title,
+    #         "max_clients" : max_clients,
+    #         "players_infos" : players_infos
+    #     }
+    #     print("roomInfos:" , roomInfos)
+    #     return roomInfos
+
+    async def _handle_list_tournament(self, data, client):
+        cursor, keys = await self.redis.scan(cursor=cursor, match=RTables.JSON_TOURNAMENT('*'))
+        tournaments = []
+        for key in keys:
+            code = re.search(rf'{RTables.JSON_TOURNAMENT("")}(\w+)$', key.decode('utf-8')).group(1)
+            
+        if cursor == 0:
+            return
 
     async def _handle_start_tournament(self, data, client):
         pass    

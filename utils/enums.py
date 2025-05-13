@@ -68,6 +68,7 @@ class RequestAction(str, Enum):
     START_TOURNAMENT: str = 'start_tournement'
     LIST_TOURNAMENT: str = 'list_tournament'
     LIST_PLAYERS: str = 'list_players'
+    TOURNAMENT_INFOS: str = 'tournament_info'
 
     # ── Notification Actions ──────────────────────────────────────────────────────────────────
     SEND_FRIEND_REQUEST: str = "send_friend_request"
@@ -111,6 +112,7 @@ class ResponseAction(str, Enum):
     TOURNAMENT_LOSE_GAME: str = "You're kick from tournament due to losing game."
     TOURNAMENT_CLOSING: str = 'Tournament close.'
     TOURNAMENT_PLAYERS_LIST: str = 'List of players'
+    TOURNAMENT_INFO: str = 'Tournament info'
 
     # ── Game Actions ──────────────────────────────────────────────────────────────────
     JOIN_GAME: str = 'You have successfully joined the game'

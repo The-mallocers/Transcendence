@@ -66,47 +66,42 @@ def check_in_queue(client, redis):
 
 
 def inRoom(request):
-    sleep(1)
-    client = Clients.get_client_by_request(request)
-    redis = RedisConnectionPool.get_sync_connection("Get_Players_Tournaments")
-    print(f"redis is {redis}")
-    queues = check_in_queue(client, redis)
+    # sleep(1)
+    # client = Clients.get_client_by_request(request)
+    # redis = RedisConnectionPool.get_sync_connection("Get_Players_Tournaments")
+    # queues = check_in_queue(client, redis)
     
-    tournament_players = []
-    if queues and RTables.HASH_TOURNAMENT_QUEUE('') in str(queues):
-        print("Salut je suis dedans")
-        code = re.search(rf'{RTables.HASH_TOURNAMENT_QUEUE("")}(\w+)$', queues.decode('utf-8')).group(1)
-        print(f"code is {code}")
-        tournament = redis.json().get(RTables.JSON_TOURNAMENT(code))
-        print(RTables.JSON_TOURNAMENT(code))
-        print("tournament: ", tournament)
-        tournament_players = redis.json().get(RTables.JSON_TOURNAMENT(code), Path('clients'))
-        print("tournament_players", tournament_players)
-    
-    context = {
-        'tournament_players': tournament_players
-    }
-    print(context)
-    #END OF TFREYDIE STUFF
-    
-    host = client.profile.username
+    # tournament = None
+    # tournament_ids = []
+    # if queues and RTables.HASH_TOURNAMENT_QUEUE('') in str(queues):
+    #     code = re.search(rf'{RTables.HASH_TOURNAMENT_QUEUE("")}(\w+)$', queues.decode('utf-8')).group(1)
+    #     tournament = redis.json().get(RTables.JSON_TOURNAMENT(code))
 
-    roomId = request.GET.get("roomId")
-    roomInfos = {
-        "name" : host,
-    }
+    # tournament_ids = tournament['clients']
+    # title = tournament['title']
+    # max_clients = range(int(tournament['max_clients']))
 
-    trophee = '/media/rank_icon/' + client.get_rank(client.stats.mmr) + ".png"
-    players = [
-        {
-            "nickname" : "EZ2C",
-            "avatar" : "/static/assets/imgs/profile/default.png",
-            "trophee" : trophee,
-            "mmr" : 200,
-            "winrate" : 60
-        },
-    ]
-    html_content = render_to_string("apps/pong/tournamentRoom.html", {"csrf_token": get_token(request), "client": client, "players": players, "roomInfos": roomInfos})
+    # print("tournament", tournament)
+    # print("title:", title)
+    # print("tournament_players:", tournament_ids)
+    # players_infos = [] 
+    # for id in tournament_ids:
+    #     client = Clients.get_client_by_id(id)
+    #     infos  = { 
+    #         "id" : client.id,
+    #         "nickname" : client.profile.username,
+    #         "avatar" : client.profile.profile_picture.url,
+    #         "trophee" : '/media/rank_icon/' + client.get_rank(client.stats.mmr) + ".png",
+    #         "mmr" : client.stats.mmr,
+    #     }
+    #     players_infos.append(infos)
+
+    # roomInfos = {
+    #     "title" : title,
+    #     "max_clients" : max_clients 
+    # }
+
+    html_content = render_to_string("apps/pong/tournamentRoom.html", {"csrf_token": get_token(request)})
     return JsonResponse({
         'html': html_content,
     })
