@@ -162,7 +162,6 @@ class Rooms(models.Model):
     def adelete_room(self):
         try:
             with transaction.atomic():
-                print("delete room")
                 self.delete()
         except Clients.DoesNotExist:
             return None
@@ -220,7 +219,6 @@ class Messages(models.Model):
     def adelete_all_messages_by_room_id(roomId):
         try:
             with transaction.atomic():
-                print("deleting messages...")
                 Messages.objects.filter(room_id=roomId).delete()
                 return True
         except Exception:

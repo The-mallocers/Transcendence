@@ -164,14 +164,16 @@ class ChatService(BaseServices):
 
     async def _handle_get_all_room_by_client(self, data, client: Clients):
         rooms = await Rooms.aget_room_id_by_client_id(client.id)
+        print("+++++++++++++++++++++++++++", rooms)
         formatted_messages = []
         for room_id in rooms:
             room = await Rooms.get_room_by_id(room_id)
             if room:
                 users = await Rooms.get_user_info_by_room_id(room_id)
-                print("||||||||||||||||||",users)
+                # print("||||||||||||||||||",users)
                 # Filter out the current client
                 other_users = [user for user in users if str(user['id']) != str(client.id)]
+                # print(other_users)
                 friend = await client.get_friend_table()
                 if other_users:  # Only add rooms with other users
                     for user in other_users:
@@ -191,7 +193,7 @@ class ChatService(BaseServices):
                                 'status': status
                             }]
                         })
-                        print(formatted_messages)
+                        # print(formatted_messages)
         await asend_group(self.service_group, 
                         EventType.CHAT, 
                         ResponseAction.ALL_ROOM_RECEIVED, 

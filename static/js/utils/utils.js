@@ -8,7 +8,7 @@ export async function getClientId() {
         if (!response.ok) {
             return null;
         }
-        console.log("data:", data);
+        // console.log("data:", data);
         if (data.client_id) {
             return data.client_id;
         } else {
