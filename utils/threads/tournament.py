@@ -48,7 +48,7 @@ class TournamentThread(Threads):
         for game in self.games:
             if game.rget_status() is GameStatus.WAITING:
                 self.redis.delete(RTables.JSON_GAME(game.code))
-        # self.redis.delete(RTables.JSON_TOURNAMENT(self.tournament.code))
+        self.redis.delete(RTables.JSON_TOURNAMENT(self.tournament.code))
         self.redis.expire(f'channels:group:{RTables.GROUP_TOURNAMENT(self.tournament.code)}', 0)
 
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ EVENT ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #

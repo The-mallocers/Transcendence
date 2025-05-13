@@ -24,6 +24,7 @@ class Router {
                 await WebSocketManager.initNotifSocket(clientId);
             }
         }
+        console.log("is tournament socket closed:", WebSocketManager.isSocketClosed(WebSocketManager.tournamentSocket));
         if (WebSocketManager.isSocketClosed(WebSocketManager.tournamentSocket)) {
             const clientId = await getClientId();
             if (clientId) {

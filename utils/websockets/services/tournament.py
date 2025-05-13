@@ -59,16 +59,34 @@ class TournamentService(BaseServices):
                 await asend_group(self.service_group, EventType.TOURNAMENT, ResponseAction.TOURNAMENT_JOIN)
     
     async def _handle_ping(self, data, client):
-        print('ping')
         return await asend_group(self.service_group, EventType.TOURNAMENT, ResponseAction.PONG)
 
     async def _handle_leave_tournament(self, data, client):
         pass
+    
+    async def _handle_list_players(self, data, client):
+        queues = await Clients.acheck_in_queue(client, self.redis)
+        if queues and RTables.HASH_TOURNAMENT_QUEUE('') in str(queues):
+            code = re.search(rf'{RTables.HASH_TOURNAMENT_QUEUE("")}(\w+)$', queues.decode('utf-8')).group(1)
+            clients = await self.redis.json().get(RTables.JSON_TOURNAMENT(code), Path('clients'))
+            await asend_group(self.service_group, EventType.TOURNAMENT, ResponseAction.TOURNAMENT_PLAYERS_LIST, clients)
+        else:
+            await asend_group_error(self.service_group, ResponseError.NOT_IN_TOURNAMENT)
 
-    async def _handle_list_tournament(self, data, client):
-        pass
+    # async def _handle_list_tournament(self, data, client):
+    #     cursor, keys = await self.redis.scan(cursor=cursor, match=RTables.JSON_TOURNAMENT('*'))
+    #     for key in keys:
+    #         ready = redis.hget(key, str(client.id))
+    #         if ready and ready.decode('utf-8') == 'True':
+    #             return key
+    #     if cursor == 0:
+    #         break
+    #     pass
 
     async def _handle_start_tournament(self, data, client):
+        pass    
+    
+    async def _handle_get_tournament_clients(self, data, client):
         pass
 
     async def disconnect(self, client):

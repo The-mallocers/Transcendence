@@ -1,6 +1,12 @@
+from json import JSONDecodeError
+import re
+from time import sleep
 from django.http import JsonResponse
 from django.middleware.csrf import get_token
 from django.template.loader import render_to_string
+from utils.enums import RTables
+from utils.redis import RedisConnectionPool
+from redis.commands.json.path import Path
 
 from apps.client.models import Clients
 
@@ -41,47 +47,63 @@ def join_tournament(request):
         'html': html_content,
     })
 
-def inRoom(request):
-    client = Clients.get_client_by_request(request)
+def check_in_queue(client, redis):
+    """Synchronous version of acheck_in_queue"""
+    cursor = 0
+    if redis.hget(name=RTables.HASH_G_QUEUE, key=str(client.id)):
+        return RTables.HASH_G_QUEUE
+    
+    while True:
+        cursor, keys = redis.scan(cursor=cursor, match=RTables.HASH_QUEUE('*'))
+        for key in keys:
+            ready = redis.hget(key, str(client.id))
+            if ready and ready.decode('utf-8') == 'True':
+                return key
+        if cursor == 0:
+            break
+    
+    return None
 
+
+async def inRoom(request):
+    sleep(1)
+    client = Clients.get_client_by_request(request)
+    redis = RedisConnectionPool.get_async_connection("Get_Players_Tournaments")
+    print(f"redis is {redis}")
+    queues = check_in_queue(client, redis)
+    
+    tournament_players = []
+    if queues and RTables.HASH_TOURNAMENT_QUEUE('') in str(queues):
+        print("Salut je suis dedans")
+        code = re.search(rf'{RTables.HASH_TOURNAMENT_QUEUE("")}(\w+)$', queues.decode('utf-8')).group(1)
+        print(f"code is {code}")
+        tournament = await redis.json().get(RTables.JSON_TOURNAMENT(code))
+        print(RTables.JSON_TOURNAMENT(code))
+        print("tournament: ", tournament)
+        tournament_players = await redis.json().get(RTables.JSON_TOURNAMENT(code), Path('clients'))
+        print("tournament_players", tournament_players)
+    
+    context = {
+        'tournament_players': tournament_players
+    }
+    print(context)
+    #END OF TFREYDIE STUFF
+    
+    host = client.profile.username
 
     roomId = request.GET.get("roomId")
-    print(roomId, "//////////\\\\\\\\\\\\\\\\\\")
     roomInfos = {
-        "name" : "minimeow's room",
-        "code"     : "X76BUBY"
+        "name" : host,
     }
 
+    trophee = '/media/rank_icon/' + client.get_rank(client.stats.mmr) + ".png"
     players = [
         {
             "nickname" : "EZ2C",
             "avatar" : "/static/assets/imgs/profile/default.png",
+            "trophee" : trophee,
             "mmr" : 200,
             "winrate" : 60
-        },        
-        {
-            "nickname" : "EZ3C",
-            "avatar" : "/static/assets/imgs/profile/default.png",
-            "mmr" : 220,
-            "winrate" : 66
-        },        
-        {
-            "nickname" : "meow",
-            "avatar" : "/static/assets/imgs/profile/default.png",
-            "mmr" : 110,
-            "winrate" : 42
-        },        
-        {
-            "nickname" : "minimeow",
-            "avatar" : "/static/assets/imgs/profile/default.png",
-            "mmr" : 600,
-            "winrate" : 94
-        },        
-        {
-            "nickname" : "gigaMeow",
-            "avatar" : "/static/assets/imgs/profile/default.png",
-            "mmr" : 1000,
-            "winrate" : 100
         },
     ]
     html_content = render_to_string("apps/pong/tournamentRoom.html", {"csrf_token": get_token(request), "client": client, "players": players, "roomInfos": roomInfos})

@@ -88,7 +88,7 @@ export const WebSocketManager = {
     //   client_id = await getClientId();
     // }
       if (this.isSocketClosed(this.notifSocket)) {
-      this.notifSocket = new WebSocket(`wss://${window.location.host}/ws/tournament/?id=${client_id}`);
+      this.notifSocket = new WebSocket(`wss://${window.location.host}/ws/notification/?id=${client_id}`);
           this.notifSocket.onopen = () => {
               const message = {
                   "event": "notification",

@@ -46,12 +46,22 @@
     padding: 1rem 2rem;
 }
 
-.inTournamentRoomContainer .btns .btn:first-of-type {
+.inTournamentRoomContainer .btns .btn-intra{
     color: white;
     background-color: #00BABB;
 }
 
-.inTournamentRoomContainer .btns .btn:last-of-type {
+.inTournamentRoomContainer .btns .btn-intra-outlined {
     border-color: #00BABB;
     color: #00BABB;
+}
+
+.inTournamentRoomContainer .btns .btn-intra-outlined {
+    border-color: #00BABB;
+    color: #00BABB;
+}
+
+.inTournamentRoomContainer .tropheeImg{
+    height: 42px;
+    width: 42px;
 }

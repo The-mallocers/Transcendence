@@ -67,6 +67,7 @@ class RequestAction(str, Enum):
     LEAVE_TOURNAMENT: str = 'leave_tournament'
     START_TOURNAMENT: str = 'start_tournement'
     LIST_TOURNAMENT: str = 'list_tournament'
+    LIST_PLAYERS: str = 'list_players'
 
     # ── Notification Actions ──────────────────────────────────────────────────────────────────
     SEND_FRIEND_REQUEST: str = "send_friend_request"
@@ -109,6 +110,7 @@ class ResponseAction(str, Enum):
     TOURNAMENT_GAME_FINISH: str = 'Game is finished'
     TOURNAMENT_LOSE_GAME: str = "You're kick from tournament due to losing game."
     TOURNAMENT_CLOSING: str = 'Tournament close.'
+    TOURNAMENT_PLAYERS_LIST: str = 'List of players'
 
     # ── Game Actions ──────────────────────────────────────────────────────────────────
     JOIN_GAME: str = 'You have successfully joined the game'
@@ -171,6 +173,7 @@ class ResponseError(str, Enum):
     TOURNAMENT_NOT_EXIST: str = 'Tournament you try to join not exist.'
     ALREADY_JOIN_TOURNAMENT: str = 'You try to join tournament already joined.'
     HOST_LEAVE: str = 'Host leave tournament.'
+    NOT_IN_TOURNAMENT: str = "You're nt in this tournament"
 
     # ── Game ──────────────────────────────────────────────────────────────────────────
     GAME_FULL: str = 'The game is currently full.'
