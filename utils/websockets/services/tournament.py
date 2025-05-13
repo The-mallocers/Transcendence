@@ -80,13 +80,11 @@ class TournamentService(BaseServices):
         if queues and RTables.HASH_TOURNAMENT_QUEUE('') in str(queues):
             code = re.search(rf'{RTables.HASH_TOURNAMENT_QUEUE("")}(\w+)$', queues.decode('utf-8')).group(1)
             tournament_info = await self.redis.json().get(RTables.JSON_TOURNAMENT(code))
-            # try:
-            tournament_info = await self.tournament_info_helper(tournament_info)
-            # except:
-            #     print("EXCEPTION CASSE LES C")
-            #     await asend_group_error(self.service_group, ResponseError.NOT_IN_TOURNAMENT)
-            #     return
-            print(tournament_info)
+            try:
+                tournament_info = await self.tournament_info_helper(tournament_info)
+            except:
+                await asend_group_error(self.service_group, ResponseError.NOT_IN_TOURNAMENT)
+                return
             await asend_group(self.service_group, EventType.TOURNAMENT, ResponseAction.TOURNAMENT_INFO, tournament_info)
         else:
             print("CHUIS PAS DANS LA QUEUE ?")
@@ -105,45 +103,21 @@ class TournamentService(BaseServices):
         }
         return roomInfos
 
-
-    # @staticmethod
-    # async def tournament_info_helper(tournament):
-    #     print("tournament = ", tournament)
-    #     tournament_ids = tournament['clients']
-    #     title = tournament['title']
-    #     max_clients = int(tournament['max_clients'])
-
-    #     print("tournament", tournament)
-    #     print("title:", title)
-    #     print("tournament_players:", tournament_ids)
-    #     players_infos = [] 
-    #     for id in tournament_ids:
-    #         client = await Clients.aget_client_by_id(id)
-    #         infos  = { 
-    #             "id" : client.id,
-    #             "nickname" : client.profile.username,
-    #             "avatar" : client.profile.profile_picture.url,
-    #             "trophee" : '/media/rank_icon/' + client.get_rank(client.stats.mmr) + ".png",
-    #             "mmr" : client.stats.mmr,
-    #         }
-    #         players_infos.append(infos)
-
-    #     roomInfos = {
-    #         "title" : title,
-    #         "max_clients" : max_clients,
-    #         "players_infos" : players_infos
-    #     }
-    #     print("roomInfos:" , roomInfos)
-    #     return roomInfos
-
     async def _handle_list_tournament(self, data, client):
-        cursor, keys = await self.redis.scan(cursor=cursor, match=RTables.JSON_TOURNAMENT('*'))
-        tournaments = []
-        for key in keys:
-            code = re.search(rf'{RTables.JSON_TOURNAMENT("")}(\w+)$', key.decode('utf-8')).group(1)
-            
-        if cursor == 0:
-            return
+        cursor = 0
+        all_tournaments = []
+        
+        while True:
+            cursor, keys = await self.redis.scan(cursor=cursor, match=RTables.JSON_TOURNAMENT('*'))    
+            for key in keys:
+                code = re.search(rf'{RTables.JSON_TOURNAMENT("")}(\w+)$', key.decode('utf-8')).group(1)
+                tournament_info = await self.redis.json().get(RTables.JSON_TOURNAMENT(code))
+                tournament_info = await self.tournament_info_helper(tournament_info)
+                all_tournaments.append(tournament_info)
+            if cursor == 0:
+                break
+        
+        await asend_group(self.service_group, EventType.TOURNAMENT, ResponseAction.TOURNAMENT_LIST, all_tournaments)
 
     async def _handle_start_tournament(self, data, client):
         pass    

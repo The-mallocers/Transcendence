@@ -113,6 +113,7 @@ class ResponseAction(str, Enum):
     TOURNAMENT_CLOSING: str = 'Tournament close.'
     TOURNAMENT_PLAYERS_LIST: str = 'List of players'
     TOURNAMENT_INFO: str = 'Tournament info'
+    TOURNAMENT_LIST: str = 'List of tournaments'
 
     # ── Game Actions ──────────────────────────────────────────────────────────────────
     JOIN_GAME: str = 'You have successfully joined the game'

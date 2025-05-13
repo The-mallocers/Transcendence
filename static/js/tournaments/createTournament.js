@@ -19,6 +19,10 @@ tournamentSocket.onmessage = ((msg)=>{
         console.log(`/pong/tournament/${message.data.content.code}`);
         navigateTo(`/pong/tournament/?code=${message.data.content.code}`);        
     }
+    else if (message.event == "TOURNAMENT" && message.data.action == "TOURNAMENT_LIST") {
+        console.log("Infos of list of tournaments", message.data);
+        //Update the front to show a button of stuff here.
+    }
 })
 function getTournamentSettings(){
     let score = document.querySelector(".score");

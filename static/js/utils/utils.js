@@ -19,3 +19,13 @@ export async function getClientId() {
         return null;
     }
 }
+
+
+
+export function sendWhenReady(socket, message) {
+    if (socket.readyState === WebSocket.OPEN) {
+        socket.send(message);
+    } else {
+        socket.addEventListener('open', () => socket.send(message), { once: true });
+    }
+}
