@@ -4,7 +4,7 @@ import { toast_friend } from "./toast.js";
 import { toast_duel } from "./toast.js";
 import { toast_message } from "./toast.js";
 import { remove_toast } from "./toast.js";
-// import { create_front_chat_room } from "../chat/chat.js";
+import { create_front_chat_room } from "../../utils/utils.js";
 
 const notifSocket =  WebSocketManager.notifSocket; 
 
@@ -148,12 +148,12 @@ notifSocket.onmessage = (event) => {
         toast_friend(`New friend request from ${message.data.content.username}`, message.data, pendingElement);
     }
     else if(message.data.action == "ACK_ACCEPT_FRIEND_REQUEST_HOST" || message.data.action == "ACK_ACCEPT_FRIEND_REQUEST") {
+        create_front_chat_room(message.data.content.room,
+            message.data.content.username, 
+            message.data.content.sender, 
+            "Block",
+            message.data.content.profile_picture);
         let friends_group = document.querySelector('.friends_group');
-        // create_front_chat_room(message.data.content.room,
-        //                         message.data.content.username, 
-        //                         message.data.content.sender, 
-        //                         "Block",
-        //                         message.data.content.profile_picture);
         if(friends_group)
         {
             const parser = new DOMParser();
@@ -174,22 +174,6 @@ notifSocket.onmessage = (event) => {
             });
             friends_group.appendChild(friendElement);
         }
-    }
-    else if(message.data.action == "ACK_REFUSE_FRIEND_REQUEST") {
-        // const buttonToDelete = document.querySelector(`li.pending_item#${message.data.content.username}`);
-        // if(buttonToDelete)
-        // {
-        //     buttonToDelete.remove();
-        // }
-    }
-    else if(message.data.action == "ACK_DELETE_FRIEND_HOST") {
-        // const friendElements = document.querySelectorAll('.friends_group li');
-        // friendElements.forEach(elem => {
-        //     const usernameElement = elem.querySelector('div:first-child');
-        //     if (usernameElement && usernameElement.textContent.trim() === message.data.content.username) {
-        //         elem.remove();
-        //     }
-        // });
     }
     else if(message.data.action == "ACK_DELETE_FRIEND") {
         const friendElements = document.querySelectorAll('.friends_group li');

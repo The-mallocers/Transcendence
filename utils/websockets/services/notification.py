@@ -69,12 +69,16 @@ class NotificationService(BaseServices):
             await room.add_client(client)
             await room.add_client(target)
 
+            profile_picture_source = await client.aget_profile_by_user()
+            profile_picture_target = await target.aget_profile_by_user()
+            
             await asend_group(self.service_group, EventType.NOTIFICATION,
                               ResponseAction.ACK_ACCEPT_FRIEND_REQUEST_HOST,
                               {
                                 "sender": str(target.id),
                                 "username": await target.aget_profile_username(),
-                                "room": str(room.id)
+                                "room": str(room.id),
+                                "profile_picture": profile_picture_target
                               })
 
             await asend_group(RTables.GROUP_NOTIF(target.id), EventType.NOTIFICATION,
@@ -82,14 +86,8 @@ class NotificationService(BaseServices):
                               {
                                 "sender": str(client.id),
                                 "username": await client.aget_profile_username(),
-                                "room": str(room.id)
-                              })
-            await asend_group(RTables.GROUP_CHAT(target.id), EventType.CHAT, 
-                              ResponseAction.NEW_FRIEND,
-                              {
-                                "sender": str(client.id),
-                                "username": await client.aget_profile_username(),
-                                "room": str(room.id)
+                                "room": str(room.id),
+                                "profile_picture": profile_picture_source
                               })
 
         except:
