@@ -65,10 +65,10 @@ def check_in_queue(client, redis):
     return None
 
 
-async def inRoom(request):
+def inRoom(request):
     sleep(1)
     client = Clients.get_client_by_request(request)
-    redis = RedisConnectionPool.get_async_connection("Get_Players_Tournaments")
+    redis = RedisConnectionPool.get_sync_connection("Get_Players_Tournaments")
     print(f"redis is {redis}")
     queues = check_in_queue(client, redis)
     
@@ -77,10 +77,10 @@ async def inRoom(request):
         print("Salut je suis dedans")
         code = re.search(rf'{RTables.HASH_TOURNAMENT_QUEUE("")}(\w+)$', queues.decode('utf-8')).group(1)
         print(f"code is {code}")
-        tournament = await redis.json().get(RTables.JSON_TOURNAMENT(code))
+        tournament = redis.json().get(RTables.JSON_TOURNAMENT(code))
         print(RTables.JSON_TOURNAMENT(code))
         print("tournament: ", tournament)
-        tournament_players = await redis.json().get(RTables.JSON_TOURNAMENT(code), Path('clients'))
+        tournament_players = redis.json().get(RTables.JSON_TOURNAMENT(code), Path('clients'))
         print("tournament_players", tournament_players)
     
     context = {
