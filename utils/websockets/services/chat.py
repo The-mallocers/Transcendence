@@ -164,7 +164,6 @@ class ChatService(BaseServices):
 
     async def _handle_get_all_room_by_client(self, data, client: Clients):
         rooms = await Rooms.aget_room_id_by_client_id(client.id)
-        print("+++++++++++++++++++++++++++", rooms)
         formatted_messages = []
         for room_id in rooms:
             room = await Rooms.get_room_by_id(room_id)

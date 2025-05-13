@@ -93,8 +93,6 @@ class Rooms(models.Model):
                         'username': user.profile.username,
                         'profile_picture': profile_pic_url
                     })
-                print(f"Final users count: {len(user_info)}")
-                print(f"|||||||||||||||||| {user_info}")
                 return user_info
         except Exception as e:
             print(f"Error in get_user_info_by_room_id: {str(e)}")

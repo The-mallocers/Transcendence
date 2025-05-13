@@ -176,6 +176,21 @@ class Clients(models.Model):
             raise Exception(f"Error retrieving username: {e}")
 
     @sync_to_async
+    def aget_profile_by_user(self):
+        try:
+            with transaction.atomic():
+                profile = self.profile
+                if profile:
+                    profile_pic_url = profile.profile_picture.url
+                    if profile_pic_url:
+                        return profile_pic_url
+                else :
+                    raise Exception(f"Error retrieving client: {e}")
+            return 
+        except Exception as e:
+            raise Exception(f"Error retrieving client: {e}")
+
+    @sync_to_async
     def get_friend_table(self):
         try:
             with transaction.atomic():
