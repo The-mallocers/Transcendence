@@ -174,6 +174,7 @@ class ResponseError(str, Enum):
     KEY_ERROR: str = 'Error in tournament key.'
     TOURNAMENT_NOT_CREATE: str = 'There is error when you try to create tournaments.'
     TOURNAMENT_NOT_EXIST: str = 'Tournament you try to join not exist.'
+    TOURNAMENT_FULL: str = 'Tournament is full'
     ALREADY_JOIN_TOURNAMENT: str = 'You try to join tournament already joined.'
     HOST_LEAVE: str = 'Host leave tournament.'
     NOT_IN_TOURNAMENT: str = "You're nt in this tournament"

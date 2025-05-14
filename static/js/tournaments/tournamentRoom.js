@@ -12,20 +12,34 @@ let tournament_data = null;
 
 
 tournamentSocket.onmessage = ((msg)=>{
+    console.log("TOURNAMENT ROOM RECEIVES THIS MESSAGE");
     console.log(msg);
     const message = JSON.parse(msg.data);
     
     if (message.event == "ERROR"){
         console.log("Error message: ", message.data.error)
-        errDiv.innerHTML = message.data.error
+        navigateTo("/pong/gamemodes/");
+        // errDiv.innerHTML = message.data.error
         return
     }
     console.log("BONJOUR:", message.data);
     if (message.event == "TOURNAMENT" && message.data.action == "TOURNAMENT_INFO") {
         tournament_data = message.data.content;
+        populateTournament(tournament_data.max_clients);
+    }
+    else if (message.event == "TOURNAMENT" && message.data.action == "TOURNAMENT_PLAYER_JOIN") {
+        tournamentSocket.send(JSON.stringify(get_tournament_info));
+    }
+    else if (message.event == "TOURNAMENT" && message.data.action == "TOURNAMENT_GAME_READY") {
+        navigateTo("/pong/matchmaking/");
     }
 })
-
+/*
+                    send_group(RTables.GROUP_TOURNAMENT(self.tournament.code),
+                               EventType.TOURNAMENT,
+                               ResponseAction.TOURNAMENT_PLAYER_JOIN,
+                               {'id': str(client.id)})
+                               */
 function leaveTournament() {
     WebSocketManager.closeTournamentSocket();
     navigateTo("/pong/gamemodes/");
@@ -42,7 +56,7 @@ leave_btn?.addEventListener('click', ()=>{
 
 function populateTournament(max_clients){
     let clientsDiv = []
-    
+    clientsInTournament.innerHTML = ``
     for (let i = 0 ; i < max_clients ; i++){
         clientsDiv.push(`
             <div class="col p-2">
@@ -78,7 +92,7 @@ function populateTournament(max_clients){
                         `
                         
                         console.log("mini meow: ", clientsDiv[i])
-                    });
+            });
     clientsDiv.forEach(htmlString => {
         const temp = document.createElement("div");
         temp.innerHTML = htmlString; 
@@ -96,4 +110,7 @@ const get_tournament_info = {
         "action": "tournament_info"
     }    
 }
+
 sendWhenReady(tournamentSocket, JSON.stringify(get_tournament_info));
+
+

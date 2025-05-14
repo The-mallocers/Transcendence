@@ -12,6 +12,7 @@ class TournamentSerializer(serializers.Serializer):
         max_length=40,
         error_messages={'blank': 'Tournament title cannot be empty'}
     )
+    #For the future, only validate 4 8 16.
     max_clients = serializers.IntegerField(
         validators=[
             MinValueValidator(2, message="Tournament must have at least 2 players"),
@@ -75,8 +76,12 @@ class TournamentSerializer(serializers.Serializer):
                 tournament["rounds"][f"round_{round_num}"]["games"][game_id] = {
                     "game_code": "",  # Will be filled when game is created
                     "status": GameStatus.CREATING,
-                    "winner": None,
-                    "loser": None
+                    # "winner": None,
+                    # "loser": None,
+                    "winner_username": None,
+                    "loser_username": None,
+                    "loser_score": 0,
+                    "winner_score": 0,
                 }
 
         return tournament

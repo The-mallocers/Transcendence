@@ -48,6 +48,22 @@ if (!socket || socket.readyState === WebSocket.CLOSED) {
     lpicture.src = window.GameState.left.picture;
     rpicture.src = window.GameState.right.picture;
 
+    //Implementing tournament edgecase.
+    const tournamentSocket = WebSocketManager.tournamentSocket;
+    tournamentSocket.onmessage = (e) => {
+
+        const jsonData = JSON.parse(e.data);
+        if (jsonData.data.action == "TOURNAMENT_GAME_FINISH") {
+            //check this is our game thats over
+            if (isPlayerIngame(jsonData.data.content) == false) { return ;}
+
+            isGameOver.gameIsOver = true;
+            WebSocketManager.closeGameSocket();
+            console.log(jsonData.data);
+            navigateTo(`/pong/tournament/tree/?tournament=${jsonData.data.content.tournament_code}`);
+        }
+    }
+
     socket.onmessage = (e) => {
         const jsonData = JSON.parse(e.data);
         // console.log("received the message below");
@@ -117,6 +133,16 @@ if (!socket || socket.readyState === WebSocket.CLOSED) {
         }
     };
 }
+
+function isPlayerIngame(data) {
+    gameLeft = window.GameState.left.client_id;
+    gameRight = window.GameState.right.client_id;
+    
+    if (gameLeft == data.winner || gameLeft == data.loser) {return true;}
+    if (gameRight == data.winner || gameRight == data.loser) {return true;}
+    return false;
+}
+
 
 document.addEventListener('visibilitychange', () => {
     did_tab_out = true;

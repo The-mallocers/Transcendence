@@ -113,9 +113,11 @@ class GameThread(Threads):
                 self.logic.set_result(disconnect=True)
                 send_group_error(RTables.GROUP_GAME(self.game_id), ResponseError.OPPONENT_LEFT, close=True)
 
+            #VERY IMPORTANT FUNCTION ENDGAME
             if self.game.tournament is not None:
                 from utils.threads.tournament import TournamentThread
-                TournamentThread.set_game_players(self.game.tournament.code, self.game.code, self.game.winner.id, self.game.loser.id, self.redis)
+                TournamentThread.set_game_players(self.game.tournament.code, self.game.code, self.game.winner, self.game.loser, self.redis)
+                #Changed the above to be just the object
 
             self._stop_event.set()
             self._stopping()

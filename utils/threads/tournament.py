@@ -126,7 +126,7 @@ class TournamentThread(Threads):
                     return
 
     @staticmethod
-    def set_game_players(tournament_code, game_code: str, winner_id: str, loser_id: str, redis):
+    def set_game_players(tournament_code, game_code: str, winner, loser , redis):
         rounds = redis.json().get(RTables.JSON_TOURNAMENT(tournament_code), Path('scoreboards.num_rounds'))
         if rounds is None:
             return None
@@ -135,8 +135,11 @@ class TournamentThread(Threads):
             for m in range(1, matches_in_round + 1):
                 game_id = redis.json().get(RTables.JSON_TOURNAMENT(tournament_code), Path(f'scoreboards.rounds.round_{r}.games.r{r}m{m}.game_code'))
                 if game_id == game_code:
-                    redis.json().set(RTables.JSON_TOURNAMENT(tournament_code), Path(f'scoreboards.rounds.round_{r}.games.r{r}m{m}.winner'), winner_id)
-                    redis.json().set(RTables.JSON_TOURNAMENT(tournament_code), Path(f'scoreboards.rounds.round_{r}.games.r{r}m{m}.loser'), loser_id)
+                    redis.json().set(RTables.JSON_TOURNAMENT(tournament_code), Path(f'scoreboards.rounds.round_{r}.games.r{r}m{m}.winner_username'), winner.client.profile.username)
+                    redis.json().set(RTables.JSON_TOURNAMENT(tournament_code), Path(f'scoreboards.rounds.round_{r}.games.r{r}m{m}.loser_username'), loser.client.profile.username)
+                    redis.json().set(RTables.JSON_TOURNAMENT(tournament_code), Path(f'scoreboards.rounds.round_{r}.games.r{r}m{m}.winner_score'), winner.score)
+                    redis.json().set(RTables.JSON_TOURNAMENT(tournament_code), Path(f'scoreboards.rounds.round_{r}.games.r{r}m{m}.loser_score'), loser.score)
+                    #ADD INFO I WANT .
                     return
 
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ FUNCTIONS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
@@ -178,7 +181,8 @@ class TournamentThread(Threads):
                 send_group(RTables.GROUP_TOURNAMENT(self.tournament.code), EventType.TOURNAMENT, ResponseAction.TOURNAMENT_GAME_FINISH, {
                     'game_id': game.code,
                     'winner': str(game.winner.client.id),
-                    'loser': str(game.loser.client.id)
+                    'loser': str(game.loser.client.id),
+                    'tournament_code' : self.tournament.code
                 })
                 send_group(RTables.GROUP_TOURNAMENT(game.loser.client.id), EventType.TOURNAMENT, ResponseAction.TOURNAMENT_LOSE_GAME)
                 #TODO envoyer a quel place on a fini

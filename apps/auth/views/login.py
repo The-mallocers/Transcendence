@@ -14,9 +14,12 @@ grafana_id = 0
 def get(req):
     csrf_token = get_token(req)
     urlpostgres = None
-    grafana_session = authenticate_grafana_user()
-    secretKey = create_api_key(grafana_session)
-    urlpostgres = render_dashboard(req, secretKey, grafana_session)
+    try :
+        grafana_session = authenticate_grafana_user()
+        secretKey = create_api_key(grafana_session)
+        urlpostgres = render_dashboard(req, secretKey, grafana_session)
+    except Exception as e:
+        print("unlucky grafana")
     users = Clients.objects.all()
     print(urlpostgres)
     html_content = render_to_string("apps/auth/login.html", {

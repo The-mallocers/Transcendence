@@ -109,6 +109,11 @@ export function reloadScriptsSPA() {
 }
 
 export function navigateTo(path) {
+    //////////
+        for (let i = 1; i < 10; i++) {
+            clearInterval(i);
+        }
+    //////////
     router.navigate(path);
 }
 
