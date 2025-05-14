@@ -17,7 +17,7 @@ help:
 
 up:
 	rm -rf ./docker/staticdocker
-	docker compose -f ./$(DOCKER_COMPOSE_FILE) up --build --attach django-web
+	docker compose -f ./$(DOCKER_COMPOSE_FILE) up --build
 
 detach:
 	rm -rf ./docker/staticdocker

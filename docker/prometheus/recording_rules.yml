@@ -16,3 +16,6 @@ groups:
 
     - record: postgresql:connections_by_user
       expr: sum(pg_stat_activity_count) by (usename)
+
+    - record: postgresql:total_clients
+      expr: pg_stat_user_tables_n_live_tup{relname="client_list", datname="dockerdjango"}
