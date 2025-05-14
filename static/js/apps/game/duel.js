@@ -1,7 +1,8 @@
-import {navigateTo} from "../../spa/spa.js";
-import {WebSocketManager} from "../../websockets/websockets.js";
-import {toast_message} from "../profile/toast.js";
-import {getClientId} from "../../utils/utils.js";
+import { navigateTo } from "../../spa/spa.js";
+import { WebSocketManager } from "../../websockets/websockets.js";
+import { toast_message } from "../profile/toast.js"; 
+import { remove_toast } from "../profile/toast.js";
+import { getClientId } from "../../utils/utils.js";
 
 let clientId;
 
@@ -77,6 +78,7 @@ notifSocket.onmessage = (event) => {
 
     if (message.data.action == "DUEL_REFUSED") {
         navigateTo("/pong/gamemodes/");
+        remove_toast();
         toast_message(`${message.data.content.username} refuses the duel`);
     } else if (message.data.action == "DUEL_JOIN") {
         const pendingDiv = document.querySelector(".state-of-player");
@@ -123,24 +125,3 @@ gameSocket.onmessage = (e) => {
         gameSocket.send(JSON.stringify(startGameMessage))
     }
 };
-
-//This is now in utils.js !
-// async function getClientId() {
-//     try {
-//         const response = await fetch("/api/auth/getId/", {
-//             method: "GET",
-//             credentials: "include",
-//         });
-//         const data = await response.json();
-
-//         if (data.client_id) {
-//             client_id = data.client_id;
-//             return client_id;
-//         } else {
-//             throw new Error(data.error);
-//         }
-//     } catch (error) {
-//         console.error("Erreur lors de la récupération de l'ID :", error);
-//         return null;
-//     }
-// }
