@@ -1,5 +1,6 @@
 import { WebSocketManager } from "../websockets/websockets.js";
 import { navigateTo } from "../spa/spa.js";
+import { sendWhenReady } from "../utils/utils.js";
 
 //In veut faire une requete a la websocket de l'etat actuel du tournoi.
 //L'etat idealement, nous rend toute les infos qu'on va render sur la page.
@@ -13,13 +14,13 @@ tournamentSocket.onmessage = ((msg)=>{
     console.log(msg);
     const message = JSON.parse(msg.data);
     
-    if (message.event == "ERROR"){
-        console.log("Error message: ", message.data.error)
-        navigateTo("/pong/gamemodes/");
-        // errDiv.innerHTML = message.data.error
-        return
-    }
-    console.log("BONJOUR:", message.data);
+    // if (message.event == "ERROR"){
+    //     console.log("Error message: ", message.data.error)
+    //     navigateTo("/pong/gamemodes/");
+    //     // errDiv.innerHTML = message.data.error
+    //     return
+    // }
+    // console.log("BONJOUR:", message.data);
     if (message.event == "TOURNAMENT" && message.data.action == "TOURNAMENT_INFO") {
         console.log("tournament info is :", message.data.action);
         tournament_data = message.data.content;
