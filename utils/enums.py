@@ -164,6 +164,7 @@ class ResponseError(str, Enum):
     NOT_INVITED: str = 'You are not invited to this duel.'
     ALREADY_JOIN_DUEL: str = 'You try to join duel already joined.'
     CANNOT_REFUSE_DUEL: str = "You can't refuse a duel you already joined."
+    BLOCKED_USER: str = 'You cannot duel a blocked user.'
 
     # ── Tournaments ───────────────────────────────────────────────────────────────── #
     KEY_ERROR: str = 'Error in tournament key.'

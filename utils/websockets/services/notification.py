@@ -167,6 +167,13 @@ class NotificationService(BaseServices):
             return await asend_group_error(self.service_group, ResponseError.USER_OFFLINE)
         if target.id == client.id:
             return await asend_group_error(self.service_group, ResponseError.DUEL_HIMSELF)
+        client_friend_table = await client.get_friend_table()
+        target_firend_table = await target.get_friend_table()
+        client_blocked_target = await client_friend_table.ais_blocked(target.id)
+        target_blocked_client = await target_firend_table.ais_blocked(client.id)
+        if client_blocked_target or target_blocked_client:
+            print("client blocked target or target blocked client")
+            return await asend_group_error(self.service_group, ResponseError.BLOCKED_USER)
         target_queues = await Clients.acheck_in_queue(target, self.redis)
         if target_queues is not RTables.HASH_G_QUEUE.value and target_queues is not None:
             if await self.redis.hexists(target_queues, str(target.id)):

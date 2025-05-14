@@ -297,10 +297,6 @@ class Clients(models.Model):
     
     @sync_to_async
     def ais_blocked(self, user_id):
-        """
-        Asynchronously check if a user is blocked
-        Returns True if the user is blocked, False otherwise
-        """
         try:
             with transaction.atomic():
                 is_blocked = self.blocked_users.filter(id=user_id).exists()
