@@ -9,7 +9,7 @@ from utils.pong.objects import PADDLE_WIDTH, PADDLE_HEIGHT, PADDLE_SPEED, CANVAS
 
 @dataclass
 class Paddle:
-    def __init__(self, game_id=None, redis=None, player_id=None, x=0):
+    def __init__(self, game_id=None, redis=None, client_id=None, x=0):
         # ── Fields ────────────────────────────────────────────────────────────────────────
         self.width: float = PADDLE_WIDTH
         self.height: float = PADDLE_HEIGHT
@@ -20,9 +20,8 @@ class Paddle:
         # ── Utils ─────────────────────────────────────────────────────────────────────────    
         self.redis = redis
         self.game_key = RTables.JSON_GAME(game_id)
-        self.player_id = player_id
         self.move: PaddleMove = PaddleMove.IDLE
-        self.player_side = Player.get_player_side(self.player_id, self.game_key, self.redis)
+        self.player_side = Player.get_player_side(client_id, self.game_key, self.redis)
 
     def update(self):
         self.width = self.get_width()

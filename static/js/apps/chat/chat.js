@@ -108,7 +108,7 @@ if(messageInput){
     });
 }
 
-window.clickRoom = function(room){
+window.clickRoom = function (room) {
     room_id = room
     const message = {
         "event": "chat",
@@ -119,31 +119,27 @@ window.clickRoom = function(room){
             }
         }
     };
-    if(chatSocket.readyState === WebSocket.OPEN) {
+    if (chatSocket.readyState === WebSocket.OPEN) {
         chatSocket.send(JSON.stringify(message));
     }
 }
-window.handleChatProfile = function(username)
-{
+window.handleChatProfile = function (username) {
     navigateTo(`/profile/?username=${username}`)
 }
 
-window.handleChatBlock = function(username)
-{
+window.handleChatBlock = function (username) {
     const message = create_message_notif_block("block_unblock_friend", username, "block");
     notifSocket.send(JSON.stringify(message));
 }
 
-window.handleChatUnblock = function(username)
-{
+window.handleChatUnblock = function (username) {
     const message = create_message_notif_block("block_unblock_friend", username, "unblock");
     notifSocket.send(JSON.stringify(message));
 }
 
-window.handleChatDuel = function(usernameId)
-{
+window.handleChatDuel = function (usernameId) {
     console.log(usernameId);
-    const message = create_message_duel("create_duel",usernameId);
+    const message = create_message_duel("create_duel", usernameId);
     notifSocket.send(JSON.stringify(message));
     navigateTo('/pong/duel/');
 }

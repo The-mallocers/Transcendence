@@ -161,6 +161,7 @@
     .gameoverPage .btns {
         animation-delay: 1.1s
     }
+
     .gameoverPage .mmr {
         animation-delay: 1s;
         opacity: 0;
@@ -189,9 +190,9 @@
         <div id="enemyScore" class="score">{{ opponent_score }}</div>
     </div>
     <div class="mmr">
-        <div id="mmr_change" class="score">{{mmr_change}}</div>
+        <div id="mmr_change" class="score">{{ mmr_change }}</div>
     </div>
-        <div class="btns mt-5">
+    <div class="btns mt-5">
         <div class="btn full d-inline" data-route="/pong/matchmaking/">Go back in queue</div>
         <div class="btn outlined d-inline" data-route="/">My profile</div>
     </div>

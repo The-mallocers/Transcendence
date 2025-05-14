@@ -49,7 +49,7 @@ class BaseServices(ABC):
             if request_action:
                 handler_method = getattr(self, f"_handle_{request_action.value}", None)
             if not handler_method or not callable(handler_method):
-                
+
                 raise ServiceError(f"CALLER CLASS: {self.__class__.__name__}, Handler not found for this action : {request_action.value}")
             else:
                 return await handler_method(data, *args)

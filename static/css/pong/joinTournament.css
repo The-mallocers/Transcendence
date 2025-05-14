@@ -80,7 +80,7 @@
 
 .joinTournamentContainer .cardContainer {
     position: relative;
-    width: 100% ;
+    width: 100%;
     border: 1px solid #dcdcdc;
     border-radius: 5px;
     padding: 1rem;
@@ -162,26 +162,26 @@
 }
 
 
-.joinTournamentContainer .avatarsContainer .imgContainer{
+.joinTournamentContainer .avatarsContainer .imgContainer {
     border: 2px solid #fff;
     border-radius: 50%;
 }
 
-.joinTournamentContainer .avatarsContainer .imgContainer:not(:first-of-type){
+.joinTournamentContainer .avatarsContainer .imgContainer:not(:first-of-type) {
     margin-left: -15px;
 }
 
-.joinTournamentContainer .avatarsContainer .imgContainer:last-of-type{
+.joinTournamentContainer .avatarsContainer .imgContainer:last-of-type {
     position: relative;
     overflow: hidden;
 }
 
-.joinTournamentContainer .avatarsContainer .imgContainer:last-of-type img{
+.joinTournamentContainer .avatarsContainer .imgContainer:last-of-type img {
     filter: brightness(0.3);
 }
 
 
-.joinTournamentContainer .avatarsContainer .more{
+.joinTournamentContainer .avatarsContainer .more {
     /* margin-left: -15px; */
     position: absolute;
     top: 50%;

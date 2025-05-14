@@ -184,19 +184,19 @@ ul.friends_group .list-group-item{
 
 #upload-img-btn {
     font-weight: bold;
-    width: 30%; 
-    display: inline-block; 
-    text-align: center; 
-    box-sizing: border-box; 
+    width: 30%;
+    display: inline-block;
+    text-align: center;
+    box-sizing: border-box;
     margin-right: auto;
 }
 
-#logout-btn {
+#logout-btn, #delete-btn {
     font-weight: bold;
-    width: 20%; 
-    display: inline-block; 
-    text-align: center; 
-    box-sizing: border-box; 
+    width: 20%;
+    display: inline-block;
+    text-align: center;
+    box-sizing: border-box;
     margin-left: auto;
     background-color: #c0392b;
     color: white;
@@ -208,20 +208,20 @@ ul.friends_group .list-group-item{
     cursor: pointer;
 }
 
-#logout-btn:hover {
-    background-color: #e74c3c;
+#logout-btn:hover, #delete-btn:hover {
+    background-color: #161216;
     transform: scale(1.03);
 }
 
 #update-btn {
     font-weight: bold;
-    width: 30%; 
-    display: inline-block; 
-    text-align: center; 
-    box-sizing: border-box; 
+    width: 30%;
+    display: inline-block;
+    text-align: center;
+    box-sizing: border-box;
     margin-right: auto;
 }
 
 #profile_picture {
-    margin-right: auto; 
+    margin-right: auto;
 }

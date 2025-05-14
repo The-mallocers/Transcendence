@@ -11,16 +11,16 @@ const gameSocket = await WebSocketManager.initGameSocket(clientId);
 const notifSocket = WebSocketManager.notifSocket;
 
 const cancelDuel = document.querySelector(".cancel-duel");
-if (cancelDuel){
-    cancelDuel.addEventListener('click', function(event){
+if (cancelDuel) {
+    cancelDuel.addEventListener('click', function (event) {
         navigateTo('/pong/gamemodes/')
     })
 }
 
 const opponentDiv = document.querySelector(".opponent_player");
-if(opponentDiv){
+if (opponentDiv) {
     const urlParams = new URLSearchParams(window.location.search);
-    const opponentName =  urlParams.get("opponent");
+    const opponentName = urlParams.get("opponent");
     opponentDiv.innerHTML = opponentName;
 }
 
@@ -76,19 +76,17 @@ notifSocket.onmessage = (event) => {
     console.log(event.data);
     const message = JSON.parse(event.data);
 
-    if(message.data.action == "DUEL_REFUSED"){
+    if (message.data.action == "DUEL_REFUSED") {
         navigateTo("/pong/gamemodes/");
         remove_toast();
         toast_message(`${message.data.content.username} refuses the duel`);
-    }
-    else if(message.data.action == "DUEL_JOIN"){
+    } else if (message.data.action == "DUEL_JOIN") {
         const pendingDiv = document.querySelector(".state-of-player");
-        if(pendingDiv){
+        if (pendingDiv) {
             pendingDiv.innerHTML = "join";
             pendingDiv.style.backgroundColor = "#00babc";
         }
-    }
-    else if(message.data.action == "DUEL_CREATED"){
+    } else if (message.data.action == "DUEL_CREATED") {
         navigateTo(`/pong/duel/?opponent=${message.data.content.opponent}`);
     }
 }
@@ -120,7 +118,7 @@ gameSocket.onmessage = (e) => {
                 username: jsonData.data.content.right.username,
                 id: ""
             }
-        }   
+        }
     }
     if (jsonData.data.action == "STARTING") {
         navigateTo("/pong/arena/");

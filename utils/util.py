@@ -7,9 +7,12 @@ from django.core.exceptions import ValidationError
 
 def create_game_id():
     from apps.game.models import Game
+    from utils.enums import RTables
+    from utils.redis import RedisConnectionPool
+    redis = RedisConnectionPool.get_sync_connection('GameID')
     while True:
-        code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=5))  # Génère un code aléatoire de 5 caractères
-        if not Game.objects.filter(id=code).exists():
+        code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=5))
+        if not Game.objects.filter(code=code).exists() and not redis.exists(RTables.JSON_GAME(code)):
             return code
 
 
@@ -17,7 +20,7 @@ def create_tournament_id():
     from apps.tournaments.models import Tournaments
     while True:
         code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=5))  # Génère un code aléatoire de 5 caractères
-        if not Tournaments.objects.filter(id=code).exists():
+        if not Tournaments.objects.filter(code=code).exists():
             return code
 
 

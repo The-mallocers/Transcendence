@@ -1,6 +1,9 @@
 import time
 import traceback
 
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
+
 from apps.game.models import Game
 from utils.enums import GameStatus, EventType, ResponseAction, \
     ResponseError, PlayerSide, RTables
@@ -12,15 +15,20 @@ from utils.websockets.channel_send import send_group, send_group_error
 
 class GameThread(Threads):
     def __init__(self, game: Game):
-        super().__init__(f"Game_{game.code}")
+        super().__init__(f"GameThread[{game.code}]")
         self.game = game
         self.game_id = game.code
         self.logic: PongLogic = PongLogic(self.game, self.redis)
 
     def main(self):
         try:
+            while self.game.tournament is not None:
+                if not self._waitting_players():
+                    time.sleep(2)
+                else:
+                    break
             while self.game_is_running():
-                if self._starting() == False:
+                if not self._starting():
                     time.sleep(0.1)
                 else:
                     break
@@ -42,15 +50,40 @@ class GameThread(Threads):
         self._logger.info("Cleaning up game...")
 
         self.redis.delete(RTables.JSON_GAME(self.game_id))
-        self.redis.hdel(RTables.HASH_MATCHES, str(self.game.pL.client_id))
-        self.redis.hdel(RTables.HASH_MATCHES, str(self.game.pR.client_id))
+        self.redis.hdel(RTables.HASH_MATCHES, str(self.game.pL.client.id))
+        self.redis.hdel(RTables.HASH_MATCHES, str(self.game.pR.client.id))
         self.redis.expire(f'channels:group:{RTables.GROUP_GAME(self.game_id)}', 0)
 
         # RedisConnectionPool.close_connection(self.__class__.__name__)
-
         self._logger.info("Cleanup of game complete")
 
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ EVENT ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
+
+    def _waitting_players(self):
+        if self.game.rget_status() is GameStatus.MATCHMAKING and self.game.tournament is not None:
+            channel_layer = get_channel_layer()
+            both_joined = 0
+
+            if self.redis.hexists(RTables.HASH_CLIENT(self.game.pR.client.id), EventType.GAME.value):
+                channel_name_pR = self.redis.hget(name=RTables.HASH_CLIENT(self.game.pR.client.id), key=str(EventType.GAME.value))
+                channel_name_pR = channel_name_pR.decode('utf-8') if channel_name_pR else None
+                if channel_name_pR and self.redis.zscore(f'channels:group:{RTables.GROUP_GAME(self.game_id)}', str(channel_name_pR)) is None:
+                    async_to_sync(channel_layer.group_add)(RTables.GROUP_GAME(self.game_id), channel_name_pR)
+                    send_group(RTables.GROUP_CLIENT(self.game.pR.client.id), EventType.GAME, ResponseAction.JOIN_GAME)
+                both_joined += 1
+            if self.redis.hexists(RTables.HASH_CLIENT(self.game.pL.client.id), EventType.GAME.value):
+                channel_name_pL = self.redis.hget(name=RTables.HASH_CLIENT(self.game.pL.client.id), key=str(EventType.GAME.value))
+                channel_name_pL = channel_name_pL.decode('utf-8') if channel_name_pL else None
+                if channel_name_pL and self.redis.zscore(f'channels:group:{RTables.GROUP_GAME(self.game_id)}', str(channel_name_pL)) is None:
+                    async_to_sync(channel_layer.group_add)(RTables.GROUP_GAME(self.game_id), channel_name_pL)
+                    send_group(RTables.GROUP_CLIENT(self.game.pL.client.id), EventType.GAME, ResponseAction.JOIN_GAME)
+                both_joined += 1
+
+            if both_joined == 2:
+                self.game.rset_status(GameStatus.STARTING)
+                return True
+            else:
+                return False
 
     def _starting(self):
         if self.game.rget_status() is GameStatus.STARTING:
@@ -80,11 +113,15 @@ class GameThread(Threads):
                 self.logic.set_result(disconnect=True)
                 send_group_error(RTables.GROUP_GAME(self.game_id), ResponseError.OPPONENT_LEFT, close=True)
 
+            if self.game.tournament is not None:
+                from utils.threads.tournament import TournamentThread
+                TournamentThread.set_game_players(self.game.tournament.code, self.game.code, self.game.winner.id, self.game.loser.id, self.redis)
+
             self._stop_event.set()
             self._stopping()
 
     def _stopping(self):
         self.game.rset_status(GameStatus.FINISHED)
-        self.redis.hdel(RTables.HASH_MATCHES, self.game.pL.client_id, self.game.pR.client_id)
+        self.redis.hdel(RTables.HASH_MATCHES, str(self.game.pL.client.id), str(self.game.pR.client.id))
         time.sleep(1)
         self.stop()

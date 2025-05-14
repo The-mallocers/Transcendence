@@ -1,6 +1,6 @@
-import { navigateTo } from '../../spa/spa.js';
-import { WebSocketManager } from '../../websockets/websockets.js';
-import { getClientId } from '../../utils/utils.js';
+import {navigateTo} from '../../spa/spa.js';
+import {WebSocketManager} from '../../websockets/websockets.js';
+import {getClientId} from '../../utils/utils.js';
 
 const AUTH_CONFIG = {
     clientId: 'u-s4t2ud-fba0f059cba0019f374c8bf89cb3a81ead9ef0cb218380d9344c21d99d1f9b3e',
@@ -94,14 +94,14 @@ if (login42Button) {
         //         clearInterval(meowInterval)
         //         navigateTo("/")
         //     }
-                
+
         //     console.log()
         //     // if (document.cookie !== previousCookies) {
         //     //     // console.log("Cookies changed!");
         //     //     // previousCookies = document.cookie;
         //     //     // // Do something with the new cookies
 
-  
+
         //     // }
 
         //     // console.log(document.cookie)
@@ -127,4 +127,5 @@ async function socketCheck() {
         WebSocketManager.closeNotifSocket();
     }
 }
+
 await socketCheck();

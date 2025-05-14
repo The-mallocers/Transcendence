@@ -1,4 +1,5 @@
 import re
+
 from django.http import HttpRequest
 from rest_framework import status
 from rest_framework.fields import CharField
@@ -32,6 +33,7 @@ class GetPendingFriendsApiView(APIView):
         serializer = FriendSerializer(client.friend.pending_friends.all(), many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+
 class GetPendingDuelsApiView(APIView):
     def get(self, request: HttpRequest, *args, **kwargs):
         client = Clients.get_client_by_request(request)
@@ -50,12 +52,13 @@ class GetPendingDuelsApiView(APIView):
                 duel_data.append({
                     'id': str(target_client.id),
                     'username': target_client.profile.username,
-                    'duel_id' : re.search(rf'{RTables.HASH_DUEL_QUEUE("")}(\w+)$', duel_hash.decode('utf-8')).group(1)
+                    'duel_id': re.search(rf'{RTables.HASH_DUEL_QUEUE("")}(\w+)$', duel_hash.decode('utf-8')).group(1)
                 })
 
         return Response(duel_data, status=status.HTTP_200_OK)
 
-#Pretty sure this is unused to im commenting it it out.
+
+# Pretty sure this is unused to im commenting it it out.
 # class GetOnlineStatus(APIView):
 #     def get(self, request: HttpRequest, *args, **kwargs):
 #         print("getting online status")

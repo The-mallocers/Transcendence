@@ -10,6 +10,7 @@ help:
 	@echo "  make logs            - Show container logs"
 	@echo "  make status          - Show container status"
 	@echo "  make restart         - Restart all containers"
+	@echo "  make reload          - Reload staticfile"
 	@echo "  make dbclean         - Remove database volumes"
 	@echo "  make clean           - Remove all containers and images"
 	@echo "  make re              - Alias for restart"
@@ -59,10 +60,8 @@ reload:
 clean: dbclean
 	docker compose -f ./$(DOCKER_COMPOSE_FILE) down --rmi all
 
-reload:
-	cp -r static/css ./docker/staticdocker
-	cp -r static/js ./docker/staticdocker
-
 re: down up
 
 redetach: down detach
+
+.PHONY: help up down test test-coverage logs status restart dbclean reload clean re

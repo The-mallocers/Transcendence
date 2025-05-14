@@ -50,6 +50,14 @@ class ProfileSerializer(serializers.ModelSerializer):
         )
     ], allow_empty_file=True, required=False)
 
+    coalition = serializers.CharField(validators=[
+        MaxLengthValidator(50),
+        RegexValidator(
+            regex=r'^[a-zA-ZáàäâéèêëíìîïóòôöúùûüçñÁÀÄÂÉÈÊËÍÌÎÏÓÒÔÖÚÙÛÜÇÑ]+$',
+            message="Coalition name can't contain specials characters."
+        )
+    ], allow_blank=True, required=False)
+
     class Meta:
         model = Profile
-        fields = ['username', 'email', 'first_name', 'last_name', 'profile_picture']
+        fields = ['username', 'email', 'first_name', 'last_name', 'profile_picture', 'coalition']

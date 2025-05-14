@@ -20,16 +20,24 @@ class PasswordModelTest(TestCase):
 
     def test_password_creation(self):
         """Test that a password is created and hashed"""
-        print("\nRunning test: PasswordModelTest.test_password_creation")
+        # Get the password from the database
         password = Password.objects.get(id=self.password.id)
+
+        # Check that the password is hashed (starts with bcrypt prefix)
         self.assertTrue(password.password.startswith('$2b$'))
+
+        # Check that the original password is not stored
         self.assertNotEqual(password.password, "testpassword123")
 
     def test_check_pwd(self):
         """Test password verification"""
-        print("\nRunning test: PasswordModelTest.test_check_pwd")
+        # Get the password from the database
         password = Password.objects.get(id=self.password.id)
+
+        # Check that the correct password verifies
         self.assertTrue(password.check_pwd("testpassword123"))
+
+        # Check that an incorrect password fails
         self.assertFalse(password.check_pwd("wrongpassword"))
 
 
@@ -42,25 +50,37 @@ class TwoFAModelTest(TestCase):
 
     def test_twofa_creation(self):
         """Test that a TwoFA instance is created with default values"""
-        print("\nRunning test: TwoFAModelTest.test_twofa_creation")
         twofa = TwoFA.objects.get(key=self.twofa.key)
+
+        # Check default values
         self.assertFalse(twofa.enable)
         self.assertFalse(twofa.scanned)
+        # self.assertIsNone(twofa.qrcode)
+
+        # Check that a key was generated
         self.assertIsNotNone(twofa.key)
-        self.assertEqual(len(twofa.key), 32)
+        self.assertEqual(len(twofa.key), 32)  # Base32 key length
 
     def test_update_method(self):
         """Test the update method for TwoFA"""
-        print("\nRunning test: TwoFAModelTest.test_update_method")
         twofa = TwoFA.objects.get(key=self.twofa.key)
+
+        # Update enable status
         twofa.update("enable", True)
         self.assertTrue(twofa.enable)
+
+        # Update scanned status
         twofa.update("scanned", True)
         self.assertTrue(twofa.scanned)
+
+        # Update key
         new_key = pyotp.random_base32()
         twofa.update("key", new_key)
         self.assertEqual(twofa.key, new_key)
-        twofa.update("invalid_field", "value")  # Should not raise
+
+        # Update with invalid field (should do nothing)
+        twofa.update("invalid_field", "value")
+        # No assertion needed, just checking it doesn't raise an error
 
 
 class InvalidatedTokenModelTest(TestCase):
@@ -68,6 +88,7 @@ class InvalidatedTokenModelTest(TestCase):
 
     def setUp(self):
         """Set up test data"""
+        # Create a token that expires in the future
         future_time = timezone.now() + timedelta(hours=1)
         self.token = InvalidatedToken.objects.create(
             jti=uuid.uuid4(),
@@ -75,6 +96,8 @@ class InvalidatedTokenModelTest(TestCase):
             exp=future_time,
             type=JWTType.ACCESS.name
         )
+
+        # Create a token that has already expired
         past_time = timezone.now() - timedelta(hours=1)
         self.expired_token = InvalidatedToken.objects.create(
             jti=uuid.uuid4(),
@@ -85,7 +108,7 @@ class InvalidatedTokenModelTest(TestCase):
 
     def test_token_creation(self):
         """Test that tokens are created correctly"""
-        print("\nRunning test: InvalidatedTokenModelTest.test_token_creation")
+        # Check the active token
         token = InvalidatedToken.objects.get(jti=self.token.jti)
         self.assertEqual(token.type, JWTType.ACCESS.name)
         self.assertEqual(token.token, self.token.token)
@@ -94,14 +117,22 @@ class InvalidatedTokenModelTest(TestCase):
 
     def test_delete_expired_token(self):
         """Test the delete_expired_token class method"""
-        print("\nRunning test: InvalidatedTokenModelTest.test_delete_expired_token")
+        # Count tokens before deletion
         before_count = InvalidatedToken.objects.count()
         self.assertEqual(before_count, 2)
+
+        # Delete expired tokens
         deleted = InvalidatedToken.delete_expired_token()
-        self.assertEqual(deleted, 1)
+        self.assertEqual(deleted, 1)  # One token should be deleted
+
+        # Count tokens after deletion
         after_count = InvalidatedToken.objects.count()
         self.assertEqual(after_count, 1)
+
+        # Check that only the expired token was deleted
         with self.assertRaises(InvalidatedToken.DoesNotExist):
             InvalidatedToken.objects.get(jti=self.expired_token.jti)
+
+        # Check that the active token still exists
         token = InvalidatedToken.objects.get(jti=self.token.jti)
         self.assertEqual(token.type, JWTType.ACCESS.name)

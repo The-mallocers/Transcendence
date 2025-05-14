@@ -2,23 +2,36 @@ import random
 import re
 import time
 import traceback
+from queue import Queue, Empty
 
+from apps.client.models import Clients
 from apps.game.models import Game
 from apps.player.models import Player
+from apps.tournaments.models import Tournaments
 from utils.enums import GameStatus, ResponseError, RTables, EventType
 from utils.threads.game import GameThread
 from utils.threads.threads import Threads
+from utils.threads.tournament import TournamentThread
 from utils.websockets.channel_send import send_group_error
 
+tournament_queue = Queue()
 
 class MatchmakingThread(Threads):
+    def __init__(self, name):
+        super().__init__(name)
+        self.tournament = None
+
     def main(self):
-        game: Game = Game()
+        self.tournament: Tournaments = None
+        game: Game = Game.create_game(runtime=True)
 
         while not self._stop_event.is_set():
             try:
+                if self.check_tournament():
+                    TournamentThread(self.tournament).start()
+
                 if game is None:
-                    game = Game()
+                    game = Game.create_game(runtime=True)
 
                 if self.select_players(game):
                     game.create_redis_game()
@@ -44,11 +57,6 @@ class MatchmakingThread(Threads):
                     game.pR.leave_queue(game.code, game.is_duel)
 
     def cleanup(self):
-        self._logger.info("Cleaning up unfinished games from previous session...")
-
-        # Stop all active threads (GameThread and TournamentThread instances)
-        Threads.stop_all_threads(except_thread=self)
-
         game_keys = self.redis.keys('game:*')
         for key in game_keys:
             self.redis.delete(key)
@@ -61,47 +69,46 @@ class MatchmakingThread(Threads):
 
         # RedisConnectionPool.close_connection(self.__class__.__name__)
 
-        self._logger.info("Cleanup of unfinished games complete")
-
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ FUNCTIONS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    def check_tournament(self) -> Tournaments:
+        try:
+            self.tournament = tournament_queue.get_nowait()
+            return True
+        except Empty:
+            return False
 
     def select_players(self, game):
         # First we check the global queue
-        players_queue = self.redis.hgetall(RTables.HASH_G_QUEUE)
-        players = [player.decode('utf-8') for player in players_queue]
-        # print("COUCOU JE SUIS SELECT PLAYERS") 
-        if len(players) >= 2:  # il faudra ce base sur les mmr
-            # print("COUCOU JE PASSE DANS MATCHMAKING")
-            selected_players = players[:2]  # this gets the first 2 players of the list
-            random.shuffle(selected_players)
+        clients_queue = self.redis.hgetall(RTables.HASH_G_QUEUE)
+        clients = [Clients.get_client_by_id(client.decode('utf-8')) for client in clients_queue]
+        if len(clients) >= 2:  # il faudra ce base sur les mmr
+            selected_clients = clients[:2]  # this gets the first 2 players of the list
+            random.shuffle(selected_clients)
             game.is_duel = False
-            game.pL = Player()
-            game.pL.my_init(selected_players[0])
-            game.pR = Player()
-            game.pR.my_init(selected_players[1])
+            game.pL = Player.create_player(selected_clients[0])
+            game.pR = Player.create_player(selected_clients[1])
             if game.pL is not None and game.pR is not None:
                 return True
         # second we check the duel for start game
         cursor = 0
         cursor, duels = self.redis.scan(cursor=cursor, match=RTables.HASH_DUEL_QUEUE('*'))
         for duel in duels:
-            players = list(self.redis.hgetall(duel).items())
-            #We seems to pass twice in this shit for some reason.
-            if len(players) >= 2:
-                random.shuffle(players)
-                player_1, stat_p1 = players[0]
-                player_2, stat_p2 = players[1]
-                channel_p1 = self.redis.hget(name=RTables.HASH_CLIENT(player_1.decode('utf-8')), key=str(EventType.GAME.value))
-                channel_p2 = self.redis.hget(name=RTables.HASH_CLIENT(player_2.decode('utf-8')), key=str(EventType.GAME.value))
-                if not channel_p1 or not channel_p2:
-                    return False
-                if stat_p1.decode('utf-8') == 'True' and stat_p2.decode('utf-8') == 'True':
-                    game.is_duel = True
-                    game.code = re.search(rf'{RTables.HASH_DUEL_QUEUE("")}(\w+)$', duel.decode('utf-8')).group(1)
-                    game.game_key = RTables.JSON_GAME(game.code)
-                    game.pL = Player()
-                    game.pL.my_init(player_1.decode('utf-8'))
-                    game.pR = Player()
-                    game.pR.my_init(player_2.decode('utf-8'))
-                    return True
+            clients = list(self.redis.hgetall(duel).items())
+            random.shuffle(clients)
+            client_1, stat_p1 = clients[0]
+            client_2, stat_p2 = clients[1]
+            client_1 = Clients.get_client_by_id(client_1)
+            client_2 = Clients.get_client_by_id(client_2)
+            channel_p1 = self.redis.hget(name=RTables.HASH_CLIENT(client_1.id), key=str(EventType.GAME.value))
+            channel_p2 = self.redis.hget(name=RTables.HASH_CLIENT(client_2.id), key=str(EventType.GAME.value))
+            if not channel_p1 or not channel_p2:
+                return False
+            if stat_p1.decode('utf-8') == 'True' and stat_p2.decode('utf-8') == 'True':
+                game.is_duel = True
+                game.code = re.search(rf'{RTables.HASH_DUEL_QUEUE("")}(\w+)$', duel.decode('utf-8')).group(1)
+                game.game_key = RTables.JSON_GAME(game.code)
+                game.pL = Player.create_player(client_1)
+                game.pR = Player.create_player(client_2)
+                return True
         return False

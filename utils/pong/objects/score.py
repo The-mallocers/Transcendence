@@ -9,15 +9,14 @@ from utils.enums import RTables
 
 @dataclass
 class Score:
-    def __init__(self, game_id=None, redis=None, player_id=None):
+    def __init__(self, game_id=None, redis=None, client_id=None):
         # ── Fields ────────────────────────────────────────────────────────────────────────
         self.score = 0
 
         # ── Utils ─────────────────────────────────────────────────────────────────────────    
         self.redis: Redis = redis
         self.game_key = RTables.JSON_GAME(game_id)
-        self.player_id = player_id
-        self.player_side = Player.get_player_side(self.player_id, self.game_key, self.redis)
+        self.player_side = Player.get_player_side(client_id, self.game_key, self.redis)
 
     def update(self):
         self.score = self.get_score()

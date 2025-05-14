@@ -1,11 +1,9 @@
-
-
-function toast_friend(message, data, itemToDelete){
+function toast_friend(message, data, itemToDelete) {
     const date = new Date();
     const hours = date.getHours().toString().padStart(2, '0');
     const minutes = date.getMinutes().toString().padStart(2, '0');
     const time = `${hours}:${minutes}`;
-    
+
     const toastHtml = `
     <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
         <div class="toast-header">
@@ -20,7 +18,7 @@ function toast_friend(message, data, itemToDelete){
             <button type="button" class="btn type-intra-white refuse_friend">Refuse</button>
         </div>
     </div>`;
-    
+
     let toastContainer = document.querySelector('.toast-container');
     if (!toastContainer) {
         toastContainer = document.createElement('div');
@@ -28,17 +26,17 @@ function toast_friend(message, data, itemToDelete){
         document.body.appendChild(toastContainer);
     }
     toastContainer.innerHTML += toastHtml;
-    
+
     const newToast = toastContainer.lastChild;
     const acceptButton = newToast.querySelector('.accept_friend');
-    acceptButton.addEventListener('click', function() {
+    acceptButton.addEventListener('click', function () {
         if (itemToDelete) {
             itemToDelete.remove();
         }
         window.handleAcceptFriend(data.content.username);
     });
     const refuseButton = newToast.querySelector('.refuse_friend');
-    refuseButton.addEventListener('click', function() {
+    refuseButton.addEventListener('click', function () {
         if (itemToDelete) {
             itemToDelete.remove();
         }
@@ -46,19 +44,19 @@ function toast_friend(message, data, itemToDelete){
     });
     const toastBootstrap = new bootstrap.Toast(newToast);
     toastBootstrap.show();
-    
-    newToast.addEventListener('hidden.bs.toast', function() {
+
+    newToast.addEventListener('hidden.bs.toast', function () {
         this.remove();
     });
 }
 
-function toast_duel(message, data, itemToDelete){
+function toast_duel(message, data, itemToDelete) {
 
     const date = new Date();
     const hours = date.getHours().toString().padStart(2, '0');
     const minutes = date.getMinutes().toString().padStart(2, '0');
     const time = `${hours}:${minutes}`;
-    
+
     const toastHtml = `
     <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
         <div class="toast-header">
@@ -81,14 +79,14 @@ function toast_duel(message, data, itemToDelete){
         document.body.appendChild(toastContainer);
     }
     toastContainer.innerHTML += toastHtml;
-    
+
     const newToast = toastContainer.lastChild;
     const acceptDuel = newToast.querySelector('.accept_duel');
-    acceptDuel.addEventListener('click', function() {
+    acceptDuel.addEventListener('click', function () {
         window.handleAcceptDuel(data.content.code, data.content.username);
     });
     const refuseDuel = newToast.querySelector('.refuse_duel');
-    refuseDuel.addEventListener('click', function() {
+    refuseDuel.addEventListener('click', function () {
         if (itemToDelete) {
             itemToDelete.remove();
         }
@@ -96,8 +94,8 @@ function toast_duel(message, data, itemToDelete){
     });
     const toastBootstrap = new bootstrap.Toast(newToast);
     toastBootstrap.show();
-    
-    newToast.addEventListener('hidden.bs.toast', function() {
+
+    newToast.addEventListener('hidden.bs.toast', function () {
         this.remove();
     });
 }
@@ -107,14 +105,14 @@ function toast_message(message) {
     const hours = date.getHours().toString().padStart(2, '0');
     const minutes = date.getMinutes().toString().padStart(2, '0');
     const time = `${hours}:${minutes}`;
-    
+
     // Create the toast element
     const toastEl = document.createElement('div');
     toastEl.className = 'toast';
     toastEl.setAttribute('role', 'alert');
     toastEl.setAttribute('aria-live', 'assertive');
     toastEl.setAttribute('aria-atomic', 'true');
-    
+
     toastEl.innerHTML = `
         <div class="toast-header">
             <img src="/static/assets/imgs/chat.png" class="rounded me-2" alt="..." style="width: 20px; height: 20px; object-fit: contain;">
@@ -124,7 +122,7 @@ function toast_message(message) {
         </div>
         <div class="toast-body">${message}</div>
     `;
-    
+
     // Create or find toast container
     let toastContainer = document.querySelector('.toast-container');
     if (!toastContainer) {
@@ -132,16 +130,16 @@ function toast_message(message) {
         toastContainer.className = 'toast-container position-fixed bottom-0 end-0 p-3';
         document.body.appendChild(toastContainer);
     }
-    
+
     // Add toast to container
     toastContainer.appendChild(toastEl);
-    
+
     // Initialize Bootstrap Toast
     const toastInstance = new bootstrap.Toast(toastEl);
     toastInstance.show();
-    
+
     // Make sure the toast is removed when hidden
-    toastEl.addEventListener('hidden.bs.toast', function() {
+    toastEl.addEventListener('hidden.bs.toast', function () {
         this.remove();
     });
 }

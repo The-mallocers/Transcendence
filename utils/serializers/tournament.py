@@ -4,28 +4,22 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils import timezone
 from rest_framework import serializers
 
-from utils.enums import TournamentStatus
-
-
-# Left to add
-# - name -> Ptit nom par default a priori ?
-# - host -> Aucune idee de comment je choppe ca
-# - Players -> Une liste avec excatement assez de slots par rapport a max players ?
+from utils.enums import TournamentStatus, GameStatus
 
 
 class TournamentSerializer(serializers.Serializer):
-    name = serializers.CharField(
+    title = serializers.CharField(
         max_length=40,
-        error_messages={'blank': 'Tournament name cannot be empty'}
+        error_messages={'blank': 'Tournament title cannot be empty'}
     )
-    max_players = serializers.IntegerField(
+    max_clients = serializers.IntegerField(
         validators=[
             MinValueValidator(2, message="Tournament must have at least 2 players"),
-            MaxValueValidator(16, message="Tournament cannot have more than 16 players")
+            MaxValueValidator(16, message="Tournament cannot have more than 16 players"),
         ]
     )
-    public = serializers.BooleanField()
-    bots = serializers.BooleanField()
+    is_public = serializers.BooleanField()
+    has_bots = serializers.BooleanField()
     points_to_win = serializers.IntegerField(
         validators=[
             MinValueValidator(1, message="Points to win must be at least 1"),
@@ -38,17 +32,19 @@ class TournamentSerializer(serializers.Serializer):
             MaxValueValidator(600, message="Timer cannot exceed 600 seconds (10 minutes)")
         ]
     )
+    host = serializers.UUIDField()
 
-    def validate(self, data):
-        if data.get('max_players') % 2 != 0:
-            raise serializers.ValidationError("Maximum players must be an even number")
-        return data
+    def validate_max_players(self, value):
+        # if value % 4 != 0:
+        #     raise ValidationError("Number of maximum players must be a multiple of 4")
+        return value
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
         data['status'] = TournamentStatus.CREATING
         data['created-at'] = timezone.now().isoformat()
-        data['scoreboards'] = self.generate_tournament_structure(data['max_players'])
+        data['clients'] = [str(data['host'])]
+        data['scoreboards'] = self.generate_tournament_structure(data['max_clients'])
         return data
 
     # this will generate a json With all the matches that will be played during the tournament.
@@ -78,6 +74,7 @@ class TournamentSerializer(serializers.Serializer):
                 game_id = f"r{round_num}m{match_num}"
                 tournament["rounds"][f"round_{round_num}"]["games"][game_id] = {
                     "game_code": "",  # Will be filled when game is created
+                    "status": GameStatus.CREATING,
                     "winner": None,
                     "loser": None
                 }

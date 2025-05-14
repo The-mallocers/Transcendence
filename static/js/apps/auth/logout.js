@@ -21,11 +21,9 @@ async function logout() {
         if (response.status == 302) {
             console.log(data)
             navigateTo(data.redirect)
-        }
-        else if (!response.ok) {
+        } else if (!response.ok) {
             throw new Error('Network response was not ok');
-        }
-        else{
+        } else {
             console.log('Logout successful:', data);
             navigateTo('/auth/login');
         }

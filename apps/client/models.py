@@ -31,7 +31,8 @@ class Clients(models.Model):
 
     # Joined tables
     password = models.ForeignKey(Password, on_delete=models.CASCADE)
-    profile = models.ForeignKey(Profile, on_delete=models.SET_NULL, null=True) #Changing profile deletes the old one, we change this so client doesnt get deleted.
+    profile = models.ForeignKey(Profile, on_delete=models.SET_NULL,
+                                null=True)  # Changing profile deletes the old one, we change this so client doesnt get deleted.
     twoFa = models.ForeignKey(TwoFA, on_delete=models.CASCADE)
     rights = models.ForeignKey('admin.Rights', on_delete=models.CASCADE, null=True)
     stats = models.ForeignKey(Stats, on_delete=models.CASCADE, null=True)
@@ -45,6 +46,21 @@ class Clients(models.Model):
     def __str__(self):
         return f"Client data => Email:{self.profile.email}, Username:{self.profile.username}"
 
+    # J'overide delete pour que ca supprime tout les trucs associer quand on supprime un client
+    # Hopefully it doesnt break anything else
+    def delete(self, *args, **kwargs):
+        self.password.delete()
+        if self.profile:
+            self.profile.delete()
+        self.twoFa.delete()
+        if self.stats:
+            self.stats.delete()
+        if self.friend:
+            self.friend.delete()
+        if self.rights:
+            self.rights.delete()
+        super().delete(*args, **kwargs)
+        
     @property
     def is_authenticated(self):
         return True
@@ -52,9 +68,13 @@ class Clients(models.Model):
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ FUNCIONS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
 
     @staticmethod
-    def get_client_by_id(id: uuid.UUID):
+    def get_id_list(clients: list['Clients']) -> list[str]:
+        return [str(client.id) for client in clients]
+
+    @staticmethod
+    def get_client_by_id(client_id) -> 'Clients':
         try:
-            client = Clients.objects.get(id=id)
+            client = Clients.objects.get(id=client_id)
             return client
         except:
             return None
@@ -158,6 +178,7 @@ class Clients(models.Model):
             return Clients.objects.select_related('player').get(id=client_id)
         except Clients.DoesNotExist:
             return None
+
     @staticmethod
     def get_rank(score: int) -> str:
         i = len(RanksThreshold)
@@ -263,7 +284,6 @@ class Clients(models.Model):
     async def acheck_in_queue(client, redis):
         cursor = 0
         if await redis.hget(name=RTables.HASH_G_QUEUE, key=str(client.id)):
-            print('global')
             return RTables.HASH_G_QUEUE
         while True:
             cursor, keys = await redis.scan(cursor=cursor, match=RTables.HASH_QUEUE('*'))

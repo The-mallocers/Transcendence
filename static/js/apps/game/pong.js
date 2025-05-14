@@ -1,6 +1,6 @@
-import { WebSocketManager } from "../../websockets/websockets.js";
-import { navigateTo } from '../../spa/spa.js';
-import { isGameOver } from "./VarGame.js"
+import {WebSocketManager} from "../../websockets/websockets.js";
+import {navigateTo} from '../../spa/spa.js';
+import {isGameOver} from "./VarGame.js"
 // import { apiFriends } from "../profile/profile.js";
 
 const socket = WebSocketManager.gameSocket;
@@ -8,6 +8,8 @@ let canvas = document.getElementById("pongCanvas");
 let ctx = canvas.getContext("2d");
 const lusername = document.getElementById("lusername");
 const rusername = document.getElementById("rusername");
+const lpicture = document.getElementById("lpicture");
+const rpicture = document.getElementById("rpicture");
 let lscore = document.getElementById("scoreLeft");
 let rscore = document.getElementById("scoreRight");
 
@@ -38,8 +40,13 @@ if (!socket || socket.readyState === WebSocket.CLOSED) {
     navigateTo("/");
 } else {
     console.log(window.GameState);
-    lusername.innerHTML = window.GameState.left.username
-    rusername.innerHTML = window.GameState.right.username
+    lusername.innerHTML = window.GameState.left.username;
+    rusername.innerHTML = window.GameState.right.username;
+    console.log("WHAT ARE THE URLS:");
+    console.log(window.GameState.left.picture);
+    console.log(window.GameState.right.picture);
+    lpicture.src = window.GameState.left.picture;
+    rpicture.src = window.GameState.right.picture;
 
     socket.onmessage = (e) => {
         const jsonData = JSON.parse(e.data);
@@ -67,14 +74,14 @@ if (!socket || socket.readyState === WebSocket.CLOSED) {
             }
             if (jsonData.data.action == "PADDLE_LEFT_UPDATE") {
                 console.log("move from server:", jsonData.data.content.move);
-                const current_move = jsonData.data.content.move 
+                const current_move = jsonData.data.content.move
                 if (current_move != left_last_move) {
                     window.GameState.left.y = jsonData.data.content.y;
                     left_last_move = current_move;
                 }
             } else if (jsonData.data.action == "PADDLE_RIGHT_UPDATE") {
                 console.log("move from server:", jsonData.data.content.move);
-                const current_move = jsonData.data.content.move 
+                const current_move = jsonData.data.content.move
                 if (current_move != right_last_move) {
                     window.GameState.right.y = jsonData.data.content.y
                     right_last_move = current_move;
@@ -252,11 +259,9 @@ function drawPaddles() {
 function handleWallCollision(y) {
     if (y < 0) {
         return 0;
-    }
-    else if (y + paddleHeight > height) {
+    } else if (y + paddleHeight > height) {
         return height - paddleHeight;
-    }
-    else {
+    } else {
         return y
     }
 }
@@ -266,11 +271,9 @@ function computeSpeed(last_move) {
     let speed = 0;
     if (last_move == "up") {
         speed = -1 * PADDLE_SPEED;
-    }
-    else if (last_move == "down") {
+    } else if (last_move == "down") {
         speed = PADDLE_SPEED;
-    }
-    else {
+    } else {
         speed = 0;
     }
     return speed;

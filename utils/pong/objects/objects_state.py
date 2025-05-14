@@ -28,7 +28,7 @@ class GameState:
         paddle_pL_copy.x = logic.paddle_pL.x
         paddle_pL_copy.y = logic.paddle_pL.y
         paddle_pL_copy.speed = logic.paddle_pL.speed
-        paddle_pL_copy.move = logic.paddle_pL.move #Added for frontend rendering
+        paddle_pL_copy.move = logic.paddle_pL.move  # Added for frontend rendering
 
         paddle_pR_copy = Paddle()
         paddle_pR_copy.width = logic.paddle_pR.width
@@ -77,7 +77,6 @@ class GameState:
                         'current': curr_val,
                         # 'diff': curr_val - prev_val
                     }
-                    
 
         # Compare Paddle 1 properties
         if current_state.paddle_pL and previous_state.paddle_pL:

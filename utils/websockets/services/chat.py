@@ -85,7 +85,7 @@ class ChatService(BaseServices):
                 return await asend_group_error(self.service_group, ResponseError.ROOM_NOT_FOUND)
 
             # Check if client is a member of the room
-            if room.id not in await Rooms.aget_room_id_by_client_id(client.id):
+            if room.code not in await Rooms.aget_room_id_by_client_id(client.id):
                 return await asend_group_error(self.service_group, ResponseError.NOT_ALLOWED)
 
             target = await room.aget_target_by_room_id(client)
@@ -93,24 +93,24 @@ class ChatService(BaseServices):
                 # dans le cas ou j'envoie un message a un user bloqué
                 player = await client.get_friend_table()
                 if await player.user_is_block(target):
-                    return await asend_group(RTables.GROUP_CHAT(str(client.id)), EventType.CHAT, 
-                        ResponseAction.ERROR_MESSAGE_USER_BLOCK, 
-                        {
-                            'message': "You can't send messages to block user",
-                            'sender': str(client.id),
-                            'room_id': str(room.id)
-                        })
-                
+                    return await asend_group(RTables.GROUP_CHAT(str(client.id)), EventType.CHAT,
+                                             ResponseAction.ERROR_MESSAGE_USER_BLOCK,
+                                             {
+                                                 'message': "You can't send messages to block user",
+                                                 'sender': str(client.id),
+                                                 'room_id': str(room.id)
+                                             })
+
                 # dans le cas ou j'envoie un message à un utilisateur qui m'a bloqué
                 player = await target.get_friend_table()
                 if await player.user_is_block(client):
-                    return await asend_group(RTables.GROUP_CHAT(str(client.id)), EventType.CHAT, 
-                        ResponseAction.ERROR_MESSAGE_USER_BLOCK, 
-                        {
-                            'message': "You can't send messages to block user",
-                            'sender': str(client.id),
-                            'room_id': str(room.id)
-                        })
+                    return await asend_group(RTables.GROUP_CHAT(str(client.id)), EventType.CHAT,
+                                             ResponseAction.ERROR_MESSAGE_USER_BLOCK,
+                                             {
+                                                 'message': "You can't send messages to block user",
+                                                 'sender': str(client.id),
+                                                 'room_id': str(room.id)
+                                             })
             await Messages.objects.acreate(sender=client, content=message, room=room)
             # Send the message to the group
             room_group = str(await Rooms.get_id(room))
@@ -140,9 +140,9 @@ class ChatService(BaseServices):
             room = await Rooms.get_room_by_id(room_id)
             if not room:
                 return await asend_group_error(self.service_group, ResponseError.ROOM_NOT_FOUND)
-            
+
             target = await room.aget_target_by_room_id(client)
-            
+
             messages = await Messages.aget_message_by_room(room, target)
             if not messages:
                 await asend_group_error(self.service_group, ResponseError.NO_HISTORY)

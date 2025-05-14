@@ -43,15 +43,15 @@ class PasswordSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         new_password = validated_data.get('password')
-        
+
         # Check if the new password matches the old one using the check_pwd method
         if instance.check_pwd(new_password):
             raise serializers.ValidationError("New password must be different from the old password.")
-        
+
         # Store the old password before updating
         old_password = instance.password
         instance.old_password = old_password
-        
+
         # Hash the new password if it's not already hashed
         if not new_password.startswith('$2b$'):
             salt = bcrypt.gensalt(prefix=b'2b')

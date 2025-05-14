@@ -2,7 +2,7 @@ import {WebSocketManager} from "../websockets/websockets.js"
 import {isGameOver} from "../apps/game/VarGame.js"
 import * as html from "../utils/html_forms.js"
 import {routes} from "../utils/routes.js";
-import { getClientId } from "../utils/utils.js";
+import {getClientId} from "../utils/utils.js";
 
 class Router {
     constructor(routes) {
@@ -74,8 +74,7 @@ class Router {
         if (splitedPath.includes("pong")) {
             if (splitedPath.includes("duel") || splitedPath.includes("arena") || splitedPath.includes("matchmaking")) {
                 WebSocketManager.closeChatSocket();
-            }
-            else {
+            } else {
                 WebSocketManager.closeAllSockets();
             }
         } else {
