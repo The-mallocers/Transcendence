@@ -91,9 +91,9 @@ const tournamentSocket = WebSocketManager.tournamentSocket;
 // console.log(tournamentInfos.roomInfos)
 
 tournamentSocket.onmessage = ((msg)=>{
-    // console.log("TOURNAMENT ROOM RECEIVES THIS MESSAGE");
-    // console.log(msg);
-    // const message = JSON.parse(msg.data);
+    console.log("TOURNAMENT ROOM RECEIVES THIS MESSAGE");
+    const message = JSON.parse(msg.data);
+    console.log(message);
     
     // // if (message.event == "ERROR"){
     // //     console.log("Error message: ", message.data.error)
@@ -101,13 +101,6 @@ tournamentSocket.onmessage = ((msg)=>{
     // //     // errDiv.innerHTML = message.data.error
     // //     return
     // // }
-    // // console.log("BONJOUR:", message.data);
-    // if (message.event == "TOURNAMENT" && message.data.action == "TOURNAMENT_INFO") {
-    //     console.log("tournament info is :", message.data.content);
-    //     // const tournament_data = message.data.content;
-    //     // populateTree(tournamentInfos);
-    // }
-    // console.log("BONJOUR:", message.data);
     if (message.event == "TOURNAMENT" && message.data.action == "TOURNAMENT_INFO") {
         console.log("tournament info is :", message.data.content);
         const tournament_data = message.data.content;
