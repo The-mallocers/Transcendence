@@ -1,4 +1,5 @@
 import json
+import logging
 
 import requests
 from django.conf import settings
@@ -18,7 +19,6 @@ def get(req):
     secretKey = create_api_key(grafana_session)
     urlpostgres = render_dashboard(req, secretKey, grafana_session)
     users = Clients.objects.all()
-    print(urlpostgres)
     html_content = render_to_string("apps/auth/login.html", {
         "users": users,
         "csrf_token": csrf_token,
@@ -49,7 +49,7 @@ def authenticate_grafana_user():
     if response.status_code == 200:
         return session
     else:
-        print(f"Failed to authenticate: {response.status_code}, {response.text}")
+        logging.getLogger('MainThread').error(f"Failed to authenticate: {response.status_code}, {response.text}")
         return None
 
 
@@ -106,7 +106,6 @@ def render_dashboard(request, secretkey, session) -> str:
             )
             response.raise_for_status()
             data = response.json()
-            print(data)
             payload = {
                 "timeSelectionEnabled": True,
                 "isEnabled": True,
@@ -123,7 +122,6 @@ def render_dashboard(request, secretkey, session) -> str:
             )
             response.raise_for_status()
             data = response.json()
-            print(data)
             urlpostgres = f"http://localhost:3000/public-dashboards/{data.get('accessToken')}"
             admin_client.rights.grafana_dashboard = urlpostgres
             admin_client.rights.save()
@@ -131,5 +129,4 @@ def render_dashboard(request, secretkey, session) -> str:
         return admin_client.rights.grafana_dashboard
 
     except requests.exceptions.RequestException as e:
-        print(str(e))
         return JsonResponse({'error': str(e)}, status=500)

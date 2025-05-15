@@ -28,7 +28,6 @@ class PasswordSerializer(serializers.ModelSerializer):
     def validate_password(self, value):
         instance = self.instance
         if instance and not instance.check_pwd(value):
-            print("Hello sir")
             raise serializers.ValidationError("New password must be different from the old password.")
         return value
 

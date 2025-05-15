@@ -29,19 +29,6 @@ class JWTMiddleware:
                 return roles
         return None
 
-    def _get_client_ip(self, request: HttpRequest):
-        ip, is_routable = get_client_ip(request)
-        if ip is None:
-            return '0.0.0.0'
-        else:
-            return ip
-        # x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
-        # if x_forwarded_for:
-        #     ip = x_forwarded_for.split(',')[0]
-        # else:
-        #     ip = request.META.get('REMOTE_ADDR')
-        # return ip
-
     @staticmethod
     def is_path_matching(path, path_list):
         path = path.rstrip('/') if path != '/' else path
@@ -58,24 +45,35 @@ class JWTMiddleware:
 
         new_access_token = JWT(client, JWTType.ACCESS)
         request.COOKIES['access_token'] = new_access_token.encode_token()
+
+        request.user.is_authenticated = True
+        request.user.is_staff = True if client.rights.is_admin else False
         
         response = self.get_response(request)
         new_access_token.set_cookie(response)
         return response
 
     def __call__(self, request: HttpRequest):
+        #Create a custom user object for the request
+        request.user = type('User', (), {
+            'is_authenticated': False,
+            'is_staff': False,
+            'client': None
+        })()
+
+        #If the path is not protected
         if not self.is_path_matching(request.path_info, settings.PROTECTED_PATHS):
             return self.get_response(request)
 
         elif self.is_path_matching(request.path_info, settings.PROTECTED_PATHS):
+            #If the path is excluded of protected_path
             if self._in_excluded_path(request.path_info):
                 return self.get_response(request)
             else:
                 try:  # let pass the request
                     token = JWT.extract_token(request, JWTType.ACCESS)
-                    self.redis.hset(RTables.HASH_CLIENT_CONN(token.SUB), ConnectionType.IP, self._get_client_ip(request))
-                    if request.session.session_key:
-                        self.redis.hset(RTables.HASH_CLIENT_CONN(token.SUB), ConnectionType.SEESION_KEY, request.session.session_key)
+                    request.user.is_authenticated = True
+                    request.user.is_staff = True if token.client.rights.is_admin else False
                     return self.get_response(request)
                 except (jwt.InvalidTokenError, jwt.ExpiredSignatureError):
                     try:

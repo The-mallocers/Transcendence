@@ -54,7 +54,6 @@ class NotificationService(BaseServices):
     # client is the client that want to add the friend from his pending list
     # target is the friend pending
     async def _handle_accept_friend_request(self, data, client):
-        print(data)
         target = await Clients.aget_client_by_username(data['data']['args']['target_name'])
         if target is None:
             return await asend_group_error(self.service_group, ResponseError.USER_NOT_FOUND)
@@ -111,7 +110,6 @@ class NotificationService(BaseServices):
             return await asend_group_error(self.service_group, ResponseError.USER_ALREADY_FRIEND_OR_NOT_PENDING_FRIEND, )
 
     async def _handle_delete_friend(self, data, client):
-        print(data)
         target = await Clients.aget_client_by_username(data['data']['args']['target_name'])
         if target is None:
             return await asend_group_error(self.service_group, ResponseError.USER_NOT_FOUND)
@@ -139,7 +137,6 @@ class NotificationService(BaseServices):
                               })
             # get the room to delete
             room = await Rooms.Aget_room_by_client_id(client.id)
-            print(room)
             if room is None:
                 return
             # First delete all messages corresponding to the two users
@@ -151,13 +148,11 @@ class NotificationService(BaseServices):
         except ValidationError:
             return await asend_group_error(self.service_group, ResponseError.NOT_FRIEND)
         except Exception as e:
-            print(repr(e))
             return await asend_group_error(self.service_group, ResponseError.INTERNAL_ERROR)
 
     # ====================================DUELS=========================================
 
     async def _handle_create_duel(self, data, client: Clients):
-        print("in the function of creating a duel")
         # ── Target Check ──────────────────────────────────────────────────────────── #
         target = await Clients.aget_client_by_id(data['data']['args']['target'])
         if target is None:
@@ -248,7 +243,6 @@ class NotificationService(BaseServices):
                         opponent_id = decoded_key
                         break
                 await asend_group(self.service_group, EventType.NOTIFICATION, ResponseAction.REFUSED_DUEL)
-                print(opponent_id)
                 await asend_group(RTables.GROUP_NOTIF(opponent_id),
                                   EventType.NOTIFICATION,
                                   ResponseAction.DUEL_REFUSED,
@@ -297,7 +291,6 @@ class NotificationService(BaseServices):
     # manage friends block and unblock
     async def _handle_block_unblock_friend(self, data, client):
         try:
-            print(data)
             target = await Clients.aget_client_by_username(data['data']['args']['target_name'])
             if target is None:
                 return await asend_group_error(self.service_group, ResponseError.USER_NOT_FOUND)
@@ -322,7 +315,6 @@ class NotificationService(BaseServices):
                                       "username": await target.aget_profile_username()
                                   })
         except Exception as e:
-            print(repr(e))
             return await asend_group_error(self.service_group, ResponseError.INTERNAL_ERROR)
 
     async def _handle_ping(self, data, client):
@@ -353,5 +345,4 @@ class NotificationService(BaseServices):
             }
         )
     async def disconnect(self, client):
-        print("in disconnect of notification - Please see me !")
         pass

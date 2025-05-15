@@ -6,7 +6,6 @@ from django.template.loader import render_to_string
 
 
 def get(request):
-    print("We are in the proper Disconnect page view (in spite of all odds)")
     message = "Opponent Left"
     # Lets add something cute here to get a random message everytime.
     disconnect_messages = [

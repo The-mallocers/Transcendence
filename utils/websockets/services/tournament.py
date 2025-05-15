@@ -59,7 +59,6 @@ class TournamentService(BaseServices):
                 await asend_group(self.service_group, EventType.TOURNAMENT, ResponseAction.TOURNAMENT_JOIN)
     
     async def _handle_ping(self, data, client):
-        print('ping')
         return await asend_group(self.service_group, EventType.TOURNAMENT, ResponseAction.PONG)
 
     async def _handle_leave_tournament(self, data, client):

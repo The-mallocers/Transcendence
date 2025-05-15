@@ -60,12 +60,11 @@ class RegisterApiView(APIView):
                 return response
             except Exception as e:
                 import traceback
-                print("\n\nException during save:", str(e))
                 logging.getLogger('MainThread').error(traceback.format_exc())
                 return Response({"error": str(e)},
                                 status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         else:
-            print("Validation errors:", serializer.errors)
+            logging.getLogger('MainThread').error(serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -152,8 +151,8 @@ class LogoutApiView(APIView):
             try:
                 JWT.extract_token(request, JWTType.REFRESH).invalidate_token()
             except Exception as e:
-                print("Couldnt invalidate the token, it was probably either deleted or modified")
-                print(f"error is {str(e)}")
+                logging.getLogger('MainThread').error("Couldnt invalidate the token, it was probably either deleted or modified")
+                logging.getLogger('MainThread').error(str(e))
             return response
         else:
             return Response({
@@ -193,7 +192,6 @@ from django.core.files.base import ContentFile
 
 def get_qrcode(user):
     # create a qrcode and convert it
-    print("first_name: " + user.profile.username + " creating qrcode")
     if not user.twoFa.qrcode:
         uri = pyotp.totp.TOTP(user.twoFa.key).provisioning_uri(name=user.profile.username,
                                                                issuer_name="Transcendance_" + str(
@@ -262,7 +260,6 @@ class GetClientIDApiView(APIView):
 
 class UploadPictureApiView(APIView):
     def post(self, request: HttpRequest, *args, **kwargs):
-        print("Its getting here !")
         try:
             client = Clients.get_client_by_request(request)
             profile = client.profile
@@ -296,8 +293,8 @@ class DeleteApiView(APIView):
             try:
                 JWT.extract_token(request, JWTType.REFRESH).invalidate_token()
             except Exception as e:
-                print("Couldnt invalidate the token, it was probably either deleted or modified")
-                print(f"error is {str(e)}")
+                logging.getLogger('MainThread').error("Couldnt invalidate the token, it was probably either deleted or modified")
+                logging.getLogger('MainThread').error(str(e))
             client = Clients.get_client_by_request(request)
             client.delete()
             return response

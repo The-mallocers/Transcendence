@@ -1,3 +1,4 @@
+import logging
 import uuid
 
 from asgiref.sync import sync_to_async
@@ -95,9 +96,9 @@ class Rooms(models.Model):
                     })
                 return user_info
         except Exception as e:
-            print(f"Error in get_user_info_by_room_id: {str(e)}")
             import traceback
-            traceback.print_exc()
+            logging.getLogger('MainThread').error(f"Error in get_user_info_by_room_id: {str(e)}")
+            logging.getLogger('MainThread').error(traceback.format_exc())
             return []
     
     @staticmethod
@@ -153,7 +154,7 @@ class Rooms(models.Model):
                     targetUser = targetUser.exclude(id=client.id)
                 return targetUser.first()
         except Exception as e:
-            print(f"Error retrieving target id in the room: {e}")
+            logging.getLogger('MainThread').error(f"Error retrieving target id in the room: {e}")
             return None
 
     @sync_to_async
@@ -202,7 +203,6 @@ class Messages(models.Model):
             with transaction.atomic():
                 return list(Messages.objects.filter(room__id=room.id))
         except Exception as e:
-            print(f"Error ROOM: {e}")
             return None
 
     @sync_to_async

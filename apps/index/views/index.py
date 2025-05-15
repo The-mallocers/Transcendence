@@ -22,7 +22,7 @@ def get(req):
     online_status = "Online"
     if client is not None:
         winrate = get_winrate(client, games_played)
-    print(winrate)
+    (winrate)
     context = {
         "client": client,
         "clients": Clients.objects.all(),
@@ -138,5 +138,4 @@ def get_friends_online_status(friends):
         username = friend['username']
         online_status = redis.hget(RTables.HASH_CLIENT(id), str(EventType.NOTIFICATION.value)) is not None
         friend_status[username] = "Online" if online_status else "Offline"
-    print("friend_status:", friend_status)
     return friend_status

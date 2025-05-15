@@ -88,6 +88,7 @@ MIDDLEWARE = [
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'utils.jwt.JWTMiddleware.JWTMiddleware',
+    'utils.session.SessionLimitingMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -134,6 +135,8 @@ SECURE_SSL_REDIRECT = True
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 
+SESSION_LIMITING_EXPIRY = 1800
+
 # Protected paths configuration
 PROTECTED_PATHS = [
     '/pages/*',
@@ -153,6 +156,10 @@ ROLE_PROTECTED_PATHS = {
     '/pages/profile/settings': ['client'],
     '/pages/admin/*': ['admin']
 }
+
+SESSION_LIMITING_EXEMPT_ADMIN = [
+    '/pages/admin/'
+]
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ JWT SETTINGS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
 
@@ -291,7 +298,6 @@ def cleanup_old_logs():
                     if os.path.getmtime(file_path) < cutoff_time:
                         try:
                             os.remove(file_path)
-                            print(f"Removed old log file: {file_path}")
                         except Exception as e:
                             raise Exception(f"Failed to remove old log file {file_path}: {e}")
     except Exception as e:

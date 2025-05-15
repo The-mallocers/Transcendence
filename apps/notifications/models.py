@@ -52,7 +52,6 @@ class Friend(models.Model):
                 # check if my friend is already my friend
                 friend = self.friends.filter(id=client.id).exists()
                 if friend:
-                    print("already friends")
                     raise ValidationError("Already Friend")
                 self.friends.add(client)
                 self.pending_friends.remove(client)
@@ -95,7 +94,6 @@ class Friend(models.Model):
                     self.save()
                     return client
         except Exception as e:
-            print(f"Error adding pending duel: {e}")
             return None
 
     @sync_to_async
@@ -104,7 +102,6 @@ class Friend(models.Model):
             with transaction.atomic():
                 return self.blocked_users
         except Exception as e:
-            print(f"Error getting blocked users: {e}")
             return None
 
     @sync_to_async
@@ -115,7 +112,6 @@ class Friend(models.Model):
                     self.blocked_users.add(target)
                     self.save()
         except Exception as e:
-            print(f"Error adding block user: {e}")
             return None
 
     @sync_to_async
@@ -126,7 +122,6 @@ class Friend(models.Model):
                     self.blocked_users.remove(target)
                     self.save()
         except Exception as e:
-            print(f"Error unblock user: {e}")
             return None
 
     @sync_to_async
@@ -137,7 +132,6 @@ class Friend(models.Model):
                     return True
                 return False
         except Exception as e:
-            print(f"Error unblock user: {e}")
             return None
         
     @sync_to_async
@@ -147,5 +141,4 @@ class Friend(models.Model):
                 is_blocked = self.blocked_users.filter(id=user_id).exists()
                 return is_blocked
         except Exception as e:
-            print(f"Error checking blocked status: {e}")
             return False

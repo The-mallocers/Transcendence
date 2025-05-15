@@ -46,7 +46,6 @@ def inRoom(request):
 
 
     roomId = request.GET.get("roomId")
-    print(roomId, "//////////\\\\\\\\\\\\\\\\\\")
     roomInfos = {
         "name" : "minimeow's room",
         "code"     : "X76BUBY"

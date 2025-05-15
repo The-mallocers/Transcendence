@@ -34,7 +34,6 @@ class BaseServices(ABC):
 
     @abstractmethod
     async def disconnect(self, client):
-        print("In disconnect of the abstract method ?!")
         pass
 
     async def handle_disconnect(self, client):
