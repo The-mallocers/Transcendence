@@ -1,4 +1,5 @@
 from json import JSONDecodeError
+import json
 import re
 from time import sleep
 from django.http import JsonResponse
@@ -66,52 +67,14 @@ def check_in_queue(client, redis):
 
 
 def inRoom(request):
-    # sleep(1)
-    # client = Clients.get_client_by_request(request)
-    # redis = RedisConnectionPool.get_sync_connection("Get_Players_Tournaments")
-    # queues = check_in_queue(client, redis)
-    
-    # tournament = None
-    # tournament_ids = []
-    # if queues and RTables.HASH_TOURNAMENT_QUEUE('') in str(queues):
-    #     code = re.search(rf'{RTables.HASH_TOURNAMENT_QUEUE("")}(\w+)$', queues.decode('utf-8')).group(1)
-    #     tournament = redis.json().get(RTables.JSON_TOURNAMENT(code))
-
-    # tournament_ids = tournament['clients']
-    # title = tournament['title']
-    # max_clients = range(int(tournament['max_clients']))
-
-    # print("tournament", tournament)
-    # print("title:", title)
-    # print("tournament_players:", tournament_ids)
-    # players_infos = [] 
-    # for id in tournament_ids:
-    #     client = Clients.get_client_by_id(id)
-    #     infos  = { 
-    #         "id" : client.id,
-    #         "nickname" : client.profile.username,
-    #         "avatar" : client.profile.profile_picture.url,
-    #         "trophee" : '/media/rank_icon/' + client.get_rank(client.stats.mmr) + ".png",
-    #         "mmr" : client.stats.mmr,
-    #     }
-    #     players_infos.append(infos)
-
-    # roomInfos = {
-    #     "title" : title,
-    #     "max_clients" : max_clients 
-    # }
-
     html_content = render_to_string("apps/pong/tournamentRoom.html", {"csrf_token": get_token(request)})
     return JsonResponse({
         'html': html_content,
     })
 
 
-
-
 def tournamentTree(request):
     client = Clients.get_client_by_request(request)
-    print("in view of tree, returning json response of tree") 
     html_content = render_to_string("apps/pong/tree.html", {"csrf_token": get_token(request), "client": client})
     return JsonResponse({
         'html': html_content,
