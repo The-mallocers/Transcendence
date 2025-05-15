@@ -1,4 +1,3 @@
-import logging
 import uuid
 
 from asgiref.sync import sync_to_async
@@ -96,9 +95,6 @@ class Rooms(models.Model):
                     })
                 return user_info
         except Exception as e:
-            import traceback
-            logging.getLogger('MainThread').error(f"Error in get_user_info_by_room_id: {str(e)}")
-            logging.getLogger('MainThread').error(traceback.format_exc())
             return []
     
     @staticmethod
@@ -154,7 +150,6 @@ class Rooms(models.Model):
                     targetUser = targetUser.exclude(id=client.id)
                 return targetUser.first()
         except Exception as e:
-            logging.getLogger('MainThread').error(f"Error retrieving target id in the room: {e}")
             return None
 
     @sync_to_async

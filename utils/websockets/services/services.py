@@ -1,5 +1,4 @@
 import logging
-import traceback
 from abc import ABC, abstractmethod
 from typing import Dict, Any
 
@@ -54,7 +53,6 @@ class BaseServices(ABC):
                 return await handler_method(data, *args)
 
         except ValueError:
-            self._logger.error(traceback.format_exc())
             raise ServiceError(f"This action is not valid: {data['data']['action']}")
 
         except ServiceError as e:

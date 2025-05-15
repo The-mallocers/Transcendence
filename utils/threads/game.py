@@ -1,5 +1,4 @@
 import time
-import traceback
 
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
@@ -37,7 +36,6 @@ class GameThread(Threads):
                 self._ending()  # I will get this one out of this loop I swear it
 
         except Exception as e:
-            self._logger.error(traceback.format_exc())
             self.game.rset_status(GameStatus.ERROR)
             send_group_error(RTables.GROUP_GAME(self.game_id), ResponseError.EXCEPTION, close=True)
             self.stop()

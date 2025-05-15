@@ -293,7 +293,6 @@ class DeleteApiView(APIView):
             try:
                 JWT.extract_token(request, JWTType.REFRESH).invalidate_token()
             except Exception as e:
-                logging.getLogger('MainThread').error("Couldnt invalidate the token, it was probably either deleted or modified")
                 logging.getLogger('MainThread').error(str(e))
             client = Clients.get_client_by_request(request)
             client.delete()
