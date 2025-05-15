@@ -8,71 +8,70 @@ import { sendWhenReady } from "../utils/utils.js";
 
 const tournamentSocket = WebSocketManager.tournamentSocket;
 
-
-const tournamentInfos =  {
-        "roomInfos": {
-            "title":"aaaaa",
-            "max_clients": 4,
-            "players_infos":[
-                {
-                    "id":"8d32bb8e-0c88-4e5f-956c-59fdd8a28edf",
-                    "nickname":"miaou",
-                    "avatar":"/media/profile/default.png",
-                    "trophee":"/media/rank_icon/bronze.png",
-                    "mmr":75
-                }
-            ],
-            "code":"CJVLK",
-            "scoreboard":{
-                "num_rounds":2,
-                "current_round":1,
-                "rounds":{
-                    "round_1":{
-                        "matches_total":2,
-                        "matches_completed":0,
-                        "games":{
-                        "r1m1":{
-                            "game_code":"VY8K8",
-                            "status":"creating",
-                            "winner_username":"None",
-                            "loser_username":"None",
-                            "loser_score":0,
-                            "winner_score":0
-                        },
-                        "r1m2":{
-                            "game_code":"9GFAQ",
-                            "status":"creating",
-                            "winner_username":"None",
-                            "loser_username":"None",
-                            "loser_score":0,
-                            "winner_score":0
-                        }
-                        }
-                    },
-                    "round_2":{
-                        "matches_total":1,
-                        "matches_completed":0,
-                        "games":{
-                        "r2m1":{
-                            "game_code":"4HJQE",
-                            "status":"creating",
-                            "winner_username":"None",
-                            "loser_username":"None",
-                            "loser_score":0,
-                            "winner_score":0
-                        }
-                        }
-                    }
-                }
-            }
-        }
-    }
+// const tournamentInfos =  {
+//         "roomInfos": {
+//             "title":"aaaaa",
+//             "max_clients": 4,
+//             "players_infos":[
+//                 {
+//                     "id":"8d32bb8e-0c88-4e5f-956c-59fdd8a28edf",
+//                     "nickname":"miaou",
+//                     "avatar":"/media/profile/default.png",
+//                     "trophee":"/media/rank_icon/bronze.png",
+//                     "mmr":75
+//                 }
+//             ],
+//             "code":"CJVLK",
+//             "scoreboard":{
+//                 "num_rounds":2,
+//                 "current_round":1,
+//                 "rounds":{
+//                     "round_1":{
+//                         "matches_total":2,
+//                         "matches_completed":0,
+//                         "games":{
+//                         "r1m1":{
+//                             "game_code":"VY8K8",
+//                             "status":"creating",
+//                             "winner_username":"None",
+//                             "loser_username":"None",
+//                             "loser_score":0,
+//                             "winner_score":0
+//                         },
+//                         "r1m2":{
+//                             "game_code":"9GFAQ",
+//                             "status":"creating",
+//                             "winner_username":"None",
+//                             "loser_username":"None",
+//                             "loser_score":0,
+//                             "winner_score":0
+//                         }
+//                         }
+//                     },
+//                     "round_2":{
+//                         "matches_total":1,
+//                         "matches_completed":0,
+//                         "games":{
+//                         "r2m1":{
+//                             "game_code":"4HJQE",
+//                             "status":"creating",
+//                             "winner_username":"None",
+//                             "loser_username":"None",
+//                             "loser_score":0,
+//                             "winner_score":0
+//                         }
+//                         }
+//                     }
+//                 }
+//             }
+//         }
+//     }
 
     // scoreboard.rounds
 
 // let tournamentInfosJson = JSON.parse(tournamentInfos)
 
-console.log(tournamentInfos.roomInfos)
+// console.log(tournamentInfos.roomInfos)
 
 tournamentSocket.onmessage = ((msg)=>{
     console.log("TOURNAMENT ROOM RECEIVES THIS MESSAGE");
@@ -87,9 +86,9 @@ tournamentSocket.onmessage = ((msg)=>{
     // }
     // console.log("BONJOUR:", message.data);
     if (message.event == "TOURNAMENT" && message.data.action == "TOURNAMENT_INFO") {
-        console.log("tournament info is :", message.data.action);
-        tournament_data = message.data.content;
-        populateTree(tournament_data.max_clients);
+        console.log("tournament info is :", message.data.content);
+        const tournament_data = message.data.content;
+        populateTree(tournament_data);
     }
 })
 
@@ -101,115 +100,18 @@ const get_tournament_info = {
 }
 
 
-
-
-
-// <h1>{{ tournamentInfos. }}</h1>
-//     <div class="round mt-5">
-//         <h2>Round 1</h2>
-//         <table class="table mt-2">
-//             <thead>
-//             <tr>
-//                 <th scope="col">Players</th>
-//                 <th scope="col">Status</th>
-//                 <th scope="col">Scores</th>
-//             </tr>
-//             </thead>
-//             <tbody>
-//             <tr>
-//                 <td class="players">
-//                     <div class="left">
-//                         <img src="/static/img/img.png" alt="">
-//                         <div>meow</div>
-//                     </div>
-//                     <div class="vs">VS</div>
-//                     <div class="right">
-//                         <img src="/static/img/img.png" alt="">
-//                         <div>meow</div>
-//                     </div>
-//                 </td>
-//                 <td><span class="badge bg-success">Played</span></td>
-//                 <td><span class="left-score winner">5</span> - <span class="right-score loser">0</span></td>
-//             </tr>
-//             <tr>
-//                 <td class="players">
-//                     <div class="left">
-//                         <img src="/static/img/img.png" alt="">
-//                         <div>meow</div>
-//                     </div>
-//                     <div class="vs">VS</div>
-//                     <div class="right">
-//                         <img src="/static/img/img.png" alt="">
-//                         <div>meow</div>
-//                     </div>
-//                 </td>
-//                 <td><span class="badge bg-success">Played</span></td>
-//                 <td><span class="left-score winner">5</span> - <span class="right-score loser">0</span></td>
-//             </tr>
-//             <tr>
-//                 <td class="players">
-//                     <div class="left">
-//                         <img src="/static/img/img.png" alt="">
-//                         <div>brrbrrpatapim</div>
-//                     </div>
-//                     <div class="vs">VS</div>
-//                     <div class="right">
-//                         <img src="/static/img/img.png" alt="">
-//                         <div>trallalerotralala</div>
-//                     </div>
-//                 </td>
-//                 <td><span class="badge bg-success">Played</span></td>
-//                 <td><span class="left-score winner">5</span> - <span class="right-score loser">0</span></td>
-//             </tr>
-//             <tr>
-//                 <td class="players">
-//                     <div class="left">
-//                         <img src="/static/img/img.png" alt="">
-//                         <div>brrbrrpatapim</div>
-//                     </div>
-//                     <div class="vs">VS</div>
-//                     <div class="right">
-//                         <img src="/static/img/img.png" alt="">
-//                         <div>trallalerotralala</div>
-//                     </div>
-//                 </td>
-//                 <td><span class="badge bg-success">Played</span></td>
-//                 <td><span class="left-score winner">5</span> - <span class="right-score loser">0</span></td>
-//             </tr>
-//             <tr>
-//                 <td class="players">
-//                     <div class="left">
-//                         <img src="/static/img/img.png" alt="">
-//                         <div>brrbrrpatapim</div>
-//                     </div>
-//                     <div class="vs">VS</div>
-//                     <div class="right">
-//                         <img src="/static/img/img.png" alt="">
-//                         <div>trallalerotralala</div>
-//                     </div>
-//                 </td>
-//                 <td><span class="badge bg-success">Played</span></td>
-//                 <td><span class="left-score winner">5</span> - <span class="right-score loser">0</span></td>
-//             </tr>
-//             <!-- we can add a tr for every competitor of the tournament for each round  -->
-//             <!-- should dynamicaly do so when socket updates with atresall -->
-//             </tbody>
-//         </table>
-//     </div>
-
-
 const buildTr = (matchInfos)=>{
 
     return `<tr>
                 <td class="players">
                     <div class="left">
-                        <img src="/static/img/img.png" alt="">
-                        <div>${matchInfos.winner_username}</div>
+                        <img src="${matchInfos.playerL_picture}" alt="">
+                        <div>${matchInfos.playerL_username}</div>
                     </div>
                     <div class="vs">VS</div>
                     <div class="right">
-                        <img src="/static/img/img.png" alt="">
-                        <div>${matchInfos.loser_username}</div>
+                        <img src="${matchInfos.playerR_picture}" alt="">
+                        <div>${matchInfos.playerR_username}</div>
                     </div>
                 </td>
                 <td><span class="badge bg-success">${matchInfos.status}</span></td>
@@ -245,22 +147,12 @@ const buildRound = (roundInfos, name)=>{
 
 
 let meow = document.querySelector("#tree")
-function populateTree() {
+function populateTree(tournamentInfos) {
 
-        meow.innerHTML = ''
-
-
-
-    
-
-        for (const key in tournamentInfos?.roomInfos.scoreboard.rounds) {
-            meow.innerHTML += buildRound(tournamentInfos?.roomInfos.scoreboard.rounds[key], key)
+        meow.innerHTML = '';
+        for (const key in tournamentInfos?.scoreboard.rounds) {
+            meow.innerHTML += buildRound(tournamentInfos?.scoreboard.rounds[key], key)
         }
-        
-    
-    //matboyer a l'aide
 }
 
-
-populateTree()
 sendWhenReady(tournamentSocket, JSON.stringify(get_tournament_info));
