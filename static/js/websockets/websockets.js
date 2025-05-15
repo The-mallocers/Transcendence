@@ -1,3 +1,5 @@
+import { setUpTournamentSocket } from "../tournaments/tournamentsSocketHandlers.js";
+
 export const WebSocketManager = {
   gameSocket: null,
   chatSocket: null,
@@ -58,7 +60,7 @@ export const WebSocketManager = {
                   }
               }
               console.log("notif socket connected");
-              this.notifSocket.send(JSON.stringify(message))
+              this.notifSocket.send(JSON.stringify(message));
           }
     }
     return this.notifSocket;
@@ -78,8 +80,10 @@ export const WebSocketManager = {
                   }
               }
               console.log("Tournament socket connected");
-              this.tournamentSocket.send(JSON.stringify(message))
+              this.tournamentSocket.send(JSON.stringify(message));
+              setUpTournamentSocket(this.tournamentSocket);
           }
+
         }
     return this.tournamentSocket;
   },

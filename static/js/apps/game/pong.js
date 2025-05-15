@@ -48,23 +48,6 @@ if (!socket || socket.readyState === WebSocket.CLOSED) {
     lpicture.src = window.GameState.left.picture;
     rpicture.src = window.GameState.right.picture;
 
-    //Implementing tournament edgecase.
-    const tournamentSocket = WebSocketManager.tournamentSocket;
-    tournamentSocket.onmessage = (e) => {
-
-        const jsonData = JSON.parse(e.data);
-        console.log("Tournament socket message", jsonData);
-        if (jsonData.data.action == "TOURNAMENT_GAME_FINISH") {
-            //check this is our game thats over
-            if (isPlayerIngame(jsonData.data.content) == false) { return ;}
-
-            isGameOver.gameIsOver = true;
-            WebSocketManager.closeGameSocket();
-            console.log(jsonData.data);
-            navigateTo(`/pong/tournament/tree/?tree=${jsonData.data.content.tournament_code}`);
-        }
-    }
-
     socket.onmessage = (e) => {
         const jsonData = JSON.parse(e.data);
         // console.log("received the message below");
@@ -137,18 +120,6 @@ if (!socket || socket.readyState === WebSocket.CLOSED) {
             WebSocketManager.closeGameSocket();
         }
     };
-}
-
-function isPlayerIngame(data) {
-    console.log("data in function is ", data);
-    console.log("window.GameState", window.GameState);
-    const gameLeft = window.GameState.left.id;
-    const gameRight = window.GameState.right.id;
-    console.log("game left and game right", gameLeft, " ", gameRight);
-    console.log("data winner and data loser", data.winner, " ", data.loser);
-    if (gameLeft == data.winner || gameLeft == data.loser) {return true;}
-    if (gameRight == data.winner || gameRight == data.loser) {return true;}
-    return false;
 }
 
 
