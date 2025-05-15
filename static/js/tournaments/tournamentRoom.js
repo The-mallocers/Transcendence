@@ -13,8 +13,8 @@ let tournament_data = null;
 
 tournamentSocket.onmessage = ((msg)=>{
     console.log("TOURNAMENT ROOM RECEIVES THIS MESSAGE");
-    console.log(msg);
     const message = JSON.parse(msg.data);
+    console.log(message);
     
     //This triggers at unwanted times, commenting it for now
     // if (message.event == "ERROR"){
@@ -23,7 +23,6 @@ tournamentSocket.onmessage = ((msg)=>{
     //     // errDiv.innerHTML = message.data.error
     //     return
     // }
-    console.log("BONJOUR:", message.data);
     if (message.event == "TOURNAMENT" && message.data.action == "TOURNAMENT_INFO") {
         tournament_data = message.data.content;
         populateTournament(tournament_data.max_clients);
@@ -32,15 +31,10 @@ tournamentSocket.onmessage = ((msg)=>{
         tournamentSocket.send(JSON.stringify(get_tournament_info));
     }
     else if (message.event == "TOURNAMENT" && message.data.action == "TOURNAMENT_GAME_READY") {
+        console.log("ALLO JE VAIS REJOUER OUUAIS");
         navigateTo("/pong/matchmaking/");
     }
 })
-/*
-                    send_group(RTables.GROUP_TOURNAMENT(self.tournament.code),
-                               EventType.TOURNAMENT,
-                               ResponseAction.TOURNAMENT_PLAYER_JOIN,
-                               {'id': str(client.id)})
-                               */
 function leaveTournament() {
     WebSocketManager.closeTournamentSocket();
     navigateTo("/pong/gamemodes/");

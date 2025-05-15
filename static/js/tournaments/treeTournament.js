@@ -90,6 +90,10 @@ tournamentSocket.onmessage = ((msg)=>{
         const tournament_data = message.data.content;
         populateTree(tournament_data);
     }
+    else if (message.event == "TOURNAMENT" && message.data.action == "TOURNAMENT_UPDATE") {
+        console.log("Im told theres been an update, so now Im asking for it !");
+        tournamentSocket.send(JSON.stringify(get_tournament_info));
+    }
 })
 
 const get_tournament_info = {

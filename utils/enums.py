@@ -114,6 +114,7 @@ class ResponseAction(str, Enum):
     TOURNAMENT_PLAYERS_LIST: str = 'List of players'
     TOURNAMENT_INFO: str = 'Tournament info'
     TOURNAMENT_LIST: str = 'List of tournaments'
+    TOURNAMENT_UPDATE: str = 'Tournament update'
 
     # ── Game Actions ──────────────────────────────────────────────────────────────────
     JOIN_GAME: str = 'You have successfully joined the game'
