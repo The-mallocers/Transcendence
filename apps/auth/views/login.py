@@ -39,7 +39,7 @@ def authenticate_grafana_user():
     login_url = "http://grafana:3000/login"
     session = requests.Session()
     admin = "admin"
-    pwd = settings.GRFANA_ADMIN_PWD
+    pwd = settings.GRAFANA_ADMIN_PWD
     response = session.post(
         login_url,
         json={"user": admin, "password": pwd},
@@ -55,7 +55,7 @@ def authenticate_grafana_user():
 def create_api_key(session):
     admin_client = Clients.get_client_by_email(settings.ADMIN_EMAIL)
     admin_user = "admin"
-    admin_password = settings.GRFANA_ADMIN_PWD
+    admin_password = settings.GRAFANA_ADMIN_PWD
     url = f"http://grafana:3000/api/serviceaccounts"
 
     # API key details
