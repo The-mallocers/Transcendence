@@ -197,9 +197,9 @@ const buildRound = (roundInfos, name)=>{
 
 
 
-let meow = document.querySelector("#tree")
 function populateTree(tournamentInfos) {
-
+        let meow = document.querySelector("#tree")
+        // if (!meow) return ;
         meow.innerHTML = '';
         for (const key in tournamentInfos?.scoreboard.rounds) {
             meow.innerHTML += buildRound(tournamentInfos?.scoreboard.rounds[key], key)
