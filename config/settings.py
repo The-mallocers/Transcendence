@@ -123,7 +123,7 @@ REST_FRAMEWORK = {
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ SECURITY SETTINGS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'z2r4p6']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'z3r2p4']
 CSRF_TRUSTED_ORIGINS = ['https://localhost:8000', 'https://127.0.0.1:8000']
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 SECURE_SSL_REDIRECT = True
@@ -227,7 +227,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL')
 ADMIN_PWD = os.environ.get('ADMIN_PWD')
 ADMIN_USERNAME = os.environ.get('ADMIN_USERNAME')
-GRFANA_ADMIN_PWD = os.environ.get('GRAFANA_PASSWORD')
+GRAFANA_ADMIN_PWD = os.environ.get('GRAFANA_PASSWORD')
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ LOGGING SETTINGS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #

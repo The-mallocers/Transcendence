@@ -20,7 +20,7 @@ function login(e) {
     const form = document.querySelector("form");
     const formData = new FormData(form);
     const errorDiv = document.getElementById("error-message")
-
+    console.log(form.action)
     fetch(form.action, {
         method: "POST",
         body: formData,
