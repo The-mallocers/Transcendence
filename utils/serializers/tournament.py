@@ -76,16 +76,17 @@ class TournamentSerializer(serializers.Serializer):
                 tournament["rounds"][f"round_{round_num}"]["games"][game_id] = {
                     "game_code": "",  # Will be filled when game is created
                     "status": GameStatus.CREATING,
-                    # "winner": None,
-                    # "loser": None,
                     "winner_username": None,
                     "loser_username": None,
                     "loser_score": 0,
                     "winner_score": 0,
+                    "loser_picture": "",
+                    "winner_picture": "",
                     "playerL_username": "",
                     "playerR_username": "",
                     "playerR_picture": "",
                     "playerL_picture": "",
+                    
                 }
 
         return tournament

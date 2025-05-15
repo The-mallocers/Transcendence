@@ -135,7 +135,7 @@ function populateJoinTournament(tournamentList){
     })
 
                             // <div class="imgContainer">
-                        //     <img src="/static/img/img.png" alt="">
+                        //     <img src="/static/img/huh.png" alt="">
                         // </div>
                         // <div class="imgContainer">
                         //     <img src="/static/img/img.png" alt="">
