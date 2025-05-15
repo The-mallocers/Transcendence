@@ -8,64 +8,81 @@ import { sendWhenReady } from "../utils/utils.js";
 
 const tournamentSocket = WebSocketManager.tournamentSocket;
 
-// const tournamentInfos =  {
-//         "roomInfos": {
-//             "title":"aaaaa",
-//             "max_clients": 4,
-//             "players_infos":[
-//                 {
-//                     "id":"8d32bb8e-0c88-4e5f-956c-59fdd8a28edf",
-//                     "nickname":"miaou",
-//                     "avatar":"/media/profile/default.png",
-//                     "trophee":"/media/rank_icon/bronze.png",
-//                     "mmr":75
-//                 }
-//             ],
-//             "code":"CJVLK",
-//             "scoreboard":{
-//                 "num_rounds":2,
-//                 "current_round":1,
-//                 "rounds":{
-//                     "round_1":{
-//                         "matches_total":2,
-//                         "matches_completed":0,
-//                         "games":{
-//                         "r1m1":{
-//                             "game_code":"VY8K8",
-//                             "status":"creating",
-//                             "winner_username":"None",
-//                             "loser_username":"None",
-//                             "loser_score":0,
-//                             "winner_score":0
-//                         },
-//                         "r1m2":{
-//                             "game_code":"9GFAQ",
-//                             "status":"creating",
-//                             "winner_username":"None",
-//                             "loser_username":"None",
-//                             "loser_score":0,
-//                             "winner_score":0
-//                         }
-//                         }
-//                     },
-//                     "round_2":{
-//                         "matches_total":1,
-//                         "matches_completed":0,
-//                         "games":{
-//                         "r2m1":{
-//                             "game_code":"4HJQE",
-//                             "status":"creating",
-//                             "winner_username":"None",
-//                             "loser_username":"None",
-//                             "loser_score":0,
-//                             "winner_score":0
-//                         }
-//                         }
-//                     }
-//                 }
-//             }
-//         }
-//     }
+const tournamentInfos =  {
+   "title":"aaaa",
+   "max_clients":4,
+   "players_infos":[
+      {
+         "id":"7db871a6-5a1a-4e0f-9ae7-a64a2def5539",
+         "nickname":"theo",
+         "avatar":"/media/profile/default.png",
+         "trophee":"/media/rank_icon/bronze.png",
+         "mmr":66
+      },
+      {
+         "id":"8d32bb8e-0c88-4e5f-956c-59fdd8a28edf",
+         "nickname":"miaou",
+         "avatar":"/media/profile/default.png",
+         "trophee":"/media/rank_icon/bronze.png",
+         "mmr":94
+      }
+   ],
+   "code":"KW91H",
+   "scoreboard":{
+      "num_rounds":2,
+      "current_round":2,
+      "rounds":{
+         "round_1":{
+            "matches_total":2,
+            "matches_completed":2,
+            "games":{
+               "r1m1":{
+                  "game_code":"Z8LGR",
+                  "status":"finished",
+                  "winner_username":"miaou",
+                  "loser_username":"test2",
+                  "loser_score":0,
+                  "winner_score":1,
+                  "playerL_username":"test2",
+                  "playerR_username":"miaou",
+                  "playerR_picture":"/media/profile/default.png",
+                  "playerL_picture":"/media/profile/default.png"
+               },
+               "r1m2":{
+                  "game_code":"QCA0A",
+                  "status":"finished",
+                  "winner_username":"theo",
+                  "loser_username":"test1",
+                  "loser_score":0,
+                  "winner_score":1,
+                  "playerL_username":"theo",
+                  "playerR_username":"test1",
+                  "playerR_picture":"/media/profile/default.png",
+                  "playerL_picture":"/media/profile/default.png"
+               }
+            }
+         },
+         "round_2":{
+            "matches_total":1,
+            "matches_completed":0,
+            "games":{
+               "r2m1":{
+                  "game_code":"HE4M1",
+                  "status":"creating",
+                  "winner_username":"None",
+                  "loser_username":"None",
+                  "loser_score":0,
+                  "winner_score":0,
+                  "playerL_username":"miaou",
+                  "playerR_username":"theo",
+                  "playerR_picture":"/media/profile/default.png",
+                  "playerL_picture":"/media/profile/default.png"
+               }
+            }
+         }
+      }
+   }
+}
 
     // scoreboard.rounds
 
@@ -74,22 +91,22 @@ const tournamentSocket = WebSocketManager.tournamentSocket;
 // console.log(tournamentInfos.roomInfos)
 
 tournamentSocket.onmessage = ((msg)=>{
-    console.log("TOURNAMENT ROOM RECEIVES THIS MESSAGE");
-    console.log(msg);
-    const message = JSON.parse(msg.data);
+    // console.log("TOURNAMENT ROOM RECEIVES THIS MESSAGE");
+    // console.log(msg);
+    // const message = JSON.parse(msg.data);
     
-    // if (message.event == "ERROR"){
-    //     console.log("Error message: ", message.data.error)
-    //     navigateTo("/pong/gamemodes/");
-    //     // errDiv.innerHTML = message.data.error
-    //     return
+    // // if (message.event == "ERROR"){
+    // //     console.log("Error message: ", message.data.error)
+    // //     navigateTo("/pong/gamemodes/");
+    // //     // errDiv.innerHTML = message.data.error
+    // //     return
+    // // }
+    // // console.log("BONJOUR:", message.data);
+    // if (message.event == "TOURNAMENT" && message.data.action == "TOURNAMENT_INFO") {
+    //     console.log("tournament info is :", message.data.content);
+    //     // const tournament_data = message.data.content;
+    //     // populateTree(tournamentInfos);
     // }
-    // console.log("BONJOUR:", message.data);
-    if (message.event == "TOURNAMENT" && message.data.action == "TOURNAMENT_INFO") {
-        console.log("tournament info is :", message.data.content);
-        const tournament_data = message.data.content;
-        populateTree(tournament_data);
-    }
 })
 
 const get_tournament_info = {
@@ -101,17 +118,48 @@ const get_tournament_info = {
 
 
 const buildTr = (matchInfos)=>{
+    let left, right = ``
 
+    if (matchInfos.status == "creating"){
+        left = `
+                <img src="/static/img/huh.webp" alt="">
+                <div>-- tbd --</div>
+        `
+        right = `
+                <img src="/static/img/huh.webp" alt="">
+                <div>-- tbd --</div>
+        `
+
+    }else if (matchInfos.status == "finished"){
+
+        left = `
+                <img src="${matchInfos.winner_picture}" alt="">
+                <div>${matchInfos.winner_username}</div>
+        `
+
+        right = `
+                <img src="${matchInfos.loser_picture}" alt="">
+                <div>${matchInfos.loser_username}</div>
+        `
+    }else {
+        left = `
+            ${`<img src="${matchInfos.playerL_picture}" alt="">`}
+            <div>${matchInfos.playerL_username}</div>
+        `
+
+        right = `
+            ${`<img src="${matchInfos.playerL_picture}" alt="">`}
+            <div>${matchInfos.playerL_username}</div>
+        `
+    }
     return `<tr>
                 <td class="players">
                     <div class="left">
-                        <img src="${matchInfos.playerL_picture}" alt="">
-                        <div>${matchInfos.playerL_username}</div>
+                        ${left}
                     </div>
                     <div class="vs">VS</div>
                     <div class="right">
-                        <img src="${matchInfos.playerR_picture}" alt="">
-                        <div>${matchInfos.playerR_username}</div>
+                        ${right}
                     </div>
                 </td>
                 <td><span class="badge bg-success">${matchInfos.status}</span></td>
@@ -155,4 +203,8 @@ function populateTree(tournamentInfos) {
         }
 }
 
-sendWhenReady(tournamentSocket, JSON.stringify(get_tournament_info));
+// sendWhenReady(tournamentSocket, JSON.stringify(get_tournament_info));
+
+
+populateTree(tournamentInfos);
+
