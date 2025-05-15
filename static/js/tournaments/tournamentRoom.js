@@ -16,12 +16,13 @@ tournamentSocket.onmessage = ((msg)=>{
     console.log(msg);
     const message = JSON.parse(msg.data);
     
-    if (message.event == "ERROR"){
-        console.log("Error message: ", message.data.error)
-        navigateTo("/pong/gamemodes/");
-        // errDiv.innerHTML = message.data.error
-        return
-    }
+    //This triggers at unwanted times, commenting it for now
+    // if (message.event == "ERROR"){
+    //     console.log("Error message: ", message.data.error)
+    //     navigateTo("/pong/gamemodes/");
+    //     // errDiv.innerHTML = message.data.error
+    //     return
+    // }
     console.log("BONJOUR:", message.data);
     if (message.event == "TOURNAMENT" && message.data.action == "TOURNAMENT_INFO") {
         tournament_data = message.data.content;

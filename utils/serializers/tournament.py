@@ -82,6 +82,10 @@ class TournamentSerializer(serializers.Serializer):
                     "loser_username": None,
                     "loser_score": 0,
                     "winner_score": 0,
+                    "playerL_username": "",
+                    "playerR_username": "",
+                    "playerR_picture": "",
+                    "playerL_picture": "",
                 }
 
         return tournament

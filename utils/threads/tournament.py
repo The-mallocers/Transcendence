@@ -141,7 +141,22 @@ class TournamentThread(Threads):
                     redis.json().set(RTables.JSON_TOURNAMENT(tournament_code), Path(f'scoreboards.rounds.round_{r}.games.r{r}m{m}.loser_score'), loser.score)
                     #ADD INFO I WANT .
                     return
-
+    @staticmethod
+    def set_game_players_name(tournament_code, game_code: str, playerL, playerR , redis):
+        rounds = redis.json().get(RTables.JSON_TOURNAMENT(tournament_code), Path('scoreboards.num_rounds'))
+        if rounds is None:
+            return None
+        for r in range(1, rounds + 1):
+            matches_in_round = redis.json().get(RTables.JSON_TOURNAMENT(tournament_code), Path(f'scoreboards.rounds.round_{r}.matches_total'))
+            for m in range(1, matches_in_round + 1):
+                game_id = redis.json().get(RTables.JSON_TOURNAMENT(tournament_code), Path(f'scoreboards.rounds.round_{r}.games.r{r}m{m}.game_code'))
+                if game_id == game_code:
+                    redis.json().set(RTables.JSON_TOURNAMENT(tournament_code), Path(f'scoreboards.rounds.round_{r}.games.r{r}m{m}.playerL_username'), playerL.client.profile.username)
+                    redis.json().set(RTables.JSON_TOURNAMENT(tournament_code), Path(f'scoreboards.rounds.round_{r}.games.r{r}m{m}.playerR_username'), playerR.client.profile.username)
+                    redis.json().set(RTables.JSON_TOURNAMENT(tournament_code), Path(f'scoreboards.rounds.round_{r}.games.r{r}m{m}.playerL_picture'), playerL.client.profile.profile_picture.url)
+                    redis.json().set(RTables.JSON_TOURNAMENT(tournament_code), Path(f'scoreboards.rounds.round_{r}.games.r{r}m{m}.playerR_picture'), playerR.client.profile.profile_picture.url)
+                    #ADD INFO I WANT .
+                    return
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ FUNCTIONS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
 
     def create_games(self) -> list[Game]:
