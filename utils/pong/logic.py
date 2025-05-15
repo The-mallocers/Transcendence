@@ -263,19 +263,22 @@ class PongLogic:
         player.save()
 
     def compute_mmr_change(self, winner, loser):
-        K = 50
-        winner_mmr = winner.client.stats.mmr
-        loser_mmr = loser.client.stats.mmr
+            K = 50
+            winner_mmr = winner.client.stats.mmr
+            loser_mmr = loser.client.stats.mmr
 
-        expected_win = 1 / (1 + 10 ** ((loser_mmr - winner_mmr) / 120))
-        expected_loss = 1 / (1 + 10 ** ((winner_mmr - loser_mmr) / 120))
+            expected_win = 1 / (1 + 10 ** ((loser_mmr - winner_mmr) / 120))
+            expected_loss = 1 / (1 + 10 ** ((winner_mmr - loser_mmr) / 120))
 
-        mmr_gain = round(K * (1 - expected_win))
-        mmr_loss = round(K * (0 - expected_loss))
-        if (loser_mmr - mmr_loss < 0):
-            mmr_loss = loser_mmr
+            mmr_gain = round(K * (1 - expected_win))
+            mmr_loss = round(K * (0 - expected_loss))
+            if (loser_mmr + mmr_loss < 0):
+                mmr_loss = loser_mmr
+                loser.client.stats.mmr = 0
+                loser.mmr_change = -mmr_loss
+            else:
+                loser.client.stats.mmr = F('mmr') + mmr_loss
+                loser.mmr_change = mmr_loss
 
-        winner.mmr_change = mmr_gain
-        loser.mmr_change = mmr_loss
-        winner.client.stats.mmr = F('mmr') + mmr_gain
-        loser.client.stats.mmr = F('mmr') + mmr_loss
+            winner.mmr_change = mmr_gain
+            winner.client.stats.mmr = F('mmr') + mmr_gain
