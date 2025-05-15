@@ -25,13 +25,21 @@ class TournamentStatus(str, Enum):
 
 
 class EventType(str, Enum):
+    # ── Services ──────────────────────────────────────────────────────────────────────
     MATCHMAKING: str = 'matchmaking'
     GAME: str = 'game'
     TOURNAMENT: str = 'tournament'
-    UPDATE: str = 'update'
     CHAT: str = 'chat'
     NOTIFICATION: str = 'notification'
+
+    # ── Others ────────────────────────────────────────────────────────────────────────
+    UPDATE: str = 'update'
     ERROR: str = 'error'
+
+
+class ConnectionType(str, Enum):
+    IP: str = 'ip'
+    SEESION_KEY: str = 'session_key'
 
 
 # All the actions the client sends to the server
@@ -220,6 +228,7 @@ class RTables(str, Enum):
 
     # ── Hash Tables ───────────────────────────────────────────────────────────────── #
     HASH_CLIENT: str = 'client_{}'
+    HASH_CLIENT_CONN: str = 'client_conn_{}'
     HASH_MATCHES: str = 'current_matches'
     HASH_QUEUE: str = 'queue_{}'
     HASH_G_QUEUE: str = HASH_QUEUE.format('global')

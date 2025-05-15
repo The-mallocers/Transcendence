@@ -17,6 +17,7 @@ import logging.config
 import os
 import shutil
 import signal
+import socket
 import stat
 import sys
 import time
@@ -123,9 +124,12 @@ REST_FRAMEWORK = {
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ SECURITY SETTINGS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'z1r5p2']
-CSRF_TRUSTED_ORIGINS = ['https://localhost:8000', 'https://127.0.0.1:8000']
+HOSTNAME = socket.gethostname()
+ALLOWED_HOSTS = ['*']
+IPWARE_TRUSTED_PROXIES = ['127.0.0.1', '::1', 'django', 'nginx']
+CSRF_TRUSTED_ORIGINS = [f'https://{HOSTNAME}']
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+USE_X_FORWARDED_HOST = True
 SECURE_SSL_REDIRECT = True
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
@@ -156,7 +160,7 @@ JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY')
 JWT_EXP_ACCESS_TOKEN = os.environ.get('JWT_EXP_ACCESS_TOKEN', default=10)  # 30 minutes
 JWT_EXP_REFRESH_TOKEN = os.environ.get('JWT_EXP_REFRESH_TOKEN', default=30)  # 30 days
 JWT_ALGORITH = 'HS256'
-JWT_ISS = 'https://localhost:8000'
+JWT_ISS = f'https://{HOSTNAME}'
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ DATABASE SETTINGS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
 DATABASES = {

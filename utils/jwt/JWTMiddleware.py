@@ -3,16 +3,19 @@ import fnmatch
 import jwt
 from django.conf import settings
 from django.http import JsonResponse, HttpRequest
+from ipware import get_client_ip
 from rest_framework import status
 
 from apps.client.models import Clients
-from utils.enums import JWTType
+from utils.enums import JWTType, RTables, ConnectionType
 from utils.jwt.JWT import JWT
+from utils.redis import RedisConnectionPool
 
 
 class JWTMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
+        self.redis = RedisConnectionPool.get_sync_connection(alias=self.__class__.__name__)
 
     def _in_excluded_path(self, path: str) -> bool:
         if self.is_path_matching(path, settings.EXCLUDED_PATHS):
@@ -25,6 +28,19 @@ class JWTMiddleware:
             if self.is_path_matching(path, [pattern]):
                 return roles
         return None
+
+    def _get_client_ip(self, request: HttpRequest):
+        ip, is_routable = get_client_ip(request)
+        if ip is None:
+            return '0.0.0.0'
+        else:
+            return ip
+        # x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        # if x_forwarded_for:
+        #     ip = x_forwarded_for.split(',')[0]
+        # else:
+        #     ip = request.META.get('REMOTE_ADDR')
+        # return ip
 
     @staticmethod
     def is_path_matching(path, path_list):
@@ -55,8 +71,11 @@ class JWTMiddleware:
             if self._in_excluded_path(request.path_info):
                 return self.get_response(request)
             else:
-                try:
-                    JWT.extract_token(request, JWTType.ACCESS)
+                try:  # let pass the request
+                    token = JWT.extract_token(request, JWTType.ACCESS)
+                    self.redis.hset(RTables.HASH_CLIENT_CONN(token.SUB), ConnectionType.IP, self._get_client_ip(request))
+                    if request.session.session_key:
+                        self.redis.hset(RTables.HASH_CLIENT_CONN(token.SUB), ConnectionType.SEESION_KEY, request.session.session_key)
                     return self.get_response(request)
                 except (jwt.InvalidTokenError, jwt.ExpiredSignatureError):
                     try:
