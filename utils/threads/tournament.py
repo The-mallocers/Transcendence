@@ -155,6 +155,7 @@ class TournamentThread(Threads):
                 game.create_redis_game()
                 game.rset_status(GameStatus.WAITING)
                 games.append(game)
+                
                 self.redis.json().set(RTables.JSON_TOURNAMENT(self.tournament.code), Path(f'scoreboards.rounds.round_{r}.games.r{r}m{m}.game_code'),
                                       game.code)
         return games

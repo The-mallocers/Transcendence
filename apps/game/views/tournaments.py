@@ -1,4 +1,5 @@
 from json import JSONDecodeError
+import json
 import re
 from time import sleep
 from django.http import JsonResponse
@@ -110,8 +111,70 @@ def inRoom(request):
 
 
 def tournamentTree(request):
+
+    testJson = {
+        "roomInfos": {
+            "title":"aaaaa",
+            "max_clients": 4,
+            "players_infos":[
+                {
+                    "id":"8d32bb8e-0c88-4e5f-956c-59fdd8a28edf",
+                    "nickname":"miaou",
+                    "avatar":"/media/profile/default.png",
+                    "trophee":"/media/rank_icon/bronze.png",
+                    "mmr":75
+                }
+            ],
+            "code":"CJVLK",
+            "scoreboard":{
+                "num_rounds":2,
+                "current_round":1,
+                "rounds":{
+                    "round_1":{
+                        "matches_total":2,
+                        "matches_completed":0,
+                        "games":{
+                        "r1m1":{
+                            "game_code":"VY8K8",
+                            "status":"creating",
+                            "winner_username":"None",
+                            "loser_username":"None",
+                            "loser_score":0,
+                            "winner_score":0
+                        },
+                        "r1m2":{
+                            "game_code":"9GFAQ",
+                            "status":"creating",
+                            "winner_username":"None",
+                            "loser_username":"None",
+                            "loser_score":0,
+                            "winner_score":0
+                        }
+                        }
+                    },
+                    "round_2":{
+                        "matches_total":1,
+                        "matches_completed":0,
+                        "games":{
+                        "r2m1":{
+                            "game_code":"4HJQE",
+                            "status":"creating",
+                            "winner_username":"None",
+                            "loser_username":"None",
+                            "loser_score":0,
+                            "winner_score":0
+                        }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     client = Clients.get_client_by_request(request)
-    html_content = render_to_string("apps/pong/tree.html", {"csrf_token": get_token(request), "client": client})
+    testClient = Clients.objects.select_related("profile").get(id=client.id)
+
+    html_content = render_to_string("apps/pong/tree.html", {"csrf_token": get_token(request), "client": client, "tournamentInfos": json.dumps(testJson), 'testClient' : testClient})
     return JsonResponse({
         'html': html_content,
     })
