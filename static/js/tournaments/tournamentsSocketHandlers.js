@@ -3,6 +3,7 @@ import { populateTournament } from "./populateHelpers.js";
 import { populateJoinTournament } from "./populateHelpers.js";
 import { populateTree } from "./populateHelpers.js";
 import { isGameOver } from "../apps/game/VarGame.js";
+import { tournamentData } from "../apps/game/VarGame.js";
 
 export function setUpTournamentSocket (tournamentSocket) {
     tournamentSocket.onmessage = (message) => {
@@ -51,8 +52,19 @@ export function setUpTournamentSocket (tournamentSocket) {
                 break;
                 
             case "TOURNAMENT_GAME_READY":
-                console.log("ALLO JE VAIS REJOUER OUUAIS");
-                navigateTo("/pong/matchmaking/");
+                tournamentData.gameIsReady = true;
+                // console.log("ALLO JE VAIS REJOUER OUUAIS");
+                // navigateTo("/pong/matchmaking/");
+                console.log(document.location.pathname)  
+                const parrent = document.querySelector(document.location.pathname.includes('tree') ?  '#tree': "#btnsRoom")
+                console.log("data of tournament join", parrent);
+                if (parrent) {
+                    let btn = document.createElement('div')
+                    btn.classList.add('btn', 'btn-primary');
+                    btn.innerText = 'Ready';
+                    btn.addEventListener('click', ()=>{navigateTo(`/pong/matchmaking/`);})
+                    parrent.appendChild(btn)
+                }
                 break;
                 
             case "TOURNAMENT_UPDATE":

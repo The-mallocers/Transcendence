@@ -1,6 +1,7 @@
 import {WebSocketManager} from "../../websockets/websockets.js";
 import {navigateTo} from '../../spa/spa.js';
-import {isGameOver} from "./VarGame.js"
+import {isGameOver} from "./VarGame.js";
+import { tournamentData } from "./VarGame.js";
 // import { apiFriends } from "../profile/profile.js";
 
 const socket = WebSocketManager.gameSocket;
@@ -40,6 +41,7 @@ let right_last_move = "idle";
 if (!socket || socket.readyState === WebSocket.CLOSED) {
     navigateTo("/");
 } else {
+    tournamentData.gameIsReady = false;
     console.log(window.GameState);
     lusername.innerHTML = window.GameState.left.username;
     rusername.innerHTML = window.GameState.right.username;
