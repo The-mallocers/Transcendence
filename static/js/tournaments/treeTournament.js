@@ -1,4 +1,5 @@
 import { sendWhenReady } from "../utils/utils.js";
+import { WebSocketManager } from "../websockets/websockets.js";
 
 const get_tournament_info = {
     "event": "tournament",
@@ -6,5 +7,5 @@ const get_tournament_info = {
         "action": "tournament_info"
     }
 }
-sendWhenReady(tournamentSocket, JSON.stringify(get_tournament_info));
 
+sendWhenReady(WebSocketManager.tournamentSocket, JSON.stringify(get_tournament_info));

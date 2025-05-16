@@ -92,6 +92,7 @@ export function populateTournament(tournament_data){
     const max_clients = tournament_data.max_clients
     const clientsInTournament = document.querySelector("#clientsInTournament");
     let clientsDiv = []
+    if (clientsInTournament == null) return ;
     clientsInTournament.innerHTML = ``
     for (let i = 0 ; i < max_clients ; i++){
         clientsDiv.push(`
