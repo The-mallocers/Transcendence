@@ -35,11 +35,14 @@ class Router {
             try {
                 // console.log("About to try the route template of the route :", route);
                 const content = await route.template(window.location.search ? window.location.search : "");
+                console.log(content)
                 this.rootElement.innerHTML = content;
+                console.log(content)
                 this.reloadScripts();
             } catch (error) {
                 console.error('Route rendering failed:', error);
             }
+            // alert("page changed")
         }
     }
 

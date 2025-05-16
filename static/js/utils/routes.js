@@ -17,7 +17,9 @@ const routes = [
     {
         path: '/auth/auth42',
         template: async (query) => {
-            return await fetchRoute(`/pages/auth/auth42${query}`);
+            await fetchRoute(`/pages/auth/auth42${query}`);
+
+            return ("<h1>Authentication process is ending you are now being redirected<h1>")
         }
     },
     {
