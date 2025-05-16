@@ -35,6 +35,7 @@ class TournamentThread(Threads):
                     sleep(5)
                 if self._running():
                     break
+                sleep(2)
 
         except Exception as e:
             self._logger.error(traceback.format_exc())
@@ -44,6 +45,7 @@ class TournamentThread(Threads):
             self.stoping()
 
     def cleanup(self):
+        print("IN CLEANUP OF TOURNAMENT")
         for game in self.games:
             if game.rget_status() is GameStatus.WAITING:
                 self.redis.delete(RTables.JSON_GAME(game.code))

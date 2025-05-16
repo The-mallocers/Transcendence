@@ -145,6 +145,7 @@ export function populateTournament(tournament_data){
 export function populateJoinTournament(tournamentList){
     const tournaments = document.querySelector("#tournaments");
     let clientsDiv = []
+    if (tournaments == null) return ;
     tournaments.innerHTML = ``
     
     tournamentList.forEach((room)=>{
