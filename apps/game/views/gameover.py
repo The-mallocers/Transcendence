@@ -4,7 +4,7 @@ from django.template.loader import render_to_string
 
 from apps.client.models import Clients
 from apps.game.models import Game
-
+import random
 
 def get(request):
     client = Clients.get_client_by_request(request)
@@ -25,6 +25,8 @@ def get(request):
         opponent_score = found_game.winner.score
         opponent = found_game.winner.client.profile.username
         mmr_change = str(found_game.loser.mmr_change) + " mmr"
+        if mmr_change == "0 mmr":
+            mmr_change = zeroMmrSlander()
 
     html_content = render_to_string("pong/../../templates/apps/pong/gameover.html", {
         "csrf_token": get_token(request),
@@ -39,3 +41,12 @@ def get(request):
     return JsonResponse({
         'html': html_content,
     })
+
+def zeroMmrSlander() -> str:
+    slander = [
+        'Cannot go below 0 mmr !',
+        "0 + 0 = la tete a toto",
+        "0 mmr, 0 problems",
+    ]
+    index = random.randint(0, len(slander) - 1)
+    return slander[index]

@@ -71,7 +71,10 @@
                         <div class="lastGames container d-flex flex-row align-items-center justify-content-between">
                             <span class="names d-flex flex-row justify-content-enter">
                                 <div class="nickname {% if game.won %}win{% else %} loss {% endif %}">{{ game.opponent }}</div>
-                                <div class="time">A day ago</div>
+                                <div class="time">{{ game.when }}</div>
+                            </span>
+                            <span class="scores d-flex flex-row justify-content-center align-items-center">
+                                <div class="mmr">{{ game.mmr_change }}</div>
                             </span>
                             <span class="scores d-flex flex-row justify-content-center align-items-center">
                                 <div class="myScore">{{ game.myPoints }}</div>
