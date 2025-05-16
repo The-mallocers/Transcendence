@@ -96,6 +96,12 @@ class TournamentThread(Threads):
             if self.get_match_complete() == self.get_total_matches() and self.get_current_round() <= self.rounds:
                 self.set_current_round(self.get_current_round() + 1)
                 self.place_players()
+                timer = 15
+                while timer > 0:
+                    send_group(RTables.GROUP_TOURNAMENT(self.tournament.code), EventType.TOURNAMENT, ResponseAction.WAITING_FOR_NEXT_ROUND,
+                               {'timer': timer})
+                    sleep(1)
+                    timer -= 1
             elif self.get_current_round() == self.rounds:
                 self.set_status(TournamentStatus.ENDING)
                 return True
