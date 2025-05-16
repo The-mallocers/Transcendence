@@ -1,5 +1,5 @@
 import { tournamentData } from "../apps/game/VarGame.js"
-import { navigateTo } from "../spa/spa"
+import { navigateTo } from "../spa/spa.js"  
 
 //Build TREE
 const buildTr = (matchInfos) => {

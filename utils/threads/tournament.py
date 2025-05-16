@@ -52,6 +52,7 @@ class TournamentThread(Threads):
                 self.redis.delete(RTables.JSON_GAME(game.code))
         self.redis.delete(RTables.JSON_TOURNAMENT(self.tournament.code))
         self.redis.expire(f'channels:group:{RTables.GROUP_TOURNAMENT(self.tournament.code)}', 0)
+        self.redis.expire(RTables.HASH_TOURNAMENT_QUEUE(self.tournament.code), 0)
 
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ EVENT ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
 
