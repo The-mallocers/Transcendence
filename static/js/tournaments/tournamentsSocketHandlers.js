@@ -37,7 +37,8 @@ export function setUpTournamentSocket (tournamentSocket) {
                 //I think the game might already be over by that point.
                 // isGameOver.gameIsOver = true;
                 // WebSocketManager.closeGameSocket();
-                navigateTo(`/pong/tournament/tree/?tree=${jsonData.data.content.tournament_code}`);
+                // navigateTo(`/pong/tournament/tree/?tree=${jsonData.data.content.tournament_code}`);
+                // navigateTo(`/pong/tournament/tree/?tree=${jsonData.data.content.tournament_code}`);
                 break;
                 
             case "TOURNAMENT_JOIN":
