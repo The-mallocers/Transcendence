@@ -9,12 +9,47 @@
             </div>
 
             <div id="btnsRoom" class="btns d-flex flex-row justify-content-between gap-3 align-items-center mt-3">
-                <div class="btn btn-intra">Invite</div>
+                <div class="btn btn-intra" onclick="invite_friends()" >Invite</div>
                 <div class="btn btn-intra-outlined" data-route="/pong/tournament/join/">Leave</div>
             </div>
         </div>
     </div>
 </div>
 
+<div class="modal fade" id="friendSelectionModal" tabindex="-1" aria-labelledby="friendSelectionModalLabel">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="friendSelectionModalLabel">Select a Friend to Duel</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <ul class="friends_group list-group friends-to-duel">
+                </ul>
+            </div>
+            {% if friends_list %}
+            <div class="modal-header">
+                <h5 class="modal-title" id="friendSelectionModalLabel">Create or join Duel (Not working for the moment)</h5>
+            </div>
+            <div class="modal-body">
+                <ul class="friends_group list-group">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>Create Room</div>
+                            <div class="d-flex align-items-center">
+                                <button type="button" class="type-intra-green delete_friend me-4">Create</button>
+                            </div>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>Join room</div>
+                            <div class="d-flex align-items-center">
+                                <button type="button" class="type-intra-green delete_friend me-4">Join</button>
+                            </div>
+                        </li>
+                </ul>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
 
 <script type="module" src="{% static '/js/tournaments/tournamentRoom.js' %}"></script>
