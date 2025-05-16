@@ -8,8 +8,8 @@ from apps.auth.models import Password
 class PasswordSerializer(serializers.ModelSerializer):
     password = serializers.CharField(validators=[
         MinLengthValidator(
-            limit_value=4,
-            message="Password must be at least 4 charcaters"
+            limit_value=8,
+            message="Password must be at least 8 charcaters"
         ),
         RegexValidator(
             regex=r'^(?=.*[!@#$%^&*()_+\-=\[\]{};:\'",<>\./?\\|`~]).*(?=.*\d).+$',

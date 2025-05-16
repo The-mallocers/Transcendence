@@ -19,11 +19,24 @@ class ClientSerializer(serializers.ModelSerializer):
         model = Clients
         fields = ['profile', 'password']
 
+    def validate(self, data): # the validate function append before the create
+        profile_data = data.get('profile', {})
+        password_data = data.get('password', {})
+        
+        username = profile_data.get('username', '').lower()
+        password = password_data.get('password', '')
+        
+        if username and username in password.lower():
+            raise serializers.ValidationError(
+                {"password": {"password" : "Password cannot contain username"}}
+            )   
+        return data
+
     def create(self, validated_data):
         profile_data = validated_data.pop('profile')
         password_data = validated_data.pop('password')
         is_admin = self.context.get('is_admin')
-
+            
         # Removing passwordcheck since its not longer useful
         if 'passwordcheck' in password_data:
             password_data.pop('passwordcheck')
