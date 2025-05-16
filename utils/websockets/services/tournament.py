@@ -67,8 +67,8 @@ class TournamentService(BaseServices):
     async def _handle_ping(self, data, client):
         return await asend_group(self.service_group, EventType.TOURNAMENT, ResponseAction.PONG)
 
-    # async def _handle_leave_tournament(self, data, client):
-    #     pass
+    async def _handle_leave_tournament(self, data, client):
+        return await asend_group(self.service_group, EventType.TOURNAMENT, ResponseAction.TOURNAMENT_LEFT)
     
     async def _handle_list_players(self, data, client):
         queues = await Clients.acheck_in_queue(client, self.redis)

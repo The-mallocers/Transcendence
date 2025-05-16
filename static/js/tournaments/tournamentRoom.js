@@ -6,7 +6,14 @@ const tournamentSocket = WebSocketManager.tournamentSocket;
 const delete_btn = document.querySelector("#delete-btn");
 const leave_btn = document.querySelector("#leave-btn");
 
+const leave_tournament = {
+    "event": "tournament",
+    "data": {
+        "action": "leave_tournament"
+    }
+}
 function leaveTournament() {
+    WebSocketManager.tournamentSocket.send(JSON.stringify(leave_tournament))
     WebSocketManager.closeTournamentSocket();
     navigateTo("/pong/gamemodes/");
 }
@@ -15,7 +22,7 @@ delete_btn?.addEventListener('click', ()=>{
     leaveTournament();
 });
 
-leave_btn?.addEventListener('click', ()=>{
+leave_btn.addEventListener('click', ()=>{
     leaveTournament();
 });
 
