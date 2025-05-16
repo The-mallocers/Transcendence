@@ -18,7 +18,6 @@ class TournamentThread(Threads):
     def __init__(self, tournament: Tournaments):
         super().__init__(f'TournamentThread[{tournament.code}]')
         self.tournament: Tournaments = tournament
-        self.redis.json().set(RTables.JSON_TOURNAMENT(self.tournament.code), Path.root_path(), self.tournament.serializer.data)
 
         self.rounds = self.get('scoreboards.num_rounds')
         self.set('scoreboards.current_round', 1)
@@ -35,7 +34,9 @@ class TournamentThread(Threads):
                 if self._starting():
                     sleep(5)
                 if self._running():
+                    print("Mama mia tournament is over !")
                     break
+                sleep(2)
 
         except Exception as e:
             self._logger.error(traceback.format_exc())
@@ -45,11 +46,13 @@ class TournamentThread(Threads):
             self.stoping()
 
     def cleanup(self):
+        print("IN CLEANUP OF TOURNAMENT")
         for game in self.games:
             if game.rget_status() is GameStatus.WAITING:
                 self.redis.delete(RTables.JSON_GAME(game.code))
-        # self.redis.delete(RTables.JSON_TOURNAMENT(self.tournament.code))
+        self.redis.delete(RTables.JSON_TOURNAMENT(self.tournament.code))
         self.redis.expire(f'channels:group:{RTables.GROUP_TOURNAMENT(self.tournament.code)}', 0)
+        self.redis.expire(RTables.HASH_TOURNAMENT_QUEUE(self.tournament.code), 0)
 
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ EVENT ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
 
@@ -92,15 +95,25 @@ class TournamentThread(Threads):
             return True
         return False
 
+    #Very importante !!
     def _running(self):
         if self.tournament.status is TournamentStatus.RUNNING:
             if self.get_match_complete() == self.get_total_matches() and self.get_current_round() <= self.rounds:
+                print("Going to next round !")
                 self.set_current_round(self.get_current_round() + 1)
                 self.place_players()
+                timer = 15
+                while timer > 0:
+                    send_group(RTables.GROUP_TOURNAMENT(self.tournament.code), EventType.TOURNAMENT, ResponseAction.WAITING_FOR_NEXT_ROUND,
+                               {'timer': timer})
+                    sleep(1)
+                    timer -= 1
             elif self.get_current_round() == self.rounds:
+                print("Setting tournament status to Ending !")
                 self.set_status(TournamentStatus.ENDING)
                 return True
             else:
+                print("Managing games that just happened !")
                 self.manage_games()
             # todo, il faut que je fasse le systeme de classment, on se base sur le nombre de points marque, si il y a egalite, on se base sur celui
             # qui a perdu le plus tot
@@ -127,7 +140,7 @@ class TournamentThread(Threads):
                     return
 
     @staticmethod
-    def set_game_players(tournament_code, game_code: str, winner_id: str, loser_id: str, redis):
+    def set_game_players(tournament_code, game_code: str, winner, loser , redis):
         rounds = redis.json().get(RTables.JSON_TOURNAMENT(tournament_code), Path('scoreboards.num_rounds'))
         if rounds is None:
             return None
@@ -136,10 +149,32 @@ class TournamentThread(Threads):
             for m in range(1, matches_in_round + 1):
                 game_id = redis.json().get(RTables.JSON_TOURNAMENT(tournament_code), Path(f'scoreboards.rounds.round_{r}.games.r{r}m{m}.game_code'))
                 if game_id == game_code:
-                    redis.json().set(RTables.JSON_TOURNAMENT(tournament_code), Path(f'scoreboards.rounds.round_{r}.games.r{r}m{m}.winner'), winner_id)
-                    redis.json().set(RTables.JSON_TOURNAMENT(tournament_code), Path(f'scoreboards.rounds.round_{r}.games.r{r}m{m}.loser'), loser_id)
-                    return
+                    redis.json().set(RTables.JSON_TOURNAMENT(tournament_code), Path(f'scoreboards.rounds.round_{r}.games.r{r}m{m}.winner_username'), winner.client.profile.username)
+                    redis.json().set(RTables.JSON_TOURNAMENT(tournament_code), Path(f'scoreboards.rounds.round_{r}.games.r{r}m{m}.loser_username'), loser.client.profile.username)
+                    redis.json().set(RTables.JSON_TOURNAMENT(tournament_code), Path(f'scoreboards.rounds.round_{r}.games.r{r}m{m}.winner_score'), winner.score)
+                    redis.json().set(RTables.JSON_TOURNAMENT(tournament_code), Path(f'scoreboards.rounds.round_{r}.games.r{r}m{m}.loser_score'), loser.score)
+                    redis.json().set(RTables.JSON_TOURNAMENT(tournament_code), Path(f'scoreboards.rounds.round_{r}.games.r{r}m{m}.winner_picture'), winner.client.profile.profile_picture.url)
+                    redis.json().set(RTables.JSON_TOURNAMENT(tournament_code), Path(f'scoreboards.rounds.round_{r}.games.r{r}m{m}.loser_picture'), loser.client.profile.profile_picture.url)
 
+
+                    #ADD INFO I WANT .
+                    return
+    @staticmethod
+    def set_game_players_name(tournament_code, game_code: str, playerL, playerR , redis):
+        rounds = redis.json().get(RTables.JSON_TOURNAMENT(tournament_code), Path('scoreboards.num_rounds'))
+        if rounds is None:
+            return None
+        for r in range(1, rounds + 1):
+            matches_in_round = redis.json().get(RTables.JSON_TOURNAMENT(tournament_code), Path(f'scoreboards.rounds.round_{r}.matches_total'))
+            for m in range(1, matches_in_round + 1):
+                game_id = redis.json().get(RTables.JSON_TOURNAMENT(tournament_code), Path(f'scoreboards.rounds.round_{r}.games.r{r}m{m}.game_code'))
+                if game_id == game_code:
+                    redis.json().set(RTables.JSON_TOURNAMENT(tournament_code), Path(f'scoreboards.rounds.round_{r}.games.r{r}m{m}.playerL_username'), playerL.client.profile.username)
+                    redis.json().set(RTables.JSON_TOURNAMENT(tournament_code), Path(f'scoreboards.rounds.round_{r}.games.r{r}m{m}.playerR_username'), playerR.client.profile.username)
+                    redis.json().set(RTables.JSON_TOURNAMENT(tournament_code), Path(f'scoreboards.rounds.round_{r}.games.r{r}m{m}.playerL_picture'), playerL.client.profile.profile_picture.url)
+                    redis.json().set(RTables.JSON_TOURNAMENT(tournament_code), Path(f'scoreboards.rounds.round_{r}.games.r{r}m{m}.playerR_picture'), playerR.client.profile.profile_picture.url)
+                    #ADD INFO I WANT .
+                    return
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ FUNCTIONS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
 
     def create_games(self) -> list[Game]:
@@ -153,6 +188,7 @@ class TournamentThread(Threads):
                 game.create_redis_game()
                 game.rset_status(GameStatus.WAITING)
                 games.append(game)
+                
                 self.redis.json().set(RTables.JSON_TOURNAMENT(self.tournament.code), Path(f'scoreboards.rounds.round_{r}.games.r{r}m{m}.game_code'),
                                       game.code)
         return games
@@ -172,14 +208,21 @@ class TournamentThread(Threads):
 
     def manage_games(self):
         for game in self.games[:self.get_total_matches()]:
-            status = game.rget_status()
+            status = None
+            for m in range(1, self.get_total_matches() + 1):
+                round = self.get_current_round()
+                if self.get(f'scoreboards.rounds.round_{round}.games.r{round}m{m}.game_code')  == game.code:
+                    status = GameStatus(self.get(f'scoreboards.rounds.round_{round}.games.r{round}m{m}.status'))
+            print(f"Status of this game is {status}")
             if status is GameStatus.FINISHED:
+                print("Game is finished !, lets increase match completed and del loser")
                 matches_completed = self.get(f'scoreboards.rounds.round_{self.get_current_round()}.matches_completed')
                 self.set(f'scoreboards.rounds.round_{self.get_current_round()}.matches_completed', int(matches_completed) + 1)
                 send_group(RTables.GROUP_TOURNAMENT(self.tournament.code), EventType.TOURNAMENT, ResponseAction.TOURNAMENT_GAME_FINISH, {
                     'game_id': game.code,
                     'winner': str(game.winner.client.id),
-                    'loser': str(game.loser.client.id)
+                    'loser': str(game.loser.client.id),
+                    'tournament_code' : self.tournament.code
                 })
                 send_group(RTables.GROUP_TOURNAMENT(game.loser.client.id), EventType.TOURNAMENT, ResponseAction.TOURNAMENT_LOSE_GAME)
                 #TODO envoyer a quel place on a fini

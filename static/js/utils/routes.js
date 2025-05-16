@@ -29,6 +29,7 @@ const routes = [
     {
         path: '/pong/tournament/tree/',
         template: async (query) => {
+            console.log("Fetching the queried tournament for real ");
             return await fetchRoute(`/pages/pong/tournament/tree/${query}`);
         },
     },

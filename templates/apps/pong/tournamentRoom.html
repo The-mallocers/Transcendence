@@ -1,42 +1,20 @@
+{% load static %}
 <div class="inTournamentRoomContainer p-5">
+    <h1>LOADING TOURNAMENT ROOM</h1>
     <div class="box p-3">
-        <h1 class="mt-2 text-center">{{ roomInfos.name }}</h1>
+        <h1 class="mt-2 text-center" id="title"></h1>
         <div class="container-fluid mt-3">
-            <div class="row row-cols-2 d-flex justify-content-start">
-                {% for player in players %}
-                    <div class="col p-2">
-                        <div class="content border p-3 d-flex justify-content-between align-items-center">
-                            <div class="d-flex align-items-center justify-content-center gap-3">
-                                <div class="avatarContainer">
-                                    <img src="{{player.avatar}}" alt="">
-                                </div>
-                                <div class="nickname ml-3">{{ player.nickname }}</div>
-                            </div>
-                            <div >
+            <div id="clientsInTournament" class="row row-cols-2 d-flex justify-content-start">
 
-                            </div>
-                        </div>
-                    </div>
-                {% endfor %}
-
-                {% for i in "12345678" %}
-                    {% if forloop.counter > players|length %}
-                        <div class="col p-2">
-                            <div class="content border p-3 d-flex justify-content-between align-items-center">
-                                <div class="d-flex align-items-center justify-content-center gap-3">
-                                    <div class="nickname ml-3"> waiting</div>
-                                    <div>(add bpoyer's animation with the li dots)</div>
-                                </div>
-                            </div>
-                        </div>
-                    {% endif %}
-                {% endfor %}
             </div>
 
-            <div class="btns d-flex flex-row gap-3 justify-content-center align-items-center mt-3">
-                <div class="btn" data-route="/pong/tournament/join/">Leave</div>
-                <div class="btn btn-outline-primary">Invite</div>
+            <div id="btnsRoom" class="btns d-flex flex-row justify-content-between gap-3 align-items-center mt-3">
+                <div class="btn btn-intra">Invite</div>
+                <div class="btn btn-intra-outlined" data-route="/pong/tournament/join/">Leave</div>
             </div>
         </div>
     </div>
 </div>
+
+
+<script type="module" src="{% static '/js/tournaments/tournamentRoom.js' %}"></script>

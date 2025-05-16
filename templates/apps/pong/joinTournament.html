@@ -1,3 +1,4 @@
+{% load static %}
 <div class="joinTournamentContainer">
     <div class="container">
         <h1 class="text-center mt-5">Create tournament lobby</h1>
@@ -8,32 +9,12 @@
             </div>
         </div> 
         <h1 class="text-center mt-5">Join a room</h1>
-        <div class="row row-cols-3 d-flex justify-content-start roomsContainer">
-          {% for room in rooms %}
-            <div class="col room d-flex justify-content-center align-items-center">
-                <div class="cardContainer">
-                    <h4>{{ room.name }}</h4>
-
-
-                    <div class="d-flex flex-row align-items-center justify-content-between">
-                        <div class="btn joinBtn">join</div>
-                        <div class="avatarsContainer mt-2">
-
-                            <div class="imgContainer">
-                                <img src="/static/img/img.png" alt="">
-                            </div>
-                            <div class="imgContainer">
-                                <img src="/static/img/img.png" alt="">
-                            </div>
-                            <div class="imgContainer">
-                                <img src="/static/img/img.png" alt="">
-                                <div class="more">+6</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-          {% endfor %}
+        <div id="tournaments" class="row row-cols-3 d-flex justify-content-start roomsContainer">
+          <!-- {% for room in rooms %}
+            
+          {% endfor %} -->
         </div>
       </div>
 </div>
+
+<script type="module" src="{% static '/js/tournaments/joinTournament.js' %}"></script>

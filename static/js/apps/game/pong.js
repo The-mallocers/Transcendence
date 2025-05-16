@@ -1,6 +1,7 @@
 import {WebSocketManager} from "../../websockets/websockets.js";
 import {navigateTo} from '../../spa/spa.js';
-import {isGameOver} from "./VarGame.js"
+import {isGameOver} from "./VarGame.js";
+import { tournamentData } from "./VarGame.js";
 // import { apiFriends } from "../profile/profile.js";
 
 const socket = WebSocketManager.gameSocket;
@@ -12,6 +13,7 @@ const lpicture = document.getElementById("lpicture");
 const rpicture = document.getElementById("rpicture");
 let lscore = document.getElementById("scoreLeft");
 let rscore = document.getElementById("scoreRight");
+let timer = document.getElementById("timer");
 
 const height = 500;
 const width = 1000;
@@ -39,6 +41,7 @@ let right_last_move = "idle";
 if (!socket || socket.readyState === WebSocket.CLOSED) {
     navigateTo("/");
 } else {
+    tournamentData.gameIsReady = false;
     console.log(window.GameState);
     lusername.innerHTML = window.GameState.left.username;
     rusername.innerHTML = window.GameState.right.username;
@@ -66,12 +69,18 @@ if (!socket || socket.readyState === WebSocket.CLOSED) {
             navigateTo("/");
         }
 
-        if (jsonData.event == "UPDATE") {
+        if (jsonData.data.action == "WAITING_TO_START") {
+            is_gameplay_start = true
+            timer.innerHTML = jsonData.data.content.timer;
+        }
 
-            if (is_gameplay_start == false) {
-                is_gameplay_start = true;
-                last_time = performance.now();
-            }
+        if (jsonData.event == "UPDATE") {
+            timer.remove()
+
+            // if (is_gameplay_start == false) {
+            //     is_gameplay_start = true;
+            //     last_time = performance.now();
+            // }
             if (jsonData.data.action == "PADDLE_LEFT_UPDATE") {
                 console.log("move from server:", jsonData.data.content.move);
                 const current_move = jsonData.data.content.move
@@ -111,12 +120,17 @@ if (!socket || socket.readyState === WebSocket.CLOSED) {
         } else if (jsonData.data.action == "GAME_ENDING") {
             const game_id = jsonData.data.content
             console.log("GAME IS OVER");
-            navigateTo(`/pong/gameover/?game=${game_id}`);
+            //Hack that allows me to not change backend 
+            //otherwise game over will navigate after we redirected to tournament.
+            if (window.location.pathname != "/pong/tournament/tree/" ) {
+                navigateTo(`/pong/gameover/?game=${game_id}`);
+            }
             isGameOver.gameIsOver = true;
             WebSocketManager.closeGameSocket();
         }
     };
 }
+
 
 document.addEventListener('visibilitychange', () => {
     did_tab_out = true;

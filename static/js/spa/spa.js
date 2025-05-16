@@ -24,6 +24,14 @@ class Router {
                 await WebSocketManager.initNotifSocket(clientId);
             }
         }
+        console.log("is tournament socket closed:", WebSocketManager.isSocketClosed(WebSocketManager.tournamentSocket));
+        if (WebSocketManager.isSocketClosed(WebSocketManager.tournamentSocket)) {
+            const clientId = await getClientId();
+            if (clientId) {
+                console.log("COUCOU WEBSOCKET TOURNOI ICI");
+                await WebSocketManager.initTournamentSocket(clientId);
+            }
+        }
         const path = window.location.pathname;
         // console.log(window.location.search);
         // console.log("looking for the path: ", path)
@@ -70,7 +78,7 @@ class Router {
     navigate(path) {
 
         let splitedPath = path.split("/")
-        console.log(splitedPath);
+        // console.log(splitedPath);
         if (splitedPath.includes("pong")) {
             if (splitedPath.includes("duel") || splitedPath.includes("arena") || splitedPath.includes("matchmaking")) {
                 WebSocketManager.closeChatSocket();
@@ -101,6 +109,11 @@ export function reloadScriptsSPA() {
 }
 
 export function navigateTo(path) {
+    //////////
+        for (let i = 1; i < 10; i++) {
+            clearInterval(i);
+        }
+    //////////
     router.navigate(path);
 }
 

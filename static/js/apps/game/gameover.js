@@ -1,5 +1,6 @@
 function endStateThingy(event) {
     const msg = document.querySelector(".endState");
+    if (!msg) return ;
     const words = msg.innerHTML.trim().split(" ");
     const newContent = words.map(word =>
         word.split("").map((letter, letterIndex, arr) =>
