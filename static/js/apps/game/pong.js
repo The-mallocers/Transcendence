@@ -13,6 +13,7 @@ const lpicture = document.getElementById("lpicture");
 const rpicture = document.getElementById("rpicture");
 let lscore = document.getElementById("scoreLeft");
 let rscore = document.getElementById("scoreRight");
+let timer = document.getElementById("timer");
 
 const height = 500;
 const width = 1000;
@@ -68,12 +69,18 @@ if (!socket || socket.readyState === WebSocket.CLOSED) {
             navigateTo("/");
         }
 
-        if (jsonData.event == "UPDATE") {
+        if (jsonData.data.action == "WAITING_TO_START") {
+            is_gameplay_start = true
+            timer.innerHTML = jsonData.data.content.timer;
+        }
 
-            if (is_gameplay_start == false) {
-                is_gameplay_start = true;
-                last_time = performance.now();
-            }
+        if (jsonData.event == "UPDATE") {
+            timer.remove()
+
+            // if (is_gameplay_start == false) {
+            //     is_gameplay_start = true;
+            //     last_time = performance.now();
+            // }
             if (jsonData.data.action == "PADDLE_LEFT_UPDATE") {
                 console.log("move from server:", jsonData.data.content.move);
                 const current_move = jsonData.data.content.move

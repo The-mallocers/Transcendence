@@ -6,6 +6,7 @@ class GameStatus(str, Enum):
     WAITING: str = 'waiting'
     MATCHMAKING: str = 'matchmaking'
     STARTING: str = 'starting'
+    WAITING_TO_START: str = 'waiting_to_start'
     RUNNING: str = 'running'
     ENDING: str = 'ending'
     FINISHED: str = 'finished'
@@ -115,6 +116,7 @@ class ResponseAction(str, Enum):
     TOURNAMENT_INFO: str = 'Tournament info'
     TOURNAMENT_LIST: str = 'List of tournaments'
     TOURNAMENT_UPDATE: str = 'Tournament update'
+    WAITING_FOR_NEXT_ROUND: str = 'The tournament is waiting for the next round'
 
     # ── Game Actions ──────────────────────────────────────────────────────────────────
     JOIN_GAME: str = 'You have successfully joined the game'
@@ -122,6 +124,7 @@ class ResponseAction(str, Enum):
     STARTING: str = 'The game is about to start'
     STARTED: str = 'The game has started'
     GAME_ENDING: str = 'The game has ended'
+    WAITING_TO_START: str = 'Waiting for the game to start'
 
     # ── Update ────────────────────────────────────────────────────────────────────────
     PLAYER_INFOS: str = 'player_informations'
