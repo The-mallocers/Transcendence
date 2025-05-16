@@ -5,6 +5,15 @@ import { populateTree } from "./populateHelpers.js";
 import { isGameOver } from "../apps/game/VarGame.js";
 import { tournamentData } from "../apps/game/VarGame.js";
 
+
+
+const get_tournament_info = {
+    "event": "tournament",
+    "data": {
+        "action": "tournament_info"
+    }    
+}
+
 export function setUpTournamentSocket (tournamentSocket) {
     tournamentSocket.onmessage = (message) => {
         const jsonData = JSON.parse(message.data);
@@ -20,7 +29,9 @@ export function setUpTournamentSocket (tournamentSocket) {
             //     navigateTo("/pong/gamemodes/");
             //     // errDiv.innerHTML = message.data.error
             //     break;
-            
+            case "TOURNAMENT_PLAYER_LEFT" :
+                tournamentSocket.send(JSON.stringify(get_tournament_info));
+                break;
             case "TOURNAMENT_GAME_FINISH":
                 if (isPlayerIngame(jsonData.data.content) == false) return;
                 //I think the game might already be over by that point.
@@ -91,9 +102,3 @@ function isPlayerIngame(data) {
     return false;
 }
 
-const get_tournament_info = {
-    "event": "tournament",
-    "data": {
-        "action": "tournament_info"
-    }    
-}
