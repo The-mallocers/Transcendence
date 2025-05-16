@@ -3,6 +3,27 @@ import { WebSocketManager } from "../websockets/websockets.js"
 const tournamentSocket = WebSocketManager.tournamentSocket;
 const btn = document.querySelector("#create-btn");
 
+
+let minus = document.querySelector(".minus")
+let plus = document.querySelector(".plus")
+
+
+function decrease(){
+    let score = document.querySelector(".score")
+    let val = parseInt(score.innerHTML)
+    if (val > 1)
+        score.innerHTML = --val
+}
+
+function increase(){
+    let score = document.querySelector(".score")
+    let val = parseInt(score.innerHTML)
+    score.innerHTML = ++val
+}
+
+minus.addEventListener("click", decrease)
+plus.addEventListener("click", increase)
+
 function getTournamentSettings(){
     let score = document.querySelector(".score");
     let points = parseInt(score.innerHTML);
