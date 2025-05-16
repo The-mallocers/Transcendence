@@ -1,3 +1,4 @@
+import hashlib
 import uuid
 from datetime import timedelta, datetime, timezone
 
@@ -7,12 +8,13 @@ from django.http import HttpRequest, HttpResponse
 
 from apps.auth.models import InvalidatedToken
 from apps.client.models import Clients
-from utils.enums import JWTType
-from utils.util import create_jti_id
+from utils.enums import JWTType, RTables, SessionType
+from utils.redis import RedisConnectionPool
+from utils.util import create_jti_id, get_client_ip
 
 
 class JWT:
-    def __init__(self, client: Clients, token_type: JWTType):
+    def __init__(self, client: Clients, token_type: JWTType, request: HttpRequest = None):
         # ── Local Vars ────────────────────────────────────────────────────────────── #
         self.client: Clients = client
         now = datetime.now(tz=timezone.utc)
@@ -36,12 +38,19 @@ class JWT:
         if self.client.rights.is_admin:
             self.ROLES.append('admin')
 
+        self.SESSION_ID = request.session.session_key
+        self.IP_ADDRESS = get_client_ip(request)
+        self.USER_AGENT = request.META.get('HTTP_USER_AGENT', '')
+        self.DEVICE_FINGERPRINT = hashlib.sha256(str(f"{self.USER_AGENT}|{self.IP_ADDRESS}").encode()).hexdigest()
+
+
     def __str__(self):
         return f"{self.TYPE}_token expired in {self.EXP}, issue a {self.IAT}"
 
     # ── Public ────────────────────────────────────────────────────────────────────── #
 
     def set_cookie(self, response: HttpResponse) -> HttpResponse:
+        redis = RedisConnectionPool.get_sync_connection('JWT')
         response.set_cookie(
             f'{self.TYPE.value}_token',
             f'{self.encode_token()}',
@@ -50,6 +59,15 @@ class JWT:
             samesite='Lax',
             expires=self.EXP
         )
+
+        #Store session settings in redis
+        redis.hset(RTables.HASH_CLIENT_SESSION(self.client.id), SessionType.SESSION_ID, self.SESSION_ID)
+        redis.hset(RTables.HASH_CLIENT_SESSION(self.client.id), SessionType.IP_ADRESS, self.IP_ADDRESS)
+        redis.hset(RTables.HASH_CLIENT_SESSION(self.client.id), SessionType.USER_AGENT, self.USER_AGENT)
+        redis.hset(RTables.HASH_CLIENT_SESSION(self.client.id), SessionType.FINGERPRINT, self.DEVICE_FINGERPRINT)
+        redis.hset(RTables.HASH_CLIENT_SESSION(self.client.id), SessionType.LAST_ACTIVITY, int(datetime.now().timestamp()))
+        redis.expire(RTables.HASH_CLIENT_SESSION(self.client.id), settings.SESSION_EXPIRY)
+
         return response
 
     def invalidate_token(self):
@@ -112,6 +130,10 @@ class JWT:
             'iat': self.IAT,
             'exp': self.EXP,
             'type': self.TYPE,
+            'session_id': self.SESSION_ID,
+            'ip_address': self.IP_ADDRESS,
+            'user_agent': self.USER_AGENT,
+            'device_fingerprint': self.DEVICE_FINGERPRINT,
         }
 
         if self.TYPE == JWTType.ACCESS:
@@ -134,9 +156,8 @@ class JWT:
         token.JTI = uuid.UUID(data['jti'])
         token.IAT = data.get('iat')
         token.ROLES = data.get('roles', [])
-        token.DEVICE_ID = data.get('device_id')
+        token.SESSION_ID = data.get('session_id')
         token.IP_ADDRESS = data.get('ip_address')
         token.USER_AGENT = data.get('user_agent')
         token.DEVICE_FINGERPRINT = data.get('device_fingerprint')
-        token.TOKEN_VERSION = data.get('token_version', 0)
         return token

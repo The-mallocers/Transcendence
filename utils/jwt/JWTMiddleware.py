@@ -45,23 +45,11 @@ class JWTMiddleware:
         new_access_token = JWT(client, JWTType.ACCESS)
         request.COOKIES['access_token'] = new_access_token.encode_token()
 
-        request.user.is_authenticated = True
-        request.user.is_staff = True if client.rights.is_admin else False
-        request.user.id = str(client.id)
-
         response = self.get_response(request)
         new_access_token.set_cookie(response)
         return response
 
     def __call__(self, request: HttpRequest):
-        #Create a custom user object for the request
-        request.user = type('User', (), {
-            'is_authenticated': False,
-            'is_staff': False,
-            'client': None,
-            'id': None
-        })()
-
         #If the path is not protected
         if not self.is_path_matching(request.path_info, settings.PROTECTED_PATHS):
             return self.get_response(request)
@@ -72,10 +60,7 @@ class JWTMiddleware:
                 return self.get_response(request)
             else:
                 try:  # let pass the request
-                    token = JWT.extract_token(request, JWTType.ACCESS)
-                    request.user.is_authenticated = True
-                    request.user.is_staff = True if token.client.rights.is_admin else False
-                    request.user.id = token.SUB
+                    JWT.extract_token(request, JWTType.ACCESS)
                     return self.get_response(request)
                 except (jwt.InvalidTokenError, jwt.ExpiredSignatureError):
                     try:

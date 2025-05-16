@@ -42,7 +42,7 @@ class SessionType(str, Enum):
     SESSION_ID: str = 'session_id'
     LAST_ACTIVITY: str = 'last_activity'
     USER_AGENT: str = 'user_agent'
-    IP: str = 'ip'
+    IP_ADRESS: str = 'ip'
     LAST_JWT_REFRESH: str = 'refresh_jwt'
     LAST_JWT_ACCESS: str = 'access_jwt'
 

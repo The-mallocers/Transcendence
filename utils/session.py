@@ -7,6 +7,7 @@ from django.http import HttpRequest, HttpResponseForbidden
 
 from utils.enums import RTables, SessionType
 from utils.redis import RedisConnectionPool
+from utils.util import get_client_ip
 
 
 class SessionLimitingMiddleware:
@@ -18,19 +19,11 @@ class SessionLimitingMiddleware:
 
     def generate_fingerprint(self, request: HttpRequest):
         user_agent = request.META.get('HTTP_USER_AGENT', '')
-        ip_address = self.get_client_ip(request)
+        ip_address = get_client_ip(request)
 
         fingerprint_base = f"{user_agent}|{ip_address}"
-        fingerprint = hashlib.sha256(fingerprint_base.encode()).hexdigest()
+        fingerprint = hashlib.sha256(str(f"{user_agent}|{ip_address}").encode()).hexdigest()
         return fingerprint
-
-    def get_client_ip(self, request: HttpRequest):
-        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
-        if x_forwarded_for:
-            ip = x_forwarded_for.split(',')[0].strip()
-        else:
-            ip = request.META.get('REMOTE_ADDR')
-        return ip
 
     def __call__(self, request: HttpRequest):
         if not self.redis:
@@ -84,7 +77,7 @@ class SessionLimitingMiddleware:
             SessionType.SESSION_ID.value: new_session_id,
             SessionType.LAST_ACTIVITY.value: int(time.time()),
             SessionType.USER_AGENT.value: request.META.get('HTTP_USER_AGENT', ''),
-            SessionType.IP.value: self.get_client_ip(request)
+            SessionType.IP_ADRESS.value: self.get_client_ip(request)
         }
 
         self.redis.hset(redis_key, mapping=session_data)
