@@ -142,8 +142,7 @@ class JWT:
         redis.hset(RTables.HASH_CLIENT_SESSION(self.client.id), SessionType.FINGERPRINT, self.DEVICE_FINGERPRINT)
         redis.hset(RTables.HASH_CLIENT_SESSION(self.client.id), SessionType.LAST_ACTIVITY, int(datetime.now().timestamp()))
         redis.expire(RTables.HASH_CLIENT_SESSION(self.client.id), settings.SESSION_LIMITING_EXPIRY)
-
-        redis.close()
+        RedisConnectionPool.close_sync_connection('JWT')
 
     @staticmethod
     def _decode_token(token: str):
