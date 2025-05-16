@@ -296,7 +296,7 @@ class Clients(models.Model):
                 result = []
                 for client in clients:
                     rank = client.get_rank(client.stats.mmr).value
-                    print(f"rank is {rank}")
+                    # print(f"rank is {rank}")
                     
                     info = {
                         "id": str(client.id),

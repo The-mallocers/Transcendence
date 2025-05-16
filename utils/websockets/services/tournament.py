@@ -110,7 +110,7 @@ class TournamentService(BaseServices):
             "code": code,
             "scoreboard": scoreboard,
         }
-        print("roomInfos: ", roomInfos)
+        # print("roomInfos: ", roomInfos)
         return roomInfos
 
     async def _handle_list_tournament(self, data, client):

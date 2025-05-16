@@ -34,6 +34,7 @@ class TournamentThread(Threads):
                 if self._starting():
                     sleep(5)
                 if self._running():
+                    print("Mama mia tournament is over !")
                     break
                 sleep(2)
 
@@ -93,15 +94,19 @@ class TournamentThread(Threads):
             return True
         return False
 
+    #Very importante !!
     def _running(self):
         if self.tournament.status is TournamentStatus.RUNNING:
             if self.get_match_complete() == self.get_total_matches() and self.get_current_round() <= self.rounds:
+                print("Going to next round !")
                 self.set_current_round(self.get_current_round() + 1)
                 self.place_players()
             elif self.get_current_round() == self.rounds:
+                print("Setting tournament status to Ending !")
                 self.set_status(TournamentStatus.ENDING)
                 return True
             else:
+                print("Managing games that just happened !")
                 self.manage_games()
             # todo, il faut que je fasse le systeme de classment, on se base sur le nombre de points marque, si il y a egalite, on se base sur celui
             # qui a perdu le plus tot
@@ -196,8 +201,14 @@ class TournamentThread(Threads):
 
     def manage_games(self):
         for game in self.games[:self.get_total_matches()]:
-            status = game.rget_status()
+            status = None
+            for m in range(1, self.get_total_matches() + 1):
+                round = self.get_current_round()
+                if self.get(f'scoreboards.rounds.round_{round}.games.r{round}m{m}.game_code')  == game.code:
+                    status = GameStatus(self.get(f'scoreboards.rounds.round_{round}.games.r{round}m{m}.status'))
+            print(f"Status of this game is {status}")
             if status is GameStatus.FINISHED:
+                print("Game is finished !, lets increase match completed and del loser")
                 matches_completed = self.get(f'scoreboards.rounds.round_{self.get_current_round()}.matches_completed')
                 self.set(f'scoreboards.rounds.round_{self.get_current_round()}.matches_completed', int(matches_completed) + 1)
                 send_group(RTables.GROUP_TOURNAMENT(self.tournament.code), EventType.TOURNAMENT, ResponseAction.TOURNAMENT_GAME_FINISH, {

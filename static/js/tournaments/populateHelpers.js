@@ -1,3 +1,5 @@
+import { tournamentData } from "../apps/game/VarGame.js"
+import { navigateTo } from "../spa/spa"
 
 //Build TREE
 const buildTr = (matchInfos) => {
@@ -84,6 +86,17 @@ export function populateTree(tournamentInfos) {
         for (const key in tournamentInfos?.scoreboard.rounds) {
             meow.innerHTML += buildRound(tournamentInfos?.scoreboard.rounds[key], key)
         }
+        if (tournamentData.gameIsReady) {
+            const parrent = document.querySelector('#tree')
+            console.log("data of tournament join", parrent);
+            if (parrent){
+                let btn = document.createElement('div')
+                btn.classList.add('btn', 'btn-primary');
+                btn.innerText = 'Ready';
+                btn.addEventListener('click', ()=>{navigateTo(`/pong/matchmaking/`);})
+                parrent.appendChild(btn)
+            }
+        }
 }
 
 
@@ -127,8 +140,6 @@ export function populateTournament(tournament_data){
                         </div>
                         </div>
                         `
-                        
-                        console.log("mini meow: ", clientsDiv[i])
             });
     clientsDiv.forEach(htmlString => {
         const temp = document.createElement("div");
