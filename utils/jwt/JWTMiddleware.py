@@ -3,11 +3,10 @@ import fnmatch
 import jwt
 from django.conf import settings
 from django.http import JsonResponse, HttpRequest
-from ipware import get_client_ip
 from rest_framework import status
 
 from apps.client.models import Clients
-from utils.enums import JWTType, RTables, ConnectionType
+from utils.enums import JWTType
 from utils.jwt.JWT import JWT
 from utils.redis import RedisConnectionPool
 
@@ -48,6 +47,7 @@ class JWTMiddleware:
 
         request.user.is_authenticated = True
         request.user.is_staff = True if client.rights.is_admin else False
+        request.user.id = str(client.id)
         
         response = self.get_response(request)
         new_access_token.set_cookie(response)
@@ -58,7 +58,8 @@ class JWTMiddleware:
         request.user = type('User', (), {
             'is_authenticated': False,
             'is_staff': False,
-            'client': None
+            'client': None,
+            'id': None
         })()
 
         #If the path is not protected
@@ -74,6 +75,7 @@ class JWTMiddleware:
                     token = JWT.extract_token(request, JWTType.ACCESS)
                     request.user.is_authenticated = True
                     request.user.is_staff = True if token.client.rights.is_admin else False
+                    request.user.id = token.SUB
                     return self.get_response(request)
                 except (jwt.InvalidTokenError, jwt.ExpiredSignatureError):
                     try:

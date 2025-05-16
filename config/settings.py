@@ -135,7 +135,6 @@ SECURE_SSL_REDIRECT = True
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 
-SESSION_LIMITING_EXPIRY = 1800
 
 # Protected paths configuration
 PROTECTED_PATHS = [
@@ -157,8 +156,16 @@ ROLE_PROTECTED_PATHS = {
     '/pages/admin/*': ['admin']
 }
 
-SESSION_LIMITING_EXEMPT_ADMIN = [
-    '/pages/admin/'
+# ────────────────────────────────── Session Limiting ────────────────────────────────── #
+
+SESSION_LIMITING_EXPIRY = 1800
+SESSION_LIMITING_BLOCK_NEW = True
+SESSION_LIMITING_EXEMPT_ADMIN = True
+SESSION_LIMITING_EXEMPT_PATHS = [
+    # '/pages/',
+    '/api/',
+    '/static/',
+    '/media/'
 ]
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ JWT SETTINGS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #

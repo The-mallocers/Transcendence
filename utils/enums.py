@@ -37,9 +37,14 @@ class EventType(str, Enum):
     ERROR: str = 'error'
 
 
-class ConnectionType(str, Enum):
+class SessionType(str, Enum):
+    FINGERPRINT: str = 'fingerprint'
+    SESSION_ID: str = 'session_id'
+    LAST_ACTIVITY: str = 'last_activity'
+    USER_AGENT: str = 'user_agent'
     IP: str = 'ip'
-    SEESION_KEY: str = 'session_key'
+    LAST_JWT_REFRESH: str = 'refresh_jwt'
+    LAST_JWT_ACCESS: str = 'access_jwt'
 
 
 # All the actions the client sends to the server
@@ -228,7 +233,7 @@ class RTables(str, Enum):
 
     # ── Hash Tables ───────────────────────────────────────────────────────────────── #
     HASH_CLIENT: str = 'client_{}'
-    HASH_CLIENT_CONN: str = 'client_conn_{}'
+    HASH_CLIENT_SESSION: str = 'client_session_{}'
     HASH_MATCHES: str = 'current_matches'
     HASH_QUEUE: str = 'queue_{}'
     HASH_G_QUEUE: str = HASH_QUEUE.format('global')
