@@ -1,102 +1,87 @@
 {% load static %}
 
-<div class="myinformationsPage">
+<div class="container-fluid main mt-4">
+    <div class="row row-information g-4 align-items-start justify-content-start">
     {% csrf_token %}
-    <div class="container-fluid main">
-        <div class="row align-items-start box">
-            <div class="col-7">
-                <div class="content">
-                    <h2 class="text-center" id="currusername">Current username: {{ client.profile.username }}</h2>
-                    <h2 class="text-center" id="curremail">Current email: {{ client.profile.email }}</h2>
-                    <h2 class="text-center">Update Personal informations</h2>
-                    <form id="register-form" method="PUT" action="{% url 'update' %}" enctype="multipart/form-data">
-                        <div id="error-message" style="color: red;"></div>
-                        {% csrf_token %}
-                        <div class="row">
-                            <div class="col">
-                                <input class="p-3 container-fluid" type="text" id="username" name="username"
-                                       placeholder="Enter new username" required>
-                            </div>
-                            <div class="col">
-                                <input class="p-3 container-fluid" type="email" id="email" name="email"
-                                       placeholder="Enter new email" required>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col">
-                                <input class="p-3 container-fluid mt-3" type="password" id="password" name="password"
-                                       placeholder="Enter new password" required>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col">
-                                <input class="p-3 container-fluid mt-3" type="password" id="password_check" name="password_check"
-                                       placeholder="Verify password" required>
-                            </div>
-                        </div>
-                    </form>
-                    <div class=" d-flex flex-column align-items-center justify-content-center inputs">
-                        <div class="type-intra-green mt-4" id="update-btn">Update informations</div>
-                        <h2 class="text-center">Current picture:</h2>
-                        <div id="upload-feedback"></div>
-                        <img src="{{ client.profile.profile_picture.url }}" id="profile_picture">
-                        <div class="type-intra-green mt-4" id="upload-img-btn">Upload new profile picture</div>
-                        <div class="type-intra-green mt-4" id="logout-btn">Log out</div>
-                        <div class="type-intra-green mt-4" id="delete-btn">Delete your account</div>
-
-                        <input type="file" id="file_input" style="display: none;"/>
-                    </div>
-                    {% if isAdmin %}
-                        <div class="type-intra-green mt-4" data-route="/admin/monitoring/">Monitoring</div>
-                    {%endif%}
+        <div class="col-6 col-md-6">
+            <div class="box box-top d-flex flex-column align-items-start">
+                <h4>Personal informations</h4>
+                <label class="control-label string optional disabled" for="user_first_name">Name</label>
+                <input class="form-control string optional disabled" disabled="disabled" 
+                    type="text" value={{ client.profile.username }} name="user[first_name]" 
+                    id="currusername">
+                <label class="control-label string optional disabled" for="user_first_name">Email</label>
+                <input class="form-control string optional disabled" disabled="disabled" 
+                    type="text" value={{ client.profile.email }} name="user[first_name]" 
+                    id="curremail">
+                <div class="w-100 p-3 d-flex justify-content-around">
+                    <div class="type-intra-green mt-4" id="logout-btn">Log out</div>
+                    <div class="type-intra-green mt-4" id="delete-btn">Delete your account</div>
                 </div>
+                <input type="file" id="file_input" style="display: none;"/>
+                {% if isAdmin %}
+                    <div class="align-self-center type-intra-green mt-4" data-route="/admin/monitoring/">Monitoring</div>
+                {%endif%}
             </div>
-            <div class="col-5">
+        </div>
+        <div class="col-6 col-md-6">
+            <div class="box box-top">
                 <div class="content d-flex flex-column justify-content-center align-items-center">
+                    <h4 class="align-self-start">Enable 2-FA</h4>
                     <svg class="shield" viewBox="0 0 94 125" xmlns="http://www.w3.org/2000/svg">
-                        <path class="shieldPath {% if twoFaEnable %}fillGreen{% endif %}"
-                        "
-                              d="M46.009 0.27625L14.5877 9.02375V11.0687C14.5877 22.0438 7.9441 17.275 1.98196 19.4575L0.00250072 20.1838L0 22.0438V67.92C0 83.7687 7.92035 98.5875 22.902 110.772C34.1035 119.884 45.195 124.29 45.6626 124.474L47.0006 125L48.3386 124.475C48.805 124.293 59.8953 119.885 71.0993 110.774C86.0809 98.5888 94 83.7688 94 67.9212V20.1863L92.018 19.4587C86.0547 17.275 79.4123 22.0438 79.4123 11.07V9.02375L47.0006 0L46.009 0.27625Z "/>
+                        <path class="shieldPath {% if twoFaEnable %}fillGreen{% endif %}" d="M46.009 0.27625L14.5877 9.02375V11.0687C14.5877 22.0438 7.9441 17.275 1.98196 19.4575L0.00250072 20.1838L0 22.0438V67.92C0 83.7687 7.92035 98.5875 22.902 110.772C34.1035 119.884 45.195 124.29 45.6626 124.474L47.0006 125L48.3386 124.475C48.805 124.293 59.8953 119.885 71.0993 110.774C86.0809 98.5888 94 83.7688 94 67.9212V20.1863L92.018 19.4587C86.0547 17.275 79.4123 22.0438 79.4123 11.07V9.02375L47.0006 0L46.009 0.27625Z "/>
                     </svg>
-                    <h2 class="text-center mt-5">Enable 2-FA</h2>
                     {% if twoFaEnable %}
                         <div class="switch mt-3 fillGreen" data-status="on" onclick="switchToggle(this)"></div>
                     {% else %}
                         <div class="switch mt-3" data-status="off" onclick="switchToggle(this)"></div>
                     {% endif %}
-                    <script>
-                        async function switchToggle(e) {
-                            e.dataset.status = (e.dataset.status === 'on' ? 'off' : 'on');
-                            let bool_2fa = false;
-                            // Target the SVG using its class name and change the fill color
-                            if (e.dataset.status === 'on') {
-                                document.querySelector(".shieldPath").classList.add("fillGreen");
-                                bool_2fa = true;
-                            } else {
-                                bool_2fa = false;
-                                document.querySelector(".shieldPath").classList.remove("fillGreen");
-                            }
-                            console.log("crsf token is : ", document.querySelector('[name=csrfmiddlewaretoken]').value)
-                            const response = await fetch("/api/auth/change_two_fa", {
-                                method: "POST",
-                                headers: {
-                                    "Content-Type": "application/json",
-                                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
-                                },
-                                body: JSON.stringify({
-                                    status: bool_2fa,
-                                }),
-                            });
-                        }
-                    </script>
                 </div>
             </div>
         </div>
-
     </div>
+        <div class="row row-information g-4 align-items-start justify-content-start">
+            <div class="col-6 col-md-6">
+                <div class="box box-bottom">
+                    <h4>Current picture</h4>
+                    <div class=" d-flex flex-column align-items-center justify-content-center inputs">
+                        <div id="upload-feedback"></div>
+                        <img src="{{ client.profile.profile_picture.url }}" id="profile_picture">
+                        <div class="type-intra-green mt-4" id="upload-img-btn">Upload new profile picture</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-6">
+                <div class="box box-bottom">
+                    <h4>Update Personal informations</h4>
+                    <form id="register-form" method="PUT" action="{% url 'update' %}" enctype="multipart/form-data">
+                        <div id="error-message" style="color: red;"></div>
+                        {% csrf_token %}
+                        <div class="">
+                            <label class="control-label username optional">Username</label>
+                            <input class="form-control string optional" id="username" name="username" type="text" placeholder={{client.profile.username}} required>
+                        </div>
+                        <div class="">
+                            <label class="control-label email optional">Email</label>
+                            <input class="form-control string optional" id="email" type="email" name="email" placeholder={{client.profile.email}} required>
+                        </div>
+                        <div class="">
+                            <label class="control-label password optional">Password</label>
+                            <input class="form-control string optional" id="password" type="password" name="password" required>
+                        </div>
+                        <div class="">
+                            <label class="control-label email optional">Verify password</label>
+                            <input class="form-control string optional" id="password" type="password" name="password" required>
+                        </div>
+                        <div class="type-intra-green mt-4" id="update-btn">Update informations</div>
+                    </form>
+                </div>
+            </div>
+        </div>
 </div>
+
 <script type="module" src="{% static 'js/apps/auth/logout.js' %}"></script>
 <script type="module" src="{% static 'js/apps/auth/delete.js' %}"></script>
 <script type="module" src="{% static 'js/apps/auth/upload_img.js' %}"></script>
 <script type="module" src="{% static 'js/apps/auth/update_infos.js' %}"></script>
-
+<script type="module" src="{% static 'js/apps/profile/myinformations.js' %}"></script>

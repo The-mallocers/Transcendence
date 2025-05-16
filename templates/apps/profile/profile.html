@@ -2,8 +2,6 @@
 
 <div class="informationsContainer">
     <img class="background" src="{% static 'assets/imgs/'|add:client.profile.coalition|add:'.jpg' %}">
-
-
     <h3>{{ client.profile.username }}</h3>
     <div class="avatar">
         <img src="{{ client.profile.profile_picture.url }}">
