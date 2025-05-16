@@ -54,7 +54,6 @@ class SessionLimitingMiddleware:
 
         new_fingerprint = self.generate_fingerprint(request)
         new_session_id = request.session.session_key
-        new_refresh_jwt = request.user.
 
         has_active_session = self.redis.hexists(redis_key, SessionType.SESSION_ID)
 

@@ -48,7 +48,7 @@ class JWTMiddleware:
         request.user.is_authenticated = True
         request.user.is_staff = True if client.rights.is_admin else False
         request.user.id = str(client.id)
-        
+
         response = self.get_response(request)
         new_access_token.set_cookie(response)
         return response
