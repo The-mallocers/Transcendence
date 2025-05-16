@@ -42,7 +42,7 @@ class JWTMiddleware:
         refresh_token = JWT.extract_token(request, JWTType.REFRESH)  # if refresh is oudated, this will throw an exception
         client = Clients.get_client_by_id(refresh_token.SUB)
 
-        new_access_token = JWT(client, JWTType.ACCESS)
+        new_access_token = JWT(client, JWTType.ACCESS, request)
         request.COOKIES['access_token'] = new_access_token.encode_token()
 
         response = self.get_response(request)
@@ -50,6 +50,9 @@ class JWTMiddleware:
         return response
 
     def __call__(self, request: HttpRequest):
+        if not request.session.session_key:
+            request.session.create()
+
         #If the path is not protected
         if not self.is_path_matching(request.path_info, settings.PROTECTED_PATHS):
             return self.get_response(request)
