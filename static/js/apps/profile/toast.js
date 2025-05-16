@@ -144,6 +144,13 @@ function toast_message(message) {
     });
 }
 
+function remove_toast(){
+    const toast = document.querySelector(".toast");
+    if(toast)
+        toast.remove();
+}
+
 export {toast_friend};
 export {toast_duel};
 export {toast_message};
+export {remove_toast};

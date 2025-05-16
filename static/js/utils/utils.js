@@ -8,7 +8,7 @@ export async function getClientId() {
         if (!response.ok) {
             return null;
         }
-        console.log("data:", data);
+        // console.log("data:", data);
         if (data.client_id) {
             return data.client_id;
         } else {
@@ -20,12 +20,76 @@ export async function getClientId() {
     }
 }
 
-
-
 export function sendWhenReady(socket, message) {
     if (socket.readyState === WebSocket.OPEN) {
         socket.send(message);
     } else {
         socket.addEventListener('open', () => socket.send(message), { once: true });
+    }
+}
+
+export function create_front_chat_room(room, username, usernameId, status, profilePicture = null){
+    const newChat = document.querySelector('.chatRooms');
+    if(newChat)
+    {
+        const imgSrc = profilePicture;
+
+        const parser = new DOMParser();
+        const htmlChat = 
+        `<div class="roomroom container d-flex flex-wrap align-items-center justify-content-between">
+            <button class="chat-${username} chat-button btn d-flex align-items-center gap-3">
+                <img src="${imgSrc}" alt="${username}'s profile picture">
+                <div>${username}</div>
+            </button>
+            
+            <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle no-caret rounded-circle" type="button" id="dropdownMenu-${room}" data-bs-toggle="dropdown" aria-expanded="false">
+                    ...
+                </button>
+                <ul class="dropdown-menu">
+                    <li><button class="dropdown-item chat-profile" type="button">Profil</button></li>
+                    <li><button class="dropdown-item chat-block" type="button">${status}</button></li>
+                    <li><button class="dropdown-item chat-duel" type="button">Duel</button></li>
+                </ul>
+            </div>
+        </div>`
+        const doc = parser.parseFromString(htmlChat, "text/html");
+        const chatElement = doc.body.firstChild;
+        const chatButton = chatElement.querySelector(`.chat-${username}`)
+        const chatProfile = chatElement.querySelector(`.chat-profile`);
+        const chatBlock = chatElement.querySelector(`.chat-block`);
+        const chatDuel = chatElement.querySelector(`.chat-duel`);
+
+        chatButton.addEventListener('click', function() {
+            console.log(room);
+            const roomroomDiv = this.closest('.roomroom');
+    
+            roomroomDiv.classList.add('active-room');
+            
+            document.querySelectorAll('.roomroom.active-room').forEach(div => {
+                if (div !== roomroomDiv) {
+                    div.classList.remove('active-room');
+                }
+            });
+            clickRoom(room)
+        })
+        chatProfile.addEventListener('click', function(){
+            handleChatProfile(username);
+        })
+        chatBlock.addEventListener('click', function(){
+            if(this.innerHTML == "Block"){
+                this.innerHTML = "Unblock"
+                handleChatBlock(username);
+            }
+            else{
+                this.innerHTML = "Block"
+                handleChatUnblock(username);
+            }
+            
+        })
+        chatDuel.addEventListener('click', function(){
+            handleChatDuel(usernameId);
+        })
+        newChat.appendChild(chatElement);
     }
 }

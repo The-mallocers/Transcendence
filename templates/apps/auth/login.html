@@ -97,12 +97,12 @@
         <form id="register-form" enctype="multipart/form-data" action="{% url 'login' %}">
             <div id="error-message" style="color: red;"></div>
             {% csrf_token %}
-            <input class="p-3" type="email" id="email" name="email" placeholder="Entrez votre e-mail" required>
+            <input class="p-3" type="email" id="email" name="email" placeholder="Enter email" required>
             <input class="mt-4 p-3" type="password" id="password" name="password"
-                   placeholder="Entrez votre mot de passe" required>
+                   placeholder="Enter password" required>
 
-            <button class="p-3 mt-5 btn" id="login-btn" type="submit">Se connecter</button>
-            <div data-route="/auth/register" class="mt-2 registerBtn text-center">Je n'ai pas encore de compte</div>
+            <button class="p-3 mt-5 btn" id="login-btn" type="submit">Connect</button>
+            <div data-route="/auth/register" class="mt-2 registerBtn text-center">Sign up</div>
             <div class="mt-5 text-center">OR</div>
 
 

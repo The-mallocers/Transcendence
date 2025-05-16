@@ -1,6 +1,10 @@
 import {WebSocketManager} from "../../websockets/websockets.js";
 import {navigateTo} from "../../spa/spa.js";
-import {toast_duel, toast_friend, toast_message} from "./toast.js";
+import { toast_friend } from "./toast.js";
+import { toast_duel } from "./toast.js";
+import { toast_message } from "./toast.js";
+import { remove_toast } from "./toast.js";
+import { create_front_chat_room } from "../../utils/utils.js";
 
 const notifSocket = WebSocketManager.notifSocket;
 
@@ -10,13 +14,13 @@ console.log(pathname);
 
 if (!searchParams.has('username') && pathname == '/') {
     // Display all friends and pending friends
-    console.log("displaying friends from profile.js");
     const friends = await apiFriends("/api/friends/get_friends/");
     const pending_friends = await apiFriends("/api/friends/get_pending_friends/");
     const pending_duels = await apiFriends("/api/friends/get_pending_duels/");
     const friends_online_status = JSON.parse(document.getElementById('friends-data')?.textContent);
 
     friends.forEach(friend => {
+        console.log(friend);
         const friends_group = document.querySelector('.friends_group');
         const parser = new DOMParser();
         const status = friends_online_status[friend.username];
@@ -138,8 +142,15 @@ notifSocket.onmessage = (event) => {
         if (pending_group) {
             pending_group.appendChild(pendingElement);
         }
+        remove_toast();
         toast_friend(`New friend request from ${message.data.content.username}`, message.data, pendingElement);
-    } else if (message.data.action == "ACK_ACCEPT_FRIEND_REQUEST_HOST" || message.data.action == "ACK_ACCEPT_FRIEND_REQUEST") {
+    }
+    else if(message.data.action == "ACK_ACCEPT_FRIEND_REQUEST_HOST" || message.data.action == "ACK_ACCEPT_FRIEND_REQUEST") {
+        create_front_chat_room(message.data.content.room,
+            message.data.content.username, 
+            message.data.content.sender, 
+            "Block",
+            message.data.content.profile_picture);
         let friends_group = document.querySelector('.friends_group');
         if(friends_group)
         {
@@ -161,22 +172,6 @@ notifSocket.onmessage = (event) => {
             });
             friends_group.appendChild(friendElement);
         }
-    }
-    else if(message.data.action == "ACK_REFUSE_FRIEND_REQUEST") {
-        // const buttonToDelete = document.querySelector(`li.pending_item#${message.data.content.username}`);
-        // if(buttonToDelete)
-        // {
-        //     buttonToDelete.remove();
-        // }
-    }
-    else if(message.data.action == "ACK_DELETE_FRIEND_HOST") {
-        // const friendElements = document.querySelectorAll('.friends_group li');
-        // friendElements.forEach(elem => {
-        //     const usernameElement = elem.querySelector('div:first-child');
-        //     if (usernameElement && usernameElement.textContent.trim() === message.data.content.username) {
-        //         elem.remove();
-        //     }
-        // });
     }
     else if(message.data.action == "ACK_DELETE_FRIEND") {
         const friendElements = document.querySelectorAll('.friends_group li');
@@ -219,25 +214,26 @@ notifSocket.onmessage = (event) => {
         if (pending_group) {
             pending_group.appendChild(pendingElement);
         }
+        remove_toast();
         toast_duel(`${message.data.content.username} wants a duel`, message.data, pendingElement);
     } else if (message.data.action == "DUEL_CREATED") {
         navigateTo(`/pong/duel/?opponent=${message.data.content.opponent}`);
         // const socket = create_message_notif("get_opponent_name", message.data.content.opponent)
         // notifSocket.send(JSON.stringify(socket));
-    } else if (message.data.action == "DUEL_NOT_EXIST") {
-        const toast = document.querySelector(".toast");
-        if (toast)
-            toast.remove();
-
+    }
+    else if(message.data.action == "DUEL_NOT_EXIST")
+    {
+        remove_toast();
+        
         navigateTo("/")
         toast_message("DUEL don't exist");
     } else if (message.data.action == "DUEL_REFUSED") {
         navigateTo("/pong/gamemodes/");
+        remove_toast();
         toast_message(`${message.data.content.username} refuses the duel`);
-    } else if (message.data.action == "USER_OFFLINE") {
-        const toast = document.querySelector(".toast");
-        if (toast)
-            toast.remove();
+    }
+    else if(message.data.action == "USER_OFFLINE"){
+        remove_toast();
 
         navigateTo('/pong/gamemodes/')
         toast_message(`Player you want to duel is offline`);
@@ -275,6 +271,14 @@ notifSocket.onmessage = (event) => {
             status.innerHTML = "Offline";
         }
     }
+    else if (message.data.action == "DUEL_CREATED") {
+        navigateTo(`/pong/duel/?opponent=${message.data.content.opponent}`);
+    }
+    else if(message.data.action == "BLOCKED_USER"){ 
+        remove_toast();
+        toast_message("You have blocked this user");
+        navigateTo('');
+    }
 }
 
 // Define the functions in the global scope (window)
@@ -286,18 +290,13 @@ window.handleAskFriend = function(username) {
 };
 
 window.handleAcceptFriend = function(username) {
-    const toast = document.querySelector(".toast");
-
-    if(toast)
-        toast.remove();
+    remove_toast();
     const message = create_message_notif("accept_friend_request", username);
     notifSocket.send(JSON.stringify(message));
 };
 
 window.handleRefuseFriend = function(username) {
-    const toast = document.querySelector(".toast");
-    if(toast)
-        toast.remove();
+    remove_toast();
     const message = create_message_notif("refuse_friend_request", username);
     notifSocket.send(JSON.stringify(message));
 };
@@ -307,22 +306,15 @@ window.handleDeleteFriend = function(username) {
     notifSocket.send(JSON.stringify(message));
 };
 
-window.handleAcceptDuel = function (code, targetName) {
-    const toast = document.querySelector(".toast");
-
-    if (toast)
-        toast.remove();
-    console.log(targetName);
+window.handleAcceptDuel = function(code, targetName) {
+    remove_toast();
     const message = create_message_duel("accept_duel", code, targetName);
     notifSocket.send(JSON.stringify(message));
     navigateTo(`/pong/duel/?opponent=${targetName}`);
 };
 
-window.handleRefuseDuel = function (code, targetName) {
-    const toast = document.querySelector(".toast");
-
-    if (toast)
-        toast.remove();
+window.handleRefuseDuel = function(code, targetName) {
+    remove_toast();
     const message = create_message_duel("refuse_duel", code, targetName);
     notifSocket.send(JSON.stringify(message));
 };

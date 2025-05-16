@@ -54,6 +54,7 @@ class NotificationService(BaseServices):
     # client is the client that want to add the friend from his pending list
     # target is the friend pending
     async def _handle_accept_friend_request(self, data, client):
+        print(data)
         target = await Clients.aget_client_by_username(data['data']['args']['target_name'])
         if target is None:
             return await asend_group_error(self.service_group, ResponseError.USER_NOT_FOUND)
@@ -68,26 +69,25 @@ class NotificationService(BaseServices):
             await room.add_client(client)
             await room.add_client(target)
 
+            profile_picture_source = await client.aget_profile_by_user()
+            profile_picture_target = await target.aget_profile_by_user()
+            
             await asend_group(self.service_group, EventType.NOTIFICATION,
                               ResponseAction.ACK_ACCEPT_FRIEND_REQUEST_HOST,
                               {
-                                  "sender": str(target.id),
-                                  "username": await target.aget_profile_username()
+                                "sender": str(target.id),
+                                "username": await target.aget_profile_username(),
+                                "room": str(room.id),
+                                "profile_picture": profile_picture_target
                               })
 
             await asend_group(RTables.GROUP_NOTIF(target.id), EventType.NOTIFICATION,
                               ResponseAction.ACK_ACCEPT_FRIEND_REQUEST,
                               {
-                                  "sender": str(client.id),
-                                  "username": await client.aget_profile_username(),
-                                  "room": str(room.id)
-                              })
-            await asend_group(RTables.GROUP_CHAT(target.id), EventType.CHAT,
-                              ResponseAction.NEW_FRIEND,
-                              {
-                                  "sender": str(client.id),
-                                  "username": await client.aget_profile_username(),
-                                  "room": str(room.id)
+                                "sender": str(client.id),
+                                "username": await client.aget_profile_username(),
+                                "room": str(room.id),
+                                "profile_picture": profile_picture_source
                               })
 
         except:
@@ -111,6 +111,7 @@ class NotificationService(BaseServices):
             return await asend_group_error(self.service_group, ResponseError.USER_ALREADY_FRIEND_OR_NOT_PENDING_FRIEND, )
 
     async def _handle_delete_friend(self, data, client):
+        print(data)
         target = await Clients.aget_client_by_username(data['data']['args']['target_name'])
         if target is None:
             return await asend_group_error(self.service_group, ResponseError.USER_NOT_FOUND)
@@ -138,6 +139,7 @@ class NotificationService(BaseServices):
                               })
             # get the room to delete
             room = await Rooms.Aget_room_by_client_id(client.id)
+            print(room)
             if room is None:
                 return
             # First delete all messages corresponding to the two users
@@ -165,6 +167,13 @@ class NotificationService(BaseServices):
             return await asend_group_error(self.service_group, ResponseError.USER_OFFLINE)
         if target.id == client.id:
             return await asend_group_error(self.service_group, ResponseError.DUEL_HIMSELF)
+        client_friend_table = await client.get_friend_table()
+        target_firend_table = await target.get_friend_table()
+        client_blocked_target = await client_friend_table.ais_blocked(target.id)
+        target_blocked_client = await target_firend_table.ais_blocked(client.id)
+        if client_blocked_target or target_blocked_client:
+            print("client blocked target or target blocked client")
+            return await asend_group_error(self.service_group, ResponseError.BLOCKED_USER)
         target_queues = await Clients.acheck_in_queue(target, self.redis)
         if target_queues is not RTables.HASH_G_QUEUE.value and target_queues is not None:
             if await self.redis.hexists(target_queues, str(target.id)):
@@ -295,6 +304,7 @@ class NotificationService(BaseServices):
     # manage friends block and unblock
     async def _handle_block_unblock_friend(self, data, client):
         try:
+            print(data)
             target = await Clients.aget_client_by_username(data['data']['args']['target_name'])
             if target is None:
                 return await asend_group_error(self.service_group, ResponseError.USER_NOT_FOUND)

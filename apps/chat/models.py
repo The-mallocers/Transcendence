@@ -81,13 +81,31 @@ class Rooms(models.Model):
 
     @staticmethod
     @sync_to_async
+    def get_user_info_by_room_id(room_id):
+        try:
+            with transaction.atomic():
+                users = Clients.objects.filter(rooms__id=room_id).select_related('profile').distinct()
+                user_info = []
+                for user in users:
+                    profile_pic_url = user.profile.profile_picture.url if user.profile.profile_picture else "/static/assets/imgs/profile/default.png"
+                    user_info.append({
+                        'id': str(user.id),
+                        'username': user.profile.username,
+                        'profile_picture': profile_pic_url
+                    })
+                return user_info
+        except Exception as e:
+            print(f"Error in get_user_info_by_room_id: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            return []
+    
+    @staticmethod
+    @sync_to_async
     def Aget_room_by_client_id(client_id):
-        global_room = "00000000-0000-0000-0000-000000000000"
         try:
             with transaction.atomic():
                 query = Rooms.objects.filter(clients__id=client_id)
-                if query is not None:
-                    query = query.exclude(id=global_room)
                 return query.first()
         except Exception as e:
             raise Exception(f"Error getting room by client ID: {e}")
@@ -142,7 +160,6 @@ class Rooms(models.Model):
     def adelete_room(self):
         try:
             with transaction.atomic():
-                print("delete room")
                 self.delete()
         except Clients.DoesNotExist:
             return None
@@ -201,7 +218,6 @@ class Messages(models.Model):
     def adelete_all_messages_by_room_id(roomId):
         try:
             with transaction.atomic():
-                print("deleting messages...")
                 Messages.objects.filter(room_id=roomId).delete()
                 return True
         except Exception:

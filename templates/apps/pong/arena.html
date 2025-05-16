@@ -1,123 +1,32 @@
 {% load static %}
-<style>
 
-
-    .arenaPage {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-direction: column;
-        position: relative;
-    }
-
-    #pongCanvas {
-        border: 1px white solid;
-    }
-
-    .username {
-        font-size: 6rem;
-        color: #1d212b;
-    }
-
-    /*
-        #lusername {
-            top: 52%;
-            left: 33%;
-            transform: translate(-50%, -50%);
-        }
-
-        #rusername {
-            top: 52%;
-            right: 33%;
-            transform: translate(50%, -50%);
-        } */
-
-    .lmeow {
-        top: 52%;
-        left: 33%;
-        transform: translate(-50%, -50%);
-    }
-
-    .rmeow {
-        top: 52%;
-        right: 33%;
-        transform: translate(50%, -50%);
-    }
-    .score {
-        position: absolute;
-        font-size: 20rem;
-        color: #6d7892;
-        text-shadow: 2px 2px #000; /* Optional for extra retro contrast */
-    }
-
-    #timer {
-        top: 52%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-    }
-
-    #scoreLeft {
-        top: 52%;
-        left: 10%;
-        transform: translate(-50%, -50%);
-    }
-
-    #scoreRight {
-        top: 52%;
-        right: 10%;
-        transform: translate(50%, -50%);
-    }
-
-    .username-row {
-        display: flex;
-        justify-content: center; /* Center both usernames */
-        gap: 4rem; /* Controls how close they are; reduce this for closer spacing */
-        width: 1000px;
-        margin-bottom: 0.5rem;
-        margin-top: 0.5rem; /* Add this */
-    }
-
-    #rpicture {
-        top: 42%;
-        right: 10%;
-        transform: translate(50%, -50%);
-    }
-
-    #lpicture {
-        top: 42%;
-        left: 10%;
-        transform: translate(-50%, -50%);
-    } 
-
-</style>
-
-<div class="arenaPage" style="background-image: url('{{ arena_picture }}');">
-
-    <div class="username-row">
-
-        <div class="lmeow">
-            <div id="lusername" class="username"></div>
-            <div class="avatar">
-                <img id="lpicture" src="">
-            </div>
+<div class="container-fluid arenaPage" style="background-image: url('{{ arena_picture }}');">
+    <div class="row align-items-center py-3 d-flex l_username">
+        <div class="col-3 d-flex justify-content-between align-items-center flex-wrap">
+            <img id="lpicture" src="{% static 'assets/imgs/chien.jpg' %}" class="picture">
+            <div id="lusername" class="username">leny</div>
         </div>
 
-        <div class="rmeow">
-            <div id="rusername" class="username"></div>
-            <div class="avatar">
-                <img id="rpicture" src="">
-            </div>
+        <div class="col-2 text-center">
+            <div id="scoreLeft" class="score">0</div>
         </div>
 
+        <div class="col-2 text-center">
+            <div id="scoreRight" class="score">0</div>
+        </div>
+
+        <div class="col-3 d-flex justify-content-between align-items-center flex-wrap">
+            <div id="rusername" class="username">leny</div>
+            <img id="rpicture" src="{% static 'assets/imgs/chien.jpg' %}" class="picture">
+        </div>
     </div>
-    <div id="scoreLeft" class="score">0</div>
-    <div id="scoreRight" class="score">0</div>
     <div id="timer" class="score">5</div>
-
-    <canvas id="pongCanvas" width="1000" height="500">
-    </canvas>
+    <div class="row justify-content-center pong-arena">
+        <div class="col-auto">
+            <canvas id="pongCanvas" width="1000" height="500"></canvas>
+        </div>
+    </div>
 </div>
 
-
 <script type="module" src="{% static '/js/apps/game/pong.js' %}"></script>
-
+<link rel="stylesheet" href="{% static '/css/pong/arena.css' %}">

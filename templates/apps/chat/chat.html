@@ -10,14 +10,20 @@
         </div>
     </div>
     <div class="col-9 chatBox">
-        <div class="chatHistory">
-            {% for msg in conversation %}
-                <div class="msg {% if me == msg.sender %} me {% else %} you {% endif %}">
-                    {{ msg.content }}
-                </div>
-            {% endfor %}
+        <div id="no-chat-selected" class="d-flex flex-column justify-content-center align-items-center h-100">
+            <h4 class="text-muted">Select a conversation</h4>
+            <p class="text-muted">Choose a friend or room from the list to start chatting</p>
         </div>
-        <input type="text" id="messageInput" placeholder="message">
+        <div id="active-chat" class="d-none">
+            <div class="chatHistory">
+                {% for msg in conversation %}
+                    <div class="msg {% if me == msg.sender %} me {% else %} you {% endif %}">
+                        {{ msg.content }}
+                    </div>
+                {% endfor %}
+            </div>
+            <input type="text" id="messageInput" placeholder="message">
+        </div>
     </div>
 </div>  
 

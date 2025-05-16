@@ -95,20 +95,24 @@ class MatchmakingThread(Threads):
         cursor, duels = self.redis.scan(cursor=cursor, match=RTables.HASH_DUEL_QUEUE('*'))
         for duel in duels:
             clients = list(self.redis.hgetall(duel).items())
-            random.shuffle(clients)
-            client_1, stat_p1 = clients[0]
-            client_2, stat_p2 = clients[1]
-            client_1 = Clients.get_client_by_id(client_1)
-            client_2 = Clients.get_client_by_id(client_2)
-            channel_p1 = self.redis.hget(name=RTables.HASH_CLIENT(client_1.id), key=str(EventType.GAME.value))
-            channel_p2 = self.redis.hget(name=RTables.HASH_CLIENT(client_2.id), key=str(EventType.GAME.value))
-            if not channel_p1 or not channel_p2:
-                return False
-            if stat_p1.decode('utf-8') == 'True' and stat_p2.decode('utf-8') == 'True':
-                game.is_duel = True
-                game.code = re.search(rf'{RTables.HASH_DUEL_QUEUE("")}(\w+)$', duel.decode('utf-8')).group(1)
-                game.game_key = RTables.JSON_GAME(game.code)
-                game.pL = Player.create_player(client_1)
-                game.pR = Player.create_player(client_2)
-                return True
+            if len(clients) >= 2:
+                random.shuffle(clients)
+                client_1 = clients[0][0].decode('utf-8')
+                client_2 = clients[1][0].decode('utf-8')
+                stat_p1 = clients[0][1].decode('utf-8')
+                stat_p2 = clients[1][1].decode('utf-8')
+                
+                client_id_1 = Clients.get_client_by_id(client_1)
+                client_id_2 = Clients.get_client_by_id(client_2)
+                channel_p1 = self.redis.hget(name=RTables.HASH_CLIENT(client_id_1.id), key=str(EventType.GAME.value))
+                channel_p2 = self.redis.hget(name=RTables.HASH_CLIENT(client_id_2.id), key=str(EventType.GAME.value))
+                if not channel_p1 or not channel_p2:
+                    return False
+                if stat_p1 == 'True' and stat_p2 == 'True':
+                    game.is_duel = True
+                    game.code = re.search(rf'{RTables.HASH_DUEL_QUEUE("")}(\w+)$', duel.decode('utf-8')).group(1)
+                    game.game_key = RTables.JSON_GAME(game.code)
+                    game.pL = Player.create_player(client_id_1)
+                    game.pR = Player.create_player(client_id_2)
+                    return True
         return False

@@ -7,12 +7,10 @@ from apps.client.models import Clients
 
 
 def get(req):
-    # TimeStamp
-    # Id of sender
-    # message_content
-
     client = Clients.get_client_by_request(req)
     rooms = Rooms.get_room_id_by_client_id(client.id)
+
+
 
     me = None
     if client:
@@ -24,7 +22,7 @@ def get(req):
         'my_range': range(0),
         'conversation': conversation,
         "client_id": me,
-        "rooms": rooms
+        "rooms": rooms,
     }),
 
     return JsonResponse({
