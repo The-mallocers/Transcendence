@@ -110,6 +110,12 @@ class TournamentThread(Threads):
                     timer -= 1
             elif self.get_current_round() == self.rounds:
                 print("Setting tournament status to Ending !")
+                #Updating the DB !
+                json_scoreboards = self.redis.json().get(RTables.JSON_TOURNAMENT(self.tournament.code))
+                print("Updating the db, scoreboard is:", json_scoreboards)
+                #Ideally compute the winner here as well.
+                self.tournament.scoreboards = json_scoreboards
+                self.tournament.save()
                 self.set_status(TournamentStatus.ENDING)
                 return True
             else:
