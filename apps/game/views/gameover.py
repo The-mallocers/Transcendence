@@ -11,8 +11,9 @@ def get(request):
     game_id = request.GET.get("game", "game_not_found")
     found_game = Game.objects.filter(code=game_id).first()
     print(f"found game tournament is {found_game.tournament}")
+    print("found_game.tournament json: ", found_game.tournament.scoreboards)
     client_player_name = client.profile.username
-    mmr_change = message = client_score = opponent_score = opponent = None
+    is_lost_tourney = mmr_change = message = client_score = opponent_score = opponent = None
     if found_game.winner.client.id == client.id:
         message = "You won !"
         client_score = found_game.winner.score
@@ -21,6 +22,9 @@ def get(request):
         mmr_change = "+" + str(found_game.winner.mmr_change) + " mmr !"
     else:
         message = "You lost !"
+        if found_game.tournament:
+            message = "Tournament lost"
+            is_lost_tourney = True
         client_score = found_game.loser.score
         opponent_score = found_game.winner.score
         opponent = found_game.winner.client.profile.username
@@ -37,6 +41,7 @@ def get(request):
         "opponent_score": opponent_score,
         "mmr_change": mmr_change,
         "found_game": found_game,
+        "is_lost_tourney": is_lost_tourney,
     })
     return JsonResponse({
         'html': html_content,

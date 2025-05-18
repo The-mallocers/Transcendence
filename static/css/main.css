@@ -298,7 +298,12 @@ main {
 
 .mmr {
     justify-content: center;
-    color:#00000a;
+    color:#ffffff;
+}
+
+.mmr_profile {
+    justify-content: center;
+    color:#0a0909;
 }
 
 .myScore {
