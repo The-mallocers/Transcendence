@@ -36,7 +36,7 @@ class TournamentThread(Threads):
                 if self._running():
                     print("Mama mia tournament is over !")
                     break
-                sleep(2)
+                sleep(1)
 
         except Exception as e:
             self._logger.error(traceback.format_exc())
@@ -111,12 +111,17 @@ class TournamentThread(Threads):
             elif self.get_current_round() == self.rounds:
                 print("Setting tournament status to Ending !")
                 #Updating the DB !
-                json_scoreboards = self.redis.json().get(RTables.JSON_TOURNAMENT(self.tournament.code))
-                print("Updating the db, scoreboard is:", json_scoreboards)
+                #This is where, I think, we should be able to update the tournament in the database
+                #But trying to run below just gets us TournamentRuntime
+                #Fix this in another issue
+                
+                # json scoreboard can be anything it doesnt have to be the entire json
+                # json_scoreboards = self.redis.json().get(RTables.JSON_TOURNAMENT(self.tournament.code))
+                # print("Updating the db, scoreboard is:", json_scoreboards)
                 #Ideally compute the winner here as well.
-                self.tournament.scoreboards = json_scoreboards
-                self.tournament.save()
-                self.set_status(TournamentStatus.ENDING)
+                # self.tournament.scoreboards = json_scoreboards
+                # self.tournament.save()
+                # self.set_status(TournamentStatus.ENDING)
                 return True
             else:
                 print("Managing games that just happened !")
