@@ -4,9 +4,10 @@ import { populateJoinTournament } from "./populateHelpers.js";
 import { populateTree } from "./populateHelpers.js";
 import { isGameOver } from "../apps/game/VarGame.js";
 import { tournamentData } from "../apps/game/VarGame.js";
+import { remove_toast, toast_message } from "../apps/profile/toast.js";
 
-
-
+// import { toast_message } from "../profile/toast.js";
+// import { remove_toast } from "../profile/toast.js";
 const get_tournament_info = {
     "event": "tournament",
     "data": {
@@ -64,6 +65,8 @@ export function setUpTournamentSocket (tournamentSocket) {
                 break;
                 
             case "TOURNAMENT_GAME_READY":
+
+                toast_message("frero bouge toi")
                 tournamentData.gameIsReady = true;
                 // console.log("ALLO JE VAIS REJOUER OUUAIS");
                 // navigateTo("/pong/matchmaking/");
@@ -77,6 +80,7 @@ export function setUpTournamentSocket (tournamentSocket) {
                     btn.addEventListener('click', ()=>{navigateTo(`/pong/matchmaking/`);})
                     parrent.appendChild(btn)
                 }
+                // remove_toast()
                 break;
                 
             case "TOURNAMENT_UPDATE":
