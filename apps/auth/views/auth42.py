@@ -15,7 +15,7 @@ from utils.serializers.client import ClientSerializer
 
 def generate_password():
     length = random.randint(8, 32)
-    characters = string.ascii_letters + string.digits + string.punctuation
+    characters = string.ascii_letters + string.digits + string.punctuation.replace('$', '')
     password = ''.join(random.choice(characters) for _ in range(length))
     return password
 
