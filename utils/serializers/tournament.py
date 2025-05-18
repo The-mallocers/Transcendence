@@ -1,23 +1,27 @@
 import math
 
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.forms import ValidationError
 from django.utils import timezone
 from rest_framework import serializers
 
 from utils.enums import TournamentStatus, GameStatus
 
 
+
+def validate_tournament_size(value):
+    valid_sizes = [4, 8, 16]
+    if value not in valid_sizes:
+        raise ValidationError(f"Tournament must have exactly 4, 8, or 16 players. You specified {value}.")
+    return value
+
 class TournamentSerializer(serializers.Serializer):
     title = serializers.CharField(
         max_length=40,
         error_messages={'blank': 'Tournament title cannot be empty'}
     )
-    #For the future, only validate 4 8 16.
     max_clients = serializers.IntegerField(
-        validators=[
-            MinValueValidator(2, message="Tournament must have at least 2 players"),
-            MaxValueValidator(16, message="Tournament cannot have more than 16 players"),
-        ]
+        validators=[validate_tournament_size]
     )
     is_public = serializers.BooleanField()
     has_bots = serializers.BooleanField()
@@ -35,6 +39,8 @@ class TournamentSerializer(serializers.Serializer):
     )
     host = serializers.UUIDField()
 
+
+    
     def validate_max_players(self, value):
         # if value % 4 != 0:
         #     raise ValidationError("Number of maximum players must be a multiple of 4")
