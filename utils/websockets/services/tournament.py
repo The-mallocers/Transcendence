@@ -87,8 +87,9 @@ class TournamentService(BaseServices):
             tournament_info = await self.redis.json().get(RTables.JSON_TOURNAMENT(code))
             try:
                 tournament_info = await self.tournament_info_helper(tournament_info, code)
-            except:
-                await asend_group_error(self.service_group, ResponseError.EXCEPTION)
+            except Exception as e:
+                print(f"Error in tournament info helper {e}")
+                await asend_group_error(self.service_group, ResponseError.NOT_IN_TOURNAMENT)
                 return
             await asend_group(self.service_group, EventType.TOURNAMENT, ResponseAction.TOURNAMENT_INFO, tournament_info)
         else:
@@ -102,12 +103,14 @@ class TournamentService(BaseServices):
         title = tournament['title']
         max_clients = int(tournament['max_clients'])
         scoreboard = tournament['scoreboards']
+        host = tournament['host']
         players_infos = await Clients.get_tournament_clients_infos(tournament_ids)
         roomInfos = {
             "title": title,
             "max_clients": max_clients,
             "players_infos": players_infos,
             "code": code,
+            "host" : host,
             "scoreboard": scoreboard,
         }
         # print("roomInfos: ", roomInfos)

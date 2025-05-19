@@ -33,8 +33,8 @@ const buildTr = (matchInfos) => {
         `
 
         right = `
-            ${`<img src="${matchInfos.playerL_picture}" alt="">`}
-            <div>${matchInfos.playerL_username}</div>
+            ${`<img src="${matchInfos.playerR_picture}" alt="">`}
+            <div>${matchInfos.playerR_username}</div>
         `
     }
     return `<tr>
@@ -103,6 +103,8 @@ export function populateTree(tournamentInfos) {
 //TOURNAMENT ROOM
 export function populateTournament(tournament_data){
     const max_clients = tournament_data.max_clients
+
+    console.log(tournamentData)
     const clientsInTournament = document.querySelector("#clientsInTournament");
     let clientsDiv = []
     if (clientsInTournament == null) return ;
@@ -121,15 +123,20 @@ export function populateTournament(tournament_data){
             `)
         }
         
+        
         tournament_data?.players_infos?.forEach((player , i)=> {
+            console.log(tournament_data.host , player ,player.id, )
             clientsDiv[i] = `
-            <div class="col p-2">
+            <div class="position-relative col p-2">
             <div class="content border p-3 d-flex justify-content-between align-items-center">
                             <div class="d-flex align-items-center justify-content-center gap-3">
                             <div class="avatarContainer">
-                                    <img src="${player.avatar}" alt="">
-                                    </div>
-                                <div class="nickname ml-3">${ player.nickname }</div>
+                                    <img class="avatar" src="${player.avatar}" alt="">
+                            </div>
+                                <div class="position-relative nickname ml-3">
+                                    ${tournament_data.host == player.id ? (`<img class="star" src="/static/img/star.png" alt="">`):''}
+                                    ${ player.nickname }
+                                </div>
                             </div>
 
                             <div class="d-flex justify-content-center align-items-center gap-1 flex-column">
