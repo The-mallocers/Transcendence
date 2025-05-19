@@ -41,6 +41,7 @@ let right_last_move = "idle";
 //Si un petit malin va sur la page sans raison
 if (!socket || socket.readyState === WebSocket.CLOSED) {
     navigateTo("/");
+    remove_toast();
     toast_message("You are being redirected because you are not in any game right now")
 } else {
     tournamentData.gameIsReady = false;
@@ -69,6 +70,7 @@ if (!socket || socket.readyState === WebSocket.CLOSED) {
             isGameOver.gameIsOver = true;
             WebSocketManager.closeGameSocket();
             navigateTo("/");
+            remove_toast();
             toast_message("something went wrong, you are being redirected")
         }
 
