@@ -238,7 +238,10 @@ def post_twofa_code(req):
             JWT(client, JWTType.ACCESS).set_cookie(response)
             JWT(client, JWTType.REFRESH).set_cookie(response)
             return response
-    response = formulate_json_response(False, 400, "No email match this request", "/auth/login")
+        else:
+            response = formulate_json_response(False, 400, "Invalid Code", "/auth/login")
+    else:
+        response = formulate_json_response(False, 400, "No email match this request", "/auth/login")
     return response
 
 
