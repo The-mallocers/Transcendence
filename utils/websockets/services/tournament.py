@@ -103,12 +103,14 @@ class TournamentService(BaseServices):
         title = tournament['title']
         max_clients = int(tournament['max_clients'])
         scoreboard = tournament['scoreboards']
+        host = tournament['host']
         players_infos = await Clients.get_tournament_clients_infos(tournament_ids)
         roomInfos = {
             "title": title,
             "max_clients": max_clients,
             "players_infos": players_infos,
             "code": code,
+            "host" : host,
             "scoreboard": scoreboard,
         }
         # print("roomInfos: ", roomInfos)
