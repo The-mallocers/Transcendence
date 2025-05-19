@@ -20,16 +20,21 @@ export function setUpTournamentSocket (tournamentSocket) {
         const jsonData = JSON.parse(message.data);
         console.log("Tournament socket message", jsonData.data);
         console.log("The event is:", jsonData.event);
-        
-        if (jsonData.event != "TOURNAMENT") return;
+        console.log({"MEOW" : jsonData});
+        if (jsonData.event != "TOURNAMENT" && jsonData.event != "ERROR") return;
         const action = jsonData.data.action;   
-
+        console.log("action : ", action)
         switch (action) {
-            // case "ERROR":
-            //     console.log("Error message: ", message.data.error)
-            //     navigateTo("/pong/gamemodes/");
-            //     // errDiv.innerHTML = message.data.error
-            //     break;
+
+            case "HOST_LEAVE":
+            case "NOT_IN_TOURNAMENT":
+            case "ERROR":
+                // console.log("Error message: ", jsonData.data.error)
+                remove_toast()
+                toast_message(jsonData.data.error || jsonData.data.content )
+                navigateTo("/pong/gamemodes/");
+                // errDiv.innerHTML = jsonData.data.error
+                break;
             case "TOURNAMENT_PLAYER_LEFT" :
                 tournamentSocket.send(JSON.stringify(get_tournament_info));
                 break;
