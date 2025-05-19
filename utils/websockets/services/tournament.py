@@ -35,7 +35,7 @@ class TournamentService(BaseServices):
                 tournament_queue.put(tournament)
                 await self.channel_layer.group_add(RTables.GROUP_TOURNAMENT(tournament.code), self.channel_name)
                 await self.redis.hset(name=RTables.HASH_TOURNAMENT_QUEUE(tournament.code), key=str(client.id), value=str(True))
-                await asend_group(RTables.GROUP_TOURNAMENT(tournament.code), EventType.TOURNAMENT, ResponseAction.TOURNAMENT_CREATED, {
+                await asend_group(RTables.GROUP_CLIENT(tournament.code), EventType.TOURNAMENT, ResponseAction.TOURNAMENT_CREATED, { # testing here
                     'code': tournament.code,
                 })
             except ValueError as e:

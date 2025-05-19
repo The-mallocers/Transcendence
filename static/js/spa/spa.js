@@ -4,6 +4,7 @@ import * as html from "../utils/html_forms.js"
 import {routes} from "../utils/routes.js";
 import {getClientId} from "../utils/utils.js";
 
+window.intervalsManager = []
 class Router {
     constructor(routes) {
         this.routes = routes;
@@ -17,6 +18,12 @@ class Router {
     }
 
     async handleLocation() {
+        for (let id of window.intervalsManager) {
+            console.log(id)
+            clearInterval(id);
+            
+        }
+        window.intervalsManager.length = 0;
         //Now making the notif ws in navigation
         if (WebSocketManager.isSocketClosed(WebSocketManager.notifSocket)) {
             const clientId = await getClientId();
@@ -110,9 +117,6 @@ export function reloadScriptsSPA() {
 
 export function navigateTo(path) {
     //////////
-        for (let i = 1; i < 10; i++) {
-            clearInterval(i);
-        }
     //////////
     router.navigate(path);
 }
