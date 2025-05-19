@@ -65,7 +65,7 @@ export function setUpTournamentSocket (tournamentSocket) {
                 break;
                 
             case "TOURNAMENT_GAME_READY":
-
+                remove_toast();
                 toast_message("frero bouge toi")
                 tournamentData.gameIsReady = true;
                 // console.log("ALLO JE VAIS REJOUER OUUAIS");
@@ -80,7 +80,6 @@ export function setUpTournamentSocket (tournamentSocket) {
                     btn.addEventListener('click', ()=>{navigateTo(`/pong/matchmaking/`);})
                     parrent.appendChild(btn)
                 }
-                // remove_toast()
                 break;
                 
             case "TOURNAMENT_UPDATE":
