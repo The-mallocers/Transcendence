@@ -182,7 +182,7 @@ class ResponseError(str, Enum):
     TOURNAMENT_FULL: str = 'Tournament is full'
     ALREADY_JOIN_TOURNAMENT: str = 'You try to join tournament already joined.'
     HOST_LEAVE: str = 'Host leave tournament.'
-    NOT_IN_TOURNAMENT: str = "You're nt in this tournament"
+    NOT_IN_TOURNAMENT: str = "You're not in this tournament"
 
     # ── Game ──────────────────────────────────────────────────────────────────────────
     GAME_FULL: str = 'The game is currently full.'

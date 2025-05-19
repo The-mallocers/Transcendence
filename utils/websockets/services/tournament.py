@@ -87,7 +87,8 @@ class TournamentService(BaseServices):
             tournament_info = await self.redis.json().get(RTables.JSON_TOURNAMENT(code))
             try:
                 tournament_info = await self.tournament_info_helper(tournament_info, code)
-            except:
+            except Exception as e:
+                print(f"Error in tournament info helper {e}")
                 await asend_group_error(self.service_group, ResponseError.NOT_IN_TOURNAMENT)
                 return
             await asend_group(self.service_group, EventType.TOURNAMENT, ResponseAction.TOURNAMENT_INFO, tournament_info)

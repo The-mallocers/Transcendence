@@ -33,8 +33,8 @@ const buildTr = (matchInfos) => {
         `
 
         right = `
-            ${`<img src="${matchInfos.playerL_picture}" alt="">`}
-            <div>${matchInfos.playerL_username}</div>
+            ${`<img src="${matchInfos.playerR_picture}" alt="">`}
+            <div>${matchInfos.playerR_username}</div>
         `
     }
     return `<tr>
