@@ -39,7 +39,7 @@ function getTournamentSettings(){
             "args": {
                 "title": tournamentName,
                 "max_clients": parseInt(maxClients),
-                "is_public": false,
+                "is_public": true,
                 "has_bots": false,
                 "points_to_win": points,
                 "timer": 420

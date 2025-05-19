@@ -90,13 +90,13 @@ class GameThread(Threads):
 
     def _starting(self):
         if self.game.rget_status() is GameStatus.STARTING:
-            send_group(RTables.GROUP_GAME(self.game_id), EventType.GAME, ResponseAction.STARTING)
             pL_serializer = PlayerInformationSerializer(self.game.pL, context={'side': PlayerSide.LEFT})
             pR_serializer = PlayerInformationSerializer(self.game.pR, context={'side': PlayerSide.RIGHT})
             send_group(RTables.GROUP_GAME(self.game_id), EventType.GAME, ResponseAction.PLAYER_INFOS, {
                 'left': pL_serializer.data,
                 'right': pR_serializer.data
             })
+            send_group(RTables.GROUP_GAME(self.game_id), EventType.GAME, ResponseAction.STARTING)
             self.game.rset_status(GameStatus.WAITING_TO_START)
             return True
         return False
