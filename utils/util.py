@@ -53,3 +53,6 @@ def format_validation_errors(errors):
 
     process_errors("", errors)
     return "; ".join(result)
+
+def default_scoreboards():
+    return {'scoreboards': []}

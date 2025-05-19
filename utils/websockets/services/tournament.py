@@ -88,7 +88,7 @@ class TournamentService(BaseServices):
             try:
                 tournament_info = await self.tournament_info_helper(tournament_info, code)
             except:
-                await asend_group_error(self.service_group, ResponseError.NOT_IN_TOURNAMENT)
+                await asend_group_error(self.service_group, ResponseError.EXCEPTION)
                 return
             await asend_group(self.service_group, EventType.TOURNAMENT, ResponseAction.TOURNAMENT_INFO, tournament_info)
         else:

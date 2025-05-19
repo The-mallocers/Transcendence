@@ -108,20 +108,11 @@ class TournamentThread(Threads):
                                {'timer': timer})
                     sleep(1)
                     timer -= 1
-            elif self.get_current_round() == self.rounds:
-                print("Setting tournament status to Ending !")
-                #Updating the DB !
-                #This is where, I think, we should be able to update the tournament in the database
-                #But trying to run below just gets us TournamentRuntime
-                #Fix this in another issue
-                
-                # json scoreboard can be anything it doesnt have to be the entire json
-                # json_scoreboards = self.redis.json().get(RTables.JSON_TOURNAMENT(self.tournament.code))
-                # print("Updating the db, scoreboard is:", json_scoreboards)
-                #Ideally compute the winner here as well.
-                # self.tournament.scoreboards = json_scoreboards
-                # self.tournament.save()
-                # self.set_status(TournamentStatus.ENDING)
+            elif self.get_current_round() == self.rounds and self.games[-1].rget_status() is GameStatus.FINISHED:
+                tournament = Tournaments.get_tournament_by_code(self.tournament.code)
+                tournament.winner = Game.get_game_by_id(self.games[-1].code).winner.client
+                tournament.save()
+                self.set_status(TournamentStatus.ENDING)
                 return True
             else:
                 print("Managing games that just happened !")
@@ -277,7 +268,6 @@ class TournamentThread(Threads):
                     {'id': str(client.id)}
                 )
                 self.del_client(client)
-
 
     # ━━ GETTER / SETTER ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
 

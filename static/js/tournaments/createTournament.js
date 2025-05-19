@@ -27,7 +27,7 @@ plus.addEventListener("click", increase)
 function getTournamentSettings(){
     let score = document.querySelector(".score");
     let points = parseInt(score.innerHTML);
-    const tournamentName = document.querySelector("#roomName").value;
+    const tournamentName = document.querySelector("#roomName");
     // const isPrivate = document.querySelector("#isPrivate").checked;
     const maxClients = document.querySelector('#player-options input[name="tournamentPlayers"]:checked')?.value;
     console.log("MAx client is:", maxClients);
@@ -37,7 +37,7 @@ function getTournamentSettings(){
         "data": {
             "action": "create_tournament",
             "args": {
-                "title": tournamentName,
+                "title": tournamentName.placeholder ||  tournamentName.value,
                 "max_clients": parseInt(maxClients),
                 "is_public": true,
                 "has_bots": false,

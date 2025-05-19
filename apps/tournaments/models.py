@@ -10,7 +10,7 @@ from apps.client.models import Clients
 from apps.player.models import Player
 from utils.enums import RTables, TournamentStatus
 from utils.serializers.tournament import TournamentSerializer
-from utils.util import create_tournament_id, validate_even
+from utils.util import create_tournament_id, validate_even, default_scoreboards
 from redis.commands.json.path import Path
 
 
@@ -115,34 +115,34 @@ class TournamentRuntime:
 
     @classmethod
     async def create_tournament(cls, data, redis, runtime=False) -> 'Tournaments':
-        # Always create a Tournaments model instance, not a runtime-only instance
-        tournament = await sync_to_async(Tournaments)()
+        if runtime or cls is TournamentRuntime:
+            tournament = TournamentRuntime()
+        else:
+            tournament = await sync_to_async(cls)()
 
         tournament.serializer = TournamentSerializer(data=data)
         if tournament.serializer.is_valid():
             tournament.code = await sync_to_async(create_tournament_id)()
             tournament.status = TournamentStatus.CREATING
             tournament.host = await Clients.aget_client_by_id(data['host'])
-            tournament._clients = [tournament.host]  # Store for later use with ManyToMany
+            tournament.clients = [tournament.host]
 
             # ── Initialized With Data ─────────────────────────────────────────────────
-            tournament.title = tournament.serializer.validated_data['title']
+            if data['title'] is not None and data['title'] != '':
+                tournament.title = data['title']
+            else:
+                tournament.title = f"{tournament.code}'s tournaments"
             tournament.max_clients = tournament.serializer.validated_data['max_clients']
             tournament.is_public = tournament.serializer.validated_data['is_public']
             tournament.has_bots = tournament.serializer.validated_data['has_bots']
             tournament.points_to_win = tournament.serializer.validated_data['points_to_win']
-            tournament.timer = timedelta(seconds=tournament.serializer.validated_data['timer'])
+            tournament.timer = tournament.serializer.validated_data['timer']
 
-            # Save the model to the database
-            await sync_to_async(tournament.save)()
-
-            # Add clients (since ManyToMany requires the instance to be saved first)
-            if tournament._clients:
-                await sync_to_async(tournament.clients.add)(*tournament._clients)
-
-            # Save to Redis
-            await redis.json().set(RTables.JSON_TOURNAMENT(tournament.code), Path.root_path(), tournament.serializer.data)
-
+            # ── Creating Tournament In Database ───────────────────────────────────────
+            await Tournaments.objects.acreate(code=tournament.code, host=tournament.host, title=tournament.title,
+                                              max_clients=tournament.max_clients, is_public=tournament.is_public, has_bots=tournament.has_bots,
+                                              points_to_win=tournament.points_to_win, timer=timedelta(seconds=tournament.timer))
+            await redis.json().set(RTables.JSON_TOURNAMENT(tournament.code), Path.root_path(), tournament.serializer.data) #Brand new moved line !
             return tournament
         else:
             for field, errors in tournament.serializer.errors.items():
@@ -159,12 +159,12 @@ class Tournaments(models.Model, TournamentRuntime):
 
     # ── Tournaments Informations ───────────────────────────────────────────────────────────── #
     created_at = DateTimeField(default=timezone.now)  # I think its () at the end.
-    scoreboards = JSONField(default=list)
+    scoreboards = JSONField(default=default_scoreboards, null=False, blank=True)
 
     # ── Settings Of Tournaments ───────────────────────────────────────────────────── #
+    host = ForeignKey(Clients, on_delete=models.SET_NULL, null=True, related_name='host')
     title = TextField(max_length=30, null=False, default=f"{code}'s tournaments")
     max_clients = IntegerField(default=8, validators=[validate_even])
-    host = ForeignKey(Clients, on_delete=models.SET_NULL, null=True, related_name='host')
     winner = ForeignKey(Clients, on_delete=models.SET_NULL, null=True, blank=True, related_name='winner')
     clients = models.ManyToManyField(Clients, related_name='tournaments_players', blank=True)
     is_public = BooleanField(default=True)
@@ -183,23 +183,48 @@ class Tournaments(models.Model, TournamentRuntime):
 
     # ═══════════════════════════════════ Functions ════════════════════════════════════ #
 
-    def save(self, *args, **kwargs):
-        if self._code is not None:
-            self.code = self._code
-        if self._status is not None:
-            self.status = self._status
-        if self._title is not None:
-            self.title = self._title
-        if self._max_clients is not None:
-            self.max_clients = self._max_clients
-        if self._clients is not None:
-            self.clients.set(self._clients)
-        if self._points_to_win is not None:
-            self.points_to_win = self._points_to_win
-        super().save(*args, **kwargs)
+    # def save(self, *args, **kwargs):
+    #     # First, check if this is an update to an existing tournament
+    #     if self._code is not None and self._code != '':
+    #         try:
+    #             # Try to get existing tournament from database
+    #             existing_tournament = Tournaments.objects.filter(code=self._code).first()
+    #             if existing_tournament:
+    #                 # This is an update to an existing tournament
+    #                 self.pk = self._code  # Set primary key to ensure update instead of insert
+    #         except Exception:
+    #             # If any error occurs, continue with normal save
+    #             pass
+    #
+    #     # Transfer values from runtime properties to model fields
+    #     if self._code is not None:
+    #         self.code = self._code
+    #     if self._status is not None:
+    #         self.status = self._status.value if hasattr(self._status, 'value') else self._status
+    #     if self._title is not None:
+    #         self.title = self._title
+    #     if self._host is not None:
+    #         self.host = self._host
+    #     if self._max_clients is not None:
+    #         self.max_clients = self._max_clients
+    #     if self._is_public is not None:
+    #         self.is_public = self._is_public
+    #     if self._has_bots is not None:
+    #         self.has_bots = self._has_bots
+    #     if self._points_to_win is not None:
+    #         self.points_to_win = self._points_to_win
+    #     if self._timer is not None:
+    #         self.timer = self._timer
+    #
+    #     # Save the model
+    #     super().save(*args, **kwargs)
+    #
+    #     # Handle ManyToMany relationships after save
+    #     if self._clients is not None:
+    #         self.clients.set(self._clients)
 
     @staticmethod
-    def get_tournament_by_code(code):
+    def get_tournament_by_code(code) -> 'Tournaments':
         try:
             tournament = Tournaments.objects.get(code=code)
             return tournament

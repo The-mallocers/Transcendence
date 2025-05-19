@@ -5,6 +5,7 @@ import random
 import time
 
 from django.db.models import F
+from redis.commands.json.path import Path
 
 from apps.client.models import Clients
 from apps.game.models import Game
@@ -19,6 +20,7 @@ from utils.pong.objects.objects_state import GameState
 from utils.pong.objects.paddle import Paddle
 from utils.pong.objects.score import Score
 from utils.serializers.game import PaddleSerializer, BallSerializer
+from utils.serializers.player import PlayerScoreSerializer
 from utils.websockets.channel_send import send_group
 
 
@@ -241,7 +243,19 @@ class PongLogic:
         print("score of this player :", winner.score)
         tournament = None
         if self.game.tournament:
-            tournament = Tournaments.get_tournament_by_code(self.game.tournament.code) 
+            tournament = Tournaments.get_tournament_by_code(self.game.tournament.code)
+            current_round = self.redis.json().get(RTables.JSON_TOURNAMENT(tournament.code), Path('scoreboards.current_round'))
+            max_round = self.redis.json().get(RTables.JSON_TOURNAMENT(tournament.code), Path('scoreboards.num_rounds'))
+            client_pos = PlayerScoreSerializer(loser, context={
+                'position': (max_round-current_round)*2,
+                'client_id': str(loser.client.id),
+                'username': loser.client.profile.username,
+                'matches_played': 0,
+                'matches_won': 0,
+                'points': 0,
+            })
+            tournament.scoreboards['scoreboards'].append(client_pos.data)
+            tournament.save()
         finished_game = Game.objects.create(code=self.game.code, winner=winner, loser=loser,
                                             points_to_win=self.game.points_to_win, is_duel=self.game.rget_is_duel(), tournament=tournament)
 
