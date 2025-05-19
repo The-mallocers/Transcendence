@@ -96,7 +96,7 @@ class Clients(models.Model):
 
     @staticmethod
     @sync_to_async
-    def aget_client_by_id(id: uuid.UUID):
+    def aget_client_by_id(id: uuid.UUID) -> 'Clients':
         try:
             with transaction.atomic():
                 return Clients.objects.get(id=id)

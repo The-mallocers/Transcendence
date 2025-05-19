@@ -94,12 +94,32 @@ class PlayersRedisSerializer(serializers.ModelSerializer):
             PlayerSide.RIGHT: PlayerSerializer(pr, context={'paddle': paddle_right, 'id': str(pr.client.id)}).data
         }
 
-
-class GameFinishSerializer(serializers.ModelSerializer):
-    winner = serializers.SerializerMethodField()
-    loser = serializers.SerializerMethodField()
-    pL_score = serializers.SerializerMethodField()
-    pR_score = serializers.SerializerMethodField()
+class PlayerScoreSerializer(serializers.ModelSerializer):
+    position = serializers.SerializerMethodField()
+    client_id = serializers.SerializerMethodField()
+    username = serializers.SerializerMethodField()
+    matches_played = serializers.SerializerMethodField()
+    matches_won = serializers.SerializerMethodField()
+    points = serializers.SerializerMethodField()
 
     class Meta:
-        fields = ['winner', 'loser', 'pL_score', 'pR_score']
+        model = Player
+        fields = ['position', 'client_id', 'username', 'matches_played', 'matches_won', 'points']
+
+    def get_position(self, obj):
+        return self.context.get('position')
+
+    def get_client_id(self, obj):
+        return self.context.get('client_id')
+
+    def get_username(self, obj):
+        return self.context.get('username')
+
+    def get_matches_played(self, obj):
+        return self.context.get('matches_played')
+
+    def get_matches_won(self, obj):
+        return self.context.get('matches_won')
+
+    def get_points(self, obj):
+        return self.context.get('points')

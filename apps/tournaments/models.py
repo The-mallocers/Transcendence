@@ -10,7 +10,7 @@ from apps.client.models import Clients
 from apps.player.models import Player
 from utils.enums import RTables, TournamentStatus
 from utils.serializers.tournament import TournamentSerializer
-from utils.util import create_tournament_id, validate_even
+from utils.util import create_tournament_id, validate_even, default_scoreboards
 from redis.commands.json.path import Path
 
 
@@ -128,7 +128,10 @@ class TournamentRuntime:
             tournament.clients = [tournament.host]
 
             # ── Initialized With Data ─────────────────────────────────────────────────
-            tournament.title = tournament.serializer.validated_data['title']
+            if data['title'] is not None and data['title'] != '':
+                tournament.title = data['title']
+            else:
+                tournament.title = f"{tournament.code}'s tournaments"
             tournament.max_clients = tournament.serializer.validated_data['max_clients']
             tournament.is_public = tournament.serializer.validated_data['is_public']
             tournament.has_bots = tournament.serializer.validated_data['has_bots']
@@ -156,12 +159,12 @@ class Tournaments(models.Model, TournamentRuntime):
 
     # ── Tournaments Informations ───────────────────────────────────────────────────────────── #
     created_at = DateTimeField(default=timezone.now)  # I think its () at the end.
-    scoreboards = JSONField(default=list)
+    scoreboards = JSONField(default=default_scoreboards, null=False, blank=True)
 
     # ── Settings Of Tournaments ───────────────────────────────────────────────────── #
+    host = ForeignKey(Clients, on_delete=models.SET_NULL, null=True, related_name='host')
     title = TextField(max_length=30, null=False, default=f"{code}'s tournaments")
     max_clients = IntegerField(default=8, validators=[validate_even])
-    host = ForeignKey(Clients, on_delete=models.SET_NULL, null=True, related_name='host')
     winner = ForeignKey(Clients, on_delete=models.SET_NULL, null=True, blank=True, related_name='winner')
     clients = models.ManyToManyField(Clients, related_name='tournaments_players', blank=True)
     is_public = BooleanField(default=True)
@@ -180,23 +183,48 @@ class Tournaments(models.Model, TournamentRuntime):
 
     # ═══════════════════════════════════ Functions ════════════════════════════════════ #
 
-    def save(self, *args, **kwargs):
-        if self._code is not None:
-            self.code = self._code
-        if self._status is not None:
-            self.status = self._status
-        if self._title is not None:
-            self.title = self._title
-        if self._max_clients is not None:
-            self.max_clients = self._max_clients
-        if self._clients is not None:
-            self.clients.set(self._clients)
-        if self._points_to_win is not None:
-            self.points_to_win = self._points_to_win
-        super().save(*args, **kwargs)
+    # def save(self, *args, **kwargs):
+    #     # First, check if this is an update to an existing tournament
+    #     if self._code is not None and self._code != '':
+    #         try:
+    #             # Try to get existing tournament from database
+    #             existing_tournament = Tournaments.objects.filter(code=self._code).first()
+    #             if existing_tournament:
+    #                 # This is an update to an existing tournament
+    #                 self.pk = self._code  # Set primary key to ensure update instead of insert
+    #         except Exception:
+    #             # If any error occurs, continue with normal save
+    #             pass
+    #
+    #     # Transfer values from runtime properties to model fields
+    #     if self._code is not None:
+    #         self.code = self._code
+    #     if self._status is not None:
+    #         self.status = self._status.value if hasattr(self._status, 'value') else self._status
+    #     if self._title is not None:
+    #         self.title = self._title
+    #     if self._host is not None:
+    #         self.host = self._host
+    #     if self._max_clients is not None:
+    #         self.max_clients = self._max_clients
+    #     if self._is_public is not None:
+    #         self.is_public = self._is_public
+    #     if self._has_bots is not None:
+    #         self.has_bots = self._has_bots
+    #     if self._points_to_win is not None:
+    #         self.points_to_win = self._points_to_win
+    #     if self._timer is not None:
+    #         self.timer = self._timer
+    #
+    #     # Save the model
+    #     super().save(*args, **kwargs)
+    #
+    #     # Handle ManyToMany relationships after save
+    #     if self._clients is not None:
+    #         self.clients.set(self._clients)
 
     @staticmethod
-    def get_tournament_by_code(code):
+    def get_tournament_by_code(code) -> 'Tournaments':
         try:
             tournament = Tournaments.objects.get(code=code)
             return tournament
