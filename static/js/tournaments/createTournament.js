@@ -28,7 +28,7 @@ function getTournamentSettings(){
     let score = document.querySelector(".score");
     let points = parseInt(score.innerHTML);
     const tournamentName = document.querySelector("#roomName").value;
-    const isPrivate = document.querySelector("#isPrivate").checked;
+    // const isPrivate = document.querySelector("#isPrivate").checked;
     const maxClients = document.querySelector('#player-options input[name="tournamentPlayers"]:checked')?.value;
     console.log("MAx client is:", maxClients);
 
@@ -39,7 +39,7 @@ function getTournamentSettings(){
             "args": {
                 "title": tournamentName,
                 "max_clients": parseInt(maxClients),
-                "is_public": !isPrivate,
+                "is_public": true,
                 "has_bots": false,
                 "points_to_win": points,
                 "timer": 420
