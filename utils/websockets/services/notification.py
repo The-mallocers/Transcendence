@@ -359,6 +359,64 @@ class NotificationService(BaseServices):
                 "online": is_online
             }
         )
+
+    async def _handle_tournament_invitation_response(self, data, client):
+        code = data['data']['args']['tournament_code']
+        action = data['data']['args']['action']
+        inviter_username = data['data']['args']['inviter_username']
+        
+        # Get the inviter
+        inviter = await Clients.aget_client_by_username(inviter_username)
+        if inviter is None:
+            return await asend_group_error(self.service_group, ResponseError.USER_NOT_FOUND)
+        
+        # Check if the invitation exists
+        invitation_key = f"{RTables.HASH_TOURNAMENT_INVITATION}:{code}:{client.id}"
+        if not await self.redis.exists(invitation_key):
+            return await asend_group_error(self.service_group, ResponseError.INVITATION_NOT_FOUND)
+        
+        # Check if the tournament still exists
+        if not await self.redis.exists(RTables.HASH_TOURNAMENT_QUEUE(code)):
+            await self.redis.delete(invitation_key)
+            return await asend_group_error(self.service_group, ResponseError.TOURNAMENT_NOT_EXIST)
+        
+        if action == "accept":
+            # Check if client is already in a queue
+            if await Clients.acheck_in_queue(client, self.redis):
+                await self.redis.delete(invitation_key)
+                return await asend_group_error(self.service_group, ResponseError.ALREADY_IN_QUEUE)
+            
+            # Add client to tournament
+            await self.redis.hset(RTables.HASH_TOURNAMENT_QUEUE(code), str(client.id), 'True')
+            
+            # Update the client's channel group for tournament events
+            channel_name = await self.redis.hget(name=RTables.HASH_CLIENT(client.id), key=str(EventType.TOURNAMENT.value))
+            if channel_name:
+                channel_name = channel_name.decode('utf-8')
+                await self.channel_layer.group_add(RTables.GROUP_TOURNAMENT(code), channel_name)
+            
+            # Send notifications
+            await asend_group(self.service_group, EventType.NOTIFICATION, ResponseAction.TOURNAMENT_INVITATION_ACCEPTED, {
+                "tournament_code": code
+            })
+            
+            await asend_group(RTables.GROUP_NOTIF(inviter.id), EventType.NOTIFICATION, ResponseAction.TOURNAMENT_INVITATION_ACCEPTED_BY, {
+                "username": await client.aget_profile_username(),
+                "tournament_code": code
+            })
+        else:  # action == "reject"
+            await asend_group(self.service_group, EventType.NOTIFICATION, ResponseAction.TOURNAMENT_INVITATION_REJECTED, {
+                "tournament_code": code
+            })
+            
+            await asend_group(RTables.GROUP_NOTIF(inviter.id), EventType.NOTIFICATION, ResponseAction.TOURNAMENT_INVITATION_REJECTED_BY, {
+                "username": await client.aget_profile_username(),
+                "tournament_code": code
+            })
+        
+        # Delete the invitation
+        await self.redis.delete(invitation_key)
+    
     async def disconnect(self, client):
         print("in disconnect of notification - Please see me !")
         pass

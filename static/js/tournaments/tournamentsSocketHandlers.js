@@ -77,6 +77,14 @@ export function setUpTournamentSocket (tournamentSocket) {
                 navigateTo(`/pong/tournament/?code=${jsonData.data.content.code}`);
                 break;
                 
+            case "TOURNAMENT_INVITATION_SENT":
+                console.log(`Invitation sent to ${jsonData.data.content.target_name}`);
+                break;
+                
+            case "PLAYER_LEFT_TOURNAMENT":  // Updated to match the enum change
+                navigateTo("/pong/gamemodes/");
+                break;
+                
             default:
                 break;
         }

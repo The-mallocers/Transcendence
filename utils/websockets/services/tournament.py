@@ -67,8 +67,66 @@ class TournamentService(BaseServices):
     async def _handle_ping(self, data, client):
         return await asend_group(self.service_group, EventType.TOURNAMENT, ResponseAction.PONG)
 
-    # async def _handle_leave_tournament(self, data, client):
-    #     pass
+    async def _handle_invite_friend(self, data, client):
+        try:
+            target_id = data['data']['args']['friend_id']
+            target = await Clients.aget_client_by_id(target_id)
+            
+            if target is None:
+                return await asend_group_error(self.service_group, ResponseError.USER_NOT_FOUND)
+            
+            # Check if the target is already in the tournament
+            queues = await Clients.acheck_in_queue(client, self.redis)
+            if not queues or RTables.HASH_TOURNAMENT_QUEUE('') not in str(queues):
+                return await asend_group_error(self.service_group, ResponseError.NOT_IN_TOURNAMENT)
+            
+            code = re.search(rf'{RTables.HASH_TOURNAMENT_QUEUE("")}(\w+)$', queues.decode('utf-8')).group(1)
+            
+            if await self.redis.hexists(RTables.HASH_TOURNAMENT_QUEUE(code), str(target.id)):
+                return await asend_group_error(self.service_group, ResponseError.ALREADY_JOIN_TOURNAMENT)
+            
+            # Store the invitation in Redis
+            invitation_key = f"{RTables.HASH_TOURNAMENT_INVITATION}:{code}:{target.id}"
+            await self.redis.hset(invitation_key, "inviter_id", str(client.id))
+            await self.redis.hset(invitation_key, "tournament_code", code)
+            await self.redis.hset(invitation_key, "status", "pending")
+            
+            # Get tournament info for the notification
+            tournament_info = await self.redis.json().get(RTables.JSON_TOURNAMENT(code))
+            
+            # Send notification to target
+            await asend_group(RTables.GROUP_NOTIF(target.id), 
+                             EventType.NOTIFICATION, 
+                             ResponseAction.TOURNAMENT_INVITATION, 
+                             {
+                                 "sender": str(client.id),
+                                 "username": await client.aget_profile_username(),
+                                 "tournament_code": code,
+                                 "tournament_name": tournament_info['title']
+                             })
+            
+            # Send confirmation to client
+            await asend_group(self.service_group, 
+                             EventType.TOURNAMENT,
+                             ResponseAction.TOURNAMENT_INVITATION_SENT,
+                             {
+                                 "target": str(target.id),
+                                 "target_name": await target.aget_profile_username()
+                             })
+            
+        except Exception as e:
+            self._logger.error(traceback.format_exc())
+            await asend_group_error(self.service_group, ResponseError.INTERNAL_ERROR, str(e))
+
+    async def _handle_leave_tournament(self, data, client):
+        queues = await Clients.acheck_in_queue(client, self.redis)
+        if queues and RTables.HASH_TOURNAMENT_QUEUE('') in str(queues):
+            code = re.search(rf'{RTables.HASH_TOURNAMENT_QUEUE("")}(\w+)$', queues.decode('utf-8')).group(1)
+            await self.channel_layer.group_discard(RTables.GROUP_TOURNAMENT(code), self.channel_name)
+            await self.redis.hdel(RTables.HASH_TOURNAMENT_QUEUE(code), str(client.id))
+            await asend_group(self.service_group, EventType.TOURNAMENT, ResponseAction.PLAYER_LEFT_TOURNAMENT)
+        else:
+            await asend_group_error(self.service_group, ResponseError.NOT_IN_TOURNAMENT)
     
     async def _handle_list_players(self, data, client):
         queues = await Clients.acheck_in_queue(client, self.redis)
@@ -126,7 +184,6 @@ class TournamentService(BaseServices):
                 all_tournaments.append(tournament_info)
             if cursor == 0:
                 break
-        print("all tournament = ", all_tournaments)
         await asend_group(self.service_group, EventType.TOURNAMENT, ResponseAction.TOURNAMENT_LIST, all_tournaments)
 
     async def _handle_start_tournament(self, data, client):

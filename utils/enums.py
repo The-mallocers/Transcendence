@@ -66,10 +66,13 @@ class RequestAction(str, Enum):
     CREATE_TOURNAMENT: str = 'create_tournament'
     JOIN_TOURNAMENT: str = 'join_tournament'
     LEAVE_TOURNAMENT: str = 'leave_tournament'
-    START_TOURNAMENT: str = 'start_tournement'
+    START_TOURNAMENT: str = 'start_tournament'
     LIST_TOURNAMENT: str = 'list_tournament'
     LIST_PLAYERS: str = 'list_players'
-    TOURNAMENT_INFOS: str = 'tournament_info'
+    TOURNAMENT_INFO: str = 'tournament_info'
+    GET_TOURNAMENT_CLIENTS: str = 'get_tournament_clients'
+    INVITE_FRIEND: str = 'invite_friend'
+    TOURNAMENT_INVITATION_RESPONSE: str = 'tournament_invitation_response'
 
     # ── Notification Actions ──────────────────────────────────────────────────────────────────
     SEND_FRIEND_REQUEST: str = "send_friend_request"
@@ -155,6 +158,13 @@ class ResponseAction(str, Enum):
     NOTIF_TEST = "notification_test"
 
     PONG: str = 'pong'
+    TOURNAMENT_INVITATION = "TOURNAMENT_INVITATION"
+    TOURNAMENT_INVITATION_SENT = "TOURNAMENT_INVITATION_SENT"
+    TOURNAMENT_INVITATION_ACCEPTED = "TOURNAMENT_INVITATION_ACCEPTED"
+    TOURNAMENT_INVITATION_REJECTED = "TOURNAMENT_INVITATION_REJECTED" 
+    TOURNAMENT_INVITATION_ACCEPTED_BY = "TOURNAMENT_INVITATION_ACCEPTED_BY"
+    TOURNAMENT_INVITATION_REJECTED_BY = "TOURNAMENT_INVITATION_REJECTED_BY"
+    PLAYER_LEFT_TOURNAMENT = "PLAYER_LEFT_TOURNAMENT"
 
 
 # All the error messages sent to the client
@@ -183,6 +193,7 @@ class ResponseError(str, Enum):
     ALREADY_JOIN_TOURNAMENT: str = 'You try to join tournament already joined.'
     HOST_LEAVE: str = 'Host leave tournament.'
     NOT_IN_TOURNAMENT: str = "You're nt in this tournament"
+    INVITATION_NOT_FOUND: str = "Tournament invitation not found"
 
     # ── Game ──────────────────────────────────────────────────────────────────────────
     GAME_FULL: str = 'The game is currently full.'
@@ -237,6 +248,7 @@ class RTables(str, Enum):
     HASH_G_QUEUE: str = HASH_QUEUE.format('global')
     HASH_DUEL_QUEUE: str = HASH_QUEUE.format("duel_{}")
     HASH_TOURNAMENT_QUEUE: str = HASH_QUEUE.format("tournament_{}")
+    HASH_TOURNAMENT_INVITATION = "tournament_invitation"
 
     # ── Json ──────────────────────────────────────────────────────────────────────── #
     JSON_GAME: str = 'game_{}'

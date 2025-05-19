@@ -279,9 +279,58 @@ notifSocket.onmessage = (event) => {
         toast_message("You have blocked this user");
         navigateTo('');
     }
-}
+    else if(message.data.action == "TOURNAMENT_INVITATION") {
+        const pending_group = document.querySelector('.pending_group');
+        if (!pending_group) return;
+        
+        const parser = new DOMParser();
+        const htmlString =
+            `<li class="list-group-item pending_item d-flex justify-content-between align-items-center">
+                ${message.data.content.username} invites you to join tournament "${message.data.content.tournament_name}"
+                <div class="btn-group d-grid gap-2 d-md-flex justify-content-md-end" role="group" aria-label="Basic example">
+                    <button type="button" class="type-intra-green accept_tournament">accept</button>
+                    <button type="button" class="type-intra-white refuse_tournament">refuse</button>
+                </div>
+            </li>`;
+            
+        const doc = parser.parseFromString(htmlString, "text/html");
+        const invitationElement = doc.body.firstChild;
+        
+        const acceptButton = invitationElement.querySelector('.accept_tournament');
+        acceptButton.addEventListener('click', function() {
+            invitationElement.remove();
+            handleAcceptTournamentInvitation(
+                message.data.content.tournament_code,
+                message.data.content.username
+            );
+        });
+        
+        const rejectButton = invitationElement.querySelector('.refuse_tournament');
+        rejectButton.addEventListener('click', function() {
+            invitationElement.remove();
+            handleRejectTournamentInvitation(
+                message.data.content.tournament_code,
+                message.data.content.username
+            );
+        });
+        
+        pending_group.appendChild(invitationElement);
+        remove_toast();
+        toast_message(`Tournament invitation from ${message.data.content.username}`);
+    }
+    else if(message.data.action == "TOURNAMENT_INVITATION_ACCEPTED") {
+        navigateTo(`/pong/tournament/?code=${message.data.content.tournament_code}`);
+    }
+    else if(message.data.action == "TOURNAMENT_INVITATION_ACCEPTED_BY") {
+        remove_toast();
+        toast_message(`${message.data.content.username} accepted your tournament invitation`);
+    }
+    else if(message.data.action == "TOURNAMENT_INVITATION_REJECTED_BY") {
+        remove_toast();
+        toast_message(`${message.data.content.username} declined your tournament invitation`);
+    }
+};
 
-// Define the functions in the global scope (window)
 window.handleAskFriend = function(username) {
     console.log("the friend to add is " + username);
     const message = create_message_notif("send_friend_request", username);
@@ -316,6 +365,38 @@ window.handleAcceptDuel = function(code, targetName) {
 window.handleRefuseDuel = function(code, targetName) {
     remove_toast();
     const message = create_message_duel("refuse_duel", code, targetName);
+    notifSocket.send(JSON.stringify(message));
+};
+
+window.handleAcceptTournamentInvitation = function(tournamentCode, inviterUsername) {
+    remove_toast();
+    const message = {
+        "event": "notification",
+        "data": {
+            "action": "tournament_invitation_response",
+            "args": {
+                "tournament_code": tournamentCode,
+                "inviter_username": inviterUsername,
+                "action": "accept"
+            }
+        }
+    };
+    notifSocket.send(JSON.stringify(message));
+};
+
+window.handleRejectTournamentInvitation = function(tournamentCode, inviterUsername) {
+    remove_toast();
+    const message = {
+        "event": "notification",
+        "data": {
+            "action": "tournament_invitation_response",
+            "args": {
+                "tournament_code": tournamentCode,
+                "inviter_username": inviterUsername,
+                "action": "reject"
+            }
+        }
+    };
     notifSocket.send(JSON.stringify(message));
 };
 

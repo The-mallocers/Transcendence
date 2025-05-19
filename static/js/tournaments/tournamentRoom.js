@@ -9,6 +9,13 @@ const leave_btn = document.querySelector("#leave-btn");
 
 
 function leaveTournament() {
+    const message = {
+        "event": "tournament",
+        "data": {
+            "action": "leave_tournament"
+        }
+    };
+    tournamentSocket.send(JSON.stringify(message));
     WebSocketManager.closeTournamentSocket();
     navigateTo("/pong/gamemodes/");
 }
@@ -86,7 +93,44 @@ function sendInvitation(friendId) {
             }
         }
     };
-    console.log("Invitation message:", inviteMessage);
+    tournamentSocket.send(JSON.stringify(inviteMessage));
+    
+    // Show invitation sent feedback
+    const toastContainer = document.createElement('div');
+    toastContainer.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+    toastContainer.innerHTML = `
+        <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+                <strong class="me-auto">Tournament Invitation</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body">
+                Invitation sent!
+            </div>
+        </div>
+    `;
+    document.body.appendChild(toastContainer);
+    
+    const toastElement = toastContainer.querySelector('.toast');
+    const toast = new bootstrap.Toast(toastElement, { autohide: true, delay: 3000 });
+    toast.show();
+    
+    // Remove toast container after hiding
+    toastElement.addEventListener('hidden.bs.toast', () => {
+        document.body.removeChild(toastContainer);
+    });
 }
+
+// Listen for tournament socket messages
+tournamentSocket.onmessage = function(event) {
+    const message = JSON.parse(event.data);
+    if (message.event === "TOURNAMENT") {
+        const action = message.data.action;
+        
+        if (action === "TOURNAMENT_INVITATION_SENT") {
+            console.log(`Invitation sent to ${message.data.content.target_name}`);
+        }
+    }
+};
 
 
