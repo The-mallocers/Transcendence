@@ -14,7 +14,7 @@ const leave_tournament = {
 }
 function leaveTournament() {
     WebSocketManager.tournamentSocket.send(JSON.stringify(leave_tournament))
-    WebSocketManager.closeTournamentSocket();
+    // WebSocketManager.closeTournamentSocket();
     navigateTo("/pong/gamemodes/");
 }
 
