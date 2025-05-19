@@ -45,8 +45,22 @@ class GameThread(Threads):
             send_group_error(RTables.GROUP_GAME(self.game_id), ResponseError.EXCEPTION, close=True)
             self.stop()
 
+        finally:
+            self._ending()
+
     def game_is_running(self) -> bool:
         is_valid = not self._stop_event.is_set() and self.game.rget_status() is not GameStatus.ERROR
+        player_left = self.redis.hget(RTables.HASH_CLIENT(self.game.pL.client.id), EventType.GAME.value)
+        player_right = self.redis.hget(RTables.HASH_CLIENT(self.game.pR.client.id), EventType.GAME.value)
+        print('plqyer left' ,player_left)
+        if self.game.rget_status() is GameStatus.ENDING:
+            return True
+        if player_left is None or player_right is None:
+            send_group_error(RTables.GROUP_GAME(self.game.pR.client.id), ResponseError.OPPONENT_LEFT)
+            send_group_error(RTables.GROUP_GAME(self.game.pL.client.id), ResponseError.OPPONENT_LEFT)
+            self.game.rset_status(GameStatus.ENDING)
+            print('miaouuuuuuuu je retourne FQLSE')
+            return False
         return is_valid
 
     def cleanup(self):
