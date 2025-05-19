@@ -131,7 +131,7 @@ export function populateTournament(tournament_data){
             <div class="content border p-3 d-flex justify-content-between align-items-center">
                             <div class="d-flex align-items-center justify-content-center gap-3">
                             <div class="avatarContainer">
-                                    <img class="avatar" src="${player.avatar}" alt="">
+                                    <img class="avata" src="${player.avatar}" alt="">
                             </div>
                                 <div class="position-relative nickname ml-3">
                                     ${tournament_data.host == player.id ? (`<img class="star" src="/static/img/star.png" alt="">`):''}
