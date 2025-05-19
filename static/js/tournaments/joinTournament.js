@@ -36,6 +36,8 @@ const get_tournaments_info = {
 
 sendWhenReady(tournamentSocket, JSON.stringify(get_tournaments_info));
 
-let meowInterval = setInterval(() => {
+let interval = setInterval(() => {
     sendWhenReady(tournamentSocket, JSON.stringify(get_tournaments_info));
 }, 3000);
+
+window.intervalsManager.push(interval)
