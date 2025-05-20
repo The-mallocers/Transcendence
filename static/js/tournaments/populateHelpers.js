@@ -86,6 +86,17 @@ export function populateTree(tournamentInfos) {
         for (const key in tournamentInfos?.scoreboard.rounds) {
             meow.innerHTML += buildRound(tournamentInfos?.scoreboard.rounds[key], key)
         }
+
+        // <div id="leave-btn" class="btn btn-intra-outlined">Leave</div>
+
+        let leaveBtn = document.createElement("div")
+
+        leaveBtn.onclick = function() {
+            leaveTournament();
+        }
+
+        meow.appendChild(leaveBtn)
+        
         if (tournamentData.gameIsReady) {
             const parrent = document.querySelector('#tree')
             console.log("data of tournament join", parrent);
