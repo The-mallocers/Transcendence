@@ -290,9 +290,9 @@ notifSocket.onmessage = (event) => {
         const htmlString =
             `<li class="list-group-item pending_item d-flex justify-content-between align-items-center">
         ${message.data.content.username} invites you to join the tournament: ${tournament_name}
-        <div class="btn-group d-grid gap-2 d-md-flex justify-content-md-end"  role="group" aria-label="Basic example">
-        <button type="button" class="type-intra-green accept_tournament">accept</button>
-        <button type="button" class="type-intra-white refuse_tournament">refuse</button>
+        <div class="btn-group d-grid gap-2 d-md-flex justify-content-md-end" role="group" aria-label="Basic example">
+        <button type="button" class="type-intra-green accept_tournament" data-tournament-code="${tournament_code}" data-inviter="${inviter_username}">accept</button>
+        <button type="button" class="type-intra-white refuse_tournament" data-tournament-code="${tournament_code}" data-inviter="${inviter_username}">refuse</button>
         </div>
         </li>
         `
@@ -391,7 +391,14 @@ window.handleRefuseTour = function(tournamentCode, inviterUsername) {
         }
     };
     notifSocket.send(JSON.stringify(message));
+    
+    // Also remove from pending list in UI
+    const pendingItem = document.querySelector(`.pending_item:has(button[data-tournament-code="${tournamentCode}"])`);
+    if (pendingItem) {
+        pendingItem.remove();
+    }
 }
+
 
 window.handleAcceptTournamentInvitation = function(tournamentCode, inviterUsername) {
     remove_toast();
@@ -423,7 +430,16 @@ window.handleRejectTournamentInvitation = function(tournamentCode, inviterUserna
         }
     };
     notifSocket.send(JSON.stringify(message));
-};
+    
+    // Also remove from pending list in UI
+    const pendingItems = document.querySelectorAll('.pending_item');
+    pendingItems.forEach(item => {
+        const text = item.textContent;
+        if (text.includes(inviterUsername) && text.includes('tournament')) {
+            item.remove();
+        }
+    });
+}
 
 function create_message_notif(action, targetUser)
 {

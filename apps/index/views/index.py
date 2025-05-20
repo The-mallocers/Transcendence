@@ -7,6 +7,7 @@ from apps.game.models import Game
 from config import settings
 from utils.enums import EventType, RTables
 from utils.redis import RedisConnectionPool
+import uuid
 
 
 def get(req):
@@ -20,6 +21,7 @@ def get(req):
     friends_online_status = get_friends_online_status(friends_list)
     rank_picture = settings.MEDIA_URL + "/rank_icon/" + client.get_rank(client.stats.mmr) + ".png"
     online_status = "Online"
+    pending_tournament_invitations = get_pending_tournament_invitations(client)
     if client is not None:
         winrate = get_winrate(client, games_played)
     print(winrate)
@@ -37,6 +39,7 @@ def get(req):
         "rank_picture": rank_picture,
         "online_status": online_status,
         "friends_online_status": friends_online_status,
+        "pending_tournament_invitations": pending_tournament_invitations,
     }
     html_content = render_to_string("apps/profile/profile.html", context)
     return JsonResponse({'html': html_content})
@@ -129,6 +132,43 @@ def get_rivals(client, games_played) -> dict:
 
     return top_3_rivals
 
+def get_pending_tournament_invitations(client):
+    pending_invitations = []
+    try:
+        redis = RedisConnectionPool.get_sync_connection("Tournament_pending")
+        
+        # Pattern to match all tournament invitations for this client
+        invitation_pattern = f"{RTables.HASH_TOURNAMENT_INVITATION}:*:{client.id}"
+        keys = redis.keys(invitation_pattern)
+        
+        for key in keys:
+            try:
+                # Get invitation data
+                invitation_data = redis.hgetall(key)
+                if invitation_data and b'status' in invitation_data and invitation_data[b'status'] == b'pending':
+                    # Parse the tournament code from the key
+                    tournament_code = key.decode('utf-8').split(':')[1]
+                    
+                    # Get tournament information
+                    tournament_info = redis.json().get(RTables.JSON_TOURNAMENT(tournament_code))
+                    
+                    # Get inviter information
+                    inviter_id = invitation_data[b'inviter_id'].decode('utf-8')
+                    inviter = Clients.get_client_by_id(uuid.UUID(inviter_id))
+                    
+                    if tournament_info and inviter:
+                        pending_invitations.append({
+                            'tournament_code': tournament_code,
+                            'tournament_name': tournament_info['title'],
+                            'inviter_id': inviter_id,
+                            'inviter_username': inviter.profile.username
+                        })
+            except Exception as e:
+                print(f"Error processing invitation {key}: {e}")
+    except Exception as e:
+        print(f"Error retrieving tournament invitations: {e}")
+    
+    return pending_invitations
 
 def get_friends_online_status(friends):
     friend_status = {}

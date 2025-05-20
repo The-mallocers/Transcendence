@@ -151,7 +151,7 @@ function toast_tournament(message, data, itemToDelete) {
     const time = `${hours}:${minutes}`;
 
     const toastHtml = `
-    <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="toast align-items-center text-bg-light border-0" role="alert" aria-live="assertive" aria-atomic="true">
         <div class="toast-header">
             <img src="/static/assets/imgs/chat.png" class="rounded me-2" alt="..." style="width: 20px; height: 20px; object-fit: contain;">
             <strong class="me-auto">Tournament Invitation</strong>
@@ -160,8 +160,12 @@ function toast_tournament(message, data, itemToDelete) {
         </div>
         <div class="toast-body">${message}</div>
         <div class="mt-2 pt-2 border-top d-flex justify-content-end">
-            <button type="button" class="btn type-intra-green me-2 accept_tournament">Accept</button>
-            <button type="button" class="btn type-intra-white refuse_tournament">Refuse</button>
+            <button type="button" class="btn type-intra-green me-2 accept_tournament" 
+                    data-tournament-code="${data.content.tournament_code}" 
+                    data-inviter="${data.content.username}">Accept</button>
+            <button type="button" class="btn type-intra-white refuse_tournament"
+                    data-tournament-code="${data.content.tournament_code}" 
+                    data-inviter="${data.content.username}">Refuse</button>
         </div>
     </div>`;
 
@@ -176,24 +180,26 @@ function toast_tournament(message, data, itemToDelete) {
     const newToast = toastContainer.lastChild;
     const acceptButton = newToast.querySelector('.accept_tournament');
     acceptButton.addEventListener('click', function () {
-        if (itemToDelete) {
-            itemToDelete.remove();
-        }
-        window.handleAcceptTournamentInvitation(
-            data.content.tournament_code, 
-            data.content.username
-        );
+        const tournamentCode = this.getAttribute('data-tournament-code');
+        const inviterUsername = this.getAttribute('data-inviter');
+        
+        // Remove both toast and pending item
+        const pendingItems = document.querySelectorAll(`.pending_item:has(button[data-tournament-code="${tournamentCode}"])`);
+        pendingItems.forEach(item => item.remove());
+        
+        window.handleAcceptTournamentInvitation(tournamentCode, inviterUsername);
     });
     
     const refuseButton = newToast.querySelector('.refuse_tournament');
     refuseButton.addEventListener('click', function () {
-        if (itemToDelete) {
-            itemToDelete.remove();
-        }
-        window.handleRejectTournamentInvitation(
-            data.content.tournament_code,
-            data.content.username
-        );
+        const tournamentCode = this.getAttribute('data-tournament-code');
+        const inviterUsername = this.getAttribute('data-inviter');
+        
+        // Remove both toast and pending item
+        const pendingItems = document.querySelectorAll(`.pending_item:has(button[data-tournament-code="${tournamentCode}"])`);
+        pendingItems.forEach(item => item.remove());
+        
+        window.handleRejectTournamentInvitation(tournamentCode, inviterUsername);
     });
     
     const toastBootstrap = new bootstrap.Toast(newToast);
@@ -203,7 +209,6 @@ function toast_tournament(message, data, itemToDelete) {
         this.remove();
     });
 }
-
 
 function remove_toast(){
     const toast = document.querySelector(".toast");

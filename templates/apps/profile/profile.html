@@ -111,6 +111,7 @@
 </div>
 <!-- <div id="friends" data-friends={{ friends_online_status|json_script:"friends-data" }} style="display: none;"></div> -->
 {{ friends_online_status|json_script:"friends-data" }}
+{{ pending_tournament_invitations|json_script:"pending-tournament-data" }}
 
 <script type="module" src="{% static '/js/apps/profile/profile.js' %}" defer></script>
 {% comment %} <script type="module" src="{% static '/js/apps/profile/profile.js' %}?v={% now 'U' %}" defer></script> {% endcomment %}
