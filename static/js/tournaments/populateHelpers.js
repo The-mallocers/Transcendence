@@ -80,6 +80,13 @@ const buildRound = (roundInfos, name)=> {
 let meow = null
 
 export function populateTree(tournamentInfos) {
+        // const btnsRoom = document.querySelector("#btnsRoom")
+
+        // if (btnsRoom) {
+        //     btnsRoom.innerHTML = `
+        //                 <div id="leave-btn" class="btn btn-intra-outlined">Leave</div>
+        //     `
+        // }
         meow = document.querySelector("#tree")
         if (meow == null) return ;
         meow.innerHTML = '';
