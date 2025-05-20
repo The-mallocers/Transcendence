@@ -27,7 +27,7 @@ class TournamentService(BaseServices):
 
     async def _helper_tournament_connection(self, client):
         code = self.check_if_socket_in_tournament(client)
-        if code:    
+        if code:
             self.add_socket_to_group(code)
 
     async def check_if_socket_in_tournament(self, client):
@@ -75,7 +75,6 @@ class TournamentService(BaseServices):
             if await self.redis.hget(RTables.HASH_TOURNAMENT_QUEUE(code), str(client.id)) == 'True':
                 return await asend_group_error(self.service_group, ResponseError.ALREADY_JOIN_TOURNAMENT)
             client_list = [await self.redis.json().get(RTables.JSON_TOURNAMENT(code), Path('clients'))]
-            print("client list when join: ", client_list)
             if await self.redis.json().get(RTables.JSON_TOURNAMENT(code), Path('max_clients')) < len(client_list):
                 return await asend_group_error(self.service_group, ResponseError.TOURNAMENT_FULL)
             else:
@@ -93,7 +92,7 @@ class TournamentService(BaseServices):
             code = re.search(rf'{RTables.HASH_TOURNAMENT_QUEUE("")}(\w+)$', queues.decode('utf-8')).group(1)
             await self.channel_layer.group_discard(RTables.GROUP_TOURNAMENT(code), self.channel_name)
             await self.redis.hdel(RTables.HASH_TOURNAMENT_QUEUE(code), str(client.id))
-        
+
         return await asend_group(self.service_group, EventType.TOURNAMENT, ResponseAction.TOURNAMENT_LEFT)
     
     async def _handle_list_players(self, data, client):
@@ -114,12 +113,10 @@ class TournamentService(BaseServices):
             try:
                 tournament_info = await self.tournament_info_helper(tournament_info, code)
             except Exception as e:
-                print(f"Error in tournament info helper {e}")
                 await asend_group_error(self.service_group, ResponseError.NOT_IN_TOURNAMENT)
                 return
             await asend_group(self.service_group, EventType.TOURNAMENT, ResponseAction.TOURNAMENT_INFO, tournament_info)
         else:
-            print("CHUIS PAS DANS LA QUEUE ?")
             await asend_group_error(self.service_group, ResponseError.NOT_IN_TOURNAMENT)
 
 
@@ -155,7 +152,6 @@ class TournamentService(BaseServices):
                 all_tournaments.append(tournament_info)
             if cursor == 0:
                 break
-        print("all tournament = ", all_tournaments)
         await asend_group(self.service_group, EventType.TOURNAMENT, ResponseAction.TOURNAMENT_LIST, all_tournaments)
 
     async def _handle_start_tournament(self, data, client):
@@ -166,8 +162,8 @@ class TournamentService(BaseServices):
 
     async def disconnect(self, client):
         pass
-        
-        
+
+
         #NEw system it used to be as below
         # print("IN DISCONNECT OF TOURNAMENT SERVICE")
         # queues = await Clients.acheck_in_queue(client, self.redis)
@@ -175,9 +171,9 @@ class TournamentService(BaseServices):
             # code = re.search(rf'{RTables.HASH_TOURNAMENT_QUEUE("")}(\w+)$', queues.decode('utf-8')).group(1)
             # await self.channel_layer.group_discard(RTables.GROUP_TOURNAMENT(code), self.channel_name)
             # await self.redis.hdel(RTables.HASH_TOURNAMENT_QUEUE(code), str(client.id))
-        
-        
-        
+
+
+
         # await asend_group(self.service_group, EventType.TOURNAMENT, ResponseAction.TOURNAMENT_UPDATE) #Sending the message to the others to check for updates.
             # tournament = Tournaments.get_tournament_by_code(code)
         #ADD the fact we want to change the status of the tournament from DB
