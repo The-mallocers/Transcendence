@@ -223,6 +223,8 @@ class TournamentThread(Threads):
                 send_group(RTables.GROUP_TOURNAMENT(game.loser.client.id), EventType.TOURNAMENT, ResponseAction.TOURNAMENT_LOSE_GAME)
                 #TODO envoyer a quel place on a fini
                 self.del_client(game.loser.client)
+                #ENLEVER DE LA QUEUE ICI TFREYDIE
+                self.redis.hdel(RTables.HASH_TOURNAMENT_QUEUE(self.code), game.loser.client.id)
                 self.games.remove(game)
                 break
 
