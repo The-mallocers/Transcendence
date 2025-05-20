@@ -170,11 +170,10 @@ def change_two_fa(req):
     if req.method == "POST":
         data = json.loads(req.body.decode('utf-8'))
         client = Clients.get_client_by_request(req)
-        print(req.body)
         if client is not None:
             client.twoFa.update("enable", data['status'])
             if(data['status']):
-                if get_qrcode(client, True) == True: 
+                if get_qrcode(client, True) == True:
                     response = JsonResponse({
                         "success": True,
                         "state": True,
@@ -204,18 +203,19 @@ from django.core.files.base import ContentFile
 def get_qrcode(user, binary):
     # create a qrcode and convert it
     if not user.twoFa.qrcode or binary is True:
+        new_key = pyotp.random_base32()
+        user.twoFa.update("key", new_key)
+        # print(user.twoFa.key)
         uri = pyotp.totp.TOTP(user.twoFa.key).provisioning_uri(name=user.profile.username,
                                                                issuer_name="Transcendance_" + str(
                                                                    user.profile.username))
+        # print(uri)
         qr_image = qrcode.make(uri)
         buf = io.BytesIO()
         qr_image.save(buf, "PNG")
         contents = buf.getvalue()
-
-        # convert it to adapt to a imagefield type in my db
         image_file = ContentFile(contents, name=f"{user.profile.username}_qrcode.png")
         user.twoFa.update("qrcode", image_file)
-
         return True
     return False
 
@@ -227,6 +227,21 @@ def formulate_json_response(state, status, message, redirect):
         "redirect": redirect
     }, status=status))
 
+def post_check_qrcode(req):
+    client = Clients.get_client_by_request(req)
+    if client and req.method == "POST":
+        data = json.loads(req.body.decode('utf-8'))
+        totp = pyotp.TOTP(client.twoFa.key)
+        is_valid = totp.verify(data['code'])
+        if is_valid:
+            if not client.twoFa.scanned:
+                client.twoFa.update("scanned", True)
+            response = formulate_json_response(True, 200, "2Fa successfully activate", "/") 
+            return response
+        else:
+            print("invalid code")
+            return formulate_json_response(False, 400, "Invalid code", "/auth/login")
+    return formulate_json_response(False, 400, "No email match this request", "/auth/login")
 
 def post_twofa_code(req):
     email = req.COOKIES.get('email')

@@ -79,30 +79,6 @@
         </div>
 </div>
 
-<div class="modal fade" id="twoFactorModal" tabindex="-1" aria-labelledby="twoFactorModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="twoFactorModalLabel">Two FA Authentification</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="qr-container">
-                <img src="" alt="2FA QR Code">
-            </div>
-            <form>
-                <input type="text"
-                       id="authCode"
-                       maxlength="6"
-                       placeholder="Enter 6-digit code"
-                       pattern="[0-9]{6}"
-                       required>
-                <br>
-                <button type="submit">Verify Code</button>
-            </form>
-        </div>
-    </div>
-</div>
-
 <script type="module" src="{% static 'js/apps/auth/logout.js' %}"></script>
 <script type="module" src="{% static 'js/apps/auth/delete.js' %}"></script>
 <script type="module" src="{% static 'js/apps/auth/upload_img.js' %}"></script>
