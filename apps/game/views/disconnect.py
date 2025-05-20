@@ -1,4 +1,5 @@
 import random
+from time import sleep
 
 from django.http import JsonResponse
 from django.middleware.csrf import get_token
@@ -10,7 +11,10 @@ from apps.game.models import Game
 
 
 def get(request):
-    game_id = request.GET.get("game", "game_not_found")
+    game_id = "game_not_found"
+    while game_id == "game_not_found":
+        game_id = request.GET.get("game", "game_not_found")
+        sleep(0.1)
     print("I get the game_id", game_id)
     found_game = Game.objects.filter(code=game_id).first()
     message = "Opponent Left"
@@ -33,7 +37,9 @@ def get(request):
     ]
     is_won_tourney = False
     client = Clients.get_client_by_request(request)
-    if found_game.tournament.winner == client:
+    print("found_game tournament winner ", found_game.tournament.winner)
+    print("client id ", client.id)
+    if found_game.tournament and found_game.tournament.winner == client.id:
         disconnect_messages = "Your opponent disconnected, making you the tournament winner !"
         is_won_tourney = True
     is_tourney = False

@@ -1,3 +1,4 @@
+from time import sleep
 from django.http import JsonResponse
 from django.middleware.csrf import get_token
 from django.template.loader import render_to_string
@@ -9,7 +10,6 @@ import random
 def get(request):
     client = Clients.get_client_by_request(request)
     game_id = request.GET.get("game", "game_not_found")
-    print("game id is ", game_id)
     found_game = Game.objects.filter(code=game_id).first()
     # print(f"found game tournament is {found_game.tournament}")
     # print("found_game.tournament json: ", found_game.tournament.scoreboards)
