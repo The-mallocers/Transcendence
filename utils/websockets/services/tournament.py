@@ -21,7 +21,7 @@ class TournamentService(BaseServices):
         self.channel_name = await self.redis.hget(name=RTables.HASH_CLIENT(client.id), key=str(EventType.TOURNAMENT.value))
         self.channel_name = self.channel_name.decode('utf-8')
         #new call
-        self._helper_tournament_connection(client)
+        await self._helper_tournament_connection(client)
         return True
 
 
