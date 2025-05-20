@@ -23,7 +23,7 @@ def create_tournament(request):
     if status[0] == FULL_TOURNEY:
         return formulate_json_response(True, 302, "Login Successful", "/pong/tournament/tree/")
     elif status[0] == HALF_TOURNEY:
-        return formulate_json_response(True, 302, "Login Successful", "/pong/tournament/tree/")
+        return formulate_json_response(True, 302, "Login Successful", "/pong/tournament/")
     html_content = render_to_string("apps/pong/createTournament.html", {"csrf_token": get_token(request), "client": client})
     return JsonResponse({
         'html': html_content,
@@ -31,8 +31,11 @@ def create_tournament(request):
 
 def join_tournament(request):
     client = Clients.get_client_by_request(request)
-    if isInTournament(client):
+    status = isInTournament(client)
+    if status[0] == FULL_TOURNEY:
         return formulate_json_response(True, 302, "Login Successful", "/pong/tournament/tree/")
+    elif status[0] == HALF_TOURNEY:
+        return formulate_json_response(True, 302, "Login Successful", "/pong/tournament/")
     html_content = render_to_string("apps/pong/joinTournament.html", {"csrf_token": get_token(request), "client": client})
     return JsonResponse({
         'html': html_content,
@@ -41,7 +44,8 @@ def join_tournament(request):
 
 def inRoom(request):
     client = Clients.get_client_by_request(request)
-    if isInTournament(client):
+    status = isInTournament(client)
+    if status[0] == FULL_TOURNEY:
         return formulate_json_response(True, 302, "Login Successful", "/pong/tournament/tree/")
     html_content = render_to_string("apps/pong/tournamentRoom.html", {"csrf_token": get_token(request)})
     return JsonResponse({
