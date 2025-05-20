@@ -143,8 +143,10 @@ export async function fetchRoute(path) {
         } else if (response.status === 302) {
             console.log(data, response)
             //Add toast
-            remove_toast();
-            toast_message("You are not logged in");
+            if (window.location.pathname != "/") {
+                remove_toast();
+                toast_message("You are not logged in");
+            }
             return navigateTo(data.redirect)
         } else if (response.status === 401) {
             return navigateTo(data.redirect)
