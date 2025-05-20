@@ -20,15 +20,14 @@ class TournamentService(BaseServices):
         self.service_group = f'{EventType.TOURNAMENT.value}_{client.id}'
         self.channel_name = await self.redis.hget(name=RTables.HASH_CLIENT(client.id), key=str(EventType.TOURNAMENT.value))
         self.channel_name = self.channel_name.decode('utf-8')
-        #new call
-        self._helper_tournament_connection(client)
+        await self._helper_tournament_connection(client)
         return True
 
 
     async def _helper_tournament_connection(self, client):
-        code = self.check_if_socket_in_tournament(client)
+        code = await self.check_if_socket_in_tournament(client)
         if code:
-            self.add_socket_to_group(code)
+            await self.add_socket_to_group(code)
 
     async def check_if_socket_in_tournament(self, client):
         queues = await Clients.acheck_in_queue(client, self.redis)
