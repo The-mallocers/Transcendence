@@ -164,7 +164,6 @@ class ResponseAction(str, Enum):
     TOURNAMENT_INVITATION_REJECTED = "TOURNAMENT_INVITATION_REJECTED" 
     TOURNAMENT_INVITATION_ACCEPTED_BY = "TOURNAMENT_INVITATION_ACCEPTED_BY"
     TOURNAMENT_INVITATION_REJECTED_BY = "TOURNAMENT_INVITATION_REJECTED_BY"
-    PLAYER_LEFT_TOURNAMENT = "PLAYER_LEFT_TOURNAMENT"
 
 
 # All the error messages sent to the client
@@ -194,6 +193,7 @@ class ResponseError(str, Enum):
     HOST_LEAVE: str = 'Host leave tournament.'
     NOT_IN_TOURNAMENT: str = "You're nt in this tournament"
     INVITATION_NOT_FOUND: str = "Tournament invitation not found"
+    INVITATION_ALREADY_SENT: str = "Tournament invitation already sent"
 
     # ── Game ──────────────────────────────────────────────────────────────────────────
     GAME_FULL: str = 'The game is currently full.'

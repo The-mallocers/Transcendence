@@ -75,7 +75,6 @@ class TournamentService(BaseServices):
             if target is None:
                 return await asend_group_error(self.service_group, ResponseError.USER_NOT_FOUND)
             
-            # Check if the target is already in the tournament
             queues = await Clients.acheck_in_queue(client, self.redis)
             if not queues or RTables.HASH_TOURNAMENT_QUEUE('') not in str(queues):
                 return await asend_group_error(self.service_group, ResponseError.NOT_IN_TOURNAMENT)
@@ -85,35 +84,44 @@ class TournamentService(BaseServices):
             if await self.redis.hexists(RTables.HASH_TOURNAMENT_QUEUE(code), str(target.id)):
                 return await asend_group_error(self.service_group, ResponseError.ALREADY_JOIN_TOURNAMENT)
             
-            # Store the invitation in Redis
+            # Check if invitation already exists
+            invitation_key = f"{RTables.HASH_TOURNAMENT_INVITATION}:{code}:{target.id}"
+            if await self.redis.exists(invitation_key):
+                return await asend_group_error(self.service_group, ResponseError.INVITATION_ALREADY_SENT)
+                
+            # Block invitations if target has blocked client or vice versa
+            client_friend_table = await client.get_friend_table()
+            target_friend_table = await target.get_friend_table()
+            
+            if await client_friend_table.ais_blocked(target.id) or await target_friend_table.ais_blocked(client.id):
+                return await asend_group_error(self.service_group, ResponseError.BLOCKED_USER)
+                
+            # Create the invitation
             invitation_key = f"{RTables.HASH_TOURNAMENT_INVITATION}:{code}:{target.id}"
             await self.redis.hset(invitation_key, "inviter_id", str(client.id))
             await self.redis.hset(invitation_key, "tournament_code", code)
             await self.redis.hset(invitation_key, "status", "pending")
             
-            # Get tournament info for the notification
             tournament_info = await self.redis.json().get(RTables.JSON_TOURNAMENT(code))
             
-            # Send notification to target
             await asend_group(RTables.GROUP_NOTIF(target.id), 
-                             EventType.NOTIFICATION, 
-                             ResponseAction.TOURNAMENT_INVITATION, 
-                             {
-                                 "sender": str(client.id),
-                                 "username": await client.aget_profile_username(),
-                                 "tournament_code": code,
-                                 "tournament_name": tournament_info['title']
-                             })
+                            EventType.NOTIFICATION, 
+                            ResponseAction.TOURNAMENT_INVITATION, 
+                            {
+                                "sender": str(client.id),
+                                "username": await client.aget_profile_username(),
+                                "tournament_code": code,
+                                "tournament_name": tournament_info['title']
+                            })
             
-            # Send confirmation to client
             await asend_group(self.service_group, 
-                             EventType.TOURNAMENT,
-                             ResponseAction.TOURNAMENT_INVITATION_SENT,
-                             {
-                                 "target": str(target.id),
-                                 "target_name": await target.aget_profile_username()
-                             })
-            
+                            EventType.TOURNAMENT,
+                            ResponseAction.TOURNAMENT_INVITATION_SENT,
+                            {
+                                "target": str(target.id),
+                                "target_name": await target.aget_profile_username()
+                            })
+        
         except Exception as e:
             self._logger.error(traceback.format_exc())
             await asend_group_error(self.service_group, ResponseError.INTERNAL_ERROR, str(e))
@@ -124,7 +132,7 @@ class TournamentService(BaseServices):
             code = re.search(rf'{RTables.HASH_TOURNAMENT_QUEUE("")}(\w+)$', queues.decode('utf-8')).group(1)
             await self.channel_layer.group_discard(RTables.GROUP_TOURNAMENT(code), self.channel_name)
             await self.redis.hdel(RTables.HASH_TOURNAMENT_QUEUE(code), str(client.id))
-            await asend_group(self.service_group, EventType.TOURNAMENT, ResponseAction.PLAYER_LEFT_TOURNAMENT)
+            await asend_group(self.service_group, EventType.TOURNAMENT, ResponseAction.TOURNAMENT_PLAYER_LEFT)
         else:
             await asend_group_error(self.service_group, ResponseError.NOT_IN_TOURNAMENT)
     

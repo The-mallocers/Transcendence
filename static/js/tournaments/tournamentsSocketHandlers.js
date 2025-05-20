@@ -4,6 +4,7 @@ import { populateJoinTournament } from "./populateHelpers.js";
 import { populateTree } from "./populateHelpers.js";
 import { isGameOver } from "../apps/game/VarGame.js";
 import { tournamentData } from "../apps/game/VarGame.js";
+import { remove_toast, toast_message, toast_tournament } from "../apps/profile/toast.js";
 
 export function setUpTournamentSocket (tournamentSocket) {
     tournamentSocket.onmessage = (message) => {
@@ -81,10 +82,10 @@ export function setUpTournamentSocket (tournamentSocket) {
                 console.log(`Invitation sent to ${jsonData.data.content.target_name}`);
                 break;
                 
-            case "PLAYER_LEFT_TOURNAMENT":  // Updated to match the enum change
-                navigateTo("/pong/gamemodes/");
+            case "TOURNAMENT_PLAYER_LEFT" :
+                tournamentSocket.send(JSON.stringify(get_tournament_info));
                 break;
-                
+
             default:
                 break;
         }

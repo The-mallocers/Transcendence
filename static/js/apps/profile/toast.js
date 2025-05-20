@@ -144,6 +144,67 @@ function toast_message(message) {
     });
 }
 
+function toast_tournament(message, data, itemToDelete) {
+    const date = new Date();
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    const time = `${hours}:${minutes}`;
+
+    const toastHtml = `
+    <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+            <img src="/static/assets/imgs/chat.png" class="rounded me-2" alt="..." style="width: 20px; height: 20px; object-fit: contain;">
+            <strong class="me-auto">Tournament Invitation</strong>
+            <small>${time}</small>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">${message}</div>
+        <div class="mt-2 pt-2 border-top d-flex justify-content-end">
+            <button type="button" class="btn type-intra-green me-2 accept_tournament">Accept</button>
+            <button type="button" class="btn type-intra-white refuse_tournament">Refuse</button>
+        </div>
+    </div>`;
+
+    let toastContainer = document.querySelector('.toast-container');
+    if (!toastContainer) {
+        toastContainer = document.createElement('div');
+        toastContainer.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+        document.body.appendChild(toastContainer);
+    }
+    toastContainer.innerHTML += toastHtml;
+
+    const newToast = toastContainer.lastChild;
+    const acceptButton = newToast.querySelector('.accept_tournament');
+    acceptButton.addEventListener('click', function () {
+        if (itemToDelete) {
+            itemToDelete.remove();
+        }
+        window.handleAcceptTournamentInvitation(
+            data.content.tournament_code, 
+            data.content.username
+        );
+    });
+    
+    const refuseButton = newToast.querySelector('.refuse_tournament');
+    refuseButton.addEventListener('click', function () {
+        if (itemToDelete) {
+            itemToDelete.remove();
+        }
+        window.handleRejectTournamentInvitation(
+            data.content.tournament_code,
+            data.content.username
+        );
+    });
+    
+    const toastBootstrap = new bootstrap.Toast(newToast);
+    toastBootstrap.show();
+
+    newToast.addEventListener('hidden.bs.toast', function () {
+        this.remove();
+    });
+}
+
+
 function remove_toast(){
     const toast = document.querySelector(".toast");
     if(toast)
@@ -154,3 +215,4 @@ export {toast_friend};
 export {toast_duel};
 export {toast_message};
 export {remove_toast};
+export {toast_tournament};
