@@ -333,5 +333,4 @@ class Clients(models.Model):
                 is_blocked = self.blocked_users.filter(id=user_id).exists()
                 return is_blocked
         except Exception as e:
-            print(f"Error checking blocked status: {e}")
             return False

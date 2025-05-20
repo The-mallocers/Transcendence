@@ -112,7 +112,6 @@ def post(request: HttpRequest, client_id):
                 'message': 'Profile updated successfully'
             }, status=200)
         except PermissionDenied as e:
-            print("This is the only return 400 in the codebase, is this triggering ?!")
             return JsonResponse({
                 'success': False,
                 'message': str(e)

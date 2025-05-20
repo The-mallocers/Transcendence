@@ -1,3 +1,4 @@
+import hashlib
 import uuid
 from datetime import timedelta, datetime, timezone
 
@@ -7,12 +8,13 @@ from django.http import HttpRequest, HttpResponse
 
 from apps.auth.models import InvalidatedToken
 from apps.client.models import Clients
-from utils.enums import JWTType
-from utils.util import create_jti_id
+from utils.enums import JWTType, RTables, SessionType
+from utils.redis import RedisConnectionPool
+from utils.util import create_jti_id, get_client_ip
 
 
 class JWT:
-    def __init__(self, client: Clients, token_type: JWTType):
+    def __init__(self, client: Clients, token_type: JWTType, request: HttpRequest = None):
         # ── Local Vars ────────────────────────────────────────────────────────────── #
         self.client: Clients = client
         now = datetime.now(tz=timezone.utc)
@@ -36,6 +38,12 @@ class JWT:
         if self.client.rights.is_admin:
             self.ROLES.append('admin')
 
+        self.SESSION_KEY = request.session.session_key
+        self.IP_ADDRESS = get_client_ip(request)
+        self.USER_AGENT = request.META.get('HTTP_USER_AGENT', '')
+        self.DEVICE_FINGERPRINT = hashlib.sha256(str(f"{self.USER_AGENT}|{self.IP_ADDRESS}").encode()).hexdigest()
+
+
     def __str__(self):
         return f"{self.TYPE}_token expired in {self.EXP}, issue a {self.IAT}"
 
@@ -50,6 +58,7 @@ class JWT:
             samesite='Lax',
             expires=self.EXP
         )
+        self._store_session_redis()
         return response
 
     def invalidate_token(self):
@@ -66,11 +75,11 @@ class JWT:
         )
 
     @staticmethod
-    def validate_token(token_key: str, token_type: JWTType):
+    def validate_token(token_key: str, token_type: JWTType, request):
         token = None
         try:
             payload = JWT._decode_token(token_key)
-            token = JWT._get_token(payload)
+            token = JWT._get_token(payload, request)
             if InvalidatedToken.objects.filter(jti=token.JTI).exists():
                 raise jwt.InvalidKeyError('Token has been invalidated')
             if token and token.TYPE != token_type:
@@ -90,7 +99,7 @@ class JWT:
     @staticmethod
     def extract_token(request: HttpRequest, token_type: JWTType):
         token_key = request.COOKIES.get(token_type.value + '_token')
-        return JWT.validate_token(token_key, token_type)
+        return JWT.validate_token(token_key, token_type, request)
 
     def encode_token(self):
         header = {
@@ -112,6 +121,10 @@ class JWT:
             'iat': self.IAT,
             'exp': self.EXP,
             'type': self.TYPE,
+            'session_id': self.SESSION_KEY,
+            'ip_address': self.IP_ADDRESS,
+            'user_agent': self.USER_AGENT,
+            'device_fingerprint': self.DEVICE_FINGERPRINT,
         }
 
         if self.TYPE == JWTType.ACCESS:
@@ -119,24 +132,35 @@ class JWT:
 
         return token_dict
 
+    def _store_session_redis(self):
+        redis = RedisConnectionPool.get_sync_connection('JWT')
+
+        # Store session settings in redis
+        redis.hset(RTables.HASH_CLIENT_SESSION(self.client.id), SessionType.SESSION_ID, self.SESSION_KEY)
+        redis.hset(RTables.HASH_CLIENT_SESSION(self.client.id), SessionType.IP_ADRESS, self.IP_ADDRESS)
+        redis.hset(RTables.HASH_CLIENT_SESSION(self.client.id), SessionType.USER_AGENT, self.USER_AGENT)
+        redis.hset(RTables.HASH_CLIENT_SESSION(self.client.id), SessionType.FINGERPRINT, self.DEVICE_FINGERPRINT)
+        redis.hset(RTables.HASH_CLIENT_SESSION(self.client.id), SessionType.LAST_ACTIVITY, int(datetime.now().timestamp()))
+        redis.expire(RTables.HASH_CLIENT_SESSION(self.client.id), settings.SESSION_LIMITING_EXPIRY)
+        RedisConnectionPool.close_sync_connection('JWT')
+
     @staticmethod
     def _decode_token(token: str):
         payload = jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITH])
         return payload
 
     @staticmethod
-    def _get_token(data: dict):
+    def _get_token(data: dict, request):
         client = Clients.get_client_by_id(data['sub'])
         if client is None:
             raise Clients.DoesNotExist()
-        token = JWT(client=client, token_type=data['type'])
+        token = JWT(client=client, token_type=data['type'], request=request)
         token.EXP = data.get('exp')
         token.JTI = uuid.UUID(data['jti'])
         token.IAT = data.get('iat')
         token.ROLES = data.get('roles', [])
-        token.DEVICE_ID = data.get('device_id')
+        token.SESSION_KEY = data.get('session_id')
         token.IP_ADDRESS = data.get('ip_address')
         token.USER_AGENT = data.get('user_agent')
         token.DEVICE_FINGERPRINT = data.get('device_fingerprint')
-        token.TOKEN_VERSION = data.get('token_version', 0)
         return token

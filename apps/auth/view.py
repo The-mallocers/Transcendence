@@ -23,5 +23,4 @@ def twofa_get(req):
 
 # @require_http_methods(["GET"])
 def exchange_42_token(req):
-    print("aaaaaaaaaaaaa")
     return auth42(req)

@@ -31,7 +31,7 @@ def check_in_queue(client, redis):
     cursor = 0
     if redis.hget(name=RTables.HASH_G_QUEUE, key=str(client.id)):
         return RTables.HASH_G_QUEUE
-    
+
     while True:
         cursor, keys = redis.scan(cursor=cursor, match=RTables.HASH_QUEUE('*'))
         for key in keys:
@@ -40,7 +40,7 @@ def check_in_queue(client, redis):
                 return key
         if cursor == 0:
             break
-    
+
     return None
 
 

@@ -204,43 +204,25 @@ class PongLogic:
         loser = Player.create_player()
 
         if disconnect is True:
-            print("Disconnect is true")
             if self.redis.hget(name=RTables.HASH_CLIENT(self.game.pL.client.id), key=str(EventType.GAME.value)) is None:
-                print(f"player left left is true, points to win is {self.game.points_to_win}")
                 self.score_pL.set_score(0)
                 self.score_pR.set_score(self.game.points_to_win)
             if self.redis.hget(name=RTables.HASH_CLIENT(self.game.pR.client.id), key=str(EventType.GAME.value)) is None:
-                print(f"player right left is true, points to win is {self.game.points_to_win}")
                 self.score_pR.set_score(0)
                 self.score_pL.set_score(self.game.points_to_win)
         if self.score_pL.get_score() > self.score_pR.get_score():
-            print(f"self.score_pL.get_score = {self.score_pL.get_score()}")
-            print(f"self.score_pR.get_score = {self.score_pR.get_score()}")
             winner.client = Clients.get_client_by_id(self.game.pL.client.id)
             winner.score = self.score_pL.get_score()
             loser.client = Clients.get_client_by_id(self.game.pR.client.id)
             loser.score = self.score_pR.get_score()
-            print("Loser then winner score")
-            print(loser.score)
-            print(winner.score)
         elif self.score_pL.get_score() < self.score_pR.get_score():
-            print(f"self.score_pL.get_score = {self.score_pL.get_score()}")
-            print(f"self.score_pR.get_score = {self.score_pR.get_score()}")
             winner.client = Clients.get_client_by_id(self.game.pR.client.id)
             winner.score = self.score_pR.get_score()
             loser.client = Clients.get_client_by_id(self.game.pL.client.id)
             loser.score = self.score_pL.get_score()
-            print("Loser then winner score")
-            print(loser.score)
-            print(winner.score)
 
         loser.save()
         winner.save()
-        print("Printing loser - Winner")
-        print(loser)
-        print("score of this player :", loser.score)
-        print(winner)
-        print("score of this player :", winner.score)
         tournament = None
         if self.game.tournament:
             tournament = Tournaments.get_tournament_by_code(self.game.tournament.code)

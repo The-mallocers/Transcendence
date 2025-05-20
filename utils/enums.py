@@ -26,13 +26,26 @@ class TournamentStatus(str, Enum):
 
 
 class EventType(str, Enum):
+    # ── Services ──────────────────────────────────────────────────────────────────────
     MATCHMAKING: str = 'matchmaking'
     GAME: str = 'game'
     TOURNAMENT: str = 'tournament'
-    UPDATE: str = 'update'
     CHAT: str = 'chat'
     NOTIFICATION: str = 'notification'
+
+    # ── Others ────────────────────────────────────────────────────────────────────────
+    UPDATE: str = 'update'
     ERROR: str = 'error'
+
+
+class SessionType(str, Enum):
+    FINGERPRINT: str = 'fingerprint'
+    SESSION_ID: str = 'session_id'
+    LAST_ACTIVITY: str = 'last_activity'
+    USER_AGENT: str = 'user_agent'
+    IP_ADRESS: str = 'ip'
+    LAST_JWT_REFRESH: str = 'refresh_jwt'
+    LAST_JWT_ACCESS: str = 'access_jwt'
 
 
 # All the actions the client sends to the server
@@ -232,6 +245,7 @@ class RTables(str, Enum):
 
     # ── Hash Tables ───────────────────────────────────────────────────────────────── #
     HASH_CLIENT: str = 'client_{}'
+    HASH_CLIENT_SESSION: str = 'client_session_{}'
     HASH_MATCHES: str = 'current_matches'
     HASH_QUEUE: str = 'queue_{}'
     HASH_G_QUEUE: str = HASH_QUEUE.format('global')
