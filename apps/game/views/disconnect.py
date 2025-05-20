@@ -4,12 +4,14 @@ from django.http import JsonResponse
 from django.middleware.csrf import get_token
 from django.template.loader import render_to_string
 
+from apps import game
 from apps.client.models import Clients
 from apps.game.models import Game
 
 
 def get(request):
     game_id = request.GET.get("game", "game_not_found")
+    print("I get the game_id", game_id)
     found_game = Game.objects.filter(code=game_id).first()
     print("We are in the proper Disconnect page view (in spite of all odds)")
     message = "Opponent Left"
@@ -30,6 +32,11 @@ def get(request):
         "Maybe they just went to get milk.",
         "Bravely ran away, Sir Opponent.",
     ]
+    is_won_tourney = False
+    client = Clients.get_client_by_request(request)
+    if found_game.tournament.winner == client:
+        disconnect_messages = "Your opponent disconnected, making you the tournament winner !"
+        is_won_tourney = True
     is_tourney = False
     if found_game.tournament:
         is_tourney = True
@@ -39,7 +46,8 @@ def get(request):
         "csrf_token": get_token(request),
         "message": message,
         "disconnect_message": disconnect_messages[index],
-        "is_tourney": is_tourney
+        "is_tourney": is_tourney,
+        "is_won_tourney": is_won_tourney,
     })
     return JsonResponse({
         'html': html_content,

@@ -117,8 +117,9 @@ if (!socket || socket.readyState === WebSocket.CLOSED) {
             }
         } else if (jsonData.event == "ERROR") {
             if (jsonData.data.action == "OPPONENT_LEFT") {
+                const game_id = jsonData.data.content
                 console.log("Opponent Disconnected");
-                navigateTo("/pong/disconnect/");
+                navigateTo(`/pong/disconnect/?game=${game_id}`);
                 isGameOver.gameIsOver = true;
                 WebSocketManager.closeGameSocket();
             }
