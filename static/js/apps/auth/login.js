@@ -4,7 +4,7 @@ import {getClientId} from '../../utils/utils.js';
 
 const AUTH_CONFIG = {
     clientId: 'u-s4t2ud-fba0f059cba0019f374c8bf89cb3a81ead9ef0cb218380d9344c21d99d1f9b3e',
-    redirectUri: 'https://localhost:8000/auth/auth42',
+    redirectUri: `https://${window.location.hostname}:8000/auth/auth42`,
     authorizationEndpoint: 'https://api.intra.42.fr/oauth/authorize',
     tokenEndpoint: 'https://api.intra.42.fr/oauth/token',
     userInfoEndpoint: 'https://api.intra.42.fr/v2/me'

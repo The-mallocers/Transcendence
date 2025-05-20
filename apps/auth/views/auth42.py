@@ -8,6 +8,7 @@ from apps.auth.api.views import formulate_json_response
 # from apps.shared.api.serializers import ClientSerializer
 # from apps.shared.models import Clients
 from apps.client.models import Clients
+from config import settings
 from utils.jwt.JWT import JWT
 from utils.jwt.JWT import JWTType
 from utils.serializers.client import ClientSerializer
@@ -32,12 +33,13 @@ def add_suffix_until_unique(username):
 
 def auth42(request):
     auth_code = request.GET.get('code')
+    hostname = request.get_host().split(':')[0]  # Remove port if present
     token_params = {
         'grant_type': 'authorization_code',
         'client_id': os.environ.get('AUTH_42_CLIENT'),
         'client_secret': os.environ.get('AUTH_42_SECRET'),
         'code': auth_code,
-        'redirect_uri': 'https://localhost:8000/auth/auth42'
+        'redirect_uri': f'https://{hostname}:8000/auth/auth42'
     }
 
     token_response = requests.post(
