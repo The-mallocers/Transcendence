@@ -35,7 +35,7 @@ class ProfilePictureValidator(serializers.Serializer):
 
             return InMemoryUploadedFile(
                 output, 'ImageField',
-                f"{image.title.split('.')[0]}.jpg",
+                f"{image.name.split('.')[0]}.jpg",
                 'image/jpeg', sys.getsizeof(output), None
             )
 

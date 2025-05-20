@@ -1,7 +1,10 @@
+import { setUpTournamentSocket } from "../tournaments/tournamentsSocketHandlers.js";
+
 export const WebSocketManager = {
   gameSocket: null,
   chatSocket: null,
   notifSocket: null,
+  tournamentSocket: null,
   
   async initGameSocket(client_id) {
     // if (!client_id) {
@@ -57,6 +60,47 @@ export const WebSocketManager = {
                   }
               }
               console.log("notif socket connected");
+              this.notifSocket.send(JSON.stringify(message));
+          }
+    }
+    return this.notifSocket;
+  },
+
+  async initTournamentSocket(client_id) {
+    // if (!client_id) {
+    //   client_id = await getClientId();
+    // }
+      if (this.isSocketClosed(this.tournamentSocket)) {
+      this.tournamentSocket = new WebSocket(`wss://${window.location.host}/ws/tournament/?id=${client_id}`);
+          this.tournamentSocket.onopen = () => {
+              const message = {
+                  "event": "tournament",
+                  "data": {
+                      "action": "ping"
+                  }
+              }
+              console.log("Tournament socket connected");
+              this.tournamentSocket.send(JSON.stringify(message));
+              setUpTournamentSocket(this.tournamentSocket);
+          }
+
+        }
+    return this.tournamentSocket;
+  },
+  async initNotifSocket(client_id) {
+    // if (!client_id) {
+    //   client_id = await getClientId();
+    // }
+      if (this.isSocketClosed(this.notifSocket)) {
+      this.notifSocket = new WebSocket(`wss://${window.location.host}/ws/notification/?id=${client_id}`);
+          this.notifSocket.onopen = () => {
+              const message = {
+                  "event": "notification",
+                  "data": {
+                      "action": "ping"
+                  }
+              }
+              console.log("notif socket connected");
               this.notifSocket.send(JSON.stringify(message))
           }
     }
@@ -67,6 +111,7 @@ export const WebSocketManager = {
     this.closeGameSocket();
     this.closeChatSocket();
     // this.closeNotifSocket();
+    // this.closeTournamentSocket();
   },
   
   closeGameSocket() {
@@ -76,6 +121,14 @@ export const WebSocketManager = {
       console.log("Game socket closed");
     }
   },
+  
+  closeTournamentSocket() {
+    if (this.isSocketOpen(this.tournamentSocket)) {
+    this.tournamentSocket.close();
+    this.tournamentSocket = null;
+    console.log("tournament socket closed");
+  }
+},
   
   closeChatSocket() {
       if (this.isSocketOpen(this.chatSocket)) {

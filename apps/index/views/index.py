@@ -59,30 +59,36 @@ def get_last_matches(client, games_played) -> list:
         myPoints = 0
         enemyPoints = 0
         opponent = ""
-
+        mmr_change = 0
         if (game.winner.client == None):
             myPoints = game.loser.score
             enemyPoints = game.winner.score
             opponent = "[REDACTED]"
+            mmr_change = game.loser.mmr_change
         elif (game.loser.client == None):
             myPoints = game.winner.score
             enemyPoints = game.loser.score
             opponent = "[REDACTED]"
+            mmr_change = game.winner.mmr_change
         elif (client.id == game.winner.client.id):
             myPoints = game.winner.score
             enemyPoints = game.loser.score
             opponent = game.loser.client.profile.username
+            mmr_change = game.winner.mmr_change
         else:
             myPoints = game.loser.score
             enemyPoints = game.winner.score
             opponent = game.winner.client.profile.username
+            mmr_change = game.loser.mmr_change
 
+        mmr_change = f"{mmr_change:+d} mmr"
         ghistory.append({
             "opponent": opponent,
             "won": myPoints > enemyPoints,
             "myPoints": myPoints,
             "enemyPoints": enemyPoints,
-            "when": game.created_at
+            "when": game.created_at.strftime("%d %B %H:%M"),
+            "mmr_change": mmr_change,
         })
         i += 1
     return ghistory

@@ -3,7 +3,10 @@ import {isGameOver} from "../apps/game/VarGame.js"
 import * as html from "../utils/html_forms.js"
 import {routes} from "../utils/routes.js";
 import {getClientId} from "../utils/utils.js";
+import { toast_message } from "../apps/profile/toast.js";
+import { remove_toast } from "../apps/profile/toast.js";
 
+window.intervalsManager = []
 class Router {
     constructor(routes) {
         this.routes = routes;
@@ -17,11 +20,25 @@ class Router {
     }
 
     async handleLocation() {
+        for (let id of window.intervalsManager) {
+            console.log(id)
+            clearInterval(id);
+            
+        }
+        window.intervalsManager.length = 0;
         //Now making the notif ws in navigation
         if (WebSocketManager.isSocketClosed(WebSocketManager.notifSocket)) {
             const clientId = await getClientId();
             if (clientId) {
                 await WebSocketManager.initNotifSocket(clientId);
+            }
+        }
+        console.log("is tournament socket closed:", WebSocketManager.isSocketClosed(WebSocketManager.tournamentSocket));
+        if (WebSocketManager.isSocketClosed(WebSocketManager.tournamentSocket)) {
+            const clientId = await getClientId();
+            if (clientId) {
+                console.log("COUCOU WEBSOCKET TOURNOI ICI");
+                await WebSocketManager.initTournamentSocket(clientId);
             }
         }
         const path = window.location.pathname;
@@ -70,7 +87,7 @@ class Router {
     navigate(path) {
 
         let splitedPath = path.split("/")
-        console.log(splitedPath);
+        // console.log(splitedPath);
         if (splitedPath.includes("pong")) {
             if (splitedPath.includes("duel") || splitedPath.includes("arena") || splitedPath.includes("matchmaking")) {
                 WebSocketManager.closeChatSocket();
@@ -101,6 +118,8 @@ export function reloadScriptsSPA() {
 }
 
 export function navigateTo(path) {
+    //////////
+    //////////
     router.navigate(path);
 }
 
@@ -123,6 +142,11 @@ export async function fetchRoute(path) {
             return data.html;
         } else if (response.status === 302) {
             console.log(data, response)
+            //Add toast
+            if (window.location.pathname != "/") {
+                remove_toast();
+                toast_message("You are not logged in");
+            }
             return navigateTo(data.redirect)
         } else if (response.status === 401) {
             return navigateTo(data.redirect)

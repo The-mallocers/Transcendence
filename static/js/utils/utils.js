@@ -20,6 +20,14 @@ export async function getClientId() {
     }
 }
 
+export function sendWhenReady(socket, message) {
+    if (socket.readyState === WebSocket.OPEN) {
+        socket.send(message);
+    } else {
+        socket.addEventListener('open', () => socket.send(message), { once: true });
+    }
+}
+
 export function create_front_chat_room(room, username, usernameId, status, profilePicture = null){
     const newChat = document.querySelector('.chatRooms');
     if(newChat)

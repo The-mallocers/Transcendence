@@ -1,10 +1,13 @@
 {% load static %}
 
-<div>
-    <div>
-        <iframe src={{ urlpostgres }}
-            width="800" 
-            height="800">
-        </iframe>
+<div class="container-monitoring">
+    <div class="header-monitoring">
+        <h1>Metrics Dashboard</h1>
+    </div>
+    
+    <div class="dashboard-card">
+        <div class="dashboard-container-monitoring">
+            <iframe src="{{ urlpostgres }}"></iframe>
+        </div>
     </div>
 </div>

@@ -6,6 +6,7 @@ class GameStatus(str, Enum):
     WAITING: str = 'waiting'
     MATCHMAKING: str = 'matchmaking'
     STARTING: str = 'starting'
+    WAITING_TO_START: str = 'waiting_to_start'
     RUNNING: str = 'running'
     ENDING: str = 'ending'
     FINISHED: str = 'finished'
@@ -80,6 +81,8 @@ class RequestAction(str, Enum):
     LEAVE_TOURNAMENT: str = 'leave_tournament'
     START_TOURNAMENT: str = 'start_tournement'
     LIST_TOURNAMENT: str = 'list_tournament'
+    LIST_PLAYERS: str = 'list_players'
+    TOURNAMENT_INFOS: str = 'tournament_info'
 
     # ── Notification Actions ──────────────────────────────────────────────────────────────────
     SEND_FRIEND_REQUEST: str = "send_friend_request"
@@ -122,6 +125,11 @@ class ResponseAction(str, Enum):
     TOURNAMENT_GAME_FINISH: str = 'Game is finished'
     TOURNAMENT_LOSE_GAME: str = "You're kick from tournament due to losing game."
     TOURNAMENT_CLOSING: str = 'Tournament close.'
+    TOURNAMENT_PLAYERS_LIST: str = 'List of players'
+    TOURNAMENT_INFO: str = 'Tournament info'
+    TOURNAMENT_LIST: str = 'List of tournaments'
+    TOURNAMENT_UPDATE: str = 'Tournament update'
+    WAITING_FOR_NEXT_ROUND: str = 'The tournament is waiting for the next round'
 
     # ── Game Actions ──────────────────────────────────────────────────────────────────
     JOIN_GAME: str = 'You have successfully joined the game'
@@ -129,6 +137,7 @@ class ResponseAction(str, Enum):
     STARTING: str = 'The game is about to start'
     STARTED: str = 'The game has started'
     GAME_ENDING: str = 'The game has ended'
+    WAITING_TO_START: str = 'Waiting for the game to start'
 
     # ── Update ────────────────────────────────────────────────────────────────────────
     PLAYER_INFOS: str = 'player_informations'
@@ -177,13 +186,16 @@ class ResponseError(str, Enum):
     NOT_INVITED: str = 'You are not invited to this duel.'
     ALREADY_JOIN_DUEL: str = 'You try to join duel already joined.'
     CANNOT_REFUSE_DUEL: str = "You can't refuse a duel you already joined."
+    BLOCKED_USER: str = 'You cannot duel a blocked user.'
 
     # ── Tournaments ───────────────────────────────────────────────────────────────── #
     KEY_ERROR: str = 'Error in tournament key.'
     TOURNAMENT_NOT_CREATE: str = 'There is error when you try to create tournaments.'
     TOURNAMENT_NOT_EXIST: str = 'Tournament you try to join not exist.'
+    TOURNAMENT_FULL: str = 'Tournament is full'
     ALREADY_JOIN_TOURNAMENT: str = 'You try to join tournament already joined.'
     HOST_LEAVE: str = 'Host leave tournament.'
+    NOT_IN_TOURNAMENT: str = "You're not in this tournament"
 
     # ── Game ──────────────────────────────────────────────────────────────────────────
     GAME_FULL: str = 'The game is currently full.'

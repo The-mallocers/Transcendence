@@ -68,8 +68,16 @@ chatSocket.onmessage = (event) => {
                                 message.data.content.sender, 
                                 "Block",
                                 message.data.content.profile_picture);
-                            }
-                        }
+    }
+    else if (message.data.action == "DUEL_CREATED") {
+        navigateTo(`/pong/duel/?opponent=${message.data.content.opponent}`);
+    }
+    else if(message.data.action == "BLOCKED_USER"){ 
+        remove_toast();
+        toast_message("You have blocked this user");
+        navigateTo('');
+    }
+}
                         
 const messageInput = document.getElementById("messageInput")
 if(messageInput){
@@ -141,7 +149,7 @@ window.handleChatDuel = function (usernameId) {
     console.log(usernameId);
     const message = create_message_duel("create_duel", usernameId);
     notifSocket.send(JSON.stringify(message));
-    navigateTo('/pong/duel/');
+    // navigateTo('/pong/duel/');
 }
 
 async function displayHistory(message) {

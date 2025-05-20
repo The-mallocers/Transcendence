@@ -14,17 +14,12 @@ grafana_id = 0
 
 def get(req):
     csrf_token = get_token(req)
-    urlpostgres = None
-    grafana_session = authenticate_grafana_user()
-    secretKey = create_api_key(grafana_session)
-    urlpostgres = render_dashboard(req, secretKey, grafana_session)
     users = Clients.objects.all()
     html_content = render_to_string("apps/auth/login.html", {
         "users": users,
         "csrf_token": csrf_token,
-        "urlpostgres": urlpostgres,
+        # "urlpostgres": urlpostgres,
     })
-
     response = JsonResponse({
         'html': html_content,
         'users': list(users.values())
@@ -40,7 +35,7 @@ def authenticate_grafana_user():
     login_url = "http://grafana:3000/login"
     session = requests.Session()
     admin = "admin"
-    pwd = settings.GRFANA_ADMIN_PWD
+    pwd = settings.GRAFANA_ADMIN_PWD
     response = session.post(
         login_url,
         json={"user": admin, "password": pwd},
@@ -56,7 +51,7 @@ def authenticate_grafana_user():
 def create_api_key(session):
     admin_client = Clients.get_client_by_email(settings.ADMIN_EMAIL)
     admin_user = "admin"
-    admin_password = settings.GRFANA_ADMIN_PWD
+    admin_password = settings.GRAFANA_ADMIN_PWD
     url = f"http://grafana:3000/api/serviceaccounts"
 
     # API key details

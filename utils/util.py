@@ -62,3 +62,6 @@ def get_client_ip(request: HttpRequest):
     else:
         ip = request.META.get('REMOTE_ADDR')
     return ip
+
+def default_scoreboards():
+    return {'scoreboards': []}

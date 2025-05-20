@@ -2,10 +2,11 @@ import time
 
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
+from django.conf import settings
 
 from apps.game.models import Game
 from utils.enums import GameStatus, EventType, ResponseAction, \
-    ResponseError, PlayerSide, RTables
+    ResponseError, PlayerSide, RTables, game_status_order
 from utils.pong.logic import PongLogic
 from utils.serializers.player import PlayerInformationSerializer
 from utils.threads.threads import Threads
@@ -32,6 +33,7 @@ class GameThread(Threads):
                 else:
                     break
             while self.game_is_running():
+                self._waitting_to_start()
                 self._running()
                 self._ending()  # I will get this one out of this loop I swear it
 
@@ -40,8 +42,19 @@ class GameThread(Threads):
             send_group_error(RTables.GROUP_GAME(self.game_id), ResponseError.EXCEPTION, close=True)
             self.stop()
 
+        finally:
+            self._ending()
+
     def game_is_running(self) -> bool:
         is_valid = not self._stop_event.is_set() and self.game.rget_status() is not GameStatus.ERROR
+        player_left = self.redis.hget(RTables.HASH_CLIENT(self.game.pL.client.id), EventType.GAME.value)
+        player_right = self.redis.hget(RTables.HASH_CLIENT(self.game.pR.client.id), EventType.GAME.value)
+        if player_left is None or player_right is None:
+            send_group_error(RTables.GROUP_GAME(self.game.pR.client.id), ResponseError.OPPONENT_LEFT)
+            send_group_error(RTables.GROUP_GAME(self.game.pL.client.id), ResponseError.OPPONENT_LEFT)
+            if self.game.rget_status() is not GameStatus.ENDING or self.game.rget_status() is not GameStatus.FINISHED:
+                self.game.rset_status(GameStatus.ENDING)
+            return False
         return is_valid
 
     def cleanup(self):
@@ -85,20 +98,34 @@ class GameThread(Threads):
 
     def _starting(self):
         if self.game.rget_status() is GameStatus.STARTING:
-            send_group(RTables.GROUP_GAME(self.game_id), EventType.GAME, ResponseAction.STARTING)
             pL_serializer = PlayerInformationSerializer(self.game.pL, context={'side': PlayerSide.LEFT})
             pR_serializer = PlayerInformationSerializer(self.game.pR, context={'side': PlayerSide.RIGHT})
             send_group(RTables.GROUP_GAME(self.game_id), EventType.GAME, ResponseAction.PLAYER_INFOS, {
                 'left': pL_serializer.data,
                 'right': pR_serializer.data
             })
-            self.game.rset_status(GameStatus.RUNNING)
-            time.sleep(5)
+            send_group(RTables.GROUP_GAME(self.game_id), EventType.GAME, ResponseAction.STARTING)
+            self.game.rset_status(GameStatus.WAITING_TO_START)
             return True
         return False
 
+    def _waitting_to_start(self):
+        if self.game.rget_status() is GameStatus.WAITING_TO_START:
+            counts = 5
+            while counts >= 0 and self.game_is_running():
+                if (counts == 0):
+                    send_group(RTables.GROUP_GAME(self.game_id), EventType.GAME, ResponseAction.WAITING_TO_START, {'timer': 'GO !!!!'})
+                else:
+                    send_group(RTables.GROUP_GAME(self.game_id), EventType.GAME, ResponseAction.WAITING_TO_START, {'timer': counts})
+                counts -= 1
+                sleep(1)
+            self.game.rset_status(GameStatus.RUNNING)
+            return True
+
     def _running(self):
         if self.game.rget_status() is GameStatus.RUNNING:
+            if not self.game_is_running():
+                self.game.rset_status(GameStatus.ENDING)
             self.execute_once(send_group, self.game_id, EventType.GAME, ResponseAction.STARTED)
             self.logic.game_task()
 
@@ -113,7 +140,8 @@ class GameThread(Threads):
 
             if self.game.tournament is not None:
                 from utils.threads.tournament import TournamentThread
-                TournamentThread.set_game_players(self.game.tournament.code, self.game.code, self.game.winner.id, self.game.loser.id, self.redis)
+                TournamentThread.set_game_players(self.game.tournament.code, self.game.code, self.game.winner, self.game.loser, self.redis)
+                #Changed the above to be just the object
 
             self._stop_event.set()
             self._stopping()

@@ -51,7 +51,7 @@ const leftGameMessage = {
 
 window.leftQueue = function () {
     socket.send(JSON.stringify((leftGameMessage)));
-    socket.close();
+    // socket.close();
     navigateTo('/pong/gamemodes/');
 }
 
@@ -80,10 +80,11 @@ socket.onclose = () => {
 socket.onmessage = (e) => {
     const jsonData = JSON.parse(e.data)
 
-    if (jsonData.data.action)
+    if ((typeof jsonData?.data?.content) == "string")
         gameStatusDiv.innerHTML = jsonData.data.content
     console.log(jsonData, gameStatusDiv)
     console.log(jsonData.data.action)
+    console.log(jsonData.data.content )
     //We should only get the response that a match was found
 
     //On message on regarde si c'est que la game a commencer
@@ -99,7 +100,7 @@ socket.onmessage = (e) => {
                 x: jsonData.data.content.left.paddle.x,
                 y: jsonData.data.content.left.paddle.y,
                 username: jsonData.data.content.left.username,
-                id: "",
+                id: jsonData.data.content.left.client_id,
                 picture: jsonData.data.content.left.player_profile,
 
             },
@@ -107,7 +108,7 @@ socket.onmessage = (e) => {
                 x: jsonData.data.content.right.paddle.x,
                 y: jsonData.data.content.right.paddle.y,
                 username: jsonData.data.content.right.username,
-                id: "",
+                id: jsonData.data.content.right.client_id,
                 picture: jsonData.data.content.right.player_profile,
             }
         }

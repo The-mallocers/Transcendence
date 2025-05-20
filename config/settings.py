@@ -245,7 +245,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL')
 ADMIN_PWD = os.environ.get('ADMIN_PWD')
 ADMIN_USERNAME = os.environ.get('ADMIN_USERNAME')
-GRFANA_ADMIN_PWD = os.environ.get('GRAFANA_PASSWORD')
+GRAFANA_ADMIN_PWD = os.environ.get('GRAFANA_PASSWORD')
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ LOGGING SETTINGS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #

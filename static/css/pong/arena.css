@@ -1,0 +1,47 @@
+.arenaPage {
+    position: relative;
+    background-size: cover;
+    background-position: center;
+    padding: 20px;
+}
+
+.arenaPage #pongCanvas {
+    border: 1px white solid;
+}
+
+.arenaPage .username {
+    font-size: 3rem;
+    color: white;
+}
+
+.arenaPage  .l_username{
+    background-color: hsla(229, 15%, 14%, .95);
+    margin-top: 30px;
+    margin-left: 50px;
+    margin-right: 50px;
+    margin-bottom: 12vh;
+}
+
+.arenaPage .score {
+    font-size: 3rem;
+    color: white;
+}
+
+.arenaPage .picture{
+    width:70px;
+    height:70px;
+    background-size: cover;
+    background-position: center;
+    border-radius: 10px;
+}
+
+
+.arenaPage .timer {
+    position: absolute;
+    top: calc(50% + 0px);
+    left: calc(50% + 0px);
+    font-size: 5rem;
+    color: white;
+
+    transform: translate(-50%, -50%);
+}

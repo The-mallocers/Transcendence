@@ -1,3 +1,5 @@
+{% load static %}
+
 <div class="createTournamentContainer">
     <div class="box">
 
@@ -5,7 +7,7 @@
 
         <div class="d-flex roomNameContainer align-items-center justify-content-between mt-4">
             <label for="roomName">Room name</label>
-            <input id="roomName" type="text" placeholder="minimeow's room">
+            <input id="roomName" type="text" placeholder="myRoom">
         </div>
 
         <div class="points text-center mt-2">
@@ -16,34 +18,25 @@
                 <div class="plus">+</div>
             </div>
         </div>
-
-        <div class="d-flex roomPrivateContainer align-items-center mt-2">
-            <label for="roomName">Private room</label>
-            <input type="checkbox" checked>
+        
+        <div class="d-flex mt-4 playNum">
+            <div>Select number of players</div>
+            <div class="d-flex gap-2" id="player-options">
+                <input type="radio" id="opt-1" name="tournamentPlayers"  value="4">
+                <label for="opt-1">4</label><br>
+                <input type="radio" id="opt-2" name="tournamentPlayers" checked value="4">
+                <label for="opt-2">8</label><br>
+                <input type="radio" id="opt-3" name="tournamentPlayers" value="16">
+                <label for="opt-3">16</label>
+            </div>
         </div>
-
-        <div class="btn createBtn mt-4" data-route="/pong/tournament/">Create Room</div>
-    </div>
-
-    <script>    
-        let minus = document.querySelector(".minus")
-        let plus = document.querySelector(".plus")
         
 
-        function decrease(){
-            let score = document.querySelector(".score")
-            val = parseInt(score.innerHTML)
-            if (val > 1)
-                score.innerHTML = --val
-        }
+        <div id="create-btn" class="btn createBtn mt-4">Create Room</div>
+        <div id="errDiv" class="mt-2"></div>
 
-        function increase(){
-            let score = document.querySelector(".score")
-            val = parseInt(score.innerHTML)
-            score.innerHTML = ++val
-        }
-
-        minus.addEventListener("click", decrease)
-        plus.addEventListener("click", increase)
-    </script>
+        <!-- data-route="/pong/tournament/" -->
+    </div>
 </div>
+
+<script type="module" src="{% static '/js/tournaments/createTournament.js' %}"></script>

@@ -17,9 +17,10 @@
 }
 
 .inTournamentRoomContainer .avatarContainer {
+    position: relative;
+
     height: 3.5rem;
     width: 3.5rem;
-
     border-radius: 50%;
     overflow: hidden;
 
@@ -37,21 +38,41 @@
 } 
 
 
-.inTournamentRoomContainer .avatarContainer img{
+.inTournamentRoomContainer .avatarContainer .avata{
     height: 100%;
     width: 100%;
+}
+
+.inTournamentRoomContainer .star{
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    left: 120%;
+
+    height: 20px;
+    width : 20px;
 }
 
 .inTournamentRoomContainer .btns .btn {
     padding: 1rem 2rem;
 }
 
-.inTournamentRoomContainer .btns .btn:first-of-type {
+.inTournamentRoomContainer .btns .btn-intra{
     color: white;
     background-color: #00BABB;
 }
 
-.inTournamentRoomContainer .btns .btn:last-of-type {
+.inTournamentRoomContainer .btns .btn-intra-outlined {
     border-color: #00BABB;
     color: #00BABB;
+}
+
+.inTournamentRoomContainer .btns .btn-intra-outlined {
+    border-color: #00BABB;
+    color: #00BABB;
+}
+
+.inTournamentRoomContainer .tropheeImg{
+    height: 42px;
+    width: 42px;
 }

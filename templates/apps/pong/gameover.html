@@ -193,8 +193,15 @@
         <div id="mmr_change" class="score">{{ mmr_change }}</div>
     </div>
     <div class="btns mt-5">
+        {% if is_lost_tourney %}
+        <div class="btn full d-inline" data-route="/pong/matchmaking/">Practice for next tournament</div>
+        <div class="btn outlined d-inline" data-route="/">My profile</div>
+        {% elif found_game.tournament %}
+        <div class="btn full d-inline" data-route="/pong/tournament/tree/?tree={{ found_game.tournament.code }}">Go back to tournament</div>
+        {% else %}
         <div class="btn full d-inline" data-route="/pong/matchmaking/">Go back in queue</div>
         <div class="btn outlined d-inline" data-route="/">My profile</div>
+        {% endif %}
     </div>
 </div>
 

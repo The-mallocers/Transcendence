@@ -102,11 +102,6 @@ class MatchmakingThread(Threads):
                 stat_p1 = clients[0][1].decode('utf-8')
                 stat_p2 = clients[1][1].decode('utf-8')
                 
-                if client_1 is None or client_2 is None:
-                    self._logger.error(f"One or more clients not found for duel {duel}")
-                    self.redis.delete(duel)
-                    continue
-                
                 client_id_1 = Clients.get_client_by_id(client_1)
                 client_id_2 = Clients.get_client_by_id(client_2)
                 channel_p1 = self.redis.hget(name=RTables.HASH_CLIENT(client_id_1.id), key=str(EventType.GAME.value))

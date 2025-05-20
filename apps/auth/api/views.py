@@ -111,7 +111,9 @@ class LoginApiView(APIView):
         email = request.POST.get('email')
         pwd = request.POST.get('password')
         client = Clients.get_client_by_email(email)
+        print("client: ", client)
         if client is None or client.password.check_pwd(password=pwd) is False:
+            print("error login", pwd)
             return Response({
                 "error": "Invalid credentials"
             }, status=status.HTTP_401_UNAUTHORIZED)
@@ -234,7 +236,10 @@ def post_twofa_code(req):
             JWT(client, JWTType.ACCESS, req).set_cookie(response)
             JWT(client, JWTType.REFRESH, req).set_cookie(response)
             return response
-    response = formulate_json_response(False, 400, "No email match this request", "/auth/login")
+        else:
+            response = formulate_json_response(False, 400, "Invalid Code", "/auth/login")
+    else:
+        response = formulate_json_response(False, 400, "No email match this request", "/auth/login")
     return response
 
 

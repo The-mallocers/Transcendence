@@ -271,6 +271,14 @@ notifSocket.onmessage = (event) => {
             status.innerHTML = "Offline";
         }
     }
+    else if (message.data.action == "DUEL_CREATED") {
+        navigateTo(`/pong/duel/?opponent=${message.data.content.opponent}`);
+    }
+    else if(message.data.action == "BLOCKED_USER"){ 
+        remove_toast();
+        toast_message("You have blocked this user");
+        navigateTo('');
+    }
 }
 
 // Define the functions in the global scope (window)
