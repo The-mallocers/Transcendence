@@ -11,8 +11,6 @@ def get(request):
     client = Clients.get_client_by_request(request)
     game_id = request.GET.get("game", "game_not_found")
     found_game = Game.objects.filter(code=game_id).first()
-    # print(f"found game tournament is {found_game.tournament}")
-    # print("found_game.tournament json: ", found_game.tournament.scoreboards)
     client_player_name = client.profile.username
     is_lost_tourney = mmr_change = message = client_score = opponent_score = opponent = None
     if found_game.winner.client.id == client.id:

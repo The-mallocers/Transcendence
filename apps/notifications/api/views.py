@@ -57,16 +57,6 @@ class GetPendingDuelsApiView(APIView):
 
         return Response(duel_data, status=status.HTTP_200_OK)
 
-
-# Pretty sure this is unused to im commenting it it out.
-# class GetOnlineStatus(APIView):
-#     def get(self, request: HttpRequest, *args, **kwargs):
-#         print("getting online status")
-#         data = [{
-#             "Good job getting my online status"
-#             }]
-#         return Response(data, status=status.HTTP_200_OK)
-
 class GetUserName(APIView):
     def get(self, request: HttpRequest, *args, **kwargs):
         client = Clients.get_client_by_request(request)

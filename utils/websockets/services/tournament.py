@@ -134,7 +134,6 @@ class TournamentService(BaseServices):
             "host" : host,
             "scoreboard": scoreboard,
         }
-        # print("roomInfos: ", roomInfos)
         return roomInfos
 
     async def _handle_list_tournament(self, data, client):
@@ -160,18 +159,3 @@ class TournamentService(BaseServices):
 
     async def disconnect(self, client):
         pass
-
-
-        #NEw system it used to be as below
-        # print("IN DISCONNECT OF TOURNAMENT SERVICE")
-        # queues = await Clients.acheck_in_queue(client, self.redis)
-        # if queues and RTables.HASH_TOURNAMENT_QUEUE('') in str(queues):
-            # code = re.search(rf'{RTables.HASH_TOURNAMENT_QUEUE("")}(\w+)$', queues.decode('utf-8')).group(1)
-            # await self.channel_layer.group_discard(RTables.GROUP_TOURNAMENT(code), self.channel_name)
-            # await self.redis.hdel(RTables.HASH_TOURNAMENT_QUEUE(code), str(client.id))
-
-
-
-        # await asend_group(self.service_group, EventType.TOURNAMENT, ResponseAction.TOURNAMENT_UPDATE) #Sending the message to the others to check for updates.
-            # tournament = Tournaments.get_tournament_by_code(code)
-        #ADD the fact we want to change the status of the tournament from DB

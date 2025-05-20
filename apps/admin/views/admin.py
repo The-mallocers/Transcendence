@@ -12,11 +12,8 @@ def get_monitoring(request):
     client = Clients.get_client_by_request(request)
     urlpostgres = None
     grafana_session = authenticate_grafana_user()
-    print(grafana_session)
     secretKey = create_api_key(grafana_session)
-    print("the secret key: ", secretKey)
     urlpostgres = render_dashboard(request, secretKey, grafana_session)
-    print(urlpostgres)
     if client is not None:
         context = {
             "client": client,
@@ -26,7 +23,7 @@ def get_monitoring(request):
     return JsonResponse({
         'html': html_content,
     })
-    
+
 def authenticate_grafana_user():
     login_url = "http://grafana:3000/login"
     session = requests.Session()
@@ -40,7 +37,6 @@ def authenticate_grafana_user():
     if response.status_code == 200:
         return session
     else:
-        print(f"Failed to authenticate: {response.status_code}, {response.text}")
         return None
 
 def create_api_key(session):
@@ -48,7 +44,7 @@ def create_api_key(session):
     admin_user = "admin"
     admin_password = settings.GRAFANA_ADMIN_PWD
     url = f"http://grafana:3000/api/serviceaccounts"
-    
+
     key_data = {
         "name": "grafanaDashboard",
         "role": "Admin" 
@@ -62,7 +58,6 @@ def create_api_key(session):
             auth=(admin_user, admin_password),
             data=json.dumps(key_data)
         )
-        print("response before token: ", response)
         if response.status_code == 200 or response.status_code == 201:
             grafana_id = response.json().get('id')
             admin_client.rights.grafana_id = grafana_id
@@ -72,7 +67,6 @@ def create_api_key(session):
                         headers={"Content-Type": "application/json"},
                         auth=(admin_user, admin_password),
                         data=json.dumps(dataJson))
-            print("token: ", res)
             admin_client.rights.grafana_token = res.json().get('key')
             admin_client.rights.save()
             return res.json().get('key')
@@ -94,7 +88,6 @@ def render_dashboard(request, secretkey, session) -> str:
             )
             response.raise_for_status()
             data = response.json()
-            print(data)
             payload = {
                 "timeSelectionEnabled": True,
                 "isEnabled": True,
@@ -103,7 +96,6 @@ def render_dashboard(request, secretkey, session) -> str:
                 "uid" : data[0].get('uid')
             }
             uidpostgres = data[0].get('uid')
-            print(uidpostgres)
             url = f"http://grafana:3000/api/dashboards/uid/{uidpostgres}/public-dashboards/"
             response = session.post(
                 url,
@@ -115,10 +107,8 @@ def render_dashboard(request, secretkey, session) -> str:
             urlpostgres = f"http://localhost:3000/public-dashboards/{data.get('accessToken')}"
             admin_client.rights.grafana_dashboard = urlpostgres
             admin_client.rights.save()
-            print("the url: ", urlpostgres)
             return urlpostgres
         return admin_client.rights.grafana_dashboard
-    
+
     except requests.exceptions.RequestException as e:
-        print(str(e))
         return JsonResponse({'error': str(e)}, status=500)

@@ -10,7 +10,6 @@ const AUTH_CONFIG = {
     userInfoEndpoint: 'https://api.intra.42.fr/v2/me'
 };
 
-console.log("Login has been loaded")
 
 function login(e) {
 
@@ -20,7 +19,6 @@ function login(e) {
     const form = document.querySelector("form");
     const formData = new FormData(form);
     const errorDiv = document.getElementById("error-message")
-    console.log(form.action)
     fetch(form.action, {
         method: "POST",
         body: formData,
@@ -30,13 +28,11 @@ function login(e) {
     })
         .then(async response => {
             if (response.ok) {
-                console.log("trying to navigate to index");
                 navigateTo('/');
             } else if (response.status === 302) {
                 const data = await response.json();
                 navigateTo(data.redirect); //2FA
             } else {
-                console.log("Fetch of login failed");
                 response.json().then(errorData => {
                     errorDiv.textContent = errorData.error || "An error occurred";
                 });
@@ -123,7 +119,6 @@ if (login42Button) {
 //Little trick to deal with annoying edge case of logout per invalid jwt token not closing ws
 async function socketCheck() {
     if (await getClientId() == null && WebSocketManager.isSocketOpen(WebSocketManager.notifSocket)) {
-        console.log("Allo");
         WebSocketManager.closeNotifSocket();
     }
 }

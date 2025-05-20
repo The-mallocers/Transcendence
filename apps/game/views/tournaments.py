@@ -53,9 +53,7 @@ def inRoom(request):
 
 def tournamentTree(request):
     client = Clients.get_client_by_request(request)
-    print(f"client name {client.profile.username} is now given back the tree page")
     html_content = render_to_string("apps/pong/tree.html", {"csrf_token": get_token(request), "client": client})
     return JsonResponse({
         'html': html_content,
     })
-

@@ -15,7 +15,6 @@ def get(request):
     while game_id == "game_not_found":
         game_id = request.GET.get("game", "game_not_found")
         sleep(0.1)
-    print("I get the game_id", game_id)
     found_game = Game.objects.filter(code=game_id).first()
     message = "Opponent Left"
     # Lets add something cute here to get a random message everytime.
@@ -37,8 +36,6 @@ def get(request):
     ]
     is_won_tourney = False
     client = Clients.get_client_by_request(request)
-    print("found_game tournament winner ", found_game.tournament.winner)
-    print("client id ", client.id)
     if found_game.tournament and found_game.tournament.winner == client.id:
         disconnect_messages = "Your opponent disconnected, making you the tournament winner !"
         is_won_tourney = True

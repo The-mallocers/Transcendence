@@ -70,7 +70,7 @@ class NotificationService(BaseServices):
 
             profile_picture_source = await client.aget_profile_by_user()
             profile_picture_target = await target.aget_profile_by_user()
-            
+
             await asend_group(self.service_group, EventType.NOTIFICATION,
                               ResponseAction.ACK_ACCEPT_FRIEND_REQUEST_HOST,
                               {
@@ -167,7 +167,6 @@ class NotificationService(BaseServices):
         client_blocked_target = await client_friend_table.ais_blocked(target.id)
         target_blocked_client = await target_firend_table.ais_blocked(client.id)
         if client_blocked_target or target_blocked_client:
-            print("client blocked target or target blocked client")
             return await asend_group_error(self.service_group, ResponseError.BLOCKED_USER)
         target_queues = await Clients.acheck_in_queue(target, self.redis)
         if target_queues is not RTables.HASH_G_QUEUE.value and target_queues is not None:
