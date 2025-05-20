@@ -85,7 +85,6 @@ export function handleErrorFront(errorData) {
             displayErrorMessage('password_check', errorData['password']['passwordcheck']);
         }
         if ("non_field_errors" in errorData["password"] ) {
-            console.log("Here we go")
             displayErrorMessage('password', errorData["password"]["non_field_errors"]);
             displayErrorMessage('password_check', errorData["password"]["non_field_errors"]);
         }
@@ -124,7 +123,6 @@ function clearAllErrorMessages() {
 //Little trick to deal with annoying edge case of logout per invalid jwt token not closing ws
 async function socketCheck() {
     if (await getClientId() == null && WebSocketManager.isSocketOpen(WebSocketManager.notifSocket)) {
-        console.log("Allo");
         WebSocketManager.closeNotifSocket();
     }
 }

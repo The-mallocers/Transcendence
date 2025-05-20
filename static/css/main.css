@@ -34,6 +34,7 @@ nav {
     /* padding: 15px; */
     height: 3rem;
     width: 3rem;
+    cursor: pointer;
 }
 
 .navElement:not(:first-child) {

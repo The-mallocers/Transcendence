@@ -91,16 +91,12 @@ if (login42Button) {
         //         navigateTo("/")
         //     }
 
-        //     console.log()
         //     // if (document.cookie !== previousCookies) {
-        //     //     // console.log("Cookies changed!");
         //     //     // previousCookies = document.cookie;
         //     //     // // Do something with the new cookies
 
 
         //     // }
-
-        //     // console.log(document.cookie)
         // },3000)
 
         // setTimeout(() => {

@@ -25,7 +25,6 @@ file_input.addEventListener('change', async () => {
             });
             const data = await response.json();
             if (response.ok) {
-                console.log(data);
                 const newImg = new Image();
                 newImg.src = data.picture + `?t=${Date.now()}`;
 

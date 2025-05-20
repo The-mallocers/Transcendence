@@ -1,6 +1,5 @@
 import {navigateTo} from '../../spa/spa.js';
 
-console.log("twoja loaded")
 
 const email = document.getElementById("data-email").getAttribute("email");
 
@@ -8,7 +7,6 @@ async function validateCode() {
     const code = document.getElementById('authCode').value;
     if (code.length === 6 && /^\d+$/.test(code)) {
         try {
-            console.log(code);
             const response = await fetch("/api/auth/2facode", {
                 method: "POST",
                 headers: {
@@ -21,16 +19,13 @@ async function validateCode() {
             });
 
             const result = await response.json();
-            console.log(result);
             if (response.status === 200 && result.success) {
                 navigateTo(result.redirect); //make sure to change to redirect
             }
             else{
                 alert(`${result.message}`)
-                console.log(result)
             }
         } catch (err) {
-            console.log(err);
             navigateTo(result.redirect);
         }
     } else {

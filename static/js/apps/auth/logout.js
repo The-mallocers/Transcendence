@@ -3,7 +3,6 @@ import {WebSocketManager} from "../../websockets/websockets.js"
 
 
 async function logout() {
-    console.log("logout.js online");
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
     WebSocketManager.closeNotifSocket();
 
@@ -19,12 +18,10 @@ async function logout() {
 
         const data = await response.json();
         if (response.status == 302) {
-            console.log(data)
             navigateTo(data.redirect)
         } else if (!response.ok) {
             throw new Error('Network response was not ok');
         } else {
-            console.log('Logout successful:', data);
             navigateTo('/auth/login');
         }
     } catch (error) {
@@ -38,5 +35,3 @@ const element = document.querySelector("#logout-btn");
 element?.addEventListener("click", (e) => {
     logout(e);
 })
-
-
