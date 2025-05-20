@@ -45,7 +45,8 @@ services:
   nginx:
     container_name: nginx
     ports:
-      - "8000:443"
+      - "8000:8000"
+      - "8080:8080"
     depends_on:
       - django-web
     build: docker/nginx

@@ -20,16 +20,21 @@ export function setUpTournamentSocket (tournamentSocket) {
         const jsonData = JSON.parse(message.data);
         console.log("Tournament socket message", jsonData.data);
         console.log("The event is:", jsonData.event);
-        
-        if (jsonData.event != "TOURNAMENT") return;
+        console.log({"MEOW" : jsonData});
+        if (jsonData.event != "TOURNAMENT" && jsonData.event != "ERROR") return;
         const action = jsonData.data.action;   
-
+        console.log("action : ", action)
         switch (action) {
-            // case "ERROR":
-            //     console.log("Error message: ", message.data.error)
-            //     navigateTo("/pong/gamemodes/");
-            //     // errDiv.innerHTML = message.data.error
-            //     break;
+
+            case "HOST_LEAVE":
+            case "NOT_IN_TOURNAMENT":
+            case "ERROR":
+                // console.log("Error message: ", jsonData.data.error)
+                remove_toast()
+                toast_message(jsonData.data.error || jsonData.data.content )
+                navigateTo("/pong/gamemodes/");
+                // errDiv.innerHTML = jsonData.data.error
+                break;
             case "TOURNAMENT_PLAYER_LEFT" :
                 tournamentSocket.send(JSON.stringify(get_tournament_info));
                 break;
@@ -65,12 +70,19 @@ export function setUpTournamentSocket (tournamentSocket) {
                 break;
                 
             case "TOURNAMENT_GAME_READY":
+                remove_toast();
+                let toast = toast_message("your tournament game is ready")
+                
+                let btn = document.createElement("div")
+                btn.classList.add('btn', 'intra-btn')
+                btn.innerText = 'ready'
+                btn.dataset.route = '/pong/matchmaking/'
+                toast.appendChild(btn)
 
-                toast_message("frero bouge toi")
                 tournamentData.gameIsReady = true;
                 // console.log("ALLO JE VAIS REJOUER OUUAIS");
                 // navigateTo("/pong/matchmaking/");
-                console.log(document.location.pathname)  
+                console.log(document.location.pathname)
                 const parrent = document.querySelector(document.location.pathname.includes('tree') ?  '#tree': "#btnsRoom")
                 console.log("data of tournament join", parrent);
                 if (parrent) {
@@ -80,7 +92,6 @@ export function setUpTournamentSocket (tournamentSocket) {
                     btn.addEventListener('click', ()=>{navigateTo(`/pong/matchmaking/`);})
                     parrent.appendChild(btn)
                 }
-                // remove_toast()
                 break;
                 
             case "TOURNAMENT_UPDATE":

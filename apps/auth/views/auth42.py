@@ -30,8 +30,6 @@ def add_suffix_until_unique(username):
     return username
 
 
-# print(generate_password())
-
 def auth42(request):
     auth_code = request.GET.get('code')
     token_params = {
@@ -46,8 +44,6 @@ def auth42(request):
         'https://api.intra.42.fr/oauth/token',
         json=token_params
     )
-
-    print("WOOOOOOOOOO", token_response.status_code)
 
     if token_response.status_code != 200:
         response = formulate_json_response(True, 302, "Login Unsuccessful", "/")
@@ -99,11 +95,10 @@ def auth42(request):
 
         if serializer.is_valid():
             client = serializer.save()
-    print("WOOOOOOOOOO")
     response = formulate_json_response(True, 302, "Login Successful", "/")
 
     response.set_cookie("oauthToken", access_token)
-    JWT(client, JWTType.ACCESS).set_cookie(response)
-    JWT(client, JWTType.REFRESH).set_cookie(response)
+    JWT(client, JWTType.ACCESS, request).set_cookie(response)
+    JWT(client, JWTType.REFRESH, request).set_cookie(response)
 
     return response

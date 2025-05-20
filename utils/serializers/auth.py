@@ -31,7 +31,6 @@ class PasswordSerializer(serializers.ModelSerializer):
         if '$' in value:
             raise serializers.ValidationError("Password cannot contain the '$' character.")
         if instance and not instance.check_pwd(value):
-            print("Hello sir")
             raise serializers.ValidationError("New password must be different from the old password.")
         return value
 

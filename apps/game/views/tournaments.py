@@ -21,29 +21,7 @@ def create_tournament(request):
 
 def join_tournament(request):
     client = Clients.get_client_by_request(request)
-    rooms = [
-        {
-            "name" : "minimeow's room",
-            "leaderAvatar" : "/assets/imgs/profile/default.png",
-            "players" : 6
-        },
-        {
-            "name" : "huh",
-            "leaderAvatar" : "/assets/imgs/profile/default.png",
-            "players" : 4
-        },
-        {
-            "name" : "huh2",
-            "leaderAvatar" : "/assets/imgs/profile/default.png",
-            "players" : 8
-        },
-        {
-            "name" : "huh3",
-            "leaderAvatar" : "/assets/imgs/profile/default.png",
-            "players" : 7
-        }
-    ]
-    html_content = render_to_string("apps/pong/joinTournament.html", {"csrf_token": get_token(request), "client": client, "rooms": rooms})
+    html_content = render_to_string("apps/pong/joinTournament.html", {"csrf_token": get_token(request), "client": client})
     return JsonResponse({
         'html': html_content,
     })
@@ -53,7 +31,7 @@ def check_in_queue(client, redis):
     cursor = 0
     if redis.hget(name=RTables.HASH_G_QUEUE, key=str(client.id)):
         return RTables.HASH_G_QUEUE
-    
+
     while True:
         cursor, keys = redis.scan(cursor=cursor, match=RTables.HASH_QUEUE('*'))
         for key in keys:
@@ -62,7 +40,7 @@ def check_in_queue(client, redis):
                 return key
         if cursor == 0:
             break
-    
+
     return None
 
 

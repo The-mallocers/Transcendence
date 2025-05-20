@@ -5,6 +5,7 @@ from django.forms import ValidationError
 from django.utils import timezone
 from rest_framework import serializers
 
+from apps.client.models import Clients
 from utils.enums import TournamentStatus, GameStatus
 
 
@@ -18,7 +19,8 @@ def validate_tournament_size(value):
 class TournamentSerializer(serializers.Serializer):
     title = serializers.CharField(
         max_length=40,
-        error_messages={'blank': 'Tournament title cannot be empty'}
+        required=False,
+        allow_blank=True,
     )
     max_clients = serializers.IntegerField(
         validators=[validate_tournament_size]
@@ -39,11 +41,9 @@ class TournamentSerializer(serializers.Serializer):
     )
     host = serializers.UUIDField()
 
-
-    
     def validate_max_players(self, value):
-        # if value % 4 != 0:
-        #     raise ValidationError("Number of maximum players must be a multiple of 4")
+        if value % 4 != 0:
+            raise ValidationError("Number of maximum players must be a multiple of 4")
         return value
 
     def to_representation(self, instance):

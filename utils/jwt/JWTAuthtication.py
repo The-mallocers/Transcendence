@@ -17,7 +17,7 @@ class JWTAuthentication(BaseAuthentication):
         jwt_key = auth_header.split(" ")[1]
 
         try:
-            jwt_token: JWT = JWT.validate_token(jwt_key, JWTType.ACCESS)
+            jwt_token: JWT = JWT.validate_token(jwt_key, JWTType.ACCESS, request)
         except jwt.ExpiredSignatureError:
             raise AuthenticationFailed("Token has expired")
         except jwt.InvalidTokenError:

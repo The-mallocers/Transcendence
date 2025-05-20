@@ -51,7 +51,7 @@ const leftGameMessage = {
 
 window.leftQueue = function () {
     socket.send(JSON.stringify((leftGameMessage)));
-    socket.close();
+    // socket.close();
     navigateTo('/pong/gamemodes/');
 }
 
