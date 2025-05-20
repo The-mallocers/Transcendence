@@ -189,8 +189,12 @@
         {{ disconnect_message }}
     </div>
     <div class="btns mt-5">
+        {% if is_tourney %}
+        <div class="btn full d-inline" data-route="/pong/tournament/tree/">Go back to tournament</div>
+        {% else %}
         <div class="btn full d-inline" data-route="/pong/matchmaking/">Go back in queue</div>
         <div class="btn outlined d-inline" data-route="/">My profile</div>
+        {% end if %}
     </div>
 
 </div>

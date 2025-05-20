@@ -4,8 +4,13 @@ from django.http import JsonResponse
 from django.middleware.csrf import get_token
 from django.template.loader import render_to_string
 
+from apps.client.models import Clients
+from apps.game.models import Game
+
 
 def get(request):
+    game_id = request.GET.get("game", "game_not_found")
+    found_game = Game.objects.filter(code=game_id).first()
     message = "Opponent Left"
     # Lets add something cute here to get a random message everytime.
     disconnect_messages = [
@@ -24,12 +29,16 @@ def get(request):
         "Maybe they just went to get milk.",
         "Bravely ran away, Sir Opponent.",
     ]
+    is_tourney = False
+    if found_game.tournament:
+        is_tourney = True
 
     index = random.randint(0, len(disconnect_messages) - 1) 
     html_content = render_to_string("pong/../../templates/apps/pong/disconnect.html", {
         "csrf_token": get_token(request),
         "message": message,
-        "disconnect_message": disconnect_messages[index], 
+        "disconnect_message": disconnect_messages[index],
+        "is_tourney": is_tourney
     })
     return JsonResponse({
         'html': html_content,
