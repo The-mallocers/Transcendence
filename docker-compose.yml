@@ -70,7 +70,6 @@ services:
     restart: unless-stopped
     stop_grace_period: 1s
 
-  # module grafana and prometheus
   prometheus:
     image: prom/prometheus
     container_name: prometheus
@@ -110,6 +109,10 @@ services:
     depends_on:
       prometheus:
         condition: service_started
+    volumes:
+      - ./docker/postgres-exporter/queries.yml:/queries.yml
+    command:
+      - "--extend.query-path=/queries.yml"
     restart: unless-stopped
     networks:
       - Tnetwork

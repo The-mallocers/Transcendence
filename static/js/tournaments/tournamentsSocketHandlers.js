@@ -71,11 +71,18 @@ export function setUpTournamentSocket (tournamentSocket) {
                 
             case "TOURNAMENT_GAME_READY":
                 remove_toast();
-                toast_message("frero bouge toi")
+                let toast = toast_message("your tournament game is ready")
+                
+                let btn = document.createElement("div")
+                btn.classList.add('btn', 'intra-btn')
+                btn.innerText = 'ready'
+                btn.dataset.route = '/pong/matchmaking/'
+                toast.appendChild(btn)
+
                 tournamentData.gameIsReady = true;
                 // console.log("ALLO JE VAIS REJOUER OUUAIS");
                 // navigateTo("/pong/matchmaking/");
-                console.log(document.location.pathname)  
+                console.log(document.location.pathname)
                 const parrent = document.querySelector(document.location.pathname.includes('tree') ?  '#tree': "#btnsRoom")
                 console.log("data of tournament join", parrent);
                 if (parrent) {

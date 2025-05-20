@@ -121,6 +121,12 @@ main {
     z-index: 2; /* Ensure it appears above other elements */
 }
 
+
+.intra-btn {
+    background-color: #00babc;
+    color: white;
+    margin: 0 auto;
+}
 .avatar {
     position: absolute;
     left: 5%;
