@@ -45,12 +45,12 @@ if (!socket || socket.readyState === WebSocket.CLOSED) {
     toast_message("You are being redirected because you are not in any game right now")
 } else {
     tournamentData.gameIsReady = false;
-    console.log(window.GameState);
+    // console.log(window.GameState);
     lusername.innerHTML = window.GameState.left.username;
     rusername.innerHTML = window.GameState.right.username;
-    console.log("WHAT ARE THE URLS:");
-    console.log(window.GameState.left.picture);
-    console.log(window.GameState.right.picture);
+    // console.log("WHAT ARE THE URLS:");
+    // console.log(window.GameState.left.picture);
+    // console.log(window.GameState.right.picture);
     lpicture.src = window.GameState.left.picture;
     rpicture.src = window.GameState.right.picture;
 
@@ -66,7 +66,7 @@ if (!socket || socket.readyState === WebSocket.CLOSED) {
 
         //Attempt at handling errors
         if (jsonData.data.action == "EXCEPTION") {
-            console.log("REDIRECTION BECAUSE EXCEPTION HAPPENED");
+            // console.log("REDIRECTION BECAUSE EXCEPTION HAPPENED");
             isGameOver.gameIsOver = true;
             WebSocketManager.closeGameSocket();
             navigateTo("/");
@@ -87,14 +87,14 @@ if (!socket || socket.readyState === WebSocket.CLOSED) {
             //     last_time = performance.now();
             // }
             if (jsonData.data.action == "PADDLE_LEFT_UPDATE") {
-                console.log("move from server:", jsonData.data.content.move);
+                // console.log("move from server:", jsonData.data.content.move);
                 const current_move = jsonData.data.content.move
                 if (current_move != left_last_move) {
                     window.GameState.left.y = jsonData.data.content.y;
                     left_last_move = current_move;
                 }
             } else if (jsonData.data.action == "PADDLE_RIGHT_UPDATE") {
-                console.log("move from server:", jsonData.data.content.move);
+                // console.log("move from server:", jsonData.data.content.move);
                 const current_move = jsonData.data.content.move
                 if (current_move != right_last_move) {
                     window.GameState.right.y = jsonData.data.content.y
@@ -208,7 +208,7 @@ function updatePaddles() {
     // (direction && previous_direction != direction) || frameCount % 5 === 0
     if ((direction && previous_direction != direction) || frameCount % 5 === 0) { //Trying to send less updates
         previous_direction = direction;
-        console.log("Sending to server direction :", direction);
+        // console.log("Sending to server direction :", direction);
         const message = {
             "event": "game",
             "data": {

@@ -1,5 +1,6 @@
 import { tournamentData } from "../apps/game/VarGame.js"
 import { navigateTo } from "../spa/spa.js"  
+import { addReadyButton } from "./tournamentsSocketHandlers.js"
 
 //Build TREE
 const buildTr = (matchInfos) => {
@@ -121,7 +122,14 @@ export function populateTree(tournamentInfos) {
 //TOURNAMENT ROOM
 export function populateTournament(tournament_data){
     const max_clients = tournament_data.max_clients
+    const btnsRoom = document.querySelector("#btnsRoom")
 
+    if (btnsRoom) {
+        btnsRoom.innerHTML = `
+                    <div class="btn btn-intra">Invite</div>
+                    <div id="leave-btn" class="btn btn-intra-outlined">Leave</div>
+        `
+    }
     console.log(tournamentData)
     const clientsInTournament = document.querySelector("#clientsInTournament");
     let clientsDiv = []
@@ -175,6 +183,7 @@ export function populateTournament(tournament_data){
             clientsInTournament.appendChild(temp.firstChild);
         }
     });
+    addReadyButton(tournamentData.gameIsReady);
 }
 
 ///JOIN TOURNAMENT
