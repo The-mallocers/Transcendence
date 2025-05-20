@@ -56,7 +56,6 @@ class TournamentService(BaseServices):
             if await self.redis.hget(RTables.HASH_TOURNAMENT_QUEUE(code), str(client.id)) == 'True':
                 return await asend_group_error(self.service_group, ResponseError.ALREADY_JOIN_TOURNAMENT)
             client_list = [await self.redis.json().get(RTables.JSON_TOURNAMENT(code), Path('clients'))]
-            print("client list when join: ", client_list)
             if await self.redis.json().get(RTables.JSON_TOURNAMENT(code), Path('max_clients')) < len(client_list):
                 return await asend_group_error(self.service_group, ResponseError.TOURNAMENT_FULL)
             else:
@@ -88,12 +87,10 @@ class TournamentService(BaseServices):
             try:
                 tournament_info = await self.tournament_info_helper(tournament_info, code)
             except Exception as e:
-                print(f"Error in tournament info helper {e}")
                 await asend_group_error(self.service_group, ResponseError.NOT_IN_TOURNAMENT)
                 return
             await asend_group(self.service_group, EventType.TOURNAMENT, ResponseAction.TOURNAMENT_INFO, tournament_info)
         else:
-            print("CHUIS PAS DANS LA QUEUE ?")
             await asend_group_error(self.service_group, ResponseError.NOT_IN_TOURNAMENT)
 
 
@@ -129,7 +126,6 @@ class TournamentService(BaseServices):
                 all_tournaments.append(tournament_info)
             if cursor == 0:
                 break
-        print("all tournament = ", all_tournaments)
         await asend_group(self.service_group, EventType.TOURNAMENT, ResponseAction.TOURNAMENT_LIST, all_tournaments)
 
     async def _handle_start_tournament(self, data, client):
@@ -139,7 +135,6 @@ class TournamentService(BaseServices):
         pass
 
     async def disconnect(self, client):
-        print("IN DISCONNECT OF TOURNAMENT SERVICE")
         queues = await Clients.acheck_in_queue(client, self.redis)
         if queues and RTables.HASH_TOURNAMENT_QUEUE('') in str(queues):
             code = re.search(rf'{RTables.HASH_TOURNAMENT_QUEUE("")}(\w+)$', queues.decode('utf-8')).group(1)
