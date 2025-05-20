@@ -4,3 +4,10 @@ user_count:
     - metric:
         usage: "GAUGE"
         description: "Total number of registered users"
+
+pg_custom_games_count:
+  query: "SELECT COUNT(*) as value FROM pong_games"
+  metrics:
+    - value:
+        usage: "GAUGE"
+        description: "Total number of rows in the pong_games table"

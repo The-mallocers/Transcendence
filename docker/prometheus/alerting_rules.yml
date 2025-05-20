@@ -1,20 +1,11 @@
 groups:
   - name: postgresql_alerts
     rules:
-      # - alert: HighCPUUsage
-      #   expr: node_cpu_seconds_total{mode!="idle"} > 0.5
-      #   for: 10s
-      #   labels:
-      #     severity: warning
-      #   annotations:
-      #     summary: "High CPU Usage"
-      #     description: "CPU usage is high"
-
-      - alert: TooManyConnections
-        expr: postgresql:total_connections > 2
+      - alert: UserMaxValue
+        expr: postgresql:total_clients{datname="dockerdjango", instance="postgresql-exporter:9187", job="db", relname="client_list", schemaname="public"} > 2
         for: 10s
         labels:
           severity: warning
         annotations:
-          summary: "Excessive Database Connections"
-          description: "Total connections ({{ $value }}) are above threshold"
+          summary: "Excessive User created"
+          description: "Threshold for the max users connected"
