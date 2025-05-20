@@ -20,7 +20,26 @@ class TournamentService(BaseServices):
         self.service_group = f'{EventType.TOURNAMENT.value}_{client.id}'
         self.channel_name = await self.redis.hget(name=RTables.HASH_CLIENT(client.id), key=str(EventType.TOURNAMENT.value))
         self.channel_name = self.channel_name.decode('utf-8')
+        #new call
+        self._helper_tournament_connection(client)
         return True
+
+
+    async def _helper_tournament_connection(self, client):
+        code = self.check_if_socket_in_tournament(client)
+        if code:
+            self.add_socket_to_group(code)
+
+    async def check_if_socket_in_tournament(self, client):
+        queues = await Clients.acheck_in_queue(client, self.redis)
+        code = None
+        if queues and RTables.HASH_TOURNAMENT_QUEUE('') in str(queues):
+            code = re.search(rf'{RTables.HASH_TOURNAMENT_QUEUE("")}(\w+)$', queues.decode('utf-8')).group(1)
+        return code
+
+    async def add_socket_to_group(self, code):
+        await self.channel_layer.group_add(RTables.GROUP_TOURNAMENT(code), self.channel_name)
+
 
     async def _handle_create_tournament(self, data, client: Clients):
         queues = await Clients.acheck_in_queue(client, self.redis)
@@ -67,6 +86,13 @@ class TournamentService(BaseServices):
         return await asend_group(self.service_group, EventType.TOURNAMENT, ResponseAction.PONG)
 
     async def _handle_leave_tournament(self, data, client):
+        #This used to be disconnected code
+        queues = await Clients.acheck_in_queue(client, self.redis)
+        if queues and RTables.HASH_TOURNAMENT_QUEUE('') in str(queues):
+            code = re.search(rf'{RTables.HASH_TOURNAMENT_QUEUE("")}(\w+)$', queues.decode('utf-8')).group(1)
+            await self.channel_layer.group_discard(RTables.GROUP_TOURNAMENT(code), self.channel_name)
+            await self.redis.hdel(RTables.HASH_TOURNAMENT_QUEUE(code), str(client.id))
+
         return await asend_group(self.service_group, EventType.TOURNAMENT, ResponseAction.TOURNAMENT_LEFT)
     
     async def _handle_list_players(self, data, client):
@@ -135,11 +161,19 @@ class TournamentService(BaseServices):
         pass
 
     async def disconnect(self, client):
-        queues = await Clients.acheck_in_queue(client, self.redis)
-        if queues and RTables.HASH_TOURNAMENT_QUEUE('') in str(queues):
-            code = re.search(rf'{RTables.HASH_TOURNAMENT_QUEUE("")}(\w+)$', queues.decode('utf-8')).group(1)
-            await self.channel_layer.group_discard(RTables.GROUP_TOURNAMENT(code), self.channel_name)
-            await self.redis.hdel(RTables.HASH_TOURNAMENT_QUEUE(code), str(client.id))
+        pass
+
+
+        #NEw system it used to be as below
+        # print("IN DISCONNECT OF TOURNAMENT SERVICE")
+        # queues = await Clients.acheck_in_queue(client, self.redis)
+        # if queues and RTables.HASH_TOURNAMENT_QUEUE('') in str(queues):
+            # code = re.search(rf'{RTables.HASH_TOURNAMENT_QUEUE("")}(\w+)$', queues.decode('utf-8')).group(1)
+            # await self.channel_layer.group_discard(RTables.GROUP_TOURNAMENT(code), self.channel_name)
+            # await self.redis.hdel(RTables.HASH_TOURNAMENT_QUEUE(code), str(client.id))
+
+
+
         # await asend_group(self.service_group, EventType.TOURNAMENT, ResponseAction.TOURNAMENT_UPDATE) #Sending the message to the others to check for updates.
             # tournament = Tournaments.get_tournament_by_code(code)
         #ADD the fact we want to change the status of the tournament from DB
