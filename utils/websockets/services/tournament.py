@@ -5,8 +5,9 @@ import traceback
 from redis.commands.json.path import Path
 
 from apps.client.models import Clients
+from apps.game.models import Game
 from apps.tournaments.models import Tournaments
-from utils.enums import EventType
+from utils.enums import EventType, GameStatus
 from utils.enums import RTables, ResponseError, ResponseAction
 from utils.pong.objects import score
 from utils.threads.matchmaking import tournament_queue
@@ -90,6 +91,8 @@ class TournamentService(BaseServices):
             code = re.search(rf'{RTables.HASH_TOURNAMENT_QUEUE("")}(\w+)$', queues.decode('utf-8')).group(1)
             await self.channel_layer.group_discard(RTables.GROUP_TOURNAMENT(code), self.channel_name)
             await self.redis.hdel(RTables.HASH_TOURNAMENT_QUEUE(code), str(client.id))
+            # game_code = await self.redis.hget(RTables.HASH_MATCHES, str(client.id))
+            # await self.redis.hdel(RTables.HASH_MATCHES, str(client.id))
 
         return await asend_group(self.service_group, EventType.TOURNAMENT, ResponseAction.TOURNAMENT_LEFT)
 

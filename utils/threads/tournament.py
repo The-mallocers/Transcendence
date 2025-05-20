@@ -77,6 +77,7 @@ class TournamentThread(Threads):
 
     def _starting(self):
         if self.tournament.status is TournamentStatus.STARTING:
+            send_group(RTables.GROUP_TOURNAMENT(self.tournament.code), EventType.TOURNAMENT, ResponseAction.TOURNAMENT_STARTING)
             random.shuffle(self.tournament.clients)
             player = 0
             for game in self.games[:int(self.tournament.max_clients / 2)]:
