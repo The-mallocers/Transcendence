@@ -3,6 +3,8 @@ import {isGameOver} from "../apps/game/VarGame.js"
 import * as html from "../utils/html_forms.js"
 import {routes} from "../utils/routes.js";
 import {getClientId} from "../utils/utils.js";
+import { toast_message } from "../apps/profile/toast.js";
+import { remove_toast } from "../apps/profile/toast.js";
 
 window.intervalsManager = []
 class Router {
@@ -140,6 +142,9 @@ export async function fetchRoute(path) {
             return data.html;
         } else if (response.status === 302) {
             console.log(data, response)
+            //Add toast
+            remove_toast();
+            toast_message("You are not logged in");
             return navigateTo(data.redirect)
         } else if (response.status === 401) {
             return navigateTo(data.redirect)
