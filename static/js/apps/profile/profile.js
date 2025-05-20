@@ -10,7 +10,7 @@ const notifSocket = WebSocketManager.notifSocket;
 
 const searchParams = new URLSearchParams(window.location.search);
 const pathname = window.location.pathname;
-console.log(pathname);
+// console.log(pathname);
 
 if (!searchParams.has('username') && pathname == '/') {
     // Display all friends and pending friends
@@ -151,7 +151,8 @@ notifSocket.onmessage = (event) => {
             message.data.content.sender, 
             "Block",
             message.data.content.profile_picture);
-        let friends_group = document.querySelector('.friends_group');
+        const friends_group = document.querySelector('.friends_group');
+        const friend_duel = document.querySelector(".friends-to-duel");
         if(friends_group)
         {
             const parser = new DOMParser();
@@ -172,10 +173,37 @@ notifSocket.onmessage = (event) => {
             });
             friends_group.appendChild(friendElement);
         }
+        else if(friend_duel){
+            const noFriendButton = friend_duel.querySelector(".no-friends-to-duel");
+            if(noFriendButton)
+                noFriendButton.remove();
+            const parser = new DOMParser();
+            const html =
+                `<li class="list-group-item d-flex justify-content-between align-items-center">
+                <div>${message.data.content.username}</div>
+                <div class="d-flex align-items-center">
+                    <button type="button" class="type-intra-green duel_friend me-4">Duel</button>
+                </div>
+            </li>`
+            const doc = parser.parseFromString(html, "text/html");
+            const friendElement = doc.body.firstChild;
+            const duelButton = friendElement.querySelector('.duel_friend');
+            duelButton.addEventListener('click', function () {
+                hide_modal(message.data.content.sender)
+            });
+            friend_duel.appendChild(friendElement);
+        }
     }
     else if(message.data.action == "ACK_DELETE_FRIEND") {
         const friendElements = document.querySelectorAll('.friends_group li');
+        const duelElements = document.querySelectorAll('.friends-to-duel li');
         friendElements.forEach(elem => {
+            const usernameElement = elem.querySelector('div:first-child');
+            if (usernameElement && usernameElement.textContent.trim() === message.data.content.username) {
+                elem.remove();
+            }
+        });
+        duelElements.forEach(elem => {
             const usernameElement = elem.querySelector('div:first-child');
             if (usernameElement && usernameElement.textContent.trim() === message.data.content.username) {
                 elem.remove();
@@ -319,6 +347,17 @@ window.handleRefuseDuel = function(code, targetName) {
     notifSocket.send(JSON.stringify(message));
 };
 
+window.hide_modal = async function (usernameId) {
+    try {
+        const modal = bootstrap.Modal.getInstance(document.getElementById('friendSelectionModal'));
+        modal.hide();
+        const message = create_message_duel("create_duel", usernameId);
+        notifSocket.send(JSON.stringify(message));
+    } catch (error) {
+        console.log(error);
+    }
+}
+
 function create_message_notif(action, targetUser)
 {
     let message = {
@@ -362,7 +401,6 @@ function create_message_notif_block(action, targetUser, status) {
 }
 
 export async function apiFriends(endpoint) {
-    console.log("Getting client ID")
     try {
         const response = await fetch(endpoint, {
             method: "GET",
@@ -375,7 +413,6 @@ export async function apiFriends(endpoint) {
             throw new Error(data.error);
         }
     } catch (error) {
-        // console.error("Wesh je touche pas a ca mais on a pas de route api getAllFriends Chef")
         console.error("Erreur lors de la récupération de l'ID :", error);
         return null;
     }
