@@ -81,12 +81,30 @@ const buildRound = (roundInfos, name)=> {
 let meow = null
 
 export function populateTree(tournamentInfos) {
+        // const btnsRoom = document.querySelector("#btnsRoom")
+
+        // if (btnsRoom) {
+        //     btnsRoom.innerHTML = `
+        //                 <div id="leave-btn" class="btn btn-intra-outlined">Leave</div>
+        //     `
+        // }
         meow = document.querySelector("#tree")
         if (meow == null) return ;
         meow.innerHTML = '';
         for (const key in tournamentInfos?.scoreboard.rounds) {
             meow.innerHTML += buildRound(tournamentInfos?.scoreboard.rounds[key], key)
         }
+
+        // <div id="leave-btn" class="btn btn-intra-outlined">Leave</div>
+
+        let leaveBtn = document.createElement("div")
+
+        leaveBtn.onclick = function() {
+            leaveTournament();
+        }
+
+        meow.appendChild(leaveBtn)
+        
         if (tournamentData.gameIsReady) {
             const parrent = document.querySelector('#tree')
             console.log("data of tournament join", parrent);

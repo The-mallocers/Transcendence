@@ -5,8 +5,9 @@ import traceback
 from redis.commands.json.path import Path
 
 from apps.client.models import Clients
+from apps.game.models import Game
 from apps.tournaments.models import Tournaments
-from utils.enums import EventType
+from utils.enums import EventType, GameStatus, PlayerSide
 from utils.enums import RTables, ResponseError, ResponseAction
 from utils.pong.objects import score
 from utils.threads.matchmaking import tournament_queue
@@ -90,6 +91,15 @@ class TournamentService(BaseServices):
             code = re.search(rf'{RTables.HASH_TOURNAMENT_QUEUE("")}(\w+)$', queues.decode('utf-8')).group(1)
             await self.channel_layer.group_discard(RTables.GROUP_TOURNAMENT(code), self.channel_name)
             await self.redis.hdel(RTables.HASH_TOURNAMENT_QUEUE(code), str(client.id))
+            game_code = await self.redis.hget(RTables.HASH_MATCHES, str(client.id))
+            player_left = await self.redis.json().get(RTables.JSON_GAME(game_code.decode('utf-8')), Path(f'{PlayerSide.LEFT.value}.id'))
+            player_right = await self.redis.json().get(RTables.JSON_GAME(game_code.decode('utf-8')), Path(f'{PlayerSide.RIGHT.value}.id'))
+            point_to_win = await self.redis.json().get(RTables.JSON_TOURNAMENT(code), Path('points_to_win'))
+            if player_left == str(client.id):
+                await self.redis.json().set(RTables.JSON_GAME(game_code.decode('utf-8')), Path(f'{PlayerSide.RIGHT.value}.score'), point_to_win)
+            elif player_right == str(client.id):
+                await self.redis.json().set(RTables.JSON_GAME(game_code.decode('utf-8')), Path(f'{PlayerSide.LEFT.value}.score'), point_to_win)
+            # await self.redis.json().set(RTables.JSON_GAME(game_code.decode('utf-8')), Path('status'), GameStatus.ENDING)
 
         return await asend_group(self.service_group, EventType.TOURNAMENT, ResponseAction.TOURNAMENT_LEFT)
 
