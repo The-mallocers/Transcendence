@@ -18,7 +18,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 1,
+  "id": 4,
   "links": [],
   "panels": [
     {
@@ -575,7 +575,7 @@
           "showLegend": false
         },
         "orientation": "auto",
-        "showValue": "auto",
+        "showValue": "never",
         "stacking": "none",
         "text": {},
         "tooltip": {
@@ -704,33 +704,22 @@
             "axisColorMode": "text",
             "axisLabel": "",
             "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "points",
-            "fillOpacity": 0,
+            "fillOpacity": 80,
             "gradientMode": "none",
             "hideFrom": {
               "legend": false,
               "tooltip": false,
               "viz": false
             },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
             "lineWidth": 1,
-            "pointSize": 5,
             "scaleDistribution": {
               "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
             },
             "thresholdsStyle": {
               "mode": "off"
             }
           },
+          "fieldMinMax": false,
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
@@ -739,35 +728,30 @@
                 "color": "green"
               },
               {
+                "color": "#EAB839",
+                "value": 5
+              },
+              {
                 "color": "red",
-                "value": 80
+                "value": 10
+              },
+              {
+                "color": "#6ED0E0",
+                "value": 20
               }
             ]
-          },
-          "unit": "none"
+          }
         },
         "overrides": [
           {
-            "__systemRef": "hideSeriesFrom",
             "matcher": {
-              "id": "byNames",
-              "options": {
-                "mode": "exclude",
-                "names": [
-                  "{__name__=\"pg_stat_activity_count\", backend_type=\"client backend\", datname=\"dockerdjango\", instance=\"postgresql-exporter:9187\", job=\"db\", server=\"db:5432\", state=\"active\", usename=\"postgres\"}"
-                ],
-                "prefix": "All except:",
-                "readOnly": true
-              }
+              "id": "byType",
+              "options": "time"
             },
             "properties": [
               {
-                "id": "custom.hideFrom",
-                "value": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": true
-                }
+                "id": "custom.axisPlacement",
+                "value": "hidden"
               }
             ]
           }
@@ -779,38 +763,50 @@
         "x": 0,
         "y": 19
       },
-      "id": 11,
+      "id": 13,
       "options": {
+        "barRadius": 0,
+        "barWidth": 0.97,
+        "fullHighlight": false,
+        "groupWidth": 0.7,
         "legend": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "displayMode": "table",
-          "placement": "right",
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
           "showLegend": true
         },
+        "orientation": "auto",
+        "showValue": "auto",
+        "stacking": "none",
         "tooltip": {
           "hideZeros": false,
           "mode": "single",
           "sort": "none"
-        }
+        },
+        "xField": "Time",
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0
       },
       "pluginVersion": "12.0.0",
       "targets": [
         {
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "pg_stat_activity_count{datname=\"dockerdjango\", state=\"active\"}",
+          "exemplar": false,
+          "expr": "pg_custom_games_count_value{instance=\"postgresql-exporter:9187\"}",
+          "format": "table",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
-          "legendFormat": "{{datname}}",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "__auto",
           "range": true,
           "refId": "A",
           "useBackend": false
         }
       ],
-      "title": "Active sessions",
-      "type": "timeseries"
+      "title": "Number of games played",
+      "type": "barchart"
     }
   ],
   "preload": false,
@@ -828,5 +824,5 @@
   "timezone": "browser",
   "title": "db_dashboard",
   "uid": "aegeahsaq4agwf",
-  "version": 3
+  "version": 5
 }
