@@ -57,6 +57,10 @@ class GameThread(Threads):
             if self.game.rget_status() is not GameStatus.ENDING or self.game.rget_status() is not GameStatus.FINISHED:
                 self.game.rset_status(GameStatus.ENDING)
             return False
+        # if not self.redis.hexists(RTables.HASH_TOURNAMENT_QUEUE(self.game.tournament.code), str(self.game.pL.client.id)):
+        #     return False
+        # if not self.redis.hexists(RTables.HASH_TOURNAMENT_QUEUE(self.game.tournament.code), str(self.game.pR.client.id)):
+        #     return False
         return is_valid
 
     def cleanup(self):
@@ -91,6 +95,10 @@ class GameThread(Threads):
                     async_to_sync(channel_layer.group_add)(RTables.GROUP_GAME(self.game_id), channel_name_pL)
                     send_group(RTables.GROUP_CLIENT(self.game.pL.client.id), EventType.GAME, ResponseAction.JOIN_GAME)
                 both_joined += 1
+            if not self.redis.hexists(RTables.HASH_TOURNAMENT_QUEUE(self.game.tournament.code), str(self.game.pL.client.id)):
+                return True
+            if not self.redis.hexists(RTables.HASH_TOURNAMENT_QUEUE(self.game.tournament.code), str(self.game.pR.client.id)):
+                return True
 
             if both_joined == 2:
                 self.game.rset_status(GameStatus.STARTING)
