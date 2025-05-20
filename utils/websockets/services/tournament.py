@@ -20,15 +20,14 @@ class TournamentService(BaseServices):
         self.service_group = f'{EventType.TOURNAMENT.value}_{client.id}'
         self.channel_name = await self.redis.hget(name=RTables.HASH_CLIENT(client.id), key=str(EventType.TOURNAMENT.value))
         self.channel_name = self.channel_name.decode('utf-8')
-        #new call
         await self._helper_tournament_connection(client)
         return True
 
 
     async def _helper_tournament_connection(self, client):
-        code = self.check_if_socket_in_tournament(client)
+        code = await self.check_if_socket_in_tournament(client)
         if code:
-            self.add_socket_to_group(code)
+            await self.add_socket_to_group(code)
 
     async def check_if_socket_in_tournament(self, client):
         queues = await Clients.acheck_in_queue(client, self.redis)
@@ -60,7 +59,6 @@ class TournamentService(BaseServices):
             except ValueError as e:
                 await asend_group_error(self.service_group, ResponseError.KEY_ERROR, str(e))
             except Exception as e:
-                self._logger.error(traceback.format_exc())
                 await asend_group_error(self.service_group, ResponseError.TOURNAMENT_NOT_CREATE, str(e))
 
     async def _handle_join_tournament(self, data, client):
@@ -94,7 +92,7 @@ class TournamentService(BaseServices):
             await self.redis.hdel(RTables.HASH_TOURNAMENT_QUEUE(code), str(client.id))
 
         return await asend_group(self.service_group, EventType.TOURNAMENT, ResponseAction.TOURNAMENT_LEFT)
-    
+
     async def _handle_list_players(self, data, client):
         queues = await Clients.acheck_in_queue(client, self.redis)
         if queues and RTables.HASH_TOURNAMENT_QUEUE('') in str(queues):
@@ -103,8 +101,8 @@ class TournamentService(BaseServices):
             await asend_group(self.service_group, EventType.TOURNAMENT, ResponseAction.TOURNAMENT_PLAYERS_LIST, clients)
         else:
             await asend_group_error(self.service_group, ResponseError.NOT_IN_TOURNAMENT)
-    
-    
+
+
     async def _handle_tournament_info(self, data, client):
         queues = await Clients.acheck_in_queue(client, self.redis)
         if queues and RTables.HASH_TOURNAMENT_QUEUE('') in str(queues):
@@ -142,9 +140,9 @@ class TournamentService(BaseServices):
     async def _handle_list_tournament(self, data, client):
         cursor = 0
         all_tournaments = []
-        
+
         while True:
-            cursor, keys = await self.redis.scan(cursor=cursor, match=RTables.JSON_TOURNAMENT('*'))    
+            cursor, keys = await self.redis.scan(cursor=cursor, match=RTables.JSON_TOURNAMENT('*'))
             for key in keys:
                 code = re.search(rf'{RTables.JSON_TOURNAMENT("")}(\w+)$', key.decode('utf-8')).group(1)
                 tournament_info = await self.redis.json().get(RTables.JSON_TOURNAMENT(code))
@@ -155,8 +153,8 @@ class TournamentService(BaseServices):
         await asend_group(self.service_group, EventType.TOURNAMENT, ResponseAction.TOURNAMENT_LIST, all_tournaments)
 
     async def _handle_start_tournament(self, data, client):
-        pass    
-    
+        pass
+
     async def _handle_get_tournament_clients(self, data, client):
         pass
 

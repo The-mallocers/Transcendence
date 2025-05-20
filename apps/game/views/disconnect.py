@@ -11,7 +11,6 @@ from apps.game.models import Game
 def get(request):
     game_id = request.GET.get("game", "game_not_found")
     found_game = Game.objects.filter(code=game_id).first()
-    print("We are in the proper Disconnect page view (in spite of all odds)")
     message = "Opponent Left"
     # Lets add something cute here to get a random message everytime.
     disconnect_messages = [

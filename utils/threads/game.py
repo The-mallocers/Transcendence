@@ -1,6 +1,5 @@
 import time
 import traceback
-from time import sleep
 
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
@@ -121,7 +120,7 @@ class GameThread(Threads):
                 else:
                     send_group(RTables.GROUP_GAME(self.game_id), EventType.GAME, ResponseAction.WAITING_TO_START, {'timer': counts})
                 counts -= 1
-                sleep(1)
+                time.sleep(1)
             self.game.rset_status(GameStatus.RUNNING)
             return True
 
@@ -141,7 +140,6 @@ class GameThread(Threads):
                 self.logic.set_result(disconnect=True)
                 send_group_error(RTables.GROUP_GAME(self.game_id), ResponseError.OPPONENT_LEFT, close=True)
 
-            #VERY IMPORTANT FUNCTION ENDGAME
             if self.game.tournament is not None:
                 from utils.threads.tournament import TournamentThread
                 TournamentThread.set_game_players(self.game.tournament.code, self.game.code, self.game.winner, self.game.loser, self.redis)

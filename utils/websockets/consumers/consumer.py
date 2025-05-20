@@ -74,11 +74,9 @@ class WsConsumer(AsyncWebsocketConsumer):
             await self.service.process_action(data, self.client)
 
         except json.JSONDecodeError:
-            self._logger.error(traceback.format_exc())
             await asend_group_error(RTables.GROUP_CLIENT(self.client.id), ResponseError.JSON_ERROR)
 
         except ServiceError as e:
-            self._logger.error(f"{self.__class__.__name__} {traceback.format_exc()}")
             await asend_group_error(RTables.GROUP_CLIENT(self.client.id), ResponseError.SERVICE_ERROR, content=str(e))
 
         except Exception as e:
