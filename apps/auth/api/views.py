@@ -15,6 +15,7 @@ from utils.serializers.auth import PasswordSerializer
 from utils.serializers.client import ClientSerializer
 from utils.serializers.permissions.auth import PasswordPermission
 from utils.serializers.picture import ProfilePictureValidator
+from django.template.loader import render_to_string
 
 
 class PasswordApiView(APIView):
@@ -120,7 +121,7 @@ class LoginApiView(APIView):
             # adding the 2fa check here
             if client.twoFa.enable:
                 if not client.twoFa.scanned:
-                    get_qrcode(client)
+                    get_qrcode(client, False)
                 response = Response({
                     'message': '2FA activated, redirecting',
                     'redirect': '/auth/2fa',
@@ -166,24 +167,32 @@ import json
 
 # the 2FA does not use the restful api stuff like above, too bad !
 def change_two_fa(req):
-    print("spouich")
     if req.method == "POST":
         data = json.loads(req.body.decode('utf-8'))
         client = Clients.get_client_by_request(req)
-        print(client)
+        print(req.body)
         if client is not None:
             client.twoFa.update("enable", data['status'])
-            response = JsonResponse({
-                "success": True,
-                "message": "State 2fa change"
-            }, status=200)
+            if(data['status']):
+                if get_qrcode(client, True) == True: 
+                    response = JsonResponse({
+                        "success": True,
+                        "state": True,
+                        "image": client.twoFa.qrcode.url,
+                        "message": "State 2fa change",
+                    }, status=200)
+            else:
+                response = JsonResponse({
+                    "success": True,
+                    "state": False,
+                    "message": "State 2fa change"
+                }, status=200)
         else:
             response = JsonResponse({
                 "success": False,
                 "message": "No client available"
             }, status=403)
         return response
-
 
 # utils function for 2fa
 import pyotp
@@ -192,9 +201,9 @@ import io
 from django.core.files.base import ContentFile
 
 
-def get_qrcode(user):
+def get_qrcode(user, binary):
     # create a qrcode and convert it
-    if not user.twoFa.qrcode:
+    if not user.twoFa.qrcode or binary is True:
         uri = pyotp.totp.TOTP(user.twoFa.key).provisioning_uri(name=user.profile.username,
                                                                issuer_name="Transcendance_" + str(
                                                                    user.profile.username))
