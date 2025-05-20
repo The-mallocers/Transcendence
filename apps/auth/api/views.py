@@ -166,9 +166,11 @@ import json
 
 # the 2FA does not use the restful api stuff like above, too bad !
 def change_two_fa(req):
+    print("spouich")
     if req.method == "POST":
         data = json.loads(req.body.decode('utf-8'))
         client = Clients.get_client_by_request(req)
+        print(client)
         if client is not None:
             client.twoFa.update("enable", data['status'])
             response = JsonResponse({
