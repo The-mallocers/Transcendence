@@ -109,7 +109,7 @@ class TournamentService(BaseServices):
             code = re.search(rf'{RTables.HASH_TOURNAMENT_QUEUE("")}(\w+)$', queues.decode('utf-8')).group(1)
             tournament_info = await self.redis.json().get(RTables.JSON_TOURNAMENT(code))
             try:
-                tournament_info = await self.tournament_info_helper(tournament_info, code)
+                tournament_info = await self.tournament_info_helper(tournament_info, code, client)
             except Exception as e:
                 await asend_group_error(self.service_group, ResponseError.NOT_IN_TOURNAMENT)
                 return
@@ -118,14 +118,15 @@ class TournamentService(BaseServices):
             await asend_group_error(self.service_group, ResponseError.NOT_IN_TOURNAMENT)
 
 
-    @staticmethod
-    async def tournament_info_helper(tournament, code):
+    async def tournament_info_helper(self, tournament, code, client):
         tournament_ids = tournament['clients']
         title = tournament['title']
         max_clients = int(tournament['max_clients'])
         scoreboard = tournament['scoreboards']
         host = tournament['host']
         players_infos = await Clients.get_tournament_clients_infos(tournament_ids)
+        game_ready = await self.redis.hexists(RTables.HASH_MATCHES, str(client.id))
+        print("game ready is ", game_ready)
         roomInfos = {
             "title": title,
             "max_clients": max_clients,
@@ -133,6 +134,7 @@ class TournamentService(BaseServices):
             "code": code,
             "host" : host,
             "scoreboard": scoreboard,
+            "game_ready": game_ready,
         }
         return roomInfos
 
@@ -145,7 +147,7 @@ class TournamentService(BaseServices):
             for key in keys:
                 code = re.search(rf'{RTables.JSON_TOURNAMENT("")}(\w+)$', key.decode('utf-8')).group(1)
                 tournament_info = await self.redis.json().get(RTables.JSON_TOURNAMENT(code))
-                tournament_info = await self.tournament_info_helper(tournament_info, code)
+                tournament_info = await self.tournament_info_helper(tournament_info, code, client)
                 all_tournaments.append(tournament_info)
             if cursor == 0:
                 break

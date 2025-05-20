@@ -58,6 +58,7 @@ export function setUpTournamentSocket (tournamentSocket) {
                 
             case "TOURNAMENT_INFO":
                 const tournament_data = jsonData.data.content;
+                if (tournament_data.game_ready) tournamentData.gameIsReady = true;
                 if (window.location.pathname == "/pong/tournament/tree/") {
                     populateTree(tournament_data);
                 } else {
@@ -82,16 +83,7 @@ export function setUpTournamentSocket (tournamentSocket) {
                 tournamentData.gameIsReady = true;
                 // console.log("ALLO JE VAIS REJOUER OUUAIS");
                 // navigateTo("/pong/matchmaking/");
-                console.log(document.location.pathname)
-                const parrent = document.querySelector(document.location.pathname.includes('tree') ?  '#tree': "#btnsRoom")
-                console.log("data of tournament join", parrent);
-                if (parrent) {
-                    let btn = document.createElement('div')
-                    btn.classList.add('btn', 'btn-primary');
-                    btn.innerText = 'Ready';
-                    btn.addEventListener('click', ()=>{navigateTo(`/pong/matchmaking/`);})
-                    parrent.appendChild(btn)
-                }
+                tournamentSocket.send(JSON.stringify(get_tournament_info));
                 break;
                 
             case "TOURNAMENT_UPDATE":
@@ -118,3 +110,16 @@ function isPlayerIngame(data) {
     return false;
 }
 
+export function addReadyButton(isGameReady) {
+    if (isGameReady == false) return
+
+    console.log(isGameReady)
+    const parrent = document.querySelector(document.location.pathname.includes('tree') ?  '#tree': "#btnsRoom")
+    if (parrent) {
+        let btn = document.createElement('div')
+        btn.classList.add('btn', 'btn-primary');
+        btn.innerText = 'Ready';
+        btn.addEventListener('click', ()=>{navigateTo(`/pong/matchmaking/`);})
+        parrent.appendChild(btn)
+    }
+}
