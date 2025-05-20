@@ -85,6 +85,7 @@ notifSocket.onmessage = (event) => {
         if (pendingDiv) {
             pendingDiv.innerHTML = "join";
             pendingDiv.style.backgroundColor = "#00babc";
+            pendingDiv.style.color = "white"
         }
     } else if (message.data.action == "DUEL_CREATED") {
         navigateTo(`/pong/duel/?opponent=${message.data.content.opponent}`);
