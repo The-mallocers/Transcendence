@@ -145,8 +145,9 @@ export function populateTournament(tournament_data){
     const max_clients = tournament_data.max_clients
     const btnsRoom = document.querySelector("#btnsRoom")
     const h1 = document.querySelector("h1")
-
-    h1.innerText = tournament_data.title
+    if (h1) {
+        h1.innerText = tournament_data.title;
+    }
     
     if (btnsRoom) {
         btnsRoom.innerHTML = `
