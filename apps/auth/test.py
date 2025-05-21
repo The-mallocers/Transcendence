@@ -63,6 +63,7 @@ class TwoFAModelTest(TestCase):
 
     def test_update_method(self):
         """Test the update method for TwoFA"""
+        print("jespere je rentre  pas la")
         twofa = TwoFA.objects.get(key=self.twofa.key)
 
         # Update enable status

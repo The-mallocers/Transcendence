@@ -2,14 +2,6 @@
     padding: 1rem;
 }
 
-/* .myinformationsPage .content {
-    padding: 2.5rem 0;
-    background-color: aliceblue;
-    border: 1px solid #323642;
-    text-align: center;
-    color: white;
-} */
-
 .myinformationsPage .btn {
 
     background-color: #FFA042;
@@ -229,4 +221,17 @@ label{
 
 .box-bottom{
     height: 45vh;
+}
+
+.twofa-image{
+    width:400px;
+    height:400px;
+}
+
+.twofa-input{
+    margin-bottom: 20px;
+}
+
+.verify-code{
+    margin-bottom: 20px;
 }
