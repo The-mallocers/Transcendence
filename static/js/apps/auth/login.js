@@ -116,6 +116,7 @@ if (login42Button) {
 async function socketCheck() {
     if (await getClientId() == null && WebSocketManager.isSocketOpen(WebSocketManager.notifSocket)) {
         WebSocketManager.closeNotifSocket();
+        WebSocketManager.closeTournamentSocket();
     }
 }
 

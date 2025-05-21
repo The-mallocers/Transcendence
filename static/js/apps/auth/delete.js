@@ -7,6 +7,7 @@ import {toast_message} from "../profile/toast.js";
 async function delete_account() {
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
     WebSocketManager.closeNotifSocket();
+    WebSocketManager.closeTournamentSocket();
 
     try {
         const response = await fetch('/api/auth/delete_account/', {

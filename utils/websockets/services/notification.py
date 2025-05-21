@@ -1,5 +1,6 @@
 from asgiref.sync import sync_to_async
 from django.forms import ValidationError
+from channels.db import database_sync_to_async
 
 from apps.chat.models import Rooms, Messages
 from apps.client.models import Clients
@@ -11,8 +12,27 @@ from utils.websockets.services.services import BaseServices
 
 class NotificationService(BaseServices):
     async def init(self, client, *args):
+        await super().init(client)
         self.service_group = f'{EventType.NOTIFICATION.value}_{client.id}'
-        return await super().init(client)
+        username = await self.get_username(client)
+        online_clients = await self.get_all_online_clients()
+        for client in online_clients:
+            await asend_group(client, EventType.NOTIFICATION, ResponseAction.ACK_ONLINE_STATUS,{
+                    "username": username,
+                    "online": True
+                })
+        return True
+
+    @database_sync_to_async
+    def get_username(self, client):
+        return client.profile.username
+
+    async def get_all_online_clients(self):
+        client_keys = await self.redis.keys("client_*")
+        # Decode because this gets us the results in bytes
+        if client_keys and isinstance(client_keys[0], bytes):
+            client_keys = [key.decode() for key in client_keys]
+        return client_keys
 
     # Client is the person that want to add a friend to his friend list
     # Target is the friends to add
@@ -40,7 +60,7 @@ class NotificationService(BaseServices):
             return await self._handle_accept_friend_request(friend_request_data, client)
 
         askfriend = await friendTargetTable.add_pending_friend(client)
-        # if I am already his friend 
+        # if I am already his friend
         if askfriend is None:
             return await asend_group_error(self.service_group, ResponseError.USER_ALREADY_MY_FRIEND)
         await asend_group(RTables.GROUP_CLIENT(target.id),
@@ -350,5 +370,25 @@ class NotificationService(BaseServices):
                 "online": is_online
             }
         )
+
     async def disconnect(self, client):
-        pass
+        await super().disconnect(client)
+
+        # Remove this client's notification service from Redis
+        await self.redis.hdel(RTables.HASH_CLIENT(client.id), str(EventType.NOTIFICATION.value))
+
+        username = await self.get_username(client)
+        online_clients = await self.get_all_online_clients()
+
+        # Notify other clients that this user is offline
+        for client_key in online_clients:
+            if client_key != f"client_{client.id}":
+                await asend_group(
+                    client_key,
+                    EventType.NOTIFICATION,
+                    ResponseAction.ACK_ONLINE_STATUS,
+                    {
+                        "username": username,
+                        "online": False
+                    }
+                )

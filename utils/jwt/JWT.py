@@ -38,10 +38,11 @@ class JWT:
         if self.client.rights.is_admin:
             self.ROLES.append('admin')
 
-        self.SESSION_KEY = request.session.session_key
-        self.IP_ADDRESS = get_client_ip(request)
-        self.USER_AGENT = request.META.get('HTTP_USER_AGENT', '')
-        self.DEVICE_FINGERPRINT = hashlib.sha256(str(f"{self.USER_AGENT}|{self.IP_ADDRESS}").encode()).hexdigest()
+        if request:
+            self.SESSION_KEY = request.session.session_key
+            self.IP_ADDRESS = get_client_ip(request)
+            self.USER_AGENT = request.META.get('HTTP_USER_AGENT', '')
+            self.DEVICE_FINGERPRINT = hashlib.sha256(str(f"{self.USER_AGENT}|{self.IP_ADDRESS}").encode()).hexdigest()
 
 
     def __str__(self):
@@ -58,7 +59,6 @@ class JWT:
             samesite='Lax',
             expires=self.EXP
         )
-        self._store_session_redis()
         return response
 
     def invalidate_token(self):
@@ -78,8 +78,8 @@ class JWT:
     def validate_token(token_key: str, token_type: JWTType, request):
         token = None
         try:
-            payload = JWT._decode_token(token_key)
-            token = JWT._get_token(payload, request)
+            payload = JWT.decode_token(token_key)
+            token = JWT.get_token(payload, request)
             if InvalidatedToken.objects.filter(jti=token.JTI).exists():
                 raise jwt.InvalidKeyError('Token has been invalidated')
             if token and token.TYPE != token_type:
@@ -132,25 +132,13 @@ class JWT:
 
         return token_dict
 
-    def _store_session_redis(self):
-        redis = RedisConnectionPool.get_sync_connection('JWT')
-
-        # Store session settings in redis
-        redis.hset(RTables.HASH_CLIENT_SESSION(self.client.id), SessionType.SESSION_ID, self.SESSION_KEY)
-        redis.hset(RTables.HASH_CLIENT_SESSION(self.client.id), SessionType.IP_ADRESS, self.IP_ADDRESS)
-        redis.hset(RTables.HASH_CLIENT_SESSION(self.client.id), SessionType.USER_AGENT, self.USER_AGENT)
-        redis.hset(RTables.HASH_CLIENT_SESSION(self.client.id), SessionType.FINGERPRINT, self.DEVICE_FINGERPRINT)
-        redis.hset(RTables.HASH_CLIENT_SESSION(self.client.id), SessionType.LAST_ACTIVITY, int(datetime.now().timestamp()))
-        redis.expire(RTables.HASH_CLIENT_SESSION(self.client.id), settings.SESSION_LIMITING_EXPIRY)
-        RedisConnectionPool.close_sync_connection('JWT')
-
     @staticmethod
-    def _decode_token(token: str):
+    def decode_token(token: str):
         payload = jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITH])
         return payload
 
     @staticmethod
-    def _get_token(data: dict, request):
+    def get_token(data: dict, request=None):
         client = Clients.get_client_by_id(data['sub'])
         if client is None:
             raise Clients.DoesNotExist()

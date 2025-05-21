@@ -40,7 +40,7 @@ class EventType(str, Enum):
 
 class SessionType(str, Enum):
     FINGERPRINT: str = 'fingerprint'
-    SESSION_ID: str = 'session_id'
+    SESSION_KEY: str = 'session_key'
     LAST_ACTIVITY: str = 'last_activity'
     USER_AGENT: str = 'user_agent'
     IP_ADRESS: str = 'ip'
@@ -228,6 +228,7 @@ class ResponseError(str, Enum):
     TARGET_NOT_FOUND: str = 'Target not found.'
     USER_OFFLINE: str = 'User is offline.'
     OPPONENT_NOT_FOUND: str = 'opponent_not_found'
+    SESSION_EXPIRED: str = 'Session expired.'
     
     # INTERNAL_ERROR = "Internal server error"
     # INVALID_ID: str = 'Player does not exist'

@@ -35,6 +35,7 @@ from django.middleware.common import CommonMiddleware
 from django.middleware.csrf import CsrfViewMiddleware
 from django.middleware.security import SecurityMiddleware
 
+from utils.redis import RedisConnectionPool
 from utils.threads.threads import Threads
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ PATH SETTINGS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
@@ -88,7 +89,7 @@ MIDDLEWARE = [
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'utils.jwt.JWTMiddleware.JWTMiddleware',
-    # 'utils.session.SessionLimitingMiddleware',
+    'utils.session.SessionLimitingMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -162,7 +163,7 @@ SESSION_LIMITING_EXPIRY = 1800
 SESSION_LIMITING_BLOCK_NEW = True
 SESSION_LIMITING_EXEMPT_ADMIN = True
 SESSION_LIMITING_EXEMPT_PATHS = [
-    # '/pages/',
+    '/pages/',
     '/api/',
     '/static/',
     '/media/'
@@ -315,9 +316,15 @@ def clean_threads(signum, frame):
     Threads.stop_all_threads()
     signal.default_int_handler(signum, frame)
 
+def clean_redis(sigum, frame):
+    redis = RedisConnectionPool.get_sync_connection('default')
+    redis.flushall()
+    signal.default_int_handler(sigum, frame)
+
 # Register the cleanup function to run on application exit
 signal.signal(signal.SIGTERM, cleanup_old_logs)
 signal.signal(signal.SIGTERM, clean_threads)
+signal.signal(signal.SIGTERM, clean_redis)
 
 # Load logging configuration from JSON file
 with open(os.path.join(BASE_DIR, 'config', 'logging.json'), 'r') as f:
