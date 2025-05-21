@@ -296,8 +296,6 @@ notifSocket.onmessage = (event) => {
         toast_duel(`${message.data.content.username} wants a duel`, message.data, pendingElement);
     } else if (message.data.action == "DUEL_CREATED") {
         navigateTo(`/pong/duel/?opponent=${message.data.content.opponent}`);
-        // const socket = create_message_notif("get_opponent_name", message.data.content.opponent)
-        // notifSocket.send(JSON.stringify(socket));
     }
     else if(message.data.action == "DUEL_NOT_EXIST")
     {
@@ -348,9 +346,6 @@ notifSocket.onmessage = (event) => {
         } else {
             status.innerHTML = "Offline";
         }
-    }
-    else if (message.data.action == "DUEL_CREATED") {
-        navigateTo(`/pong/duel/?opponent=${message.data.content.opponent}`);
     }
     else if(message.data.action == "BLOCKED_USER"){ 
         remove_toast();

@@ -184,14 +184,18 @@ class NotificationService(BaseServices):
             await self.redis.hset(name=RTables.HASH_DUEL_QUEUE(duel_code), key=str(target.id), value=str(False))
             await asend_group(self.service_group, EventType.NOTIFICATION, ResponseAction.DUEL_CREATED, {
                 'code': duel_code,
-                'opponent': await target.aget_profile_username()
+                'opponent': await target.aget_profile_username(),
+                'hostimage': client.profile.profile_picture.url,
+                'opponentImage': target.profile.profile_picture.url
             })
             return await asend_group(RTables.GROUP_NOTIF(target.id), EventType.NOTIFICATION,
                                      ResponseAction.ACK_ASK_DUEL,
                                      {
                                          "sender": str(client.id),
                                          "username": await client.aget_profile_username(),
-                                         'code': duel_code
+                                         'code': duel_code,
+                                        'hostimage': target.profile.profile_picture.url,
+                                        'opponentImage': client.profile.profile_picture.url
                                      })
 
     async def _handle_accept_duel(self, data, client):

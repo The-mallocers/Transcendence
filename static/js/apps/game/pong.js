@@ -4,7 +4,6 @@ import {isGameOver} from "./VarGame.js";
 import { tournamentData } from "./VarGame.js";
 import { remove_toast } from "../profile/toast.js";
 import { toast_message } from "../profile/toast.js";
-import { remove_toast } from "../profile/toast.js";
 // import { apiFriends } from "../profile/profile.js";
 
 const socket = WebSocketManager.gameSocket;

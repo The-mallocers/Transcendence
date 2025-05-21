@@ -7,6 +7,16 @@ import { getClientId } from "../../utils/utils.js";
 let clientId;
 let gameStartingInProcess = false;
 
+const images = await getImages();
+if(images){
+    const player1Image = document.querySelector('.player-photo.client');
+    const player2Image = document.querySelector('.player-photo.opponent');
+    const newPlayer1ImageUrl = images.hostPicture; 
+    const newPlayer2ImageUrl = images.opponentPicture;
+    player1Image.src = newPlayer1ImageUrl;
+    player2Image.src = newPlayer2ImageUrl;
+}
+
 clientId = await getClientId();
 const gameSocket = await WebSocketManager.initGameSocket(clientId);
 const notifSocket = WebSocketManager.notifSocket;
@@ -60,18 +70,6 @@ const startGameMessage = {
         "action": "start_game"
     }
 }
-
-// const message = {
-//     "event": "matchmaking",
-//     "data": {
-//         "action": "join_queue"
-//     }
-// }
-// gameSocket.onopen = () => {
-
-//     socket.send(JSON.stringify(message));
-// }
-
 
 notifSocket.onmessage = (event) => {
     console.log(event.data);
@@ -158,20 +156,42 @@ gameSocket.onmessage = (e) => {
     }
 };
 
-// Make sure the game initialization is complete
-function initializeGame(gameData) {
-    console.log("Initializing game with data:", gameData);
-    
-    // Set up game state properly
-    window.GameState = {
-        // Your game state initialization
-        started: false,
-        // Other properties
-    };
-    
-    // Signal ready to the server
-    socket.send(JSON.stringify({
-        event: "GAME",
-        action: "PLAYER_READY"
-    }));
+async function getImages(){
+    const urlParams = new URLSearchParams(window.location.search);
+    const opponentName = urlParams.get("opponent");
+    try {
+        const response = await fetch(`/api/friends/get_duels_images/?opponent=${opponentName}`, {
+            method: "GET",
+            credentials: "include",
+        });
+        const data = await response.json();
+        console.log(data.data);
+        if (data.status == "success") {
+            const images = data.data;
+            return images;
+        } else {
+            throw new Error(data.error);
+        }
+    } catch (error) {
+        console.error("Erreur lors de la récupération de l'ID :", error);
+        return null;
+    }
 }
+
+// // Make sure the game initialization is complete
+// function initializeGame(gameData) {
+//     console.log("Initializing game with data:", gameData);
+    
+//     // Set up game state properly
+//     window.GameState = {
+//         // Your game state initialization
+//         started: false,
+//         // Other properties
+//     };
+    
+//     // Signal ready to the server
+//     socket.send(JSON.stringify({
+//         event: "GAME",
+//         action: "PLAYER_READY"
+//     }));
+// }

@@ -99,22 +99,6 @@ async function validateCode() {
     }
 }
 
-// function removeExistingModal() {
-//     const existingModal = document.getElementById('twoFactorModal');
-//     if (existingModal) {
-//         // const verifyButton = document.getElementById('verifyCodeBtn');
-//         // if (verifyButton) {
-//         //     verifyButton.removeEventListener('click', handleVerifyClick);
-//         // }
-        
-//         const modalInstance = bootstrap.Modal.getInstance(existingModal);
-//         if (modalInstance) {
-//             modalInstance.dispose();
-//         }
-//         existingModal.remove();
-//     }
-// }
-
 function hide_modal(){
     const input = document.getElementById('authCode');
     if (input)

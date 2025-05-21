@@ -72,3 +72,25 @@ class GetUserName(APIView):
                 "status": "error",
                 "message": "Client not found"
             }, status=status.HTTP_404_NOT_FOUND)
+
+import json
+
+class GetImages(APIView):
+    def get(self, request: HttpRequest, *args, **kwargs):
+        opponent = request.GET.get('opponent')
+        client = Clients.get_client_by_request(request)
+        target = Clients.get_client_by_username(opponent)
+        
+        if client and target:
+            return Response({
+                "status": "success",
+                "data": {
+                    "hostPicture": client.profile.profile_picture.url,
+                    "opponentPicture": target.profile.profile_picture.url
+                }
+            }, status=status.HTTP_200_OK)
+        else:
+            return Response({
+                "status": "error",
+                "message": "Client or opponent not found"
+            }, status=status.HTTP_404_NOT_FOUND)
