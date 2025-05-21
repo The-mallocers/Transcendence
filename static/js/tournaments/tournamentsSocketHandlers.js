@@ -31,9 +31,12 @@ export function setUpTournamentSocket (tournamentSocket) {
             case "TOURNAMENT_NOT_EXIST":
             case "ERROR":
                 // console.log("Error message: ", jsonData.data.error)
-                remove_toast()
-                toast_message(jsonData.data.error || jsonData.data.content )
-                navigateTo("/pong/gamemodes/");
+                const path = window.location.pathname;
+                if (path == "/pong/tournament/tree/" || path == "/pong/tournament/") {
+                    remove_toast();
+                    toast_message(jsonData.data.error || jsonData.data.content )
+                    navigateTo("/pong/gamemodes/");
+                }
                 // errDiv.innerHTML = jsonData.data.error
                 break;
             case "TOURNAMENT_PLAYER_LEFT" :

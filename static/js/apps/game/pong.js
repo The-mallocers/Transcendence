@@ -2,6 +2,7 @@ import {WebSocketManager} from "../../websockets/websockets.js";
 import {navigateTo} from '../../spa/spa.js';
 import {isGameOver} from "./VarGame.js";
 import { tournamentData } from "./VarGame.js";
+import { remove_toast } from "../profile/toast.js";
 import { toast_message } from "../profile/toast.js";
 // import { apiFriends } from "../profile/profile.js";
 
@@ -42,7 +43,7 @@ let right_last_move = "idle";
 if (!socket || socket.readyState === WebSocket.CLOSED) {
     navigateTo("/");
     remove_toast();
-    toast_message("You are being redirected because you are not in any game right now")
+    toast_message("Not in a game, redirecting");
 } else {
     tournamentData.gameIsReady = false;
     // console.log(window.GameState);

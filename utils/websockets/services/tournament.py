@@ -195,11 +195,11 @@ class TournamentService(BaseServices):
             try:
                 tournament_info = await self.tournament_info_helper(tournament_info, code, client)
             except Exception as e:
-                await asend_group(self.service_group, EventType.TOURNAMENT, ResponseAction.TOURNAMENT_NO_INFO)
+                await asend_group_error(self.service_group, ResponseError.NOT_IN_TOURNAMENT)
                 return
             await asend_group(self.service_group, EventType.TOURNAMENT, ResponseAction.TOURNAMENT_INFO, tournament_info)
         else:
-            await asend_group(self.service_group, EventType.TOURNAMENT, ResponseAction.TOURNAMENT_NO_INFO)
+            await asend_group_error(self.service_group, ResponseError.NOT_IN_TOURNAMENT)
 
 
     async def tournament_info_helper(self, tournament, code, client):

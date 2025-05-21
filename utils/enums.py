@@ -133,7 +133,6 @@ class ResponseAction(str, Enum):
     TOURNAMENT_LIST: str = 'List of tournaments'
     TOURNAMENT_UPDATE: str = 'Tournament update'
     TOURNAMENT_STARTING: str = 'Tournament starting'
-    TOURNAMENT_NO_INFO: str = 'No info to give'
     WAITING_FOR_NEXT_ROUND: str = 'The tournament is waiting for the next round'
 
     # ── Game Actions ──────────────────────────────────────────────────────────────────
