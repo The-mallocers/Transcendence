@@ -1,3 +1,4 @@
+from pickle import TRUE
 from time import sleep
 from django.http import JsonResponse
 from django.middleware.csrf import get_token
@@ -14,15 +15,21 @@ def get(request):
     client_player_name = client.profile.username
     won_tourney = is_lost_tourney = mmr_change = message = client_score = opponent_score = opponent = None
     if found_game.winner.client.id == client.id:
-        tourney = found_game.tournament
-        if tourney and tourney.winner and tourney.winner.id == client.id:
-            message = "You won the Tournament !"
-            won_tourney = True
         message = "You won !"
         client_score = found_game.winner.score
         opponent_score = found_game.loser.score
         opponent = found_game.loser.client.profile.username
         mmr_change = "+" + str(found_game.winner.mmr_change) + " mmr !"
+        tourney = found_game.tournament
+        if tourney:
+            #Loop for a bit to find out if we are the tournament winner.
+            for i in range(5):
+                tmp_game = Game.objects.filter(code=game_id).first()
+                if tmp_game.tournament.winner and tmp_game.tournament.winner.id == client.id:
+                    won_tourney = True
+                    message = "Tournament Won !"
+                    break
+                sleep(0.1)
     else:
         message = "You lost !"
         if found_game.tournament:
