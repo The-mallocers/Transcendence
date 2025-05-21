@@ -5,6 +5,7 @@ import { remove_toast } from "../profile/toast.js";
 import { getClientId } from "../../utils/utils.js";
 
 let clientId;
+let gameStartingInProcess = false;
 
 clientId = await getClientId();
 const gameSocket = await WebSocketManager.initGameSocket(clientId);
@@ -101,33 +102,76 @@ gameSocket.onmessage = (e) => {
     const jsonData = JSON.parse(e.data);
 
     console.log(jsonData.data.action);
-    //We should only get the response that a match was found
 
-    //On message on regarde si c'est que la game a commencer
-    //on renvois le json approprie
+    // Handle player info first to ensure we have the data
     if (jsonData.data.action == "PLAYER_INFOS") {
         console.log("PLAYER INFOS IS:")
         console.log(jsonData.data.content)
         window.GameState = {
             ballY: height / 2,
             ballX: width / 2,
+            started: false,
 
             left: {
                 x: jsonData.data.content.left.paddle.x,
                 y: jsonData.data.content.left.paddle.y,
                 username: jsonData.data.content.left.username,
-                id: ""
+                id: jsonData.data.content.left.client_id || "",
+                picture: jsonData.data.content.left.player_profile
             },
             right: {
                 x: jsonData.data.content.right.paddle.x,
                 y: jsonData.data.content.right.paddle.y,
                 username: jsonData.data.content.right.username,
-                id: ""
+                id: jsonData.data.content.right.client_id || "",
+                picture: jsonData.data.content.right.player_profile
             }
         }
     }
-    if (jsonData.data.action == "STARTING") {
-        navigateTo("/pong/arena/");
-        gameSocket.send(JSON.stringify(startGameMessage))
+
+    // Modify the STARTING handler to use a flag
+    else if (jsonData.data.action == "STARTING") {
+        if (!gameStartingInProcess) {
+            gameStartingInProcess = true;
+            console.log("Game starting - sending start message");
+            // Do NOT navigate until the correct time
+            gameSocket.send(JSON.stringify(startGameMessage));
+        }
+    }
+
+    // Handle the waiting to start message to show the countdown
+    else if (jsonData.data.action === "WAITING_TO_START") {
+        const timer = jsonData.data.content.timer;
+        console.log("Game starting in", timer);
+        
+        // Update the timer in the UI
+        const timerElement = document.getElementById("timer");
+        if (timerElement) {
+            timerElement.textContent = timer;
+        }
+        
+        // Navigate to arena when timer is at 5 (beginning of countdown)
+        if (timer === 5 && !window.location.pathname.includes("arena")) {
+            console.log("Navigating to arena");
+            navigateTo("/pong/arena/");
+        }
     }
 };
+
+// Make sure the game initialization is complete
+function initializeGame(gameData) {
+    console.log("Initializing game with data:", gameData);
+    
+    // Set up game state properly
+    window.GameState = {
+        // Your game state initialization
+        started: false,
+        // Other properties
+    };
+    
+    // Signal ready to the server
+    socket.send(JSON.stringify({
+        event: "GAME",
+        action: "PLAYER_READY"
+    }));
+}
