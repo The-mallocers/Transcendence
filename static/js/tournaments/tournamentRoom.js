@@ -12,6 +12,7 @@ const leave_tournament = {
         "action": "leave_tournament"
     }
 }
+
 function leaveTournament() {
     WebSocketManager.tournamentSocket.send(JSON.stringify(leave_tournament))
     // WebSocketManager.closeTournamentSocket();

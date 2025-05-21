@@ -1,6 +1,10 @@
 import { tournamentData } from "../apps/game/VarGame.js"
 import { navigateTo } from "../spa/spa.js"  
 import { addReadyButton } from "./tournamentsSocketHandlers.js"
+// import { leaveTournament } from "./tournamentRoom.js"
+
+import { WebSocketManager } from "../websockets/websockets.js"
+// import { WebSocketManager } from ""
 
 //Build TREE
 const buildTr = (matchInfos) => {
@@ -78,9 +82,23 @@ const buildRound = (roundInfos, name)=> {
     `
 }
 
-let meow = null
+const leave_tournament = {
+    "event": "tournament",
+    "data": {
+        "action": "leave_tournament"
+    }
+}
+
+function leaveTournament() {
+    WebSocketManager.tournamentSocket.send(JSON.stringify(leave_tournament))
+    // WebSocketManager.closeTournamentSocket();
+    navigateTo("/pong/gamemodes/");
+}
+
+
 
 export function populateTree(tournamentInfos) {
+        let meow = null
         // const btnsRoom = document.querySelector("#btnsRoom")
 
         // if (btnsRoom) {
@@ -94,27 +112,30 @@ export function populateTree(tournamentInfos) {
         for (const key in tournamentInfos?.scoreboard.rounds) {
             meow.innerHTML += buildRound(tournamentInfos?.scoreboard.rounds[key], key)
         }
+        
+        meow.innerHTML += `<div class="btns d-flex flex-row justify-content-between gap-3 align-items-center mt-3"></div>`
 
-        // <div id="leave-btn" class="btn btn-intra-outlined">Leave</div>
 
         let leaveBtn = document.createElement("div")
-
+        leaveBtn.innerText = "leave"
+        leaveBtn.classList.add('btn','btn-intra-outlined')
         leaveBtn.onclick = function() {
             leaveTournament();
         }
 
-        meow.appendChild(leaveBtn)
-        
+        let btns = document.querySelector(".btns")
+        btns.appendChild(leaveBtn)
+        console.log(leaveBtn, meow)
         if (tournamentData.gameIsReady) {
-            const parrent = document.querySelector('#tree')
-            console.log("data of tournament join", parrent);
-            if (parrent){
+            // const parrent = document.querySelector('#tree')
+            // console.log("data of tournament join", parrent);
+            // if (parrent){
                 let btn = document.createElement('div')
-                btn.classList.add('btn', 'btn-primary');
+                btn.classList.add('btn', 'intra-btn');
                 btn.innerText = 'Ready';
                 btn.addEventListener('click', ()=>{navigateTo(`/pong/matchmaking/`);})
-                parrent.appendChild(btn)
-            }
+                btns.appendChild(btn)
+            // }
         }
 }
 
