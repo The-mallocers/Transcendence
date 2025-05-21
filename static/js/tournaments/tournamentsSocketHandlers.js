@@ -4,7 +4,7 @@ import { populateJoinTournament } from "./populateHelpers.js";
 import { populateTree } from "./populateHelpers.js";
 import { isGameOver } from "../apps/game/VarGame.js";
 import { tournamentData } from "../apps/game/VarGame.js";
-import { remove_toast, toast_message } from "../apps/profile/toast.js";
+import { remove_toast, toast_message, toast_tournament } from "../apps/profile/toast.js";
 
 // import { toast_message } from "../profile/toast.js";
 // import { remove_toast } from "../profile/toast.js";
@@ -28,6 +28,7 @@ export function setUpTournamentSocket (tournamentSocket) {
 
             case "HOST_LEAVE":
             case "NOT_IN_TOURNAMENT":
+            case "TOURNAMENT_NOT_EXIST":
             case "ERROR":
                 // console.log("Error message: ", jsonData.data.error)
                 remove_toast()
@@ -38,7 +39,6 @@ export function setUpTournamentSocket (tournamentSocket) {
             case "TOURNAMENT_PLAYER_LEFT" :
                 tournamentSocket.send(JSON.stringify(get_tournament_info));
                 remove_toast();
-                toast_message("Tournament Start ! Good luck and have fun");
                 break;
             case "TOURNAMENT_GAME_FINISH":
                 // if (isPlayerIngame(jsonData.data.content) == false) return;
@@ -100,6 +100,14 @@ export function setUpTournamentSocket (tournamentSocket) {
                 navigateTo(`/pong/tournament/?code=${jsonData.data.content.code}`);
                 break;
                 
+            case "TOURNAMENT_INVITATION_SENT":
+                console.log(`Invitation sent to ${jsonData.data.content.target_name}`);
+                break;
+                
+            case "TOURNAMENT_PLAYER_LEFT" :
+                tournamentSocket.send(JSON.stringify(get_tournament_info));
+                break;
+
             default:
                 break;
         }

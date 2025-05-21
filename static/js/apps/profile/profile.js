@@ -3,6 +3,7 @@ import {navigateTo} from "../../spa/spa.js";
 import { toast_friend } from "./toast.js";
 import { toast_duel } from "./toast.js";
 import { toast_message } from "./toast.js";
+import { toast_tournament } from "./toast.js";
 import { remove_toast } from "./toast.js";
 import { create_front_chat_room } from "../../utils/utils.js";
 
@@ -13,20 +14,38 @@ const pathname = window.location.pathname;
 // console.log(pathname);
 
 if (!searchParams.has('username') && pathname == '/') {
+    const friends_group = document.querySelector('.friends_group');
+    const pending_group = document.querySelector('.pending_group');
+    
+    if (friends_group) {
+        const existingButtons = friends_group.querySelectorAll('button.friendrequest');
+        friends_group.innerHTML = '';
+        existingButtons.forEach(button => friends_group.appendChild(button));
+    }
+    
+    if (pending_group) {
+        pending_group.innerHTML = '';
+    }
+    
     // Display all friends and pending friends
     const friends = await apiFriends("/api/friends/get_friends/");
     const pending_friends = await apiFriends("/api/friends/get_pending_friends/");
     const pending_duels = await apiFriends("/api/friends/get_pending_duels/");
     const friends_online_status = JSON.parse(document.getElementById('friends-data')?.textContent);
+    const pending_tournament_invitations = JSON.parse(document.getElementById('pending-tournament-invitations-data')?.textContent || '[]');
 
     friends.forEach(friend => {
-        console.log(friend);
+        // Check if this friend is already in the list
+        if (document.getElementById(`friend-${friend.username.replace(/\s+/g, '-')}`)) {
+            return; // Skip this friend if already added
+        }
+
         const friends_group = document.querySelector('.friends_group');
         const parser = new DOMParser();
         const status = friends_online_status[friend.username];
         console.log("status:", status);
         const html_friend =
-            `<li class="list-group-item d-flex justify-content-between align-items-center">
+            `<li id="friend-${friend.username.replace(/\s+/g, '-')}" class="list-group-item d-flex justify-content-between align-items-center">
             <div>${friend.username}</div>
             <div class="d-flex align-items-center">
                 <button type="button" class="type-intra-green delete_friend me-4" >delete</button>
@@ -107,6 +126,37 @@ if (!searchParams.has('username') && pathname == '/') {
         });
         pending_group.appendChild(pendingElement);
     })
+    pending_tournament_invitations.forEach((invitation) => {
+        const pending_group = document.querySelector('.pending_group');
+        const parser = new DOMParser();
+        const html_string =
+            `<li class="list-group-item pending_item d-flex justify-content-between align-items-center">
+                ${invitation.inviter_username} invites you to join tournament: ${invitation.tournament_name}
+                <div class="btn-group d-grid gap-2 d-md-flex justify-content-md-end"  role="group" aria-label="Basic example">
+                    <button type="button" class="type-intra-green accept_tournament" data-tournament-code="${invitation.tournament_code}" data-inviter="${invitation.inviter_username}">accept</button>
+                    <button type="button" class="type-intra-white refuse_tournament" data-tournament-code="${invitation.tournament_code}" data-inviter="${invitation.inviter_username}">refuse</button>
+                </div>
+            </li>
+            `
+        const doc = parser.parseFromString(html_string, "text/html");
+        const pendingElement = doc.body.firstChild;
+
+        const acceptButton = pendingElement.querySelector('.accept_tournament');
+        acceptButton.addEventListener('click', function () {
+            pendingElement.remove();
+            handleAcceptTour(invitation.tournament_code, invitation.inviter_username);
+        });
+
+        const deleteButton = pendingElement.querySelector('.refuse_tournament');
+        deleteButton.addEventListener('click', function () {
+            pendingElement.remove();
+            handleRefuseTour(invitation.tournament_code, invitation.inviter_username);
+        });
+        
+        if (pending_group) {
+            pending_group.appendChild(pendingElement);
+        }
+    });
 }
 
 notifSocket.onmessage = (event) => {
@@ -307,9 +357,48 @@ notifSocket.onmessage = (event) => {
         toast_message("You have blocked this user");
         navigateTo('');
     }
-}
+    else if(message.data.action == "TOURNAMENT_INVITATION"){
+        const tournament_code = message.data.content.tournament_code;
+        const inviter_username = message.data.content.username;
+        const tournament_name = message.data.content.tournament_name;
+        const itemToDelete = document.querySelector(`.pending_item`);
+        const pending_group = document.querySelector('.pending_group');
+        const parser = new DOMParser();
+        const htmlString =
+            `<li class="list-group-item pending_item d-flex justify-content-between align-items-center">
+        ${message.data.content.username} invites you to join the tournament: ${tournament_name}
+        <div class="btn-group d-grid gap-2 d-md-flex justify-content-md-end" role="group" aria-label="Basic example">
+        <button type="button" class="type-intra-green accept_tournament" data-tournament-code="${tournament_code}" data-inviter="${inviter_username}">accept</button>
+        <button type="button" class="type-intra-white refuse_tournament" data-tournament-code="${tournament_code}" data-inviter="${inviter_username}">refuse</button>
+        </div>
+        </li>
+        `
+        const doc = parser.parseFromString(htmlString, "text/html");
+        const pendingElement = doc.body.firstChild;
 
-// Define the functions in the global scope (window)
+        const acceptButton = pendingElement.querySelector('.accept_tournament');
+        acceptButton.addEventListener('click', function () {
+            pendingElement.remove();
+            console.log(`accepting tournament ${message.data.content.tournament_code}`);
+            handleAcceptTour(tournament_code, inviter_username);
+        });
+
+        const deleteButton = pendingElement.querySelector('.refuse_tournament');
+        deleteButton.addEventListener('click', function () {
+            pendingElement.remove();
+            handleRefuseTour(tournament_code, inviter_username);
+        });
+        if (pending_group) {
+            pending_group.appendChild(pendingElement);
+        }
+        remove_toast();
+        toast_tournament(`You have been invited to ${tournament_name} by ${inviter_username}`, message.data, itemToDelete);
+    }
+    else if(message.data.action == "TOURNAMENT_INVITATION_ACCEPTED"){
+        navigateTo(`/pong/tournament/?code=${message.data.content.tournament_code}`);
+    }
+};
+
 window.handleAskFriend = function(username) {
     console.log("the friend to add is " + username);
     const message = create_message_notif("send_friend_request", username);
@@ -346,6 +435,86 @@ window.handleRefuseDuel = function(code, targetName) {
     const message = create_message_duel("refuse_duel", code, targetName);
     notifSocket.send(JSON.stringify(message));
 };
+
+window.handleAcceptTour = function(tournamentCode, inviterUsername) {
+    remove_toast();
+    const message = {
+        "event": "notification",
+        "data": {
+            "action": "tournament_invitation_response",
+            "args": {
+                "tournament_code": tournamentCode,
+                "inviter_username": inviterUsername,
+                "action": "accept"
+            }
+        }
+    };
+    notifSocket.send(JSON.stringify(message));
+    navigateTo(`/pong/tournament/?code=${tournamentCode}`);
+}
+
+window.handleRefuseTour = function(tournamentCode, inviterUsername) {
+    remove_toast();
+
+    const message = {
+        "event": "notification",
+        "data": {
+            "action": "tournament_invitation_response",
+            "args": {
+                "tournament_code": tournamentCode,
+                "inviter_username": inviterUsername,
+                "action": "reject"
+            }
+        }
+    };
+    notifSocket.send(JSON.stringify(message));
+    
+    const pendingItem = document.querySelector(`.pending_item:has(button[data-tournament-code="${tournamentCode}"])`);
+    if (pendingItem) {
+        pendingItem.remove();
+    }
+}
+
+
+window.handleAcceptTournamentInvitation = function(tournamentCode, inviterUsername) {
+    remove_toast();
+    const message = {
+        "event": "notification",
+        "data": {
+            "action": "tournament_invitation_response",
+            "args": {
+                "tournament_code": tournamentCode,
+                "inviter_username": inviterUsername,
+                "action": "accept"
+            }
+        }
+    };
+    notifSocket.send(JSON.stringify(message));
+};
+
+window.handleRejectTournamentInvitation = function(tournamentCode, inviterUsername) {
+    remove_toast();
+    const message = {
+        "event": "notification",
+        "data": {
+            "action": "tournament_invitation_response",
+            "args": {
+                "tournament_code": tournamentCode,
+                "inviter_username": inviterUsername,
+                "action": "reject"
+            }
+        }
+    };
+    notifSocket.send(JSON.stringify(message));
+    
+    const pendingItems = document.querySelectorAll('.pending_item');
+    pendingItems.forEach(item => {
+        const text = item.textContent;
+        if (text.includes(inviterUsername) && text.includes('tournament')) {
+            item.remove();
+        }
+    });
+}
 
 window.hide_modal = async function (usernameId) {
     try {

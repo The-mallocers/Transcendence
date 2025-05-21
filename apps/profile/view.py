@@ -21,3 +21,4 @@ def profile_post(req, client_id):
 @require_http_methods(["DELETE"])
 def profile_delete(req, client_id):
     return delete(req, client_id)
+
