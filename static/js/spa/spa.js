@@ -145,7 +145,12 @@ export async function fetchRoute(path) {
             //Add toast
             if (window.location.pathname != "/") {
                 remove_toast();
-                toast_message("You are not logged in");
+                if (data.message) {
+                    toast_message(data.message);
+                }
+                else {
+                    toast_message("Redirecting");
+                }
             }
             return navigateTo(data.redirect)
         } else if (response.status === 401) {

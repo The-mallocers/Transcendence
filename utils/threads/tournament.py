@@ -224,7 +224,7 @@ class TournamentThread(Threads):
                 #TODO envoyer a quel place on a fini
                 self.del_client(game.loser.client)
                 #ENLEVER DE LA QUEUE ICI TFREYDIE
-                self.redis.hdel(RTables.HASH_TOURNAMENT_QUEUE(self.code), game.loser.client.id)
+                # self.redis.hdel(RTables.HASH_TOURNAMENT_QUEUE(self.code), game.loser.client.id)
                 self.games.remove(game)
                 break
 
