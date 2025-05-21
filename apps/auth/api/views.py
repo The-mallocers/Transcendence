@@ -1,6 +1,8 @@
 import random
 
-from django.forms import ValidationError
+# from django.forms import ValidationError
+from rest_framework.exceptions import ValidationError
+
 from django.http import HttpRequest
 from rest_framework import status
 from rest_framework.response import Response
@@ -9,6 +11,7 @@ from rest_framework.views import APIView
 from apps.auth.models import Password
 from apps.client.models import Clients
 from apps.profile.models import Profile
+from utils import serializers
 from utils.enums import JWTType, RTables
 from utils.jwt.JWT import JWT
 from utils.redis import RedisConnectionPool
@@ -98,9 +101,9 @@ class UpdateApiView(APIView):
                 return Response({"message": "Infos updated succesfully"}, status=status.HTTP_200_OK)
             else:
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        except ValidationError as e:
+        except (ValidationError) as e:
             return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
+        except Exception as e: 
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR) 
 
 
