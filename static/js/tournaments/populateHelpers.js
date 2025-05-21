@@ -144,14 +144,17 @@ export function populateTree(tournamentInfos) {
 export function populateTournament(tournament_data){
     const max_clients = tournament_data.max_clients
     const btnsRoom = document.querySelector("#btnsRoom")
+    const h1 = document.querySelector("h1")
 
+    h1.innerText = tournament_data.title
+    
     if (btnsRoom) {
         btnsRoom.innerHTML = `
                     <div class="btn btn-intra">Invite</div>
                     <div id="leave-btn" class="btn btn-intra-outlined">Leave</div>
         `
     }
-    console.log(tournamentData)
+    console.log("jhdcv§zfXVZÈVÈD§FVTÈZFVIÈZTDFVÈFVÈFVTÈFV",tournament_data)
     const clientsInTournament = document.querySelector("#clientsInTournament");
     let clientsDiv = []
     if (clientsInTournament == null) return ;

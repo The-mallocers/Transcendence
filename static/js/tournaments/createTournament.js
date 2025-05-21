@@ -39,7 +39,7 @@ function getTournamentSettings(){
         "data": {
             "action": "create_tournament",
             "args": {
-                "title": tournamentName.placeholder ||  tournamentName.value,
+                "title": tournamentName.value.length > 0 ? tournamentName.value : tournamentName.placeholder,
                 "max_clients": parseInt(maxClients),
                 "is_public": true,
                 "has_bots": false,
