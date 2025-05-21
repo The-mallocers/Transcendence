@@ -4,7 +4,7 @@ import { sendWhenReady } from "../utils/utils.js";
 
 const tournamentSocket = WebSocketManager.tournamentSocket;
 const delete_btn = document.querySelector("#delete-btn");
-const leave_btn = document.querySelector("#leave-btn");
+// const leave_btn = document.querySelector("#leave-btn");
 
 const leave_tournament = {
     "event": "tournament",
@@ -23,9 +23,9 @@ delete_btn?.addEventListener('click', ()=>{
     leaveTournament();
 });
 
-leave_btn.addEventListener('click', ()=>{
-    leaveTournament();
-});
+// leave_btn.addEventListener('click', ()=>{
+//     leaveTournament();
+// });
 
 const get_tournament_info = {
     "event": "tournament",
