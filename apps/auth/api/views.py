@@ -9,8 +9,9 @@ from rest_framework.views import APIView
 from apps.auth.models import Password
 from apps.client.models import Clients
 from apps.profile.models import Profile
-from utils.enums import JWTType
+from utils.enums import JWTType, RTables
 from utils.jwt.JWT import JWT
+from utils.redis import RedisConnectionPool
 from utils.serializers.auth import PasswordSerializer
 from utils.serializers.client import ClientSerializer
 from utils.serializers.permissions.auth import PasswordPermission
@@ -297,7 +298,12 @@ class DeleteApiView(APIView):
                 JWT.extract_token(request, JWTType.REFRESH).invalidate_token()
             except Exception as e:
                 logging.getLogger('MainThread').error(str(e))
+            redis = RedisConnectionPool.get_sync_connection('api')
             client = Clients.get_client_by_request(request)
+            if redis.hexists(RTables.HASH_MATCHES, str(client.id)):
+                return Response({
+                    "error": "You are currently in a match, please end it before deleting your account"
+                }, status=status.HTTP_401_UNAUTHORIZED)
             client.delete()
             return response
         else:
