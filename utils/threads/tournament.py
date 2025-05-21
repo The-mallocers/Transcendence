@@ -35,7 +35,7 @@ class TournamentThread(Threads):
                     sleep(5)
                 if self._running():
                     break
-                sleep(1)
+                sleep(0.3)
 
         except Exception as e:
             self._logger.error(traceback.format_exc())

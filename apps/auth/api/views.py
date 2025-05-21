@@ -303,10 +303,15 @@ class DeleteApiView(APIView):
                 logging.getLogger('MainThread').error(str(e))
             redis = RedisConnectionPool.get_sync_connection('api')
             client = Clients.get_client_by_request(request)
-            if redis.hexists(RTables.HASH_MATCHES, str(client.id)):
+            if (redis.hexists(RTables.HASH_MATCHES, str(client.id))):
                 return Response({
-                    "error": "You are currently in a match, please end it before deleting your account"
+                    "error": "You are currently in a match, please leave it before deleting your account"
                 }, status=status.HTTP_401_UNAUTHORIZED)
+            for key in redis.scan_iter("queue_tournament_*"):
+                if redis.hexists(key, str(client.id)):
+                    return Response({
+                        "error": "You are currently in a tournament, please end it before deleting your account"
+                    }, status=status.HTTP_401_UNAUTHORIZED)
             client.delete()
             return response
         else:

@@ -11,10 +11,7 @@ from apps.game.models import Game
 
 
 def get(request):
-    game_id = "game_not_found"
-    while game_id == "game_not_found":
-        game_id = request.GET.get("game", "game_not_found")
-        sleep(0.1)
+    game_id = request.GET.get("game", "game_not_found")
     found_game = Game.objects.filter(code=game_id).first()
     message = "Opponent Left"
     # Lets add something cute here to get a random message everytime.
@@ -34,14 +31,20 @@ def get(request):
         "Maybe they just went to get milk.",
         "Bravely ran away, Sir Opponent.",
     ]
-    is_won_tourney = False
-    client = Clients.get_client_by_request(request)
-    if found_game.tournament and found_game.tournament.winner == client.id:
-        disconnect_messages = "Your opponent disconnected, making you the tournament winner !"
-        is_won_tourney = True
     is_tourney = False
     if found_game.tournament:
         is_tourney = True
+    is_won_tourney = False
+    client = Clients.get_client_by_request(request)
+    tourney = found_game.tournament
+    if tourney:
+        for i in range(3):
+            tmp_game = Game.objects.filter(code=game_id).first()
+            if tmp_game.tournament.winner and tmp_game.tournament.winner.id == client.id:
+                disconnect_messages = ["Your opponent disconnected, making you the tournament winner !"]
+                is_won_tourney = True
+                break
+            sleep(0.1)
 
     index = random.randint(0, len(disconnect_messages) - 1) 
     html_content = render_to_string("pong/../../templates/apps/pong/disconnect.html", {
