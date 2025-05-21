@@ -28,6 +28,7 @@ export function setUpTournamentSocket (tournamentSocket) {
 
             case "HOST_LEAVE":
             case "NOT_IN_TOURNAMENT":
+            case "TOURNAMENT_NOT_EXIST":
             case "ERROR":
                 // console.log("Error message: ", jsonData.data.error)
                 remove_toast()
@@ -38,7 +39,6 @@ export function setUpTournamentSocket (tournamentSocket) {
             case "TOURNAMENT_PLAYER_LEFT" :
                 tournamentSocket.send(JSON.stringify(get_tournament_info));
                 remove_toast();
-                toast_message("Tournament Start ! Good luck and have fun");
                 break;
             case "TOURNAMENT_GAME_FINISH":
                 // if (isPlayerIngame(jsonData.data.content) == false) return;

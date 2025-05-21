@@ -6,7 +6,7 @@ import { remove_toast, toast_message } from "../apps/profile/toast.js";
 
 const tournamentSocket = WebSocketManager.tournamentSocket;
 const delete_btn = document.querySelector("#delete-btn");
-// const leave_btn = document.querySelector("#leave-btn");
+const leave_btn = document.querySelector("#leave-btn");
 
 const leave_tournament = {
     "event": "tournament",
@@ -17,7 +17,6 @@ const leave_tournament = {
 
 function leaveTournament() {
     WebSocketManager.tournamentSocket.send(JSON.stringify(leave_tournament))
-    // WebSocketManager.closeTournamentSocket();
     navigateTo("/pong/gamemodes/");
 }
 
@@ -25,11 +24,14 @@ delete_btn?.addEventListener('click', ()=>{
     leaveTournament();
 });
 
-// leave_btn.addEventListener('click', ()=>{
-//     leaveTournament();
-// });
+console.log(leave_btn);
 
-const get_tournament_info = {
+leave_btn?.addEventListener('click', ()=>{
+    console.log("Leave tournament button clicked");
+    leaveTournament();
+});
+
+const get_tournament_info = {   
     "event": "tournament",
     "data": {
         "action": "tournament_info"

@@ -147,9 +147,15 @@ export function populateTournament(tournament_data){
 
     if (btnsRoom) {
         btnsRoom.innerHTML = `
-                    <div class="btn btn-intra">Invite</div>
+                    <div class="btn btn-intra" onclick="invite_friends()">Invite</div>
                     <div id="leave-btn" class="btn btn-intra-outlined">Leave</div>
         `
+    }
+
+
+    const leave_btn = document.querySelector("#leave-btn");
+    leave_btn.onclick = function() {
+        leaveTournament();
     }
     console.log(tournamentData)
     const clientsInTournament = document.querySelector("#clientsInTournament");
