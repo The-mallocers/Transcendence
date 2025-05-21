@@ -7,12 +7,11 @@
 
 <div class="container">
     {% csrf_token %}
-    <h1>Two-Factor Authentication Setup</h1>
+    <h1>Two-Factor Authentication</h1>
 
     <div class="instructions">
-        <p>1. Open your authenticator app (Google Authenticator, Authy, etc.)</p>
-        <p>2. Scan the QR code below</p>
-        <p>3. Enter the 6-digit code shown in your app</p>
+        <p>1. Open your authenticator app (Google Authenticator)</p>
+        <p>2. Enter the 6-digit code shown in your app</p>
     </div>
     <div id="data-email" email={{ client.profile.email }}></div>
     <div>{{ client.profile.email }}</div>
@@ -29,7 +28,7 @@
                pattern="[0-9]{6}"
                required>
         <br>
-        <button type="submit">Verify Code</button>
+        <button class="type-intra-green" type="submit">Verify Code</button>
     </form>
 </div>
 

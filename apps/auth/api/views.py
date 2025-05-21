@@ -249,9 +249,10 @@ def post_check_qrcode(req):
         print(data)
         print(client.twoFa.key)
         totp = pyotp.TOTP(client.twoFa.key)
+        print(totp)
         is_valid = totp.verify(data['code'])
         if is_valid:
-            client.twoFa.update("enable", data['status'])
+            client.twoFa.update("enable", True)
             if not client.twoFa.scanned:
                 client.twoFa.update("scanned", True)
             print("client successfully validate")

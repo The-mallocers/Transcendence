@@ -1,6 +1,17 @@
 console.log("in the myinformations file");
-import {navigateTo} from "../../spa/spa.js";
+let enable = false;
 
+
+document.getElementById('twoFactorModal').addEventListener('hidden.bs.modal', function () {
+    const switchElement = document.querySelector('.switch');
+    let currentState = switchElement.getAttribute('data-status');
+    if(enable == false && currentState == "on"){
+        switchElement.setAttribute('data-status', "off");
+        switchElement.classList.remove("fillGreen");
+        document.querySelector(".shieldPath").classList.remove("fillGreen");
+        enable = false;
+    }
+})
 
 window.switchToggle = async function switchToggle(e) {
     e.dataset.status = (e.dataset.status === 'on' ? 'off' : 'on');
@@ -36,53 +47,16 @@ window.switchToggle = async function switchToggle(e) {
 
 function create_modal(res){
     const image = res.image;
-    const parser = new DOMParser();
-    const htmlContent = `
-    <div class="modal fade" id="twoFactorModal" tabindex="-1" aria-labelledby="twoFactorModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content d-flex">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="twoFactorModalLabel">Two FA Authentification</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="align-self-center">
-                    <img class="twofa-image" src="${image}" alt="2FA QR Code">
-                </div>
-                <div class="align-self-center">
-                    <form id="twoFactorForm" class="d-flex flex-column align-items-center">
-                        <input class="twofa-input"
-                            type="text"
-                            id="authCode"
-                            maxlength="6"
-                            placeholder="Enter 6-digit code"
-                            pattern="[0-9]{6}"
-                            required>
-                        <br>
-                        <button class="type-intra-green verify-code" type="button" id="verifyCodeBtn">Verify Code</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>`
-    const doc = parser.parseFromString(htmlContent, "text/html");
-    const modalElement = doc.body.firstChild;
-    document.body.appendChild(modalElement);
-
-    const button = document.getElementById("verifyCodeBtn");
-    console.log(button)
-    if(button){
-        // document.getElementById("twoFactorForm").addEventListener("submit", function(event) {
-        //     event.preventDefault();
-        //     validateCode();
-        // });
-        button.addEventListener("click", handleVerifyClick);
-    }
-
-    document.getElementById('twoFactorModal').addEventListener('hidden.bs.modal', function () {
-        console.log("removing modal");
-        removeExistingModal();
-    });
-
+    
+    const imageElement = document.querySelector(".twofa-image");
+    if(imageElement)
+        imageElement.src = image;
+    enable = false;
+    const modalElement = document.getElementById('twoFactorModal');
+    modalElement.addEventListener('shown.bs.modal', function () {
+        // Focus on the input field
+        document.getElementById('authCode').focus();
+    }, { once: true }); 
     const modal = new bootstrap.Modal(document.getElementById('twoFactorModal'));
     modal.show();
 }
@@ -107,6 +81,7 @@ async function validateCode() {
             if (response.status === 200 && result.success) {
                 alert("2fa successfully implemented");
                 hide_modal();
+                enable = true;
             }
             else{
                 alert(`${result.message}`)
@@ -124,26 +99,21 @@ async function validateCode() {
     }
 }
 
-function removeExistingModal() {
-    const existingModal = document.getElementById('twoFactorModal');
-    if (existingModal) {
-        const verifyButton = document.getElementById('verifyCodeBtn');
-        if (verifyButton) {
-            verifyButton.removeEventListener('click', handleVerifyClick);
-        }
+// function removeExistingModal() {
+//     const existingModal = document.getElementById('twoFactorModal');
+//     if (existingModal) {
+//         // const verifyButton = document.getElementById('verifyCodeBtn');
+//         // if (verifyButton) {
+//         //     verifyButton.removeEventListener('click', handleVerifyClick);
+//         // }
         
-        const modalInstance = bootstrap.Modal.getInstance(existingModal);
-        if (modalInstance) {
-            modalInstance.dispose();
-        }
-        existingModal.remove();
-    }
-}
-
-function handleVerifyClick(event) {
-    console.log("Button clicked");
-    validateCode();
-}
+//         const modalInstance = bootstrap.Modal.getInstance(existingModal);
+//         if (modalInstance) {
+//             modalInstance.dispose();
+//         }
+//         existingModal.remove();
+//     }
+// }
 
 function hide_modal(){
     const input = document.getElementById('authCode');
@@ -153,3 +123,5 @@ function hide_modal(){
     if(modal)
         modal.hide();
 }
+
+window.validateCode = validateCode;
