@@ -18,9 +18,9 @@ const get_tournament_info = {
 export function setUpTournamentSocket (tournamentSocket) {
     tournamentSocket.onmessage = (message) => {
         const jsonData = JSON.parse(message.data);
-        // console.log("Tournament socket message", jsonData.data);
-        // console.log("The event is:", jsonData.event);
-        // console.log({"MEOW" : jsonData});
+        console.log("Tournament socket message", jsonData.data);
+        console.log("The event is:", jsonData.event);
+        console.log({"MEOW" : jsonData});
         if (jsonData.event != "TOURNAMENT" && jsonData.event != "ERROR") return;
         const action = jsonData.data.action;   
         // console.log("action : ", action)
