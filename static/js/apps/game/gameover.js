@@ -16,7 +16,7 @@ function endStateThingy() {
         const mySpan = document.createElement("span");
 
         // console.log(letterIndex , arr.length - 1)
-        if ((letterIndex == arr.length - 1) &&( globalLetterIndex != arr.length - 1)) {
+        if ((letterIndex == arr.length - 1)) {
             mySpan.classList.add("wordEnd");
         }
 
