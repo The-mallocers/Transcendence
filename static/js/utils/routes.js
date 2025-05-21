@@ -15,6 +15,12 @@ const routes = [
         }
     },
     {
+        path: '/pong/disconnect/',
+        template: async (query) => {
+            return await fetchRoute(`/pages/pong/disconnect/${query}`);
+        }
+    },
+    {
         path: '/auth/auth42',
         template: async (query) => {
             return await fetchRoute(`/pages/auth/auth42${query}`);
@@ -48,7 +54,6 @@ const routes = [
     '/auth/2fa',
     '/admin/monitoring/',
     '/chat/friendrequest/',
-    '/pong/disconnect/',
     '/pong/duel/',
     '/pong/tournament/create/',
     '/pong/tournament/join/'

@@ -5,8 +5,9 @@ import traceback
 from redis.commands.json.path import Path
 
 from apps.client.models import Clients
+from apps.game.models import Game
 from apps.tournaments.models import Tournaments
-from utils.enums import EventType
+from utils.enums import EventType, GameStatus, PlayerSide
 from utils.enums import RTables, ResponseError, ResponseAction
 from utils.pong.objects import score
 from utils.threads.matchmaking import tournament_queue
@@ -20,7 +21,25 @@ class TournamentService(BaseServices):
         self.service_group = f'{EventType.TOURNAMENT.value}_{client.id}'
         self.channel_name = await self.redis.hget(name=RTables.HASH_CLIENT(client.id), key=str(EventType.TOURNAMENT.value))
         self.channel_name = self.channel_name.decode('utf-8')
+        await self._helper_tournament_connection(client)
         return True
+
+
+    async def _helper_tournament_connection(self, client):
+        code = await self.check_if_socket_in_tournament(client)
+        if code:
+            await self.add_socket_to_group(code)
+
+    async def check_if_socket_in_tournament(self, client):
+        queues = await Clients.acheck_in_queue(client, self.redis)
+        code = None
+        if queues and RTables.HASH_TOURNAMENT_QUEUE('') in str(queues):
+            code = re.search(rf'{RTables.HASH_TOURNAMENT_QUEUE("")}(\w+)$', queues.decode('utf-8')).group(1)
+        return code
+
+    async def add_socket_to_group(self, code):
+        await self.channel_layer.group_add(RTables.GROUP_TOURNAMENT(code), self.channel_name)
+
 
     async def _handle_create_tournament(self, data, client: Clients):
         queues = await Clients.acheck_in_queue(client, self.redis)
@@ -35,13 +54,12 @@ class TournamentService(BaseServices):
                 tournament_queue.put(tournament)
                 await self.channel_layer.group_add(RTables.GROUP_TOURNAMENT(tournament.code), self.channel_name)
                 await self.redis.hset(name=RTables.HASH_TOURNAMENT_QUEUE(tournament.code), key=str(client.id), value=str(True))
-                await asend_group(RTables.GROUP_TOURNAMENT(tournament.code), EventType.TOURNAMENT, ResponseAction.TOURNAMENT_CREATED, {
+                await asend_group(RTables.GROUP_TOURNAMENT(tournament.code), EventType.TOURNAMENT, ResponseAction.TOURNAMENT_CREATED, { # testing here
                     'code': tournament.code,
                 })
             except ValueError as e:
                 await asend_group_error(self.service_group, ResponseError.KEY_ERROR, str(e))
             except Exception as e:
-                self._logger.error(traceback.format_exc())
                 await asend_group_error(self.service_group, ResponseError.TOURNAMENT_NOT_CREATE, str(e))
 
     async def _handle_join_tournament(self, data, client):
@@ -56,7 +74,6 @@ class TournamentService(BaseServices):
             if await self.redis.hget(RTables.HASH_TOURNAMENT_QUEUE(code), str(client.id)) == 'True':
                 return await asend_group_error(self.service_group, ResponseError.ALREADY_JOIN_TOURNAMENT)
             client_list = [await self.redis.json().get(RTables.JSON_TOURNAMENT(code), Path('clients'))]
-            print("client list when join: ", client_list)
             if await self.redis.json().get(RTables.JSON_TOURNAMENT(code), Path('max_clients')) < len(client_list):
                 return await asend_group_error(self.service_group, ResponseError.TOURNAMENT_FULL)
             else:
@@ -127,14 +144,23 @@ class TournamentService(BaseServices):
             await asend_group_error(self.service_group, ResponseError.INTERNAL_ERROR, str(e))
 
     async def _handle_leave_tournament(self, data, client):
+        #This used to be disconnected code
         queues = await Clients.acheck_in_queue(client, self.redis)
         if queues and RTables.HASH_TOURNAMENT_QUEUE('') in str(queues):
             code = re.search(rf'{RTables.HASH_TOURNAMENT_QUEUE("")}(\w+)$', queues.decode('utf-8')).group(1)
             await self.channel_layer.group_discard(RTables.GROUP_TOURNAMENT(code), self.channel_name)
             await self.redis.hdel(RTables.HASH_TOURNAMENT_QUEUE(code), str(client.id))
-            await asend_group(self.service_group, EventType.TOURNAMENT, ResponseAction.TOURNAMENT_PLAYER_LEFT)
-        else:
-            await asend_group_error(self.service_group, ResponseError.NOT_IN_TOURNAMENT)
+            game_code = await self.redis.hget(RTables.HASH_MATCHES, str(client.id))
+            player_left = await self.redis.json().get(RTables.JSON_GAME(game_code.decode('utf-8')), Path(f'{PlayerSide.LEFT.value}.id'))
+            player_right = await self.redis.json().get(RTables.JSON_GAME(game_code.decode('utf-8')), Path(f'{PlayerSide.RIGHT.value}.id'))
+            point_to_win = await self.redis.json().get(RTables.JSON_TOURNAMENT(code), Path('points_to_win'))
+            if player_left == str(client.id):
+                await self.redis.json().set(RTables.JSON_GAME(game_code.decode('utf-8')), Path(f'{PlayerSide.RIGHT.value}.score'), point_to_win)
+            elif player_right == str(client.id):
+                await self.redis.json().set(RTables.JSON_GAME(game_code.decode('utf-8')), Path(f'{PlayerSide.LEFT.value}.score'), point_to_win)
+            # await self.redis.json().set(RTables.JSON_GAME(game_code.decode('utf-8')), Path('status'), GameStatus.ENDING)
+
+        return await asend_group(self.service_group, EventType.TOURNAMENT, ResponseAction.TOURNAMENT_LEFT)
     
     async def _handle_list_players(self, data, client):
         queues = await Clients.acheck_in_queue(client, self.redis)
@@ -144,69 +170,63 @@ class TournamentService(BaseServices):
             await asend_group(self.service_group, EventType.TOURNAMENT, ResponseAction.TOURNAMENT_PLAYERS_LIST, clients)
         else:
             await asend_group_error(self.service_group, ResponseError.NOT_IN_TOURNAMENT)
-    
-    
+
+
     async def _handle_tournament_info(self, data, client):
         queues = await Clients.acheck_in_queue(client, self.redis)
         if queues and RTables.HASH_TOURNAMENT_QUEUE('') in str(queues):
             code = re.search(rf'{RTables.HASH_TOURNAMENT_QUEUE("")}(\w+)$', queues.decode('utf-8')).group(1)
             tournament_info = await self.redis.json().get(RTables.JSON_TOURNAMENT(code))
             try:
-                tournament_info = await self.tournament_info_helper(tournament_info, code)
-            except:
+                tournament_info = await self.tournament_info_helper(tournament_info, code, client)
+            except Exception as e:
                 await asend_group_error(self.service_group, ResponseError.NOT_IN_TOURNAMENT)
                 return
             await asend_group(self.service_group, EventType.TOURNAMENT, ResponseAction.TOURNAMENT_INFO, tournament_info)
         else:
-            print("CHUIS PAS DANS LA QUEUE ?")
             await asend_group_error(self.service_group, ResponseError.NOT_IN_TOURNAMENT)
 
 
-    @staticmethod
-    async def tournament_info_helper(tournament, code):
+    async def tournament_info_helper(self, tournament, code, client):
         tournament_ids = tournament['clients']
         title = tournament['title']
         max_clients = int(tournament['max_clients'])
         scoreboard = tournament['scoreboards']
+        host = tournament['host']
         players_infos = await Clients.get_tournament_clients_infos(tournament_ids)
+        game_ready = await self.redis.hexists(RTables.HASH_MATCHES, str(client.id))
+        print("game ready is ", game_ready)
         roomInfos = {
             "title": title,
             "max_clients": max_clients,
             "players_infos": players_infos,
             "code": code,
+            "host" : host,
             "scoreboard": scoreboard,
+            "game_ready": game_ready,
         }
-        # print("roomInfos: ", roomInfos)
         return roomInfos
 
     async def _handle_list_tournament(self, data, client):
         cursor = 0
         all_tournaments = []
-        
+
         while True:
-            cursor, keys = await self.redis.scan(cursor=cursor, match=RTables.JSON_TOURNAMENT('*'))    
+            cursor, keys = await self.redis.scan(cursor=cursor, match=RTables.JSON_TOURNAMENT('*'))
             for key in keys:
                 code = re.search(rf'{RTables.JSON_TOURNAMENT("")}(\w+)$', key.decode('utf-8')).group(1)
                 tournament_info = await self.redis.json().get(RTables.JSON_TOURNAMENT(code))
-                tournament_info = await self.tournament_info_helper(tournament_info, code)
+                tournament_info = await self.tournament_info_helper(tournament_info, code, client)
                 all_tournaments.append(tournament_info)
             if cursor == 0:
                 break
         await asend_group(self.service_group, EventType.TOURNAMENT, ResponseAction.TOURNAMENT_LIST, all_tournaments)
 
     async def _handle_start_tournament(self, data, client):
-        pass    
-    
+        pass
+
     async def _handle_get_tournament_clients(self, data, client):
         pass
 
     async def disconnect(self, client):
-        print("IN DISCONNECT OF TOURNAMENT SERVICE")
-        queues = await Clients.acheck_in_queue(client, self.redis)
-        if queues and RTables.HASH_TOURNAMENT_QUEUE('') in str(queues):
-            code = re.search(rf'{RTables.HASH_TOURNAMENT_QUEUE("")}(\w+)$', queues.decode('utf-8')).group(1)
-            await self.channel_layer.group_discard(RTables.GROUP_TOURNAMENT(code), self.channel_name)
-            await self.redis.hdel(RTables.HASH_TOURNAMENT_QUEUE(code), str(client.id))
-        # await asend_group(self.service_group, EventType.TOURNAMENT, ResponseAction.TOURNAMENT_UPDATE) #Sending the message to the others to check for updates.
-            # tournament = Tournaments.get_tournament_by_code(code)
-        #ADD the fact we want to change the status of the tournament from DB
+        pass

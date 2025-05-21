@@ -3,7 +3,6 @@ import {WebSocketManager} from '../../websockets/websockets.js';
 import {getClientId} from '../../utils/utils.js';
 
 function register(event) {
-    console.log("I am register.js")
     event.preventDefault();
     const form = document.querySelector("form");
     const error = document.getElementById("error-message");
@@ -24,7 +23,7 @@ function register(event) {
         }
     }
     if (!isPasswordcheckValid(password, passwordcheck)) {return ;}
-    
+
     fetch(form.action, {
         method: "POST",
         body: JSON.stringify(data),
@@ -37,10 +36,7 @@ function register(event) {
             if (response.ok) {
                 navigateTo('/');
             } else {
-                console.log("we registered badly")
-                console.log(response);
                 response.json().then(errorData => {
-                    console.log(errorData);
                     error.textContent = "Error registering";
                     handleErrorFront(errorData);
                 });
@@ -72,7 +68,7 @@ export function isPasswordcheckValid(password, passwordcheck) {
 
 export function handleErrorFront(errorData) {
     clearAllErrorMessages();
-    
+
     if ("profile" in errorData) {
         if ("username" in errorData['profile']) {
             displayErrorMessage('username', errorData['profile']['username']);
@@ -81,7 +77,6 @@ export function handleErrorFront(errorData) {
             displayErrorMessage('email', errorData['profile']['email']);
         }
     }
-    console.log("Hello, error data is:", errorData);
     if ("password" in errorData) {
         if ("password" in errorData['password']) {
                 displayErrorMessage('password', errorData['password']['password']);
@@ -90,7 +85,6 @@ export function handleErrorFront(errorData) {
             displayErrorMessage('password_check', errorData['password']['passwordcheck']);
         }
         if ("non_field_errors" in errorData["password"] ) {
-            console.log("Here we go")
             displayErrorMessage('password', errorData["password"]["non_field_errors"]);
             displayErrorMessage('password_check', errorData["password"]["non_field_errors"]);
         }
@@ -101,7 +95,7 @@ export function handleErrorFront(errorData) {
 export function displayErrorMessage(fieldId, message) {
     const field = document.getElementById(fieldId);
     if (!field) return;
-    
+
     // Create error message element
     const errorElement = document.createElement('div');
     errorElement.className = 'error-message';
@@ -109,9 +103,9 @@ export function displayErrorMessage(fieldId, message) {
     errorElement.style.color = 'red';
     errorElement.style.fontSize = '0.8rem';
     errorElement.style.marginTop = '4px';
-    
+
     field.parentNode.insertBefore(errorElement, field.nextSibling);
-    
+
     field.addEventListener('focus', function() {
         const errorMsg = this.parentNode.querySelector('.error-message');
         if (errorMsg) {
@@ -129,7 +123,6 @@ function clearAllErrorMessages() {
 //Little trick to deal with annoying edge case of logout per invalid jwt token not closing ws
 async function socketCheck() {
     if (await getClientId() == null && WebSocketManager.isSocketOpen(WebSocketManager.notifSocket)) {
-        console.log("Allo");
         WebSocketManager.closeNotifSocket();
     }
 }

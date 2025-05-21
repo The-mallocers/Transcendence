@@ -1,5 +1,10 @@
 import { tournamentData } from "../apps/game/VarGame.js"
 import { navigateTo } from "../spa/spa.js"  
+import { addReadyButton } from "./tournamentsSocketHandlers.js"
+// import { leaveTournament } from "./tournamentRoom.js"
+
+import { WebSocketManager } from "../websockets/websockets.js"
+// import { WebSocketManager } from ""
 
 //Build TREE
 const buildTr = (matchInfos) => {
@@ -33,8 +38,8 @@ const buildTr = (matchInfos) => {
         `
 
         right = `
-            ${`<img src="${matchInfos.playerL_picture}" alt="">`}
-            <div>${matchInfos.playerL_username}</div>
+            ${`<img src="${matchInfos.playerR_picture}" alt="">`}
+            <div>${matchInfos.playerR_username}</div>
         `
     }
     return `<tr>
@@ -77,25 +82,60 @@ const buildRound = (roundInfos, name)=> {
     `
 }
 
-let meow = null
+const leave_tournament = {
+    "event": "tournament",
+    "data": {
+        "action": "leave_tournament"
+    }
+}
+
+function leaveTournament() {
+    WebSocketManager.tournamentSocket.send(JSON.stringify(leave_tournament))
+    // WebSocketManager.closeTournamentSocket();
+    navigateTo("/pong/gamemodes/");
+}
+
+
 
 export function populateTree(tournamentInfos) {
+        let meow = null
+        // const btnsRoom = document.querySelector("#btnsRoom")
+
+        // if (btnsRoom) {
+        //     btnsRoom.innerHTML = `
+        //                 <div id="leave-btn" class="btn btn-intra-outlined">Leave</div>
+        //     `
+        // }
         meow = document.querySelector("#tree")
         if (meow == null) return ;
         meow.innerHTML = '';
         for (const key in tournamentInfos?.scoreboard.rounds) {
             meow.innerHTML += buildRound(tournamentInfos?.scoreboard.rounds[key], key)
         }
+        
+        meow.innerHTML += `<div class="btns d-flex flex-row justify-content-between gap-3 align-items-center mt-3"></div>`
+
+
+        let leaveBtn = document.createElement("div")
+        leaveBtn.innerText = "leave"
+        leaveBtn.classList.add('btn','btn-intra-outlined')
+        leaveBtn.onclick = function() {
+            leaveTournament();
+        }
+
+        let btns = document.querySelector(".btns")
+        btns.appendChild(leaveBtn)
+        console.log(leaveBtn, meow)
         if (tournamentData.gameIsReady) {
-            const parrent = document.querySelector('#tree')
-            console.log("data of tournament join", parrent);
-            if (parrent){
+            // const parrent = document.querySelector('#tree')
+            // console.log("data of tournament join", parrent);
+            // if (parrent){
                 let btn = document.createElement('div')
-                btn.classList.add('btn', 'btn-primary');
+                btn.classList.add('btn', 'intra-btn');
                 btn.innerText = 'Ready';
                 btn.addEventListener('click', ()=>{navigateTo(`/pong/matchmaking/`);})
-                parrent.appendChild(btn)
-            }
+                btns.appendChild(btn)
+            // }
         }
 }
 
@@ -103,6 +143,15 @@ export function populateTree(tournamentInfos) {
 //TOURNAMENT ROOM
 export function populateTournament(tournament_data){
     const max_clients = tournament_data.max_clients
+    const btnsRoom = document.querySelector("#btnsRoom")
+
+    if (btnsRoom) {
+        btnsRoom.innerHTML = `
+                    <div class="btn btn-intra">Invite</div>
+                    <div id="leave-btn" class="btn btn-intra-outlined">Leave</div>
+        `
+    }
+    console.log(tournamentData)
     const clientsInTournament = document.querySelector("#clientsInTournament");
     let clientsDiv = []
     if (clientsInTournament == null) return ;
@@ -121,15 +170,20 @@ export function populateTournament(tournament_data){
             `)
         }
         
+        
         tournament_data?.players_infos?.forEach((player , i)=> {
+            console.log(tournament_data.host , player ,player.id, )
             clientsDiv[i] = `
-            <div class="col p-2">
+            <div class="position-relative col p-2">
             <div class="content border p-3 d-flex justify-content-between align-items-center">
                             <div class="d-flex align-items-center justify-content-center gap-3">
                             <div class="avatarContainer">
-                                    <img src="${player.avatar}" alt="">
-                                    </div>
-                                <div class="nickname ml-3">${ player.nickname }</div>
+                                    <img class="avata" src="${player.avatar}" alt="">
+                            </div>
+                                <div class="position-relative nickname ml-3">
+                                    ${tournament_data.host == player.id ? (`<img class="star" src="/static/img/star.png" alt="">`):''}
+                                    ${ player.nickname }
+                                </div>
                             </div>
 
                             <div class="d-flex justify-content-center align-items-center gap-1 flex-column">
@@ -150,6 +204,7 @@ export function populateTournament(tournament_data){
             clientsInTournament.appendChild(temp.firstChild);
         }
     });
+    addReadyButton(tournamentData.gameIsReady);
 }
 
 ///JOIN TOURNAMENT

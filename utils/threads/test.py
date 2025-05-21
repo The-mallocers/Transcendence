@@ -69,9 +69,7 @@ class MatchmakingThread(Threads):
         # First we check the global queue
         players_queue = self.redis.hgetall(RTables.HASH_G_QUEUE)
         players = [player.decode('utf-8') for player in players_queue]
-        # print("COUCOU JE SUIS SELECT PLAYERS") 
         if len(players) >= 2:  # il faudra ce base sur les mmr
-            # print("COUCOU JE PASSE DANS MATCHMAKING")
             selected_players = players[:2]  # this gets the first 2 players of the list
             random.shuffle(selected_players)
             game.is_duel = False

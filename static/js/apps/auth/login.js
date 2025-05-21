@@ -4,13 +4,12 @@ import {getClientId} from '../../utils/utils.js';
 
 const AUTH_CONFIG = {
     clientId: 'u-s4t2ud-fba0f059cba0019f374c8bf89cb3a81ead9ef0cb218380d9344c21d99d1f9b3e',
-    redirectUri: 'https://localhost:8000/auth/auth42',
+    redirectUri: `https://${window.location.hostname}:8000/auth/auth42`,
     authorizationEndpoint: 'https://api.intra.42.fr/oauth/authorize',
     tokenEndpoint: 'https://api.intra.42.fr/oauth/token',
     userInfoEndpoint: 'https://api.intra.42.fr/v2/me'
 };
 
-console.log("Login has been loaded")
 
 function login(e) {
 
@@ -20,7 +19,6 @@ function login(e) {
     const form = document.querySelector("form");
     const formData = new FormData(form);
     const errorDiv = document.getElementById("error-message")
-    console.log(form.action)
     fetch(form.action, {
         method: "POST",
         body: formData,
@@ -30,13 +28,11 @@ function login(e) {
     })
         .then(async response => {
             if (response.ok) {
-                console.log("trying to navigate to index");
                 navigateTo('/');
             } else if (response.status === 302) {
                 const data = await response.json();
                 navigateTo(data.redirect); //2FA
             } else {
-                console.log("Fetch of login failed");
                 response.json().then(errorData => {
                     errorDiv.textContent = errorData.error || "An error occurred";
                 });
@@ -95,16 +91,12 @@ if (login42Button) {
         //         navigateTo("/")
         //     }
 
-        //     console.log()
         //     // if (document.cookie !== previousCookies) {
-        //     //     // console.log("Cookies changed!");
         //     //     // previousCookies = document.cookie;
         //     //     // // Do something with the new cookies
 
 
         //     // }
-
-        //     // console.log(document.cookie)
         // },3000)
 
         // setTimeout(() => {
@@ -123,7 +115,6 @@ if (login42Button) {
 //Little trick to deal with annoying edge case of logout per invalid jwt token not closing ws
 async function socketCheck() {
     if (await getClientId() == null && WebSocketManager.isSocketOpen(WebSocketManager.notifSocket)) {
-        console.log("Allo");
         WebSocketManager.closeNotifSocket();
     }
 }

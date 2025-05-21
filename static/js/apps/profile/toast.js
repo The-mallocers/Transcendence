@@ -142,6 +142,8 @@ function toast_message(message) {
     toastEl.addEventListener('hidden.bs.toast', function () {
         this.remove();
     });
+
+    return toastEl
 }
 
 function toast_tournament(message, data, itemToDelete) {

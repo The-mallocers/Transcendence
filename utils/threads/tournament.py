@@ -34,9 +34,8 @@ class TournamentThread(Threads):
                 if self._starting():
                     sleep(5)
                 if self._running():
-                    print("Mama mia tournament is over !")
                     break
-                sleep(2)
+                sleep(1)
 
         except Exception as e:
             self._logger.error(traceback.format_exc())
@@ -46,7 +45,6 @@ class TournamentThread(Threads):
             self.stoping()
 
     def cleanup(self):
-        print("IN CLEANUP OF TOURNAMENT")
         for game in self.games:
             if game.rget_status() is GameStatus.WAITING:
                 self.redis.delete(RTables.JSON_GAME(game.code))
@@ -79,6 +77,7 @@ class TournamentThread(Threads):
 
     def _starting(self):
         if self.tournament.status is TournamentStatus.STARTING:
+            send_group(RTables.GROUP_TOURNAMENT(self.tournament.code), EventType.TOURNAMENT, ResponseAction.TOURNAMENT_STARTING)
             random.shuffle(self.tournament.clients)
             player = 0
             for game in self.games[:int(self.tournament.max_clients / 2)]:
@@ -99,7 +98,6 @@ class TournamentThread(Threads):
     def _running(self):
         if self.tournament.status is TournamentStatus.RUNNING:
             if self.get_match_complete() == self.get_total_matches() and self.get_current_round() <= self.rounds:
-                print("Going to next round !")
                 self.set_current_round(self.get_current_round() + 1)
                 self.place_players()
                 timer = 15
@@ -108,12 +106,13 @@ class TournamentThread(Threads):
                                {'timer': timer})
                     sleep(1)
                     timer -= 1
-            elif self.get_current_round() == self.rounds:
-                print("Setting tournament status to Ending !")
+            elif self.get_current_round() == self.rounds and self.games[-1].rget_status() is GameStatus.FINISHED:
+                tournament = Tournaments.get_tournament_by_code(self.tournament.code)
+                tournament.winner = Game.get_game_by_id(self.games[-1].code).winner.client
+                tournament.save()
                 self.set_status(TournamentStatus.ENDING)
                 return True
             else:
-                print("Managing games that just happened !")
                 self.manage_games()
             # todo, il faut que je fasse le systeme de classment, on se base sur le nombre de points marque, si il y a egalite, on se base sur celui
             # qui a perdu le plus tot
@@ -213,9 +212,7 @@ class TournamentThread(Threads):
                 round = self.get_current_round()
                 if self.get(f'scoreboards.rounds.round_{round}.games.r{round}m{m}.game_code')  == game.code:
                     status = GameStatus(self.get(f'scoreboards.rounds.round_{round}.games.r{round}m{m}.status'))
-            print(f"Status of this game is {status}")
             if status is GameStatus.FINISHED:
-                print("Game is finished !, lets increase match completed and del loser")
                 matches_completed = self.get(f'scoreboards.rounds.round_{self.get_current_round()}.matches_completed')
                 self.set(f'scoreboards.rounds.round_{self.get_current_round()}.matches_completed', int(matches_completed) + 1)
                 send_group(RTables.GROUP_TOURNAMENT(self.tournament.code), EventType.TOURNAMENT, ResponseAction.TOURNAMENT_GAME_FINISH, {
@@ -266,7 +263,6 @@ class TournamentThread(Threads):
                     {'id': str(client.id)}
                 )
                 self.del_client(client)
-
 
     # ━━ GETTER / SETTER ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
 

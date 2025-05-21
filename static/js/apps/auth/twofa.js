@@ -1,16 +1,13 @@
 import {navigateTo} from '../../spa/spa.js';
 
-console.log("twoja loaded")
 
 const email = document.getElementById("data-email").getAttribute("email");
 
 async function validateCode() {
     const code = document.getElementById('authCode').value;
     if (code.length === 6 && /^\d+$/.test(code)) {
-        // Here you would typically send the code to your server for validation
         try {
-            console.log(code);
-            const response = await fetch("/api/auth/2facode", { //added api as this is an api call
+            const response = await fetch("/api/auth/2facode", {
                 method: "POST",
                 headers: {
                     'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
@@ -22,14 +19,13 @@ async function validateCode() {
             });
 
             const result = await response.json();
-            console.log(result);
             if (response.status === 200 && result.success) {
                 navigateTo(result.redirect); //make sure to change to redirect
             }
-            // alert('Code submitted: ' + code);
+            else{
+                alert(`${result.message}`)
+            }
         } catch (err) {
-            console.log(err);
-            console.log("coucou");
             navigateTo(result.redirect);
         }
     } else {

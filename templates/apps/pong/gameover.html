@@ -55,50 +55,6 @@
 
 
     /* Delay each child element based on its index */
-    .endState > span:nth-child(1) {
-        animation-delay: calc(0.1s * 1);
-    }
-
-    .endState > span:nth-child(2) {
-        animation-delay: calc(0.1s * 2);
-    }
-
-    .endState > span:nth-child(3) {
-        animation-delay: calc(0.1s * 3);
-    }
-
-    .endState > span:nth-child(4) {
-        animation-delay: calc(0.1s * 4);
-    }
-
-    .endState > span:nth-child(5) {
-        animation-delay: calc(0.1s * 5);
-    }
-
-    .endState > span:nth-child(6) {
-        animation-delay: calc(0.1s * 6);
-    }
-
-    .endState > span:nth-child(7) {
-        animation-delay: calc(0.1s * 7);
-    }
-
-    .endState > span:nth-child(8) {
-        animation-delay: calc(0.1s * 8);
-    }
-
-    .endState > span:nth-child(9) {
-        animation-delay: calc(0.1s * 9);
-    }
-
-    .endState > span:nth-child(10) {
-        animation-delay: calc(0.1s * 10);
-    }
-
-    .gameoverPage .wordEnd:not(:last-child) {
-        margin-right: 2rem;
-    }
-
 
     .gameoverPage .score {
         font-size: 6rem;
@@ -121,6 +77,11 @@
     .gameoverPage .full {
         background-color: aliceblue;
         color: black;
+    }
+
+
+    .gameoverPage .wordEnd {
+        margin-right: 2rem;
     }
 
     /* Second button */
@@ -180,7 +141,7 @@
 
 </style>
 <div class="gameoverPage">
-    <div class="endState">
+    <div id="overMsg" class="endState">
         {{ message }}
     </div>
     <div class="vs">{{ client }} vs {{ opponnent }}</div>
@@ -193,7 +154,10 @@
         <div id="mmr_change" class="score">{{ mmr_change }}</div>
     </div>
     <div class="btns mt-5">
-        {% if found_game.tournament %}
+        {% if is_lost_tourney %}
+        <div class="btn full d-inline" data-route="/pong/matchmaking/">Practice for next tournament</div>
+        <div class="btn outlined d-inline" data-route="/">My profile</div>
+        {% elif found_game.tournament %}
         <div class="btn full d-inline" data-route="/pong/tournament/tree/?tree={{ found_game.tournament.code }}">Go back to tournament</div>
         {% else %}
         <div class="btn full d-inline" data-route="/pong/matchmaking/">Go back in queue</div>

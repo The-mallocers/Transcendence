@@ -1,9 +1,10 @@
 import {navigateTo} from '../../spa/spa.js';
 import {WebSocketManager} from "../../websockets/websockets.js"
+import {remove_toast} from "../profile/toast.js";
+import {toast_message} from "../profile/toast.js";
 
 
 async function delete_account() {
-    console.log("delete_account.js online");
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
     WebSocketManager.closeNotifSocket();
 
@@ -19,12 +20,14 @@ async function delete_account() {
 
         const data = await response.json();
         if (response.status == 302) {
-            console.log(data)
             navigateTo(data.redirect)
-        } else if (!response.ok) {
+        }
+        else if (response.status == 401){
+            remove_toast();
+            toast_message(data.error);
+        }else if (!response.ok) {
             throw new Error('Network response was not ok');
         } else {
-            console.log('Delete successful:', data);
             navigateTo('/auth/login');
         }
     } catch (error) {
@@ -37,5 +40,3 @@ const element = document.querySelector("#delete-btn");
 element?.addEventListener("click", (e) => {
     delete_account(e);
 })
-
-

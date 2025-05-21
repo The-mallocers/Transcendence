@@ -2,6 +2,7 @@ import {WebSocketManager} from "../../websockets/websockets.js";
 import {navigateTo} from '../../spa/spa.js';
 import {isGameOver} from "./VarGame.js";
 import { tournamentData } from "./VarGame.js";
+import { toast_message } from "../profile/toast.js";
 // import { apiFriends } from "../profile/profile.js";
 
 const socket = WebSocketManager.gameSocket;
@@ -40,14 +41,16 @@ let right_last_move = "idle";
 //Si un petit malin va sur la page sans raison
 if (!socket || socket.readyState === WebSocket.CLOSED) {
     navigateTo("/");
+    remove_toast();
+    toast_message("You are being redirected because you are not in any game right now")
 } else {
     tournamentData.gameIsReady = false;
-    console.log(window.GameState);
+    // console.log(window.GameState);
     lusername.innerHTML = window.GameState.left.username;
     rusername.innerHTML = window.GameState.right.username;
-    console.log("WHAT ARE THE URLS:");
-    console.log(window.GameState.left.picture);
-    console.log(window.GameState.right.picture);
+    // console.log("WHAT ARE THE URLS:");
+    // console.log(window.GameState.left.picture);
+    // console.log(window.GameState.right.picture);
     lpicture.src = window.GameState.left.picture;
     rpicture.src = window.GameState.right.picture;
 
@@ -63,10 +66,12 @@ if (!socket || socket.readyState === WebSocket.CLOSED) {
 
         //Attempt at handling errors
         if (jsonData.data.action == "EXCEPTION") {
-            console.log("REDIRECTION BECAUSE EXCEPTION HAPPENED");
+            // console.log("REDIRECTION BECAUSE EXCEPTION HAPPENED");
             isGameOver.gameIsOver = true;
             WebSocketManager.closeGameSocket();
             navigateTo("/");
+            remove_toast();
+            toast_message("something went wrong, you are being redirected")
         }
 
         if (jsonData.data.action == "WAITING_TO_START") {
@@ -82,14 +87,14 @@ if (!socket || socket.readyState === WebSocket.CLOSED) {
             //     last_time = performance.now();
             // }
             if (jsonData.data.action == "PADDLE_LEFT_UPDATE") {
-                console.log("move from server:", jsonData.data.content.move);
+                // console.log("move from server:", jsonData.data.content.move);
                 const current_move = jsonData.data.content.move
                 if (current_move != left_last_move) {
                     window.GameState.left.y = jsonData.data.content.y;
                     left_last_move = current_move;
                 }
             } else if (jsonData.data.action == "PADDLE_RIGHT_UPDATE") {
-                console.log("move from server:", jsonData.data.content.move);
+                // console.log("move from server:", jsonData.data.content.move);
                 const current_move = jsonData.data.content.move
                 if (current_move != right_last_move) {
                     window.GameState.right.y = jsonData.data.content.y
@@ -112,8 +117,9 @@ if (!socket || socket.readyState === WebSocket.CLOSED) {
             }
         } else if (jsonData.event == "ERROR") {
             if (jsonData.data.action == "OPPONENT_LEFT") {
+                const game_id = jsonData.data.content
                 console.log("Opponent Disconnected");
-                navigateTo("/pong/disconnect/");
+                navigateTo(`/pong/disconnect/?game=${game_id}`);
                 isGameOver.gameIsOver = true;
                 WebSocketManager.closeGameSocket();
             }
@@ -202,7 +208,7 @@ function updatePaddles() {
     // (direction && previous_direction != direction) || frameCount % 5 === 0
     if ((direction && previous_direction != direction) || frameCount % 5 === 0) { //Trying to send less updates
         previous_direction = direction;
-        console.log("Sending to server direction :", direction);
+        // console.log("Sending to server direction :", direction);
         const message = {
             "event": "game",
             "data": {

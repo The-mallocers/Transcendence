@@ -25,55 +25,51 @@ class ChatService(BaseServices):
 
 
     async def _handle_create_room(self, data, client: Clients):
-        try:
-            # Retrieve the target client
-            target = await Clients.aget_client_by_id(data['data']['args']['target'])
+        # Retrieve the target client
+        target = await Clients.aget_client_by_id(data['data']['args']['target'])
 
-            # Initial checks (target does not exist or same ID)
+        # Initial checks (target does not exist or same ID)
+        if target is None:
+            target = Clients.aget_client_by_username(data['data']['args']['target'])
             if target is None:
-                target = Clients.aget_client_by_username(data['data']['args']['target'])
-                if target is None:
-                    return await asend_group_error(self.service_group, ResponseError.TARGET_NOT_FOUND)
+                return await asend_group_error(self.service_group, ResponseError.TARGET_NOT_FOUND)
 
-            if client.id == target.id:
-                return await asend_group_error(self.service_group, ResponseError.SAME_ID)
+        if client.id == target.id:
+            return await asend_group_error(self.service_group, ResponseError.SAME_ID)
 
-            # Check for common rooms between admin and target
-            rooms_admin = await Rooms.aget_room_id_by_client_id(client.id)
-            rooms_target = await Rooms.aget_room_id_by_client_id(target.id)
+        # Check for common rooms between admin and target
+        rooms_admin = await Rooms.aget_room_id_by_client_id(client.id)
+        rooms_target = await Rooms.aget_room_id_by_client_id(target.id)
 
-            common_rooms = set(rooms_admin) & set(rooms_target)  # Optimized set intersection
+        common_rooms = set(rooms_admin) & set(rooms_target)  # Optimized set intersection
 
-            if common_rooms:
-                # Use an existing common room
-                room = await Rooms.get_room_by_id(next(iter(common_rooms)))
-            else:
-                # Create a new room if no common room is found
-                room = await Rooms.create_room()
-                room.admin = client
-                await room.asave()
-                await room.add_client(client)
-                await room.add_client(target)
+        if common_rooms:
+            # Use an existing common room
+            room = await Rooms.get_room_by_id(next(iter(common_rooms)))
+        else:
+            # Create a new room if no common room is found
+            room = await Rooms.create_room()
+            room.admin = client
+            await room.asave()
+            await room.add_client(client)
+            await room.add_client(target)
 
-            room_id = str(await Rooms.get_id(room))  # Store the value to avoid redundant async calls
+        room_id = str(await Rooms.get_id(room))  # Store the value to avoid redundant async calls
 
-            # Add both admin and target to the chat group
-            await self.channel_layer.group_add(RTables.GROUP_CHAT(room_id), self.channel_name.decode('utf-8'))
+        # Add both admin and target to the chat group
+        await self.channel_layer.group_add(RTables.GROUP_CHAT(room_id), self.channel_name.decode('utf-8'))
 
-            target_channel_name = await self.redis.hget(name=RTables.HASH_CLIENT(target.id), key=str(EventType.CHAT.value))
-            if target_channel_name:
-                await self.channel_layer.group_add(RTables.GROUP_CHAT(room_id), target_channel_name.decode('utf-8'))
+        target_channel_name = await self.redis.hget(name=RTables.HASH_CLIENT(target.id), key=str(EventType.CHAT.value))
+        if target_channel_name:
+            await self.channel_layer.group_add(RTables.GROUP_CHAT(room_id), target_channel_name.decode('utf-8'))
 
-            # Notify the admin that the room was created
-            await asend_group(self.service_group, EventType.CHAT, ResponseAction.ROOM_CREATED, {'room_id': room_id})
-        except json.JSONDecodeError as e:
-            self._logger.error(f"JSON parsing error: {e}")
+        # Notify the admin that the room was created
+        await asend_group(self.service_group, EventType.CHAT, ResponseAction.ROOM_CREATED, {'room_id': room_id})
 
     async def _handle_send_message(self, data, client: Clients):
         try:
             # Validate request structure
             args = data.get('data', {}).get('args', {})
-            print(args)
             message, room_id = args.get('message'), args.get('room_id')
 
             if not message or not room_id:
@@ -121,10 +117,8 @@ class ChatService(BaseServices):
             })
 
         except ServiceError as e:
-            self._logger.error(f"Service error: {e}")
             await asend_group_error(self.service_group, ResponseError.JSON_ERROR)
         except json.JSONDecodeError as e:
-            self._logger.error(f"JSON parsing error: {e}")
             await asend_group_error(self.service_group, ResponseError.JSON_ERROR)
 
     async def _handle_get_history(self, data, client: Clients):
@@ -192,7 +186,6 @@ class ChatService(BaseServices):
         return await asend_group(self.service_group, EventType.CHAT, ResponseAction.PONG)
 
     async def disconnect(self, client):
-        print("In disconnect of chat")
         await self.channel_layer.group_discard(RTables.GROUP_CHAT(uuid_global_room), self.channel_name)
         rooms = await Rooms.aget_room_id_by_client_id(client.id)
         for room in rooms:

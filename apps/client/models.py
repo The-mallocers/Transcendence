@@ -96,7 +96,7 @@ class Clients(models.Model):
 
     @staticmethod
     @sync_to_async
-    def aget_client_by_id(id: uuid.UUID):
+    def aget_client_by_id(id: uuid.UUID) -> 'Clients':
         try:
             with transaction.atomic():
                 return Clients.objects.get(id=id)
@@ -311,8 +311,7 @@ class Clients(models.Model):
                 result = []
                 for client in clients:
                     rank = client.get_rank(client.stats.mmr).value
-                    # print(f"rank is {rank}")
-                    
+
                     info = {
                         "id": str(client.id),
                         "nickname": client.profile.username,
@@ -333,5 +332,4 @@ class Clients(models.Model):
                 is_blocked = self.blocked_users.filter(id=user_id).exists()
                 return is_blocked
         except Exception as e:
-            print(f"Error checking blocked status: {e}")
             return False

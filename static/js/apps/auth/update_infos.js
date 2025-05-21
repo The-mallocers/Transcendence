@@ -34,7 +34,6 @@ async function update() {
         });
 
         const data = await response.json();
-        console.log(data)
         if (response.ok) {
             error.textContent = "Informations updated succesfully";
             updateFrontInformation();
@@ -45,8 +44,6 @@ async function update() {
             handleErrorFront(data);
         }
     } catch (e) {
-        console.log("Error with the fetch operation");
-        console.log(e);
         error.textContent = "Error updating";
         error.style.color = "red";
     }
@@ -68,4 +65,3 @@ function updateFrontInformation() {
         document.getElementById('curremail').innerHTML = `Current Email: ${email}`;
     }
 }
-

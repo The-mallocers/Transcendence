@@ -34,6 +34,7 @@ nav {
     /* padding: 15px; */
     height: 3rem;
     width: 3rem;
+    cursor: pointer;
 }
 
 .navElement:not(:first-child) {
@@ -121,6 +122,12 @@ main {
     z-index: 2; /* Ensure it appears above other elements */
 }
 
+
+.intra-btn {
+    background-color: #00babc;
+    color: white;
+    margin: 0 auto;
+}
 .avatar {
     position: absolute;
     left: 5%;
@@ -284,6 +291,7 @@ main {
 }
 
 .lastGames .nickname {
+    font-weight: bold;
 }
 
 .lastGames .time {
@@ -293,6 +301,16 @@ main {
 .scores {
     font-size: 1.5rem;
     font-weight: bold;
+}
+
+.mmr {
+    justify-content: center;
+    color:#ffffff;
+}
+
+.mmr_profile {
+    justify-content: center;
+    color:#0a0909;
 }
 
 .myScore {

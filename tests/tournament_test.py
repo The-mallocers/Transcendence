@@ -53,8 +53,6 @@ def run_docker_command(command):
         )
         return result.stdout.strip()
     except subprocess.CalledProcessError as e:
-        print(f"Error executing command: {e}")
-        print(f"Error output: {e.stderr}")
         return None
 
 

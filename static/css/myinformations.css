@@ -176,52 +176,57 @@ ul.friends_group .list-group-item{
 }
 
 /* in myinformations.html */
+
 .title-personal-info{
     color: #2c2c34;
     font-family: "futura-pt", "Helvetica", "Sans serif";
     font-weight: bold;
 }
 
-#upload-img-btn {
-    font-weight: bold;
-    width: 30%;
-    display: inline-block;
-    text-align: center;
-    box-sizing: border-box;
-    margin-right: auto;
+#delete-btn, #logout-btn{
+    color: #fff;
+    background-color: #ce3a49;
+    border-color: #ce3a49;
 }
 
-#logout-btn, #delete-btn {
-    font-weight: bold;
-    width: 20%;
-    display: inline-block;
-    text-align: center;
-    box-sizing: border-box;
-    margin-left: auto;
-    background-color: #c0392b;
-    color: white;
-    padding: 1rem;
-    border-radius: 8px;
-    font-size: 1.1rem;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    transition: background-color 0.2s ease, transform 0.1s ease;
-    cursor: pointer;
-}
-
-#logout-btn:hover, #delete-btn:hover {
-    background-color: #161216;
-    transform: scale(1.03);
-}
-
-#update-btn {
-    font-weight: bold;
-    width: 30%;
-    display: inline-block;
-    text-align: center;
-    box-sizing: border-box;
-    margin-right: auto;
+#delete-btn:hover, #logout-btn:hover{
+    background-color: #D8636F;
+    border-color: #d8636f;
 }
 
 #profile_picture {
     margin-right: auto;
+}
+
+label{
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.form-control {
+    display: block;
+    width: 100%;
+    height: 36px;
+    padding: 6px 12px;
+    font-size: 16px;
+    line-height: 1.428571429;
+    color: #555555;
+    background-color: #fff;
+    background-image: none;
+    border: 1px solid #ccc;
+    border-radius: 1px;
+    box-shadow: inset 0 1px 1px rgba(0,0,0,0.075);
+    transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+    margin-bottom: 10px;
+}
+.row-information{
+    height: 46vh;
+}
+
+.box-top{
+    height: 40vh;
+}
+
+.box-bottom{
+    height: 45vh;
 }

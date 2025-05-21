@@ -99,7 +99,6 @@ class GameRuntime:
 
         #Update le JSON du tournoi.
         if self.tournament:
-            print("bonjour je vais update le nom des joueurs !")
             from utils.threads.tournament import TournamentThread
             TournamentThread.set_game_players_name(self.tournament.code, self.code, self.pL, self.pR, self.redis)
 
@@ -129,10 +128,11 @@ class GameRuntime:
             if self.tournament is not None:
                 from utils.threads.tournament import TournamentThread
                 TournamentThread.set_game_status(self.tournament.code, self.code, status, self.redis)
-                #Send back to the client that an update happened, so they can ask for the new state.
-                print("Sending back that i updated tournament state")
                 send_group(RTables.GROUP_TOURNAMENT(self.tournament.code), EventType.TOURNAMENT, ResponseAction.TOURNAMENT_UPDATE)
-            self.redis.json().set(self.game_key, Path('status'), status)
+            try:
+                self.redis.json().set(self.game_key, Path('status'), status)
+            except Exception as e:
+                pass
 
     # ── Getter ────────────────────────────────────────────────────────────────────── #
 

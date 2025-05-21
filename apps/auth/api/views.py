@@ -9,8 +9,9 @@ from rest_framework.views import APIView
 from apps.auth.models import Password
 from apps.client.models import Clients
 from apps.profile.models import Profile
-from utils.enums import JWTType
+from utils.enums import JWTType, RTables
 from utils.jwt.JWT import JWT
+from utils.redis import RedisConnectionPool
 from utils.serializers.auth import PasswordSerializer
 from utils.serializers.client import ClientSerializer
 from utils.serializers.permissions.auth import PasswordPermission
@@ -55,17 +56,16 @@ class RegisterApiView(APIView):
                 client = serializer.save()  # this can fail so we added a catch
                 logger.info(f'Client create successfully: {client}')
                 response = Response(ClientSerializer(client).data, status=status.HTTP_201_CREATED)
-                JWT(client, JWTType.ACCESS).set_cookie(response)  # vous aviez raison la team c'est mieux
-                JWT(client, JWTType.REFRESH).set_cookie(response)
+                JWT(client, JWTType.ACCESS, request).set_cookie(response)  # vous aviez raison la team c'est mieux
+                JWT(client, JWTType.REFRESH, request).set_cookie(response)
                 return response
             except Exception as e:
                 import traceback
-                print("\n\nException during save:", str(e))
                 logging.getLogger('MainThread').error(traceback.format_exc())
                 return Response({"error": str(e)},
                                 status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         else:
-            print("Validation errors:", serializer.errors)
+            logging.getLogger('MainThread').error(serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -112,9 +112,7 @@ class LoginApiView(APIView):
         email = request.POST.get('email')
         pwd = request.POST.get('password')
         client = Clients.get_client_by_email(email)
-        print("client: ", client)
         if client is None or client.password.check_pwd(password=pwd) is False:
-            print("error login", pwd)
             return Response({
                 "error": "Invalid credentials"
             }, status=status.HTTP_401_UNAUTHORIZED)
@@ -135,8 +133,8 @@ class LoginApiView(APIView):
                 response = Response({
                     'message': 'Login successful'
                 }, status=status.HTTP_200_OK)
-                JWT(client, JWTType.ACCESS).set_cookie(response)
-                JWT(client, JWTType.REFRESH).set_cookie(response)
+                JWT(client, JWTType.ACCESS, request).set_cookie(response)
+                JWT(client, JWTType.REFRESH, request).set_cookie(response)
             return response
 
 
@@ -154,8 +152,8 @@ class LogoutApiView(APIView):
             try:
                 JWT.extract_token(request, JWTType.REFRESH).invalidate_token()
             except Exception as e:
-                print("Couldnt invalidate the token, it was probably either deleted or modified")
-                print(f"error is {str(e)}")
+                logging.getLogger('MainThread').error("Couldnt invalidate the token, it was probably either deleted or modified")
+                logging.getLogger('MainThread').error(str(e))
             return response
         else:
             return Response({
@@ -195,7 +193,6 @@ from django.core.files.base import ContentFile
 
 def get_qrcode(user):
     # create a qrcode and convert it
-    print("first_name: " + user.profile.username + " creating qrcode")
     if not user.twoFa.qrcode:
         uri = pyotp.totp.TOTP(user.twoFa.key).provisioning_uri(name=user.profile.username,
                                                                issuer_name="Transcendance_" + str(
@@ -235,10 +232,13 @@ def post_twofa_code(req):
             if not client.twoFa.scanned:
                 client.twoFa.update("scanned", True)
             response = formulate_json_response(True, 200, "Login Successful", "/")
-            JWT(client, JWTType.ACCESS).set_cookie(response)
-            JWT(client, JWTType.REFRESH).set_cookie(response)
+            JWT(client, JWTType.ACCESS, req).set_cookie(response)
+            JWT(client, JWTType.REFRESH, req).set_cookie(response)
             return response
-    response = formulate_json_response(False, 400, "No email match this request", "/auth/login")
+        else:
+            response = formulate_json_response(False, 400, "Invalid Code", "/auth/login")
+    else:
+        response = formulate_json_response(False, 400, "No email match this request", "/auth/login")
     return response
 
 
@@ -264,7 +264,6 @@ class GetClientIDApiView(APIView):
 
 class UploadPictureApiView(APIView):
     def post(self, request: HttpRequest, *args, **kwargs):
-        print("Its getting here !")
         try:
             client = Clients.get_client_by_request(request)
             profile = client.profile
@@ -298,9 +297,13 @@ class DeleteApiView(APIView):
             try:
                 JWT.extract_token(request, JWTType.REFRESH).invalidate_token()
             except Exception as e:
-                print("Couldnt invalidate the token, it was probably either deleted or modified")
-                print(f"error is {str(e)}")
+                logging.getLogger('MainThread').error(str(e))
+            redis = RedisConnectionPool.get_sync_connection('api')
             client = Clients.get_client_by_request(request)
+            if redis.hexists(RTables.HASH_MATCHES, str(client.id)):
+                return Response({
+                    "error": "You are currently in a match, please end it before deleting your account"
+                }, status=status.HTTP_401_UNAUTHORIZED)
             client.delete()
             return response
         else:
