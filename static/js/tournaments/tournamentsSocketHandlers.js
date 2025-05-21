@@ -37,9 +37,11 @@ export function setUpTournamentSocket (tournamentSocket) {
                 break;
             case "TOURNAMENT_PLAYER_LEFT" :
                 tournamentSocket.send(JSON.stringify(get_tournament_info));
+                remove_toast();
+                toast_message("Tournament Start ! Good luck and have fun");
                 break;
             case "TOURNAMENT_GAME_FINISH":
-                if (isPlayerIngame(jsonData.data.content) == false) return;
+                // if (isPlayerIngame(jsonData.data.content) == false) return;
                 //I think the game might already be over by that point.
                 // isGameOver.gameIsOver = true;
                 // WebSocketManager.closeGameSocket();
@@ -69,7 +71,9 @@ export function setUpTournamentSocket (tournamentSocket) {
             case "TOURNAMENT_PLAYER_JOIN":
                 tournamentSocket.send(JSON.stringify(get_tournament_info));
                 break;
-                
+            case "TOURNAMENT_STARTING":
+                navigateTo("/pong/tournament/tree/");
+                break;
             case "TOURNAMENT_GAME_READY":
                 remove_toast();
                 let toast = toast_message("your tournament game is ready")
