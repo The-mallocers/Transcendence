@@ -15,7 +15,8 @@ function endStateThingy() {
     word.split("").forEach((letter, letterIndex, arr) => {
         const mySpan = document.createElement("span");
 
-        if (letterIndex === arr.length - 1) {
+        // console.log(letterIndex , arr.length - 1)
+        if ((letterIndex == arr.length - 1)) {
             mySpan.classList.add("wordEnd");
         }
 

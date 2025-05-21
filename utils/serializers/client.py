@@ -60,6 +60,7 @@ class ClientSerializer(serializers.ModelSerializer):
             # # Optional: remove passwordcheck
             password_data.pop('passwordcheck', None)
             if bcrypt.checkpw(password_data['password'].encode('utf-8'), instance.password.password.encode('utf-8')):
+                print('gigaAZebi')
                 raise serializers.ValidationError("New password must be different from the old password.")
             for attr, value in password_data.items():
                 setattr(instance.password, attr, value)

@@ -99,7 +99,7 @@ def auth42(request):
             client = serializer.save()
     response = formulate_json_response(True, 302, "Login Successful", "/")
 
-    response.set_cookie("oauthToken", access_token)
+    # response.set_cookie("oauthToken", access_token)
     JWT(client, JWTType.ACCESS, request).set_cookie(response)
     JWT(client, JWTType.REFRESH, request).set_cookie(response)
 

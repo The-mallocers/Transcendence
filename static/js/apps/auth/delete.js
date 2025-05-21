@@ -1,5 +1,7 @@
 import {navigateTo} from '../../spa/spa.js';
 import {WebSocketManager} from "../../websockets/websockets.js"
+import {remove_toast} from "../profile/toast.js";
+import {toast_message} from "../profile/toast.js";
 
 
 async function delete_account() {
@@ -19,7 +21,11 @@ async function delete_account() {
         const data = await response.json();
         if (response.status == 302) {
             navigateTo(data.redirect)
-        } else if (!response.ok) {
+        }
+        else if (response.status == 401){
+            remove_toast();
+            toast_message(data.error);
+        }else if (!response.ok) {
             throw new Error('Network response was not ok');
         } else {
             navigateTo('/auth/login');

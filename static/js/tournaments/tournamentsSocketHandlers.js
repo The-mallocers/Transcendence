@@ -4,7 +4,7 @@ import { populateJoinTournament } from "./populateHelpers.js";
 import { populateTree } from "./populateHelpers.js";
 import { isGameOver } from "../apps/game/VarGame.js";
 import { tournamentData } from "../apps/game/VarGame.js";
-import { remove_toast, toast_message } from "../apps/profile/toast.js";
+import { remove_toast, toast_message, toast_tournament } from "../apps/profile/toast.js";
 
 // import { toast_message } from "../profile/toast.js";
 // import { remove_toast } from "../profile/toast.js";
@@ -18,9 +18,9 @@ const get_tournament_info = {
 export function setUpTournamentSocket (tournamentSocket) {
     tournamentSocket.onmessage = (message) => {
         const jsonData = JSON.parse(message.data);
-        // console.log("Tournament socket message", jsonData.data);
-        // console.log("The event is:", jsonData.event);
-        // console.log({"MEOW" : jsonData});
+        console.log("Tournament socket message", jsonData.data);
+        console.log("The event is:", jsonData.event);
+        console.log({"MEOW" : jsonData});
         if (jsonData.event != "TOURNAMENT" && jsonData.event != "ERROR") return;
         const action = jsonData.data.action;   
         // console.log("action : ", action)
@@ -28,18 +28,23 @@ export function setUpTournamentSocket (tournamentSocket) {
 
             case "HOST_LEAVE":
             case "NOT_IN_TOURNAMENT":
+            case "TOURNAMENT_NOT_EXIST":
             case "ERROR":
                 // console.log("Error message: ", jsonData.data.error)
-                remove_toast()
-                toast_message(jsonData.data.error || jsonData.data.content )
-                navigateTo("/pong/gamemodes/");
+                const path = window.location.pathname;
+                if (path == "/pong/tournament/tree/" || path == "/pong/tournament/") {
+                    remove_toast();
+                    toast_message(jsonData.data.error || jsonData.data.content )
+                    navigateTo("/pong/gamemodes/");
+                }
                 // errDiv.innerHTML = jsonData.data.error
                 break;
             case "TOURNAMENT_PLAYER_LEFT" :
                 tournamentSocket.send(JSON.stringify(get_tournament_info));
+                remove_toast();
                 break;
             case "TOURNAMENT_GAME_FINISH":
-                if (isPlayerIngame(jsonData.data.content) == false) return;
+                // if (isPlayerIngame(jsonData.data.content) == false) return;
                 //I think the game might already be over by that point.
                 // isGameOver.gameIsOver = true;
                 // WebSocketManager.closeGameSocket();
@@ -58,6 +63,7 @@ export function setUpTournamentSocket (tournamentSocket) {
                 
             case "TOURNAMENT_INFO":
                 const tournament_data = jsonData.data.content;
+                if (tournament_data.game_ready) tournamentData.gameIsReady = true;
                 if (window.location.pathname == "/pong/tournament/tree/") {
                     populateTree(tournament_data);
                 } else {
@@ -68,7 +74,9 @@ export function setUpTournamentSocket (tournamentSocket) {
             case "TOURNAMENT_PLAYER_JOIN":
                 tournamentSocket.send(JSON.stringify(get_tournament_info));
                 break;
-                
+            case "TOURNAMENT_STARTING":
+                navigateTo("/pong/tournament/tree/");
+                break;
             case "TOURNAMENT_GAME_READY":
                 remove_toast();
                 let toast = toast_message("your tournament game is ready")
@@ -82,16 +90,7 @@ export function setUpTournamentSocket (tournamentSocket) {
                 tournamentData.gameIsReady = true;
                 // console.log("ALLO JE VAIS REJOUER OUUAIS");
                 // navigateTo("/pong/matchmaking/");
-                console.log(document.location.pathname)
-                const parrent = document.querySelector(document.location.pathname.includes('tree') ?  '#tree': "#btnsRoom")
-                // console.log("data of tournament join", parrent);
-                if (parrent) {
-                    let btn = document.createElement('div')
-                    btn.classList.add('btn', 'btn-primary');
-                    btn.innerText = 'Ready';
-                    btn.addEventListener('click', ()=>{navigateTo(`/pong/matchmaking/`);})
-                    parrent.appendChild(btn)
-                }
+                tournamentSocket.send(JSON.stringify(get_tournament_info));
                 break;
                 
             case "TOURNAMENT_UPDATE":
@@ -104,6 +103,14 @@ export function setUpTournamentSocket (tournamentSocket) {
                 navigateTo(`/pong/tournament/?code=${jsonData.data.content.code}`);
                 break;
                 
+            case "TOURNAMENT_INVITATION_SENT":
+                console.log(`Invitation sent to ${jsonData.data.content.target_name}`);
+                break;
+                
+            case "TOURNAMENT_PLAYER_LEFT" :
+                tournamentSocket.send(JSON.stringify(get_tournament_info));
+                break;
+
             default:
                 break;
         }

@@ -26,6 +26,7 @@ if (pathname == "/pong/gamemodes/") {
         duelFriends.appendChild(friendElement);
     });
 }
+
 window.choose_duel_friend = function(){
     const friendSelectionModal = new bootstrap.Modal(document.querySelector('#friendSelectionModal'));
     friendSelectionModal.show();

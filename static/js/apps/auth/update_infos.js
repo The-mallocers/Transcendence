@@ -56,12 +56,14 @@ element.addEventListener("click", (e) => {
 })
 
 function updateFrontInformation() {
+    
     const username = document.getElementById('username').value;
     const email = document.getElementById('email').value;
+
     if (username) {
-        document.getElementById('currusername').innerHTML = `Current Username: ${username}`;
+        document.getElementById('currusername').value = `${username}`;
     }
     if (email) {
-        document.getElementById('curremail').innerHTML = `Current Email: ${email}`;
+        document.getElementById('curremail').value = `${email}`;
     }
 }

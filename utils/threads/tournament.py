@@ -35,7 +35,7 @@ class TournamentThread(Threads):
                     sleep(5)
                 if self._running():
                     break
-                sleep(1)
+                sleep(0.3)
 
         except Exception as e:
             self._logger.error(traceback.format_exc())
@@ -77,6 +77,7 @@ class TournamentThread(Threads):
 
     def _starting(self):
         if self.tournament.status is TournamentStatus.STARTING:
+            send_group(RTables.GROUP_TOURNAMENT(self.tournament.code), EventType.TOURNAMENT, ResponseAction.TOURNAMENT_STARTING)
             random.shuffle(self.tournament.clients)
             player = 0
             for game in self.games[:int(self.tournament.max_clients / 2)]:
@@ -223,6 +224,8 @@ class TournamentThread(Threads):
                 send_group(RTables.GROUP_TOURNAMENT(game.loser.client.id), EventType.TOURNAMENT, ResponseAction.TOURNAMENT_LOSE_GAME)
                 #TODO envoyer a quel place on a fini
                 self.del_client(game.loser.client)
+                #ENLEVER DE LA QUEUE ICI TFREYDIE
+                self.redis.hdel(RTables.HASH_TOURNAMENT_QUEUE(self.tournament.code), str(game.loser.client.id))
                 self.games.remove(game)
                 break
 

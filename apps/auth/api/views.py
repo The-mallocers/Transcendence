@@ -1,6 +1,8 @@
 import random
 
-from django.forms import ValidationError
+# from django.forms import ValidationError
+from rest_framework.exceptions import ValidationError
+
 from django.http import HttpRequest
 from rest_framework import status
 from rest_framework.response import Response
@@ -10,8 +12,10 @@ from apps.auth.models import Password
 from apps.client.models import Clients
 from apps.profile.models import Profile
 from apps.auth.models import TwoFA
-from utils.enums import JWTType
+from utils import serializers
+from utils.enums import JWTType, RTables
 from utils.jwt.JWT import JWT
+from utils.redis import RedisConnectionPool
 from utils.serializers.auth import PasswordSerializer
 from utils.serializers.client import ClientSerializer
 from utils.serializers.permissions.auth import PasswordPermission
@@ -99,9 +103,9 @@ class UpdateApiView(APIView):
                 return Response({"message": "Infos updated succesfully"}, status=status.HTTP_200_OK)
             else:
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        except ValidationError as e:
+        except (ValidationError) as e:
             return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
+        except Exception as e: 
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR) 
 
 
@@ -349,7 +353,17 @@ class DeleteApiView(APIView):
                 JWT.extract_token(request, JWTType.REFRESH).invalidate_token()
             except Exception as e:
                 logging.getLogger('MainThread').error(str(e))
+            redis = RedisConnectionPool.get_sync_connection('api')
             client = Clients.get_client_by_request(request)
+            if (redis.hexists(RTables.HASH_MATCHES, str(client.id))):
+                return Response({
+                    "error": "You are currently in a match, please leave it before deleting your account"
+                }, status=status.HTTP_401_UNAUTHORIZED)
+            for key in redis.scan_iter("queue_tournament_*"):
+                if redis.hexists(key, str(client.id)):
+                    return Response({
+                        "error": "You are currently in a tournament, please end it before deleting your account"
+                    }, status=status.HTTP_401_UNAUTHORIZED)
             client.delete()
             return response
         else:
