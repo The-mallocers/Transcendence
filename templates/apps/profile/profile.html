@@ -109,9 +109,10 @@
         </div>
     </div>
 </div>
-<!-- <div id="friends" data-friends={{ friends_online_status|json_script:"friends-data" }} style="display: none;"></div> -->
 {{ friends_online_status|json_script:"friends-data" }}
-{{ pending_tournament_invitations|json_script:"pending-tournament-data" }}
+
+<!-- Fix the JSON format of tournament invitations -->
+{{ pending_tournament_invitations|json_script:"pending-tournament-invitations-data" }}
 
 <script type="module" src="{% static '/js/apps/profile/profile.js' %}" defer></script>
 {% comment %} <script type="module" src="{% static '/js/apps/profile/profile.js' %}?v={% now 'U' %}" defer></script> {% endcomment %}

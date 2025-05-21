@@ -137,22 +137,17 @@ def get_pending_tournament_invitations(client):
     try:
         redis = RedisConnectionPool.get_sync_connection("Tournament_pending")
         
-        # Pattern to match all tournament invitations for this client
         invitation_pattern = f"{RTables.HASH_TOURNAMENT_INVITATION}:*:{client.id}"
         keys = redis.keys(invitation_pattern)
         
         for key in keys:
             try:
-                # Get invitation data
                 invitation_data = redis.hgetall(key)
                 if invitation_data and b'status' in invitation_data and invitation_data[b'status'] == b'pending':
-                    # Parse the tournament code from the key
                     tournament_code = key.decode('utf-8').split(':')[1]
                     
-                    # Get tournament information
                     tournament_info = redis.json().get(RTables.JSON_TOURNAMENT(tournament_code))
                     
-                    # Get inviter information
                     inviter_id = invitation_data[b'inviter_id'].decode('utf-8')
                     inviter = Clients.get_client_by_id(uuid.UUID(inviter_id))
                     
