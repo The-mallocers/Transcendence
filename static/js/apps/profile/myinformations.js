@@ -1,4 +1,6 @@
 console.log("in the myinformations file");
+import {navigateTo} from "../../spa/spa.js";
+
 
 window.switchToggle = async function switchToggle(e) {
     e.dataset.status = (e.dataset.status === 'on' ? 'off' : 'on');
@@ -28,7 +30,7 @@ window.switchToggle = async function switchToggle(e) {
             console.log(res.image);
             create_modal(res);
         }
-        console.log(response);
+        console.log(res.message);
     }
 }
 
@@ -56,7 +58,7 @@ function create_modal(res){
                             pattern="[0-9]{6}"
                             required>
                         <br>
-                        <button class="type-intra-green verify-code" type="submit">Verify Code</button>
+                        <button class="type-intra-green verify-code" type="button" id="verifyCodeBtn">Verify Code</button>
                     </form>
                 </div>
             </div>
@@ -66,9 +68,19 @@ function create_modal(res){
     const modalElement = doc.body.firstChild;
     document.body.appendChild(modalElement);
 
-    document.getElementById("twoFactorForm").addEventListener("submit", function(event) {
-        event.preventDefault();
-        validateCode();
+    const button = document.getElementById("verifyCodeBtn");
+    console.log(button)
+    if(button){
+        // document.getElementById("twoFactorForm").addEventListener("submit", function(event) {
+        //     event.preventDefault();
+        //     validateCode();
+        // });
+        button.addEventListener("click", handleVerifyClick);
+    }
+
+    document.getElementById('twoFactorModal').addEventListener('hidden.bs.modal', function () {
+        console.log("removing modal");
+        removeExistingModal();
     });
 
     const modal = new bootstrap.Modal(document.getElementById('twoFactorModal'));
@@ -86,21 +98,58 @@ async function validateCode() {
                 },
                 body: JSON.stringify({
                     code: code,
-                    email: email
                 }),
             });
 
             const result = await response.json();
+            console.log(result);
+            console.log(result.message);
             if (response.status === 200 && result.success) {
-                navigateTo(result.redirect); //make sure to change to redirect
+                alert("2fa successfully implemented");
+                hide_modal();
             }
             else{
                 alert(`${result.message}`)
+                const input = document.getElementById('authCode');
+                if (input)
+                    input.value = "";
             }
         } catch (err) {
-            navigateTo(result.redirect);
+            alert(`${err.message}`)
+            console.log("erreur ", err);
+            hide_modal();
         }
     } else {
         alert('Please enter a valid 6-digit code');
     }
+}
+
+function removeExistingModal() {
+    const existingModal = document.getElementById('twoFactorModal');
+    if (existingModal) {
+        const verifyButton = document.getElementById('verifyCodeBtn');
+        if (verifyButton) {
+            verifyButton.removeEventListener('click', handleVerifyClick);
+        }
+        
+        const modalInstance = bootstrap.Modal.getInstance(existingModal);
+        if (modalInstance) {
+            modalInstance.dispose();
+        }
+        existingModal.remove();
+    }
+}
+
+function handleVerifyClick(event) {
+    console.log("Button clicked");
+    validateCode();
+}
+
+function hide_modal(){
+    const input = document.getElementById('authCode');
+    if (input)
+        input.value = "";
+    const modal = bootstrap.Modal.getInstance(document.getElementById('twoFactorModal'));
+    if(modal)
+        modal.hide();
 }

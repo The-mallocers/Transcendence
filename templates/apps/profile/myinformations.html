@@ -56,19 +56,19 @@
                     <h4>Update Personal informations</h4>
                     <form id="register-form" method="PUT" action="{% url 'update' %}" enctype="multipart/form-data">
                         <div id="error-message" style="color: red;"></div>
-                        <div class="">
+                        <div>
                             <label class="control-label username optional">Username</label>
                             <input class="form-control string optional" id="username" name="username" type="text" placeholder={{client.profile.username}} required>
                         </div>
-                        <div class="">
+                        <div>
                             <label class="control-label email optional">Email</label>
                             <input class="form-control string optional" id="email" type="email" name="email" placeholder={{client.profile.email}} required>
                         </div>
-                        <div class="">
+                        <div>
                             <label class="control-label password optional">Password</label>
                             <input class="form-control string optional" id="password" type="password" name="password" required>
                         </div>
-                        <div class="">
+                        <div>
                             <label class="control-label email optional">Verify password</label>
                             <input class="form-control string optional" id="password_check" type="password" name="password_check" required>
                         </div>
