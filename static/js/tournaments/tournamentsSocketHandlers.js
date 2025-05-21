@@ -125,16 +125,3 @@ function isPlayerIngame(data) {
     return false;
 }
 
-export function addReadyButton(isGameReady) {
-    if (isGameReady == false) return
-
-    console.log(isGameReady)
-    const parrent = document.querySelector(document.location.pathname.includes('tree') ?  '#tree': "#btnsRoom")
-    if (parrent) {
-        let btn = document.createElement('div')
-        btn.classList.add('btn', 'btn-primary');
-        btn.innerText = 'Ready';
-        btn.addEventListener('click', ()=>{navigateTo(`/pong/matchmaking/`);})
-        parrent.appendChild(btn)
-    }
-}

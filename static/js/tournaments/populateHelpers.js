@@ -1,10 +1,10 @@
 import { tournamentData } from "../apps/game/VarGame.js"
 import { navigateTo } from "../spa/spa.js"  
-import { addReadyButton } from "./tournamentsSocketHandlers.js"
-// import { leaveTournament } from "./tournamentRoom.js"
+
+
 
 import { WebSocketManager } from "../websockets/websockets.js"
-// import { WebSocketManager } from ""
+
 
 //Build TREE
 const buildTr = (matchInfos) => {
@@ -215,7 +215,7 @@ export function populateTournament(tournament_data){
             clientsInTournament.appendChild(temp.firstChild);
         }
     });
-    addReadyButton(tournamentData.gameIsReady);
+
 }
 
 ///JOIN TOURNAMENT
