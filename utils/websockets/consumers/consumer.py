@@ -86,4 +86,9 @@ class WsConsumer(AsyncWebsocketConsumer):
     async def send_channel(self, event):
         message = event['message']
         close = event['close']
-        await self.send(text_data=json.dumps(message, ensure_ascii=False), close=bool(close))
+        try:
+            await self.send(text_data=json.dumps(message, ensure_ascii=False), close=bool(close))
+        except RuntimeError:
+        # La socket est fermée
+            print("esquiveeee")
+            pass
