@@ -52,8 +52,9 @@ class GameThread(Threads):
         player_left = self.redis.hget(RTables.HASH_CLIENT(self.game.pL.client.id), EventType.GAME.value)
         player_right = self.redis.hget(RTables.HASH_CLIENT(self.game.pR.client.id), EventType.GAME.value)
         if player_left is None or player_right is None:
-            send_group_error(RTables.GROUP_GAME(self.game.pR.client.id), ResponseError.OPPONENT_LEFT, self.game.code)
-            send_group_error(RTables.GROUP_GAME(self.game.pL.client.id), ResponseError.OPPONENT_LEFT, self.game.code)
+            self.disconnect = True
+            # send_group_error(RTables.GROUP_GAME(self.game.pR.client.id), ResponseError.OPPONENT_LEFT, self.game.code)
+            # send_group_error(RTables.GROUP_GAME(self.game.pL.client.id), ResponseError.OPPONENT_LEFT, self.game.code)
             if self.game.rget_status() is not GameStatus.ENDING or self.game.rget_status() is not GameStatus.FINISHED:
                 self.game.rset_status(GameStatus.ENDING)
             return False
