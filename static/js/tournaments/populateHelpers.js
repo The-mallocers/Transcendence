@@ -157,6 +157,7 @@ export function populateTournament(tournament_data){
 
 
     const leave_btn = document.querySelector("#leave-btn");
+    if (leave_btn == null) return ;
     leave_btn.onclick = function() {
         leaveTournament();
     }
