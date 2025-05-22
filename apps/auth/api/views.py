@@ -75,7 +75,7 @@ class RegisterApiView(APIView):
 
 
 class UpdateApiView(APIView):
-    def post(self, request, *args, **kwargs):
+    def put(self, request, *args, **kwargs):
         try:
             data = request.data
             # We get rid of the empty fields
