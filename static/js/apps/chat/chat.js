@@ -35,11 +35,21 @@ chatSocket.onmessage = (event) => {
     if (message.data.action == "HISTORY_RECEIVED") {
         showActiveChat(true);
         displayHistory(message.data.content.messages);
+        const messageId = document.getElementById("messageInput");
+        if(messageId)
+        {
+            messageId.placeholder = `Send message to ${message.data.content.username}`
+        }
     }
     else if(message.data.action == "NO_HISTORY")
         {
         showActiveChat(true);
         displayHistory([])
+        const messageId = document.getElementById("messageInput");
+        if(messageId)
+        {
+            messageId.placeholder = `Send message to ${message.data.error.username}`
+        }
     }
     else if(message.data.action == "ALL_ROOM_RECEIVED") {
         displayRooms(message.data.content.rooms);

@@ -139,7 +139,9 @@ class ChatService(BaseServices):
 
             messages = await Messages.aget_message_by_room(room, target)
             if not messages:
-                await asend_group_error(self.service_group, ResponseError.NO_HISTORY)
+                await asend_group_error(self.service_group, ResponseError.NO_HISTORY, {
+                    "username": str(await target.aget_profile_username())
+                })
                 return
 
             # Sending messages in a single batch instead of multiple requests
@@ -148,7 +150,8 @@ class ChatService(BaseServices):
                 for msg in messages
             ]
             await asend_group(self.service_group, EventType.CHAT, ResponseAction.HISTORY_RECEIVED,
-                              {"messages": formatted_messages})
+                              {"messages": formatted_messages,
+                               "username": str(await target.aget_profile_username())})
 
         except json.JSONDecodeError as e:
             self._logger.error(f"JSON parsing error: {e}")
