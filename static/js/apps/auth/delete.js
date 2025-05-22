@@ -10,7 +10,7 @@ async function delete_account() {
 
     try {
         const response = await fetch('/api/auth/delete_account/', {
-            method: 'POST',
+            method: 'DELETE',
             headers: {
                 'X-CSRFToken': csrfToken,
                 'Content-Type': 'application/json'

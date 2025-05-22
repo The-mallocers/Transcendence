@@ -25,7 +25,7 @@ async function update() {
             }
         }
         const response = await fetch(form.action, {
-            method: 'POST',
+            method: 'PUT',
             headers: {
                 'X-CSRFToken': csrfToken,
                 'Content-Type': 'application/json',
