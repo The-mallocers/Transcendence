@@ -89,7 +89,7 @@ MIDDLEWARE = [
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'utils.jwt.JWTMiddleware.JWTMiddleware',
-    'utils.session.SessionLimitingMiddleware',
+    # 'utils.session.SessionLimitingMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',

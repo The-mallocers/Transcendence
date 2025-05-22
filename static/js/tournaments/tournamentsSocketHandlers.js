@@ -15,6 +15,14 @@ const get_tournament_info = {
     }    
 }
 
+const get_tournaments_info = {
+    "event": "tournament",
+    "data": {
+        "action": "list_tournament"
+    }    
+}
+
+
 export function setUpTournamentSocket (tournamentSocket) {
     tournamentSocket.onmessage = (message) => {
         const jsonData = JSON.parse(message.data);
@@ -97,7 +105,13 @@ export function setUpTournamentSocket (tournamentSocket) {
                 console.log("Im told theres been an update, so now Im asking for it !");
                 tournamentSocket.send(JSON.stringify(get_tournament_info));
                 break;
-                
+            case "NEW_TOURNAMENTS":
+                // console.log("Im told theres been an update, so now Im asking for it !");
+                // tournamentSocket.send(JSON.stringify(get_tournament_info));
+                // populateJoinTournament(jsonData.data.content);
+                tournamentSocket.send(JSON.stringify(get_tournaments_info));
+
+                break;
             case "TOURNAMENT_CREATED":
                 console.log("CREATING TOURNAMENT !");
                 navigateTo(`/pong/tournament/?code=${jsonData.data.content.code}`);
