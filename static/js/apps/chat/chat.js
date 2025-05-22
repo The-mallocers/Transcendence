@@ -14,6 +14,7 @@ const notifSocket = WebSocketManager.notifSocket;
 const clientId = await getClientId();
 export const chatSocket = await WebSocketManager.initChatSocket(clientId);
 
+const MAX_MESSAGE_LENGTH = 200;
 
 function showActiveChat(show) {
     const noChat = document.getElementById('no-chat-selected');
@@ -106,22 +107,55 @@ if(messageInput){
     messageInput.addEventListener("keydown", function (event) {
         if (event.key === "Enter") {
             event.preventDefault(); // Prevents the default action (like form submission)
-            let message = this.value; // Get the entered text
-            console.log("User entered:", message);
+            let messageText = this.value.trim(); // Get the entered text and trim whitespace
+            
+            // Check message length
+            if (messageText.length > MAX_MESSAGE_LENGTH) {
+                toast_message(`Message too long. Maximum ${MAX_MESSAGE_LENGTH} characters allowed.`);
+                return;
+            }
+            
+            if (messageText.length === 0) {
+                return; // Don't send empty messages
+            }
+            
+            console.log("User entered:", messageText);
             this.value = ""; // Clear the input field after handling
-            //Sending this to the websocket
-            message = {
+            
+            // Sending this to the websocket
+            const message = {
                 "event": "chat",
                 "data": {
                     "action": "send_message",
                     "args": {
                         "room_id": room_id,
-                        "message": message
+                        "message": messageText
                     }
                 }
             }
             console.log("room: " + room_id);
             chatSocket.send(JSON.stringify(message));
+        }
+    });
+
+    const counterElement = document.createElement('div');
+    counterElement.className = 'char-counter';
+    counterElement.style.position = 'absolute';
+    counterElement.style.right = '10px';
+    counterElement.style.bottom = '40px';
+    counterElement.style.fontSize = '0.8rem';
+    counterElement.style.color = '#FFFFFF';
+    
+    messageInput.parentNode.insertBefore(counterElement, messageInput.nextSibling);
+    
+    messageInput.addEventListener('input', function() {
+        const remaining = MAX_MESSAGE_LENGTH - this.value.length;
+        counterElement.textContent = `${remaining} characters remaining`;
+        
+        if (remaining < 20) {
+            counterElement.style.color = '#dc3545';
+        } else {
+            counterElement.style.color = '#6c757d';
         }
     });
 }
