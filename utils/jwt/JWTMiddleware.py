@@ -50,6 +50,12 @@ class JWTMiddleware:
         return response
 
     def __call__(self, request: HttpRequest):
+        request.user = type('User', (), {
+            'is_authenticated': False,
+            'is_staff': False,
+            'client': None
+        })()
+
         if not request.session.session_key:
             request.session.create()
 
@@ -64,9 +70,11 @@ class JWTMiddleware:
             else:
                 try:  # let pass the request
                     JWT.extract_token(request, JWTType.ACCESS)
+                    request.user.is_authenticated = True
                     return self.get_response(request)
                 except (jwt.InvalidTokenError, jwt.ExpiredSignatureError):
                     try:
+                        request.user.is_authenticated = True
                         return self._update_tokens(request)
                     except (jwt.ExpiredSignatureError, jwt.InvalidTokenError, jwt.InvalidKeyError) as e:
                         return JsonResponse({

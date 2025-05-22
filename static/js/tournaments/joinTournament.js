@@ -36,8 +36,8 @@ const get_tournaments_info = {
 
 sendWhenReady(tournamentSocket, JSON.stringify(get_tournaments_info));
 
-let interval = setInterval(() => {
-    sendWhenReady(tournamentSocket, JSON.stringify(get_tournaments_info));
-}, 3000);
+// let interval = setInterval(() => {
+//     sendWhenReady(tournamentSocket, JSON.stringify(get_tournaments_info));
+// }, 3000);
 
-window.intervalsManager.push(interval)
+// window.intervalsManager.push(interval)
