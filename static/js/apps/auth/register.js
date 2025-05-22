@@ -125,6 +125,9 @@ async function socketCheck() {
     if (await getClientId() == null && WebSocketManager.isSocketOpen(WebSocketManager.notifSocket)) {
         WebSocketManager.closeNotifSocket();
     }
+    if (await getClientId() == null && WebSocketManager.isSocketOpen(WebSocketManager.tournamentSocket)) {
+        WebSocketManager.closeTournamentSocket();
+    }
 }
 
 await socketCheck();
