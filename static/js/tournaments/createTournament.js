@@ -32,8 +32,6 @@ function getTournamentSettings(){
     const tournamentName = document.querySelector("#roomName");
     // const isPrivate = document.querySelector("#isPrivate").checked;
     const maxClients = document.querySelector('#player-options input[name="tournamentPlayers"]:checked')?.value;
-    console.log("MAx client is:", maxClients);
-
     const creationMessage = {
         "event": "tournament",
         "data": {

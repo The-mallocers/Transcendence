@@ -26,19 +26,14 @@ const get_tournaments_info = {
 export function setUpTournamentSocket (tournamentSocket) {
     tournamentSocket.onmessage = (message) => {
         const jsonData = JSON.parse(message.data);
-        console.log("Tournament socket message", jsonData.data);
-        console.log("The event is:", jsonData.event);
-        console.log(jsonData);
         if (jsonData.event != "TOURNAMENT" && jsonData.event != "ERROR") return;
         const action = jsonData.data.action;   
-        // console.log("action : ", action)
         switch (action) {
 
             case "HOST_LEAVE":
             case "NOT_IN_TOURNAMENT":
             case "TOURNAMENT_NOT_EXIST":
             case "ERROR":
-                // console.log("Error message: ", jsonData.data.error)
                 const path = window.location.pathname;
                 if (path == "/pong/tournament/tree/" || path == "/pong/tournament/") {
                     remove_toast();
@@ -61,7 +56,6 @@ export function setUpTournamentSocket (tournamentSocket) {
                 break;
                 
             case "TOURNAMENT_JOIN":
-                // console.log("data of tournament join", jsonData.data);
                 navigateTo(`/pong/tournament/?code=${jsonData.data.content}`);
                 break;
                 
@@ -96,29 +90,24 @@ export function setUpTournamentSocket (tournamentSocket) {
                 toast.appendChild(btn)
 
                 tournamentData.gameIsReady = true;
-                // console.log("ALLO JE VAIS REJOUER OUUAIS");
                 // navigateTo("/pong/matchmaking/");
                 tournamentSocket.send(JSON.stringify(get_tournament_info));
                 break;
                 
             case "TOURNAMENT_UPDATE":
-                console.log("Im told theres been an update, so now Im asking for it !");
                 tournamentSocket.send(JSON.stringify(get_tournament_info));
                 break;
             case "TOURNAMENTS_NOTIFICATION":
-                console.log("tetetettyaefgiuyagwd");
                 // tournamentSocket.send(JSON.stringify(get_tournament_info));
                 populateJoinTournament(jsonData.data.content);
                 // tournamentSocket.send(JSON.stringify(get_tournaments_info));
 
                 break;
             case "TOURNAMENT_CREATED":
-                console.log("CREATING TOURNAMENT !");
                 navigateTo(`/pong/tournament/?code=${jsonData.data.content.code}`);
                 break;
                 
             case "TOURNAMENT_INVITATION_SENT":
-                console.log(`Invitation sent to ${jsonData.data.content.target_name}`);
                 break;
                 
             case "TOURNAMENT_PLAYER_LEFT" :

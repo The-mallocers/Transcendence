@@ -68,17 +68,13 @@ def create_test_account(index):
     )
 
     if not client_uuid:
-        print(f"Failed to create account for {username}")
         return None
-
-    print(f"Account created with email: {email}")
     return client_uuid
 
 
 def join_game(client_id, is_tournament=False):
     """Send a message to join a game"""
     if client_id not in client_connections:
-        print(f"[{client_id}] Not connected")
         return
 
     ws = client_connections[client_id]
@@ -91,13 +87,10 @@ def join_game(client_id, is_tournament=False):
             }
         }
     }
-
-    print(f"[{client_id}] Joining game...")
     try:
         ws.send(json.dumps(join_msg))
     except RuntimeError:
     # La socket est fermée
-        print("esquiveeee")
         pass
 
 

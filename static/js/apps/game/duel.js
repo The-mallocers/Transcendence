@@ -72,7 +72,7 @@ const startGameMessage = {
 }
 
 notifSocket.onmessage = (event) => {
-    console.log(event.data);
+
     const message = JSON.parse(event.data);
 
     if (message.data.action == "DUEL_REFUSED") {
@@ -98,13 +98,8 @@ notifSocket.onmessage = (event) => {
 
 gameSocket.onmessage = (e) => {
     const jsonData = JSON.parse(e.data);
-
-    console.log(jsonData.data.action);
-
     // Handle player info first to ensure we have the data
     if (jsonData.data.action == "PLAYER_INFOS") {
-        console.log("PLAYER INFOS IS:")
-        console.log(jsonData.data.content)
         window.GameState = {
             ballY: height / 2,
             ballX: width / 2,
@@ -131,7 +126,6 @@ gameSocket.onmessage = (e) => {
     else if (jsonData.data.action == "STARTING") {
         if (!gameStartingInProcess) {
             gameStartingInProcess = true;
-            console.log("Game starting - sending start message");
             // Do NOT navigate until the correct time
             gameSocket.send(JSON.stringify(startGameMessage));
         }
@@ -140,7 +134,6 @@ gameSocket.onmessage = (e) => {
     // Handle the waiting to start message to show the countdown
     else if (jsonData.data.action === "WAITING_TO_START") {
         const timer = jsonData.data.content.timer;
-        console.log("Game starting in", timer);
         
         // Update the timer in the UI
         const timerElement = document.getElementById("timer");
@@ -150,7 +143,6 @@ gameSocket.onmessage = (e) => {
         
         // Navigate to arena when timer is at 5 (beginning of countdown)
         if (timer === 5 && !window.location.pathname.includes("arena")) {
-            console.log("Navigating to arena");
             navigateTo("/pong/arena/");
         }
     }

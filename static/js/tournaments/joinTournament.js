@@ -22,7 +22,6 @@ document.addEventListener('click', async (e) => {
     if (joinBtn) {
         const parentRoom = joinBtn.closest('.room');
         const code = parentRoom.dataset.code ;
-        console.log(code)
         joinTournament(code);
     }
 });

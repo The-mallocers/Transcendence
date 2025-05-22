@@ -17,9 +17,7 @@ async function validateCode() {
                     email: email
                 }),
             });
-
             const result = await response.json();
-            console.log(result);
             if (response.status === 200 && result.success) {
                 navigateTo(result.redirect);
             }

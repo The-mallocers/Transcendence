@@ -39,7 +39,7 @@ window.hide_modal = async function (usernameId) {
         const message = create_message_duel("create_duel", usernameId);
         notifSocket.send(JSON.stringify(message));
     } catch (error) {
-        console.log(error);
+        console.log(error); // jsp
     }
 }
 

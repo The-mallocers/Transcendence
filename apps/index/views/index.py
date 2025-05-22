@@ -165,9 +165,9 @@ def get_pending_tournament_invitations(client):
                             'inviter_username': inviter.profile.username
                         })
             except Exception as e:
-                print(f"Error processing invitation {key}: {e}")
+                print(f"Error processing invitation {key}: {e}") # jsp
     except Exception as e:
-        print(f"Error retrieving tournament invitations: {e}")
+        print(f"Error retrieving tournament invitations: {e}") # jsp
     
     return pending_invitations
 

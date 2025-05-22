@@ -58,8 +58,6 @@ const buildTr = (matchInfos) => {
 }
 
 const buildRound = (roundInfos, name)=> {
-
-    console.log(roundInfos)
     return `
     <div class="round mt-5">
         <h2>${name}</h2>
@@ -125,10 +123,8 @@ export function populateTree(tournamentInfos) {
 
         let btns = document.querySelector(".btns")
         btns.appendChild(leaveBtn)
-        console.log(leaveBtn, meow)
         if (tournamentData.gameIsReady) {
             // const parrent = document.querySelector('#tree')
-            // console.log("data of tournament join", parrent);
             // if (parrent){
                 let btn = document.createElement('div')
                 btn.classList.add('btn', 'intra-btn');
@@ -162,7 +158,6 @@ export function populateTournament(tournament_data){
     leave_btn.onclick = function() {
         leaveTournament();
     }
-    console.log(tournamentData)
     const clientsInTournament = document.querySelector("#clientsInTournament");
     let clientsDiv = []
     if (clientsInTournament == null) return ;
@@ -183,7 +178,6 @@ export function populateTournament(tournament_data){
         
         
         tournament_data?.players_infos?.forEach((player , i)=> {
-            console.log(tournament_data.host , player ,player.id, )
             clientsDiv[i] = `
             <div class="position-relative col p-2">
             <div class="content border p-3 d-flex justify-content-between align-items-center">
@@ -211,7 +205,6 @@ export function populateTournament(tournament_data){
         temp.innerHTML = htmlString; 
 
         while (temp.firstChild) {
-            console.log(temp.firstChild)
             clientsInTournament.appendChild(temp.firstChild);
         }
     });
@@ -257,7 +250,6 @@ export function populateJoinTournament(tournamentList){
         temp.innerHTML = htmlString; 
 
         while (temp.firstChild) {
-            console.log(temp.firstChild)
             tournaments.appendChild(temp.firstChild);
         }
     });

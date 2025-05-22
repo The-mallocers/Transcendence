@@ -15,16 +15,11 @@ class Router {
     }
 
     init() {
-        console.log("init router ||||||||||||||||||||||||||||||")
+
         window.addEventListener('popstate', () => this.handleLocation());
     }
 
     async handleLocation() {
-        for (let id of window.intervalsManager) {
-            console.log(id)
-            clearInterval(id);
-            
-        }
         window.intervalsManager.length = 0;
         //Now making the notif ws in navigation
         if (WebSocketManager.isSocketClosed(WebSocketManager.notifSocket)) {
@@ -33,24 +28,19 @@ class Router {
                 await WebSocketManager.initNotifSocket(clientId);
             }
         }
-        console.log("is tournament socket closed:", WebSocketManager.isSocketClosed(WebSocketManager.tournamentSocket));
         if (WebSocketManager.isSocketClosed(WebSocketManager.tournamentSocket)) {
             const clientId = await getClientId();
             if (clientId) {
-                console.log("COUCOU WEBSOCKET TOURNOI ICI");
                 await WebSocketManager.initTournamentSocket(clientId);
             }
         }
         const path = window.location.pathname;
-        // console.log(window.location.search);
-        // console.log("looking for the path: ", path)
         const route = this.routes.find(r => r.path === path);
 
         if (!route) {
             navigateTo("/error/404/");
         } else {
             try {
-                // console.log("About to try the route template of the route :", route);
                 const content = await route.template(window.location.search ? window.location.search : "");
                 this.rootElement.innerHTML = content;
                 this.reloadScripts();
@@ -62,7 +52,6 @@ class Router {
 
     reloadScripts() {
         const scripts = this.rootElement.querySelectorAll('script');
-        // console.log("scripts = ", scripts)
         scripts.forEach(oldScript => {
             const newScript = document.createElement('script');
 
@@ -78,8 +67,6 @@ class Router {
                     newScript.setAttribute(attr.name, attr.value);
                 }
             });
-
-            // console.log(oldScript)
             oldScript.parentNode.replaceChild(newScript, oldScript);
         });
     }
@@ -87,7 +74,6 @@ class Router {
     navigate(path) {
 
         let splitedPath = path.split("/")
-        // console.log(splitedPath);
         if (splitedPath.includes("pong")) {
             if (splitedPath.includes("duel") || splitedPath.includes("arena") || splitedPath.includes("matchmaking")) {
                 WebSocketManager.closeChatSocket();
@@ -131,7 +117,6 @@ const header = {
 };
 
 export async function fetchRoute(path) {
-    console.log("fetching the path :", path)
     try {
         const response = await fetch(path, {
             headers: header,
@@ -141,7 +126,6 @@ export async function fetchRoute(path) {
         if (response.ok) {
             return data.html;
         } else if (response.status === 302) {
-            console.log(data, response)
             //Add toast
             if (window.location.pathname != "/") {
                 remove_toast();
@@ -171,7 +155,6 @@ document.addEventListener('click', async (e) => {
     const routeElement = e.target.closest('[data-route]');
     if (routeElement) {
         const route = routeElement.dataset.route;
-        // console.log("in data route :", route);
         navigateTo(route);
     }
 });
