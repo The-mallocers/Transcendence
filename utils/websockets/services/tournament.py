@@ -56,7 +56,7 @@ class TournamentService(BaseServices):
                 await self.redis.hset(name=RTables.HASH_TOURNAMENT_QUEUE(tournament.code), key=str(client.id), value=str(True))
                 online_clients = await self.get_all_online_clients()
                 for online_client in online_clients:
-                    if online_client.id == client.id:
+                    if online_client == RTables.GROUP_CLIENT(client.id):
                         await asend_group(RTables.GROUP_TOURNAMENT(tournament.code), EventType.TOURNAMENT, ResponseAction.TOURNAMENT_CREATED,{
                                   'code': tournament.code,})
                     else:

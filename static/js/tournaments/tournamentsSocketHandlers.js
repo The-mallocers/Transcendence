@@ -20,7 +20,7 @@ export function setUpTournamentSocket (tournamentSocket) {
         const jsonData = JSON.parse(message.data);
         console.log("Tournament socket message", jsonData.data);
         console.log("The event is:", jsonData.event);
-        console.log({"MEOW" : jsonData});
+        console.log(jsonData);
         if (jsonData.event != "TOURNAMENT" && jsonData.event != "ERROR") return;
         const action = jsonData.data.action;   
         // console.log("action : ", action)
