@@ -2,12 +2,6 @@ import {navigateTo} from '../../spa/spa.js';
 
 
 const email = document.getElementById("data-email").getAttribute("email");
-const searchBar = document.querySelector(".searchBar");
-console.log('test ', searchBar);
-if(searchBar){
-    searchBar.remove();
-}
-
 
 async function validateCode() {
     const code = document.getElementById('authCode').value;
@@ -27,7 +21,7 @@ async function validateCode() {
             const result = await response.json();
             console.log(result);
             if (response.status === 200 && result.success) {
-                navigateTo(result.redirect); //make sure to change to redirect
+                navigateTo(result.redirect);
             }
             else{
                 alert(`${result.message}`)

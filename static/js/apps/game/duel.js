@@ -165,7 +165,6 @@ async function getImages(){
             credentials: "include",
         });
         const data = await response.json();
-        console.log(data.data);
         if (data.status == "success") {
             const images = data.data;
             return images;
@@ -173,25 +172,8 @@ async function getImages(){
             throw new Error(data.error);
         }
     } catch (error) {
-        console.error("Erreur lors de la récupération de l'ID :", error);
+        navigateTo("/pong/gamemodes/")
+        // console.error("Erreur lors de la récupération de l'ID :", error);
         return null;
     }
 }
-
-// // Make sure the game initialization is complete
-// function initializeGame(gameData) {
-//     console.log("Initializing game with data:", gameData);
-    
-//     // Set up game state properly
-//     window.GameState = {
-//         // Your game state initialization
-//         started: false,
-//         // Other properties
-//     };
-    
-//     // Signal ready to the server
-//     socket.send(JSON.stringify({
-//         event: "GAME",
-//         action: "PLAYER_READY"
-//     }));
-// }
