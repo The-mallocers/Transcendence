@@ -350,9 +350,12 @@ class DeleteApiView(APIView):
             response.delete_cookie('refresh_token')
             response.delete_cookie('oauthToken')
             try:
+                # print(JWT.extract_token(request, JWTType.REFRESH))
                 JWT.extract_token(request, JWTType.REFRESH).invalidate_token()
             except Exception as e:
                 logging.getLogger('MainThread').error(str(e))
+            
+
             redis = RedisConnectionPool.get_sync_connection('api')
             client = Clients.get_client_by_request(request)
             if (redis.hexists(RTables.HASH_MATCHES, str(client.id))):

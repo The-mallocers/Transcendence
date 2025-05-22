@@ -66,7 +66,6 @@ class JWT:
         exp_datetime = self.EXP
         if isinstance(self.EXP, (int, float)):
             exp_datetime = datetime.fromtimestamp(self.EXP, tz=timezone.utc)
-
         InvalidatedToken.objects.get_or_create(
             jti=self.JTI,
             token=self.encode_token(),
