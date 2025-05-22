@@ -162,6 +162,12 @@ if (!searchParams.has('username') && pathname == '/') {
 notifSocket.onmessage = (event) => {
     console.log(event.data);
     const message = JSON.parse(event.data);
+
+    if (message.data.action == "SESSION_EXPIRED") {
+        remove_toast();
+        toast_message("Session expired");
+        navigateTo('/auth/login');
+    }
     
     if(message.data.action == "ACK_SEND_FRIEND_REQUEST") {
         const pending_group = document.querySelector('.pending_group');

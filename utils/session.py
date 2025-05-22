@@ -1,96 +1,98 @@
-import hashlib
 import logging
-import time
+import traceback
+from datetime import datetime
+from time import sleep
 
-from django.conf import settings
-from django.http import HttpRequest, HttpResponseForbidden
+from django.http import HttpRequest, JsonResponse
+from rest_framework import status
 
-from utils.enums import RTables, SessionType
+from apps.client.models import Clients
+from config import settings
+from utils.enums import RTables, JWTType, SessionType, ResponseError, EventType
+from utils.jwt.JWT import JWT
 from utils.redis import RedisConnectionPool
-from utils.util import get_client_ip
+from utils.websockets.channel_send import send_group_error
 
 
 class SessionLimitingMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
-        self.session_expiry = settings.SESSION_LIMITING_EXPIRY
         self.redis = RedisConnectionPool.get_sync_connection(self.__class__.__name__)
         self.logger = logging.getLogger(self.__class__.__name__)
 
-    def generate_fingerprint(self, request: HttpRequest):
-        user_agent = request.META.get('HTTP_USER_AGENT', '')
-        ip_address = get_client_ip(request)
+    def _store_session_redis(self, request: HttpRequest, client):
+        # Store session settings in redis
+        access = JWT.extract_token(request, JWTType.ACCESS)
+        refresh = JWT.extract_token(request, JWTType.REFRESH)
 
-        fingerprint_base = f"{user_agent}|{ip_address}"
-        fingerprint = hashlib.sha256(str(f"{user_agent}|{ip_address}").encode()).hexdigest()
-        return fingerprint
+        self.redis.hset(RTables.HASH_CLIENT_SESSION(client.id), SessionType.SESSION_KEY, access.SESSION_KEY)
+        self.redis.hset(RTables.HASH_CLIENT_SESSION(client.id), SessionType.IP_ADRESS, access.IP_ADDRESS)
+        self.redis.hset(RTables.HASH_CLIENT_SESSION(client.id), SessionType.USER_AGENT, access.USER_AGENT)
+        self.redis.hset(RTables.HASH_CLIENT_SESSION(client.id), SessionType.FINGERPRINT, access.DEVICE_FINGERPRINT)
+        self.redis.hset(RTables.HASH_CLIENT_SESSION(client.id), SessionType.LAST_ACTIVITY, int(datetime.now().timestamp()))
+        self.redis.hset(RTables.HASH_CLIENT_SESSION(client.id), SessionType.LAST_JWT_ACCESS, access.encode_token())
+        self.redis.hset(RTables.HASH_CLIENT_SESSION(client.id), SessionType.LAST_JWT_REFRESH, refresh.encode_token())
+        self.redis.expire(RTables.HASH_CLIENT_SESSION(client.id), settings.SESSION_LIMITING_EXPIRY)
+
+    def _check_session(self, request: HttpRequest, client):
+        current_session_key = request.session.session_key
+        stored_session_key_encode = self.redis.hget(RTables.HASH_CLIENT_SESSION(client.id), SessionType.SESSION_KEY)
+        stored_session_key = None if stored_session_key_encode is None else stored_session_key_encode.decode()
+
+        if stored_session_key and current_session_key != stored_session_key:
+            request.session.flush()
+            notification_channel = self.redis.hget(RTables.HASH_CLIENT(client.id), str(EventType.NOTIFICATION.value))
+            if notification_channel:
+                self.redis.hdel(RTables.HASH_CLIENT(client.id), str(EventType.NOTIFICATION.value))
+                self.redis.delete(RTables.GROUP_NOTIF(client.id))
+
+            tournament_channel = self.redis.hget(RTables.HASH_CLIENT(client.id), str(EventType.TOURNAMENT.value))
+            if tournament_channel:
+                self.redis.hdel(RTables.HASH_CLIENT(client.id), str(EventType.TOURNAMENT.value))
+                self.redis.delete(RTables.GROUP_TOURNAMENT(client.id))
+
+            send_group_error(RTables.GROUP_CLIENT(client.id), ResponseError.SESSION_EXPIRED, close=True)
+
+            jwt_access_token_encode = self.redis.hget(RTables.HASH_CLIENT_SESSION(client.id), SessionType.LAST_JWT_ACCESS)
+            jwt_refresh_token_encode = self.redis.hget(RTables.HASH_CLIENT_SESSION(client.id), SessionType.LAST_JWT_REFRESH)
+            jwt_access_token = jwt_access_token_encode.decode('utf-8')
+            jwt_refresh_token = jwt_refresh_token_encode.decode('utf-8')
+            jwt_access_payload = JWT.decode_token(jwt_access_token)
+            jwt_refresh_payload = JWT.decode_token(jwt_refresh_token)
+            jwt_access = JWT.get_token(jwt_access_payload)
+            jwt_refresh = JWT.get_token(jwt_refresh_payload)
+            jwt_access.invalidate_token()
+            jwt_refresh.invalidate_token()
+
+            return
+
 
     def __call__(self, request: HttpRequest):
-        if not self.redis:
-            self.logger.warning('Redis not avaible, skipping session limiting')
-            return self.get_response(request)
-
-        if not request.user.is_authenticated:
-            return self.get_response(request)
-
-        if not request.session.session_key:
+        if request.session.session_key is None:
             request.session.create()
 
-        if settings.SESSION_LIMITING_EXEMPT_ADMIN and request.user.is_staff:
+        if not request.user.is_authenticated:
             return self.get_response(request)
 
         for path in settings.SESSION_LIMITING_EXEMPT_PATHS:
             if request.path.startswith(path):
                 return self.get_response(request)
 
-        redis_key = RTables.HASH_CLIENT_SESSION(request.user.id)
+        # if request.headers.get('upgrade', '').lower() == 'websocket':
+        #     print('test')
+        #     return self.get_response(request)
 
-        new_fingerprint = self.generate_fingerprint(request)
-        new_session_id = request.session.session_key
+        try:
+            client = Clients.get_client_by_request(request)
 
-        has_active_session = self.redis.hexists(redis_key, SessionType.SESSION_ID)
+            self._check_session(request, client)
 
-        if has_active_session:
-            # Parse stored session data
-            old_fingerprint = self.redis.hget(redis_key, SessionType.FINGERPRINT)
-            old_session_id = self.redis.hget(redis_key, SessionType.SESSION_ID)
+            if not self.redis.exists(RTables.HASH_CLIENT_SESSION(client.id)):
+                self._store_session_redis(request, client)
 
-            # If this is a different browser but the same user
-            if old_fingerprint.decode('utf-8') != new_fingerprint or old_session_id != new_session_id:
-                self.logger.warning(f"Multiple session attempt by user {request.user.id} - "
-                                    f"Existing: {old_fingerprint.decode('utf-8')}, Current: {new_fingerprint}")
-
-                # Choose what to do: block new session or invalidate old session
-                if settings.SESSION_LIMITING_BLOCK_NEW:
-                    print('blocked')
-                    # Block the new session
-                    return HttpResponseForbidden("You already have an active session in another browser. "
-                                                 "Please log out from there before logging in here.")
-                else:
-                    # Allow new session to replace old one
-                    self.logger.info(f"Replacing old session for user {request.user.id}")
-                    # Continue to update Redis with the new session info below
-
-            # Store or update the session information in Redis
-        session_data = {
-            SessionType.FINGERPRINT.value: new_fingerprint,
-            SessionType.SESSION_ID.value: new_session_id,
-            SessionType.LAST_ACTIVITY.value: int(time.time()),
-            SessionType.USER_AGENT.value: request.META.get('HTTP_USER_AGENT', ''),
-            SessionType.IP_ADRESS.value: self.get_client_ip(request)
-        }
-
-        self.redis.hset(redis_key, mapping=session_data)
-        self.redis.expire(redis_key, self.session_expiry)
-
-        # Update activity timestamp on subsequent requests
-        if request.method == 'GET':
-            self.redis.hset(redis_key, SessionType.LAST_ACTIVITY, int(time.time()))
-            self.redis.expire(redis_key, self.session_expiry)
-
-        response = self.get_response(request)
-
-        if not request.session.session_key and hasattr(request, 'session'):
-            request.session.save()
-
-        return response
+            return self.get_response(request)
+        except Exception as e:
+            return JsonResponse({
+                'status': 'unauthorized',
+                'redirect': '/auth/login',
+                'message': str(e)}, status=status.HTTP_302_FOUND)

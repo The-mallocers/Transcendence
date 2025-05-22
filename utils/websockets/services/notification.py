@@ -1,18 +1,31 @@
 from asgiref.sync import sync_to_async
 from django.forms import ValidationError
+from channels.db import database_sync_to_async
 
 from apps.chat.models import Rooms, Messages
 from apps.client.models import Clients
 from utils.enums import EventType, ResponseAction, ResponseError, RTables
-from utils.util import create_game_id
+from utils.util import create_game_id, get_all_online_clients, aget_all_online_clients
 from utils.websockets.channel_send import asend_group, asend_group_error
 from utils.websockets.services.services import BaseServices
 
 
 class NotificationService(BaseServices):
     async def init(self, client, *args):
+        await super().init(client)
         self.service_group = f'{EventType.NOTIFICATION.value}_{client.id}'
-        return await super().init(client)
+        username = await self.get_username(client)
+        online_clients = await aget_all_online_clients(self.redis)
+        for client in online_clients:
+            await asend_group(client, EventType.NOTIFICATION, ResponseAction.ACK_ONLINE_STATUS,{
+                    "username": username,
+                    "online": True
+                })
+        return True
+
+    @database_sync_to_async
+    def get_username(self, client):
+        return client.profile.username
 
     # Client is the person that want to add a friend to his friend list
     # Target is the friends to add
@@ -40,7 +53,7 @@ class NotificationService(BaseServices):
             return await self._handle_accept_friend_request(friend_request_data, client)
 
         askfriend = await friendTargetTable.add_pending_friend(client)
-        # if I am already his friend 
+        # if I am already his friend
         if askfriend is None:
             return await asend_group_error(self.service_group, ResponseError.USER_ALREADY_MY_FRIEND)
         await asend_group(RTables.GROUP_CLIENT(target.id),
@@ -359,35 +372,35 @@ class NotificationService(BaseServices):
         code = data['data']['args']['tournament_code']
         action = data['data']['args']['action']
         inviter_username = data['data']['args']['inviter_username']
-        
+
         inviter = await Clients.aget_client_by_username(inviter_username)
         if inviter is None:
             return await asend_group_error(self.service_group, ResponseError.USER_NOT_FOUND)
-        
+
         invitation_key = f"{RTables.HASH_TOURNAMENT_INVITATION}:{code}:{client.id}"
         if not await self.redis.exists(invitation_key):
             return await asend_group_error(self.service_group, ResponseError.INVITATION_NOT_FOUND)
-        
+
         if not await self.redis.exists(RTables.HASH_TOURNAMENT_QUEUE(code)):
             await self.redis.delete(invitation_key)
             return await asend_group_error(self.service_group, ResponseError.TOURNAMENT_NOT_EXIST)
-        
+
         if action == "accept":
             if await Clients.acheck_in_queue(client, self.redis):
                 await self.redis.delete(invitation_key)
                 return await asend_group_error(self.service_group, ResponseError.ALREADY_IN_QUEUE)
-            
+
             await self.redis.hset(RTables.HASH_TOURNAMENT_QUEUE(code), str(client.id), 'True')
-            
+
             channel_name = await self.redis.hget(name=RTables.HASH_CLIENT(client.id), key=str(EventType.TOURNAMENT.value))
             if channel_name:
                 channel_name = channel_name.decode('utf-8')
                 await self.channel_layer.group_add(RTables.GROUP_TOURNAMENT(code), channel_name)
-            
+
             await asend_group(self.service_group, EventType.NOTIFICATION, ResponseAction.TOURNAMENT_INVITATION_ACCEPTED, {
                 "tournament_code": code
             })
-            
+
             await asend_group(RTables.GROUP_NOTIF(inviter.id), EventType.NOTIFICATION, ResponseAction.TOURNAMENT_INVITATION_ACCEPTED_BY, {
                 "username": await client.aget_profile_username(),
                 "tournament_code": code
@@ -396,13 +409,32 @@ class NotificationService(BaseServices):
             await asend_group(self.service_group, EventType.NOTIFICATION, ResponseAction.TOURNAMENT_INVITATION_REJECTED, {
                 "tournament_code": code
             })
-            
+
             await asend_group(RTables.GROUP_NOTIF(inviter.id), EventType.NOTIFICATION, ResponseAction.TOURNAMENT_INVITATION_REJECTED_BY, {
                 "username": await client.aget_profile_username(),
                 "tournament_code": code
             })
-        
+
         await self.redis.delete(invitation_key)
-    
+
     async def disconnect(self, client):
-        pass
+        await super().disconnect(client)
+
+        # Remove this client's notification service from Redis
+        await self.redis.hdel(RTables.HASH_CLIENT(client.id), str(EventType.NOTIFICATION.value))
+
+        username = await self.get_username(client)
+        online_clients = await aget_all_online_clients(self.redis)
+
+        # Notify other clients that this user is offline
+        for client_key in online_clients:
+            if client_key != f"client_{client.id}":
+                await asend_group(
+                    client_key,
+                    EventType.NOTIFICATION,
+                    ResponseAction.ACK_ONLINE_STATUS,
+                    {
+                        "username": username,
+                        "online": False
+                    }
+                )

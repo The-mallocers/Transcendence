@@ -22,7 +22,7 @@ async def asend_group(channel_name, event_type: EventType, msg_type: ResponseAct
     )
 
 
-def send_group(channel_name, event_type: EventType, msg_type: ResponseAction, content=None, close=False):
+def send_group(channel_name: object, event_type: EventType, msg_type: ResponseAction, content: object = None, close: object = False) -> None:
     channel_layer = get_channel_layer()
     async_to_sync(channel_layer.group_send)(
         str(channel_name),
