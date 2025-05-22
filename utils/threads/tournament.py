@@ -303,6 +303,7 @@ class TournamentThread(Threads):
             if tournament_status is TournamentStatus.WAITING or tournament_status is TournamentStatus.CREATING:
                 tournaments_in_waitting.append(tournament_info)
 
+        print("tournaments_code:", tournaments_code)
         for online_client in get_all_online_clients(self.redis):
             send_group(online_client, EventType.TOURNAMENT, ResponseAction.TOURNAMENTS_NOTIFICATION, tournaments_in_waitting)
 

@@ -221,7 +221,11 @@ class TournamentService(BaseServices):
             tournament_title = await self.redis.json().get(key, Path('title'))
             tournaments_players_ids = await self.redis.json().get(key, Path('clients'))
             tournaments_players = await Clients.aget_tournament_clients_infos(tournaments_players_ids)
-            tournament_info = {'title': tournament_title, 'players_infos': tournaments_players}
+            
+            match = re.match(r'tournament_(\w+)', key)
+            code = match.group(1) if match else None
+            
+            tournament_info = {'title': tournament_title, 'players_infos': tournaments_players, 'code': code}
             if tournament_status is TournamentStatus.WAITING or tournament_status is TournamentStatus.CREATING:
                 tournaments_in_waitting.append(tournament_info)
 
@@ -247,12 +251,3 @@ class TournamentService(BaseServices):
     async def disconnect(self, client):
         await super().disconnect(client)
 
-        # Remove this client's tournament service from Redis
-        await self.redis.hdel(RTables.HASH_CLIENT(client.id), str(EventType.TOURNAMENT.value))
-
-        # Handle any tournament-specific cleanup
-        queues = await Clients.acheck_in_queue(client, self.redis)
-        if queues and RTables.HASH_TOURNAMENT_QUEUE('') in str(queues):
-            code = re.search(rf'{RTables.HASH_TOURNAMENT_QUEUE("")}(\w+)$', queues.decode('utf-8')).group(1)
-            await self.channel_layer.group_discard(RTables.GROUP_TOURNAMENT(code), self.channel_name)
-            await self.redis.hdel(RTables.HASH_TOURNAMENT_QUEUE(code), str(client.id))
