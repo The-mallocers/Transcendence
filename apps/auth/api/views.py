@@ -75,7 +75,7 @@ class RegisterApiView(APIView):
 
 
 class UpdateApiView(APIView):
-    def post(self, request, *args, **kwargs):
+    def put(self, request, *args, **kwargs):
         try:
             data = request.data
             # We get rid of the empty fields
@@ -343,16 +343,19 @@ class UploadPictureApiView(APIView):
 # This code essentially logs out THEN delete the account.
 
 class DeleteApiView(APIView):
-    def post(self, request: HttpRequest, *args, **kwargs):
+    def delete(self, request: HttpRequest, *args, **kwargs):
         if request.COOKIES.get('access_token') is not None:
             response = Response({"message": "Successfully deleted your account."}, status=status.HTTP_200_OK)
             response.delete_cookie('access_token')
             response.delete_cookie('refresh_token')
             response.delete_cookie('oauthToken')
             try:
+                # print(JWT.extract_token(request, JWTType.REFRESH))
                 JWT.extract_token(request, JWTType.REFRESH).invalidate_token()
             except Exception as e:
                 logging.getLogger('MainThread').error(str(e))
+            
+
             redis = RedisConnectionPool.get_sync_connection('api')
             client = Clients.get_client_by_request(request)
             if (redis.hexists(RTables.HASH_MATCHES, str(client.id))):
