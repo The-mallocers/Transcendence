@@ -124,6 +124,7 @@ function clearAllErrorMessages() {
 async function socketCheck() {
     if (await getClientId() == null && WebSocketManager.isSocketOpen(WebSocketManager.notifSocket)) {
         WebSocketManager.closeNotifSocket();
+        WebSocketManager.closeTournamentSocket();
     }
 }
 

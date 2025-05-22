@@ -85,7 +85,7 @@ class TournamentService(BaseServices):
                 await self.redis.hset(RTables.HASH_TOURNAMENT_QUEUE(code), str(client.id), 'True')
                 await self.channel_layer.group_add(RTables.GROUP_TOURNAMENT(code), self.channel_name)
                 await asend_group(self.service_group, EventType.TOURNAMENT, ResponseAction.TOURNAMENT_JOIN, code)
-    
+
     async def _handle_ping(self, data, client):
         return await asend_group(self.service_group, EventType.TOURNAMENT, ResponseAction.PONG)
 
@@ -241,11 +241,15 @@ class TournamentService(BaseServices):
 
         await asend_group(self.service_group, EventType.TOURNAMENT, ResponseAction.TOURNAMENT_LIST, tournaments_in_waitting)
 
-    async def _handle_start_tournament(self, data, client):
-        pass
-
-    async def _handle_get_tournament_clients(self, data, client):
-        pass
-
     async def disconnect(self, client):
-        pass
+        await super().disconnect(client)
+
+        # Remove this client's tournament service from Redis
+        await self.redis.hdel(RTables.HASH_CLIENT(client.id), str(EventType.TOURNAMENT.value))
+
+        # Handle any tournament-specific cleanup
+        queues = await Clients.acheck_in_queue(client, self.redis)
+        if queues and RTables.HASH_TOURNAMENT_QUEUE('') in str(queues):
+            code = re.search(rf'{RTables.HASH_TOURNAMENT_QUEUE("")}(\w+)$', queues.decode('utf-8')).group(1)
+            await self.channel_layer.group_discard(RTables.GROUP_TOURNAMENT(code), self.channel_name)
+            await self.redis.hdel(RTables.HASH_TOURNAMENT_QUEUE(code), str(client.id))
