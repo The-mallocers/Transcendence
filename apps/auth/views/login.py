@@ -16,17 +16,11 @@ def get(req):
     csrf_token = get_token(req)
     users = Clients.objects.all()
     html_content = render_to_string("apps/auth/login.html", {
-        "users": users,
         "csrf_token": csrf_token,
-        # "urlpostgres": urlpostgres,
     })
     response = JsonResponse({
         'html': html_content,
-        'users': list(users.values())
     })
-
-    response.delete_cookie('access_token')
-    response.delete_cookie('refresh_token')
 
     return response
 
