@@ -298,7 +298,7 @@ class Clients(models.Model):
 
     @staticmethod
     @sync_to_async
-    def get_tournament_clients_infos(client_ids):
+    def aget_tournament_clients_infos(client_ids):
         """
         Get multiple clients with all related data in a single query
         using select_related to optimize database access
@@ -321,6 +321,30 @@ class Clients(models.Model):
                     }
                     result.append(info)
                 
+                return result
+        except Exception as e:
+            raise Exception(f"Error retrieving clients info: {e}")
+
+    @staticmethod
+    def get_tournament_clients_infos(client_ids):
+        try:
+            with transaction.atomic():
+                # Use select_related to prefetch the related profile and stats in one query
+                clients = Clients.objects.filter(id__in=client_ids).select_related('profile', 'stats')
+
+                result = []
+                for client in clients:
+                    rank = client.get_rank(client.stats.mmr).value
+
+                    info = {
+                        "id": str(client.id),
+                        "nickname": client.profile.username,
+                        "avatar": client.profile.profile_picture.url,
+                        "trophee": f'/media/rank_icon/{rank}.png',
+                        "mmr": client.stats.mmr,
+                    }
+                    result.append(info)
+
                 return result
         except Exception as e:
             raise Exception(f"Error retrieving clients info: {e}")

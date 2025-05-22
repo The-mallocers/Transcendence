@@ -1,9 +1,16 @@
 import random
+import re
 import string
 import uuid
 
+from asgiref.sync import async_to_sync
 from django.core.exceptions import ValidationError
+from redis.commands.json.path import Path
 from django.http import HttpRequest
+
+from apps.client.models import Clients
+from utils.enums import RTables, TournamentStatus, EventType, ResponseAction
+from utils.websockets.channel_send import send_group
 
 
 def create_game_id():
@@ -14,6 +21,7 @@ def create_game_id():
     while True:
         code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=5))
         if not Game.objects.filter(code=code).exists() and not redis.exists(RTables.JSON_GAME(code)):
+            RedisConnectionPool.close_sync_connection('GameID')
             return code
 
 
@@ -65,3 +73,18 @@ def get_client_ip(request: HttpRequest):
 
 def default_scoreboards():
     return {'scoreboards': []}
+
+
+async def aget_all_online_clients(redis):
+    client_keys = await redis.keys("client_*")
+    # Decode because this gets us the results in bytes
+    if client_keys and isinstance(client_keys[0], bytes):
+        client_keys = [key.decode() for key in client_keys]
+    return client_keys
+
+def get_all_online_clients(redis):
+    client_keys = redis.keys("client_*")
+    # Decode because this gets us the results in bytes
+    if client_keys and isinstance(client_keys[0], bytes):
+        client_keys = [key.decode() for key in client_keys]
+    return client_keys

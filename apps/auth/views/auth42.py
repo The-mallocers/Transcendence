@@ -12,6 +12,8 @@ from config import settings
 from utils.jwt.JWT import JWT
 from utils.jwt.JWT import JWTType
 from utils.serializers.client import ClientSerializer
+from apps.auth.api.views import isClientOnline
+from asgiref.sync import async_to_sync
 
 
 def generate_password():
@@ -77,6 +79,11 @@ def auth42(request):
     client = Clients.get_client_by_email(email)
 
     serializer = None
+    if client:
+        isOnline = async_to_sync(isClientOnline)(client)
+        if isOnline:
+            return formulate_json_response(False, 401, "You are already logged in somewhere else", "/")
+    
     if not client:
         generated_pwd = generate_password()
         data = {
@@ -97,6 +104,7 @@ def auth42(request):
 
         if serializer.is_valid():
             client = serializer.save()
+    
     response = formulate_json_response(True, 302, "Login Successful", "/")
 
     # response.set_cookie("oauthToken", access_token)

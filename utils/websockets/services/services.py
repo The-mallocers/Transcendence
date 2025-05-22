@@ -33,7 +33,11 @@ class BaseServices(ABC):
 
     @abstractmethod
     async def disconnect(self, client):
-        pass
+        # Base implementation for cleanup
+        # Child classes should call this via super().disconnect(client)
+        if self.service_group:
+            # Remove from service group if it exists
+            pass
 
     async def handle_disconnect(self, client):
         return await self.disconnect(client)
@@ -60,3 +64,4 @@ class BaseServices(ABC):
 
         except Exception as e:
             raise e
+

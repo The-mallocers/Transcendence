@@ -62,7 +62,7 @@ class Router {
 
     reloadScripts() {
         const scripts = this.rootElement.querySelectorAll('script');
-        console.log("scripts = ", scripts)
+        // console.log("scripts = ", scripts)
         scripts.forEach(oldScript => {
             const newScript = document.createElement('script');
 
@@ -79,7 +79,7 @@ class Router {
                 }
             });
 
-            console.log(oldScript)
+            // console.log(oldScript)
             oldScript.parentNode.replaceChild(newScript, oldScript);
         });
     }

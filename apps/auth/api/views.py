@@ -21,7 +21,7 @@ from utils.serializers.client import ClientSerializer
 from utils.serializers.permissions.auth import PasswordPermission
 from utils.serializers.picture import ProfilePictureValidator
 from django.template.loader import render_to_string
-
+from asgiref.sync import async_to_sync
 
 class PasswordApiView(APIView):
     permission_classes = [PasswordPermission]
@@ -123,8 +123,14 @@ class LoginApiView(APIView):
             }, status=status.HTTP_401_UNAUTHORIZED)
         else:
             response = None
+            isOnline = async_to_sync(isClientOnline)(client)
+            print("isOnline: ", isOnline)
+            if isOnline:
+                return Response({
+                "error": "You are already logged in somewhere else"
+            }, status=status.HTTP_401_UNAUTHORIZED)
             # adding the 2fa check here
-            if client.twoFa.enable:
+            elif client.twoFa.enable:
                 if not client.twoFa.scanned:
                     get_qrcode(client, False)
                 response = Response({
@@ -141,6 +147,7 @@ class LoginApiView(APIView):
                 JWT(client, JWTType.ACCESS, request).set_cookie(response)
                 JWT(client, JWTType.REFRESH, request).set_cookie(response)
             return response
+    
 
 
 # TODO, add the fact that we disconnect the notif socket/Get rid of the client in redis
@@ -176,10 +183,8 @@ def change_two_fa(req):
         data = json.loads(req.body.decode('utf-8'))
         client = Clients.get_client_by_request(req)
         if client is not None:
-            # client.twoFa.update("enable", data['status'])
             if(data['status']):
                 if get_qrcode(client, True) == True:
-                    print("at the true: ", client.twoFa.key)
                     response = JsonResponse({
                         "success": True,
                         "state": True,
@@ -187,8 +192,7 @@ def change_two_fa(req):
                         "message": "State 2fa change to true",
                     }, status=200)
             else:
-                print("at the false: ", client.twoFa.key)
-                #rm image dans media quand je desactive le 2fa
+                client.twoFa.update("enable", False)
                 response = JsonResponse({
                     "success": True,
                     "state": False,
@@ -197,11 +201,10 @@ def change_two_fa(req):
         else:
             response = JsonResponse({
                 "success": False,
-                "message": "No client available"
-            }, status=403)
+                "message": "No user match this request"
+            }, status=404)
         return response
 
-# utils function for 2fa
 import pyotp
 import qrcode
 import io
@@ -236,7 +239,6 @@ def get_qrcode(user, binary):
         image_file = ContentFile(contents, name=f"{user.profile.username}_qrcode.png")
         new_twofa.qrcode = image_file
         new_twofa.save()
-        print("number: ", Clients.objects.filter(twoFa=old_twofa).count())
         # Delete old TwoFA if not used by any other client
         if old_twofa and Clients.objects.filter(twoFa=old_twofa).count() <= 1:
             if old_twofa.qrcode:
@@ -248,31 +250,29 @@ def get_qrcode(user, binary):
 
 def post_check_qrcode(req):
     client = Clients.get_client_by_request(req)
-    if client and req.method == "POST":
-        data = json.loads(req.body.decode('utf-8'))
-        print(data)
-        print(client.twoFa.key)
-        totp = pyotp.TOTP(client.twoFa.key)
-        print(totp)
-        is_valid = totp.verify(data['code'])
-        if is_valid:
-            client.twoFa.update("enable", True)
-            if not client.twoFa.scanned:
-                client.twoFa.update("scanned", True)
-            print("client successfully validate")
-            response = formulate_json_response(True, 200, "2Fa successfully activate", "/profile/settings") 
-            return response
+    if client: 
+        if req.method == "POST":
+            data = json.loads(req.body.decode('utf-8'))
+            totp = pyotp.TOTP(client.twoFa.key)
+            is_valid = totp.verify(data['code'])
+            if is_valid:
+                client.twoFa.update("enable", True)
+                if not client.twoFa.scanned:
+                    client.twoFa.update("scanned", True)
+                response = formulate_json_response(True, 200, "2Fa successfully activate", "/profile/settings") 
+                return response
+            else:
+                return formulate_json_response(False, 200, "Invalid code", "/profile/settings")
         else:
-            print("invalid code")
-            return formulate_json_response(False, 400, "Invalid code", "/profile/settings")
-    return formulate_json_response(False, 400, "No email match this request", "/profile/settings")
+            return formulate_json_response(False, 405, "Method not allowed for this request", "/profile/settings")    
+    else:
+        return formulate_json_response(False, 404, "No user match this request", "/profile/settings")
 
 def post_twofa_code(req):
     email = req.COOKIES.get('email')
     client = Clients.get_client_by_email(email)
-    response = formulate_json_response(False, 400, "Error getting the user", "/auth/login")
     if client is None:
-        return response
+        return formulate_json_response(False, 404, "No user match this request", "/auth/login")
     if req.method == "POST":
         data = json.loads(req.body.decode('utf-8'))
         totp = pyotp.TOTP(client.twoFa.key)
@@ -285,9 +285,9 @@ def post_twofa_code(req):
             JWT(client, JWTType.REFRESH, req).set_cookie(response)
             return response
         else:
-            response = formulate_json_response(False, 400, "Invalid Code", "/auth/login")
+            response = formulate_json_response(False, 200, "Invalid Code", "/auth/login")
     else:
-        response = formulate_json_response(False, 400, "No email match this request", "/auth/login")
+        response = formulate_json_response(False, 401, "Method not allowed for this request", "/auth/login")
     return response
 
 def formulate_json_response(state, status, message, redirect):
@@ -350,7 +350,6 @@ class DeleteApiView(APIView):
             response.delete_cookie('refresh_token')
             response.delete_cookie('oauthToken')
             try:
-                # print(JWT.extract_token(request, JWTType.REFRESH))
                 JWT.extract_token(request, JWTType.REFRESH).invalidate_token()
             except Exception as e:
                 logging.getLogger('MainThread').error(str(e))
@@ -362,14 +361,31 @@ class DeleteApiView(APIView):
                 return Response({
                     "error": "You are currently in a match, please leave it before deleting your account"
                 }, status=status.HTTP_401_UNAUTHORIZED)
-            for key in redis.scan_iter("queue_tournament_*"):
+            for key in redis.scan_iter(RTables.HASH_TOURNAMENT_QUEUE('*')):
                 if redis.hexists(key, str(client.id)):
                     return Response({
                         "error": "You are currently in a tournament, please end it before deleting your account"
                     }, status=status.HTTP_401_UNAUTHORIZED)
             client.delete()
+            RedisConnectionPool.close_sync_connection('api')
             return response
         else:
             return Response({
                 "error": "You are not logged in"
             }, status=status.HTTP_401_UNAUTHORIZED)
+
+
+async def isClientOnline(client):
+    redis = await RedisConnectionPool.get_async_connection("is_client_online")
+    client_keys = await redis.keys("client_*")
+    # Decode because this gets us the results in bytes
+    if client_keys and isinstance(client_keys[0], bytes):
+        client_keys = [key.decode() for key in client_keys]
+    client_ids = [key.removeprefix("client_") for key in client_keys]
+    # print(f"client keys {client_keys}")
+    # print(f"client_ids {client_ids}")
+    # print(f"client.id {client.id}")
+    if str(client.id) in client_ids:
+        return True
+    else:
+        return False

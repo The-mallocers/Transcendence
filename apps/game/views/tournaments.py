@@ -66,7 +66,7 @@ def isInTournament(client):
         if queues and RTables.HASH_TOURNAMENT_QUEUE('') in str(queues):
             code = re.search(rf'{RTables.HASH_TOURNAMENT_QUEUE("")}(\w+)$', queues.decode('utf-8')).group(1)
             tournament_info = redis.json().get(RTables.JSON_TOURNAMENT(code))
-            print("tournament_info:", tournament_info)
+            # print("tournament_info:", tournament_info)
             if tournament_info['max_clients'] == len(tournament_info['clients']):
                 return FULL_TOURNEY
             else:

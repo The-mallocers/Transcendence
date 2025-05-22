@@ -9,6 +9,7 @@ from redis.asyncio import Redis
 
 from apps.client.models import Clients
 from utils.enums import EventType, ResponseError, RTables
+from utils.redis import RedisConnectionPool
 from utils.websockets.channel_send import asend_group_error
 from utils.websockets.services.services import ServiceError, BaseServices
 
@@ -16,7 +17,7 @@ from utils.websockets.services.services import ServiceError, BaseServices
 class WsConsumer(AsyncWebsocketConsumer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._redis = Redis(host=settings.REDIS_HOST, port=settings.REDIS_PORT, db=0)
+        self._redis = None
         self._logger = logging.getLogger(self.__class__.__name__)
 
         self.client: Clients = None
@@ -25,6 +26,7 @@ class WsConsumer(AsyncWebsocketConsumer):
 
     async def connect(self):
         logging.getLogger('websocket.client').info(f'New WebSocket connection from {self.scope["client"]}')
+        self._redis = await RedisConnectionPool.get_async_connection(self.service.__class__.__name__)
         query_string = self.scope['query_string'].decode()
         query_params = parse_qs(query_string)
         path = self.scope['path']
@@ -62,6 +64,7 @@ class WsConsumer(AsyncWebsocketConsumer):
             await self.channel_layer.group_discard(RTables.GROUP_CLIENT(self.client.id), self.channel_name)
             await self.channel_layer.group_discard(f'{self.event_type.value}_{self.client.id}', self.channel_name)
             await self._redis.hdel(RTables.HASH_CLIENT(self.client.id), str(self.event_type.value))
+        await RedisConnectionPool.close_async_connection(self.service.__class__.__name__)
 
     async def receive(self, text_data=None, bytes_data=None):
         try:

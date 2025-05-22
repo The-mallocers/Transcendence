@@ -40,7 +40,7 @@ class EventType(str, Enum):
 
 class SessionType(str, Enum):
     FINGERPRINT: str = 'fingerprint'
-    SESSION_ID: str = 'session_id'
+    SESSION_KEY: str = 'session_key'
     LAST_ACTIVITY: str = 'last_activity'
     USER_AGENT: str = 'user_agent'
     IP_ADRESS: str = 'ip'
@@ -80,7 +80,6 @@ class RequestAction(str, Enum):
     JOIN_TOURNAMENT: str = 'join_tournament'
     LEAVE_TOURNAMENT: str = 'leave_tournament'
     START_TOURNAMENT: str = 'start_tournament'
-    LIST_TOURNAMENT: str = 'list_tournament'
     LIST_PLAYERS: str = 'list_players'
     TOURNAMENT_INFO: str = 'tournament_info'
     GET_TOURNAMENT_CLIENTS: str = 'get_tournament_clients'
@@ -118,6 +117,7 @@ class ResponseAction(str, Enum):
 
     # ── Tournaments ───────────────────────────────────────────────────────────────── #
     TOURNAMENT_CREATED: str = 'You have successfully create the tournament'
+    TOURNAMENTS_NOTIFICATION: str = 'New tournaments created'
     TOURNAMENT_JOIN: str = 'You have successfully joined the tournament'
     TOURNAMENT_PLAYER_JOIN: str = 'Player join the tournament.'
     TOURNAMENT_PLAYER_LEFT: str = 'Player left the tournament.'
@@ -239,6 +239,7 @@ class ResponseError(str, Enum):
     TARGET_NOT_FOUND: str = 'Target not found.'
     USER_OFFLINE: str = 'User is offline.'
     OPPONENT_NOT_FOUND: str = 'opponent_not_found'
+    SESSION_EXPIRED: str = 'Session expired.'
     
     # INTERNAL_ERROR = "Internal server error"
     # INVALID_ID: str = 'Player does not exist'

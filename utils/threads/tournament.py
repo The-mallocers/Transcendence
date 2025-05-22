@@ -1,4 +1,5 @@
 import random
+import re
 import traceback
 from time import sleep
 
@@ -11,6 +12,7 @@ from apps.tournaments.models import Tournaments
 from utils.enums import EventType, GameStatus, RTables, ResponseAction, ResponseError, TournamentStatus
 from utils.threads.game import GameThread
 from utils.threads.threads import Threads
+from utils.util import get_all_online_clients
 from utils.websockets.channel_send import send_group, send_group_error
 
 
@@ -200,6 +202,7 @@ class TournamentThread(Threads):
             host = self.redis.hexists(RTables.HASH_TOURNAMENT_QUEUE(self.tournament.code), str(self.tournament.host.id))
             if not host:
                 send_group_error(RTables.GROUP_TOURNAMENT(self.tournament.code), ResponseError.HOST_LEAVE)
+                self._helper_list_tournament(self.tournament.host)
                 return False
             return True
         else:
@@ -265,6 +268,44 @@ class TournamentThread(Threads):
                     {'id': str(client.id)}
                 )
                 self.del_client(client)
+
+    def tournament_info_helper(self, tournament, code, client):
+        tournament_ids = tournament['clients']
+        title = tournament['title']
+        max_clients = int(tournament['max_clients'])
+        scoreboard = tournament['scoreboards']
+        host = tournament['host']
+        players_infos = Clients.get_tournament_clients_infos(tournament_ids)
+        game_ready = self.redis.hexists(RTables.HASH_MATCHES, str(client.id))
+        roomInfos = {
+            "title": title,
+            "max_clients": max_clients,
+            "players_infos": players_infos,
+            "code": code,
+            "host" : host,
+            "scoreboard": scoreboard,
+            "game_ready": game_ready,
+        }
+        return roomInfos
+
+    def _helper_list_tournament(self, client):
+        tournaments_in_waitting = []
+
+        for key in self.redis.scan_iter(match=f'{RTables.JSON_TOURNAMENT("*")}'):
+            key = key.decode('utf-8')
+            if key == RTables.JSON_TOURNAMENT(self.tournament.code):
+                continue
+            tournament_status = TournamentStatus(self.redis.json().get(key, Path('status')))
+            tournament_title = self.redis.json().get(key, Path('title'))
+            tournaments_code = self.redis.json().get(key, Path('clients'))
+            tournaments_players = Clients.get_tournament_clients_infos(tournaments_code)
+            tournament_info = {'title': tournament_title, 'players_infos': tournaments_players}
+            if tournament_status is TournamentStatus.WAITING or tournament_status is TournamentStatus.CREATING:
+                tournaments_in_waitting.append(tournament_info)
+
+        for online_client in get_all_online_clients(self.redis):
+            send_group(online_client, EventType.TOURNAMENT, ResponseAction.TOURNAMENTS_NOTIFICATION, tournaments_in_waitting)
+
 
     # ━━ GETTER / SETTER ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
 
