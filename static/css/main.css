@@ -252,7 +252,52 @@ main {
     border-radius: 6px;
     transition: all 0.3s ease;
     background-color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     /*border: 1px solid #eaeaea;*/
+}
+
+.lastPlayer .names {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+}
+
+.lastPlayer .names img {
+    height: 60px;
+    width: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.lastPlayer .names .fullName {
+    color: #3a3a3a;
+    margin: 0;
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+/* Nouveau style pour les statistiques win/loss */
+.lastPlayer .stats {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+    margin-left: auto;
+}
+
+.lastPlayer .stats .wins {
+    color: #5CB85B;
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+.lastPlayer .stats .losses {
+    color: #E5292D;
+    font-weight: bold;
+    font-size: 0.9rem;
 }
 
 /*.lastPlayerContainer {*/
