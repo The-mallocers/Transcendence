@@ -45,7 +45,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ CORE SETTINGS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
 
 ROOT_URLCONF = 'config.urls'
@@ -126,10 +126,14 @@ REST_FRAMEWORK = {
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ SECURITY SETTINGS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
 
-HOSTNAME = socket.gethostname()
+HOSTNAME = os.getenv('DJANGO_HOSTNAME', 'localhost')
 ALLOWED_HOSTS = ['*']
 IPWARE_TRUSTED_PROXIES = ['127.0.0.1', '::1', 'django', 'nginx']
-CSRF_TRUSTED_ORIGINS = [f'https://{HOSTNAME}', 'https://localhost:8000', 'https://127.0.0.1:8000']
+CSRF_TRUSTED_ORIGINS = [
+    f'https://{HOSTNAME}:8000', 
+    'https://localhost:8000', 
+    'https://127.0.0.1:8000', 
+    ]
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 USE_X_FORWARDED_HOST = True
 SECURE_SSL_REDIRECT = True

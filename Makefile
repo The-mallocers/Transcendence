@@ -17,6 +17,7 @@ help:
 
 up:
 	rm -rf ./docker/staticdocker/
+	echo "DJANGO_HOSTNAME=$(shell hostname | cut -d'.' -f1)" >> .env
 	docker compose -f ./$(DOCKER_COMPOSE_FILE) down
 	docker compose -f ./$(DOCKER_COMPOSE_FILE) up --build --attach django-web
 

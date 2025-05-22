@@ -17,7 +17,6 @@ urlpatterns = [
     path('api/friends/', include('apps.notifications.api.urls')),
 
     re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
-    # I need this before the catch all so I can correctly serve media files (QRcode for two FA), its not "production ready", too bad !
     re_path(r'^.*$', TemplateView.as_view(template_name='base.html')),
     # Default view
 ]
