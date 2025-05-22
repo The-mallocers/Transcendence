@@ -237,6 +237,7 @@ class TournamentService(BaseServices):
                         tournament_info = await self.redis.json().get(RTables.JSON_TOURNAMENT(code))
                         if tournament_info:
                             tournament_info = await self.tournament_info_helper(tournament_info, code, client)
+                            # uncomment when atresall added the new attribute if not tournament_info['tournament_ready']:
                             all_tournaments.append(tournament_info)
                     except Exception as e:
                         self._logger.error(f"Error processing tournament {code}: {str(e)}")
