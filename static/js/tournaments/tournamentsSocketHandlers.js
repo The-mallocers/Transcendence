@@ -105,11 +105,11 @@ export function setUpTournamentSocket (tournamentSocket) {
                 console.log("Im told theres been an update, so now Im asking for it !");
                 tournamentSocket.send(JSON.stringify(get_tournament_info));
                 break;
-            case "NEW_TOURNAMENTS":
-                // console.log("Im told theres been an update, so now Im asking for it !");
+            case "TOURNAMENTS_NOTIFICATION":
+                console.log("tetetettyaefgiuyagwd");
                 // tournamentSocket.send(JSON.stringify(get_tournament_info));
-                // populateJoinTournament(jsonData.data.content);
-                tournamentSocket.send(JSON.stringify(get_tournaments_info));
+                populateJoinTournament(jsonData.data.content);
+                // tournamentSocket.send(JSON.stringify(get_tournaments_info));
 
                 break;
             case "TOURNAMENT_CREATED":

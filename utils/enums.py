@@ -80,7 +80,6 @@ class RequestAction(str, Enum):
     JOIN_TOURNAMENT: str = 'join_tournament'
     LEAVE_TOURNAMENT: str = 'leave_tournament'
     START_TOURNAMENT: str = 'start_tournament'
-    LIST_TOURNAMENT: str = 'list_tournament'
     LIST_PLAYERS: str = 'list_players'
     TOURNAMENT_INFO: str = 'tournament_info'
     GET_TOURNAMENT_CLIENTS: str = 'get_tournament_clients'
@@ -118,7 +117,7 @@ class ResponseAction(str, Enum):
 
     # ── Tournaments ───────────────────────────────────────────────────────────────── #
     TOURNAMENT_CREATED: str = 'You have successfully create the tournament'
-    NEW_TOURNAMENTS: str = 'New tournaments created'
+    TOURNAMENTS_NOTIFICATION: str = 'New tournaments created'
     TOURNAMENT_JOIN: str = 'You have successfully joined the tournament'
     TOURNAMENT_PLAYER_JOIN: str = 'Player join the tournament.'
     TOURNAMENT_PLAYER_LEFT: str = 'Player left the tournament.'

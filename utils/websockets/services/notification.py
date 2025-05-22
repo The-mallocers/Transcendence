@@ -5,7 +5,7 @@ from channels.db import database_sync_to_async
 from apps.chat.models import Rooms, Messages
 from apps.client.models import Clients
 from utils.enums import EventType, ResponseAction, ResponseError, RTables
-from utils.util import create_game_id
+from utils.util import create_game_id, get_all_online_clients, aget_all_online_clients
 from utils.websockets.channel_send import asend_group, asend_group_error
 from utils.websockets.services.services import BaseServices
 
@@ -15,7 +15,7 @@ class NotificationService(BaseServices):
         await super().init(client)
         self.service_group = f'{EventType.NOTIFICATION.value}_{client.id}'
         username = await self.get_username(client)
-        online_clients = await self.get_all_online_clients()
+        online_clients = await aget_all_online_clients(self.redis)
         for client in online_clients:
             await asend_group(client, EventType.NOTIFICATION, ResponseAction.ACK_ONLINE_STATUS,{
                     "username": username,
@@ -26,13 +26,6 @@ class NotificationService(BaseServices):
     @database_sync_to_async
     def get_username(self, client):
         return client.profile.username
-
-    async def get_all_online_clients(self):
-        client_keys = await self.redis.keys("client_*")
-        # Decode because this gets us the results in bytes
-        if client_keys and isinstance(client_keys[0], bytes):
-            client_keys = [key.decode() for key in client_keys]
-        return client_keys
 
     # Client is the person that want to add a friend to his friend list
     # Target is the friends to add
@@ -431,7 +424,7 @@ class NotificationService(BaseServices):
         await self.redis.hdel(RTables.HASH_CLIENT(client.id), str(EventType.NOTIFICATION.value))
 
         username = await self.get_username(client)
-        online_clients = await self.get_all_online_clients()
+        online_clients = await aget_all_online_clients(self.redis)
 
         # Notify other clients that this user is offline
         for client_key in online_clients:
