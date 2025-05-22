@@ -140,35 +140,26 @@ def get_rivals(client, games_played) -> dict:
 
 def get_pending_tournament_invitations(client):
     pending_invitations = []
-    try:
-        redis = RedisConnectionPool.get_sync_connection("Tournament_pending")
-        
-        invitation_pattern = f"{RTables.HASH_TOURNAMENT_INVITATION}:*:{client.id}"
-        keys = redis.keys(invitation_pattern)
-        
-        for key in keys:
-            try:
-                invitation_data = redis.hgetall(key)
-                if invitation_data and b'status' in invitation_data and invitation_data[b'status'] == b'pending':
-                    tournament_code = key.decode('utf-8').split(':')[1]
-                    
-                    tournament_info = redis.json().get(RTables.JSON_TOURNAMENT(tournament_code))
-                    
-                    inviter_id = invitation_data[b'inviter_id'].decode('utf-8')
-                    inviter = Clients.get_client_by_id(uuid.UUID(inviter_id))
-                    
-                    if tournament_info and inviter:
-                        pending_invitations.append({
-                            'tournament_code': tournament_code,
-                            'tournament_name': tournament_info['title'],
-                            'inviter_id': inviter_id,
-                            'inviter_username': inviter.profile.username
-                        })
-            except Exception as e:
-                print(f"Error processing invitation {key}: {e}") # jsp
-    except Exception as e:
-        print(f"Error retrieving tournament invitations: {e}") # jsp
-    
+    redis = RedisConnectionPool.get_sync_connection("Tournament_pending")
+
+    invitation_pattern = f"{RTables.HASH_TOURNAMENT_INVITATION}:*:{client.id}"
+    keys = redis.keys(invitation_pattern)
+
+    for key in keys:
+        invitation_data = redis.hgetall(key)
+        if invitation_data and b'status' in invitation_data and invitation_data[b'status'] == b'pending':
+            tournament_code = key.decode('utf-8').split(':')[1]
+            tournament_info = redis.json().get(RTables.JSON_TOURNAMENT(tournament_code))
+            inviter_id = invitation_data[b'inviter_id'].decode('utf-8')
+            inviter = Clients.get_client_by_id(uuid.UUID(inviter_id))
+            if tournament_info and inviter:
+                pending_invitations.append({
+                    'tournament_code': tournament_code,
+                    'tournament_name': tournament_info['title'],
+                    'inviter_id': inviter_id,
+                    'inviter_username': inviter.profile.username
+                })
+
     return pending_invitations
 
 def get_friends_online_status(friends):

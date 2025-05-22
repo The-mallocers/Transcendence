@@ -1,0 +1,26 @@
+{% load static %}
+
+<head>
+</head>
+
+
+<style>
+    .tabOpened {
+        color: white;
+        position: fixed;
+        top: 0;
+        left: 0;
+        /* background-image: ; */
+        width: 100vw;
+        height: 100vh;
+    }
+    .tabOpened h1 {
+        font-size: 4rem;
+    }
+</style>
+
+<div class="tabOpened d-flex justify-center align-items-center" style="background-image: url('{% static 'assets/imgs/loginBackground.jpg' %}');">
+   <h1 class="text-center" >You are already playing in another tab, go there !</h1>
+</div>
+
+<script type="module" src="{% static '/js/apps/auth/login.js' %}"></script>
