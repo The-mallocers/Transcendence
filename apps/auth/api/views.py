@@ -21,7 +21,7 @@ from utils.serializers.client import ClientSerializer
 from utils.serializers.permissions.auth import PasswordPermission
 from utils.serializers.picture import ProfilePictureValidator
 from django.template.loader import render_to_string
-
+from asgiref.sync import async_to_sync
 
 class PasswordApiView(APIView):
     permission_classes = [PasswordPermission]
@@ -123,8 +123,14 @@ class LoginApiView(APIView):
             }, status=status.HTTP_401_UNAUTHORIZED)
         else:
             response = None
+            isOnline = async_to_sync(isClientOnline)(client)
+            print("isOnline: ", isOnline)
+            if isOnline:
+                return Response({
+                "error": "You are already logged in somewhere else"
+            }, status=status.HTTP_401_UNAUTHORIZED)
             # adding the 2fa check here
-            if client.twoFa.enable:
+            elif client.twoFa.enable:
                 if not client.twoFa.scanned:
                     get_qrcode(client, False)
                 response = Response({
@@ -141,6 +147,7 @@ class LoginApiView(APIView):
                 JWT(client, JWTType.ACCESS, request).set_cookie(response)
                 JWT(client, JWTType.REFRESH, request).set_cookie(response)
             return response
+    
 
 
 # TODO, add the fact that we disconnect the notif socket/Get rid of the client in redis
@@ -365,3 +372,19 @@ class DeleteApiView(APIView):
             return Response({
                 "error": "You are not logged in"
             }, status=status.HTTP_401_UNAUTHORIZED)
+
+
+async def isClientOnline(client):
+    redis = await RedisConnectionPool.get_async_connection("is_client_online")
+    client_keys = await redis.keys("client_*")
+    # Decode because this gets us the results in bytes
+    if client_keys and isinstance(client_keys[0], bytes):
+        client_keys = [key.decode() for key in client_keys]
+    client_ids = [key.removeprefix("client_") for key in client_keys]
+    # print(f"client keys {client_keys}")
+    # print(f"client_ids {client_ids}")
+    # print(f"client.id {client.id}")
+    if str(client.id) in client_ids:
+        return True
+    else:
+        return False
