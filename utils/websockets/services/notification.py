@@ -218,7 +218,7 @@ class NotificationService(BaseServices):
         if await Clients.acheck_in_queue(client, self.redis):
             return await asend_group_error(self.service_group, ResponseError.ALREADY_IN_QUEUE)
         if not await self.redis.exists(RTables.HASH_DUEL_QUEUE(code)):
-            return await asend_group_error(self.service_group, ResponseError.DUEL_NOT_EXIST)
+            return await asend_group_error(self.service_group, ResponseError.DUEL_NOT_EXIST, {"opponent": target_name})
         if await self.redis.hexists(RTables.HASH_DUEL_QUEUE(code), str(client.id)) is False:
             return await asend_group_error(self.service_group, ResponseError.NOT_INVITED)
         else:
@@ -251,8 +251,9 @@ class NotificationService(BaseServices):
 
     async def _handle_refuse_duel(self, data, client):
         code = data['data']['args']['code']
+        target_name = data['data']['args']['username']
         if not await self.redis.exists(RTables.HASH_DUEL_QUEUE(code)):
-            return await asend_group_error(self.service_group, ResponseError.DUEL_NOT_EXIST)
+            return await asend_group_error(self.service_group, ResponseError.DUEL_NOT_EXIST, {"opponent": target_name})
         if await self.redis.hexists(RTables.HASH_DUEL_QUEUE(code), str(client.id)) is False:
             return await asend_group_error(self.service_group, ResponseError.NOT_INVITED)
         else:
