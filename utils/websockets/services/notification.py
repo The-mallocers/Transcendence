@@ -213,7 +213,9 @@ class NotificationService(BaseServices):
                 return await asend_group_error(self.service_group, ResponseError.ALREADY_JOIN_DUEL)
             else:
                 await self.redis.hset(RTables.HASH_DUEL_QUEUE(code), str(client.id), 'True')
-                await asend_group(self.service_group, EventType.MATCHMAKING, ResponseAction.DUEL_JOIN)
+                await asend_group(self.service_group, EventType.NOTIFICATION, ResponseAction.DUEL_JOIN, {
+                                         "opponent": await target.aget_profile_username(),
+                                     })
                 await asend_group(RTables.GROUP_NOTIF(target.id), EventType.NOTIFICATION, ResponseAction.DUEL_JOIN)
 
     async def _handle_pending_duels(self, data, client):

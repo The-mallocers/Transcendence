@@ -307,10 +307,12 @@ notifSocket.onmessage = (event) => {
         navigateTo("/pong/gamemodes/");
         remove_toast();
         toast_message(`${message.data.content.username} refuses the duel`);
+    } 
+    else if (message.data.action == "DUEL_JOIN") {
+        navigateTo(`/pong/duel/?opponent=${message.data.content.opponent}`);
     }
     else if(message.data.action == "USER_OFFLINE"){
         remove_toast();
-
         navigateTo('/pong/gamemodes/')
         toast_message(`Player you want to duel is offline`);
     } else if (message.data.action == "ACK_ONLINE_STATUS") {
@@ -422,7 +424,6 @@ window.handleAcceptDuel = function(code, targetName) {
     remove_toast();
     const message = create_message_duel("accept_duel", code, targetName);
     notifSocket.send(JSON.stringify(message));
-    navigateTo(`/pong/duel/?opponent=${targetName}`);
 };
 
 window.handleRefuseDuel = function(code, targetName) {

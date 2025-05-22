@@ -212,16 +212,16 @@ label{
     margin-bottom: 10px;
 }
 .row-information{
-    height: 46vh;
+    min-height: 46vh;
 }
 
-.box-top{
+/* .box-top{
     height: 40vh;
 }
 
 .box-bottom{
     height: 45vh;
-}
+} */
 
 .twofa-image{
     width:400px;

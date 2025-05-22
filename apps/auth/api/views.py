@@ -176,10 +176,8 @@ def change_two_fa(req):
         data = json.loads(req.body.decode('utf-8'))
         client = Clients.get_client_by_request(req)
         if client is not None:
-            # client.twoFa.update("enable", data['status'])
             if(data['status']):
                 if get_qrcode(client, True) == True:
-                    print("at the true: ", client.twoFa.key)
                     response = JsonResponse({
                         "success": True,
                         "state": True,
@@ -187,8 +185,7 @@ def change_two_fa(req):
                         "message": "State 2fa change to true",
                     }, status=200)
             else:
-                print("at the false: ", client.twoFa.key)
-                #rm image dans media quand je desactive le 2fa
+                client.twoFa.update("enable", False)
                 response = JsonResponse({
                     "success": True,
                     "state": False,
@@ -197,11 +194,10 @@ def change_two_fa(req):
         else:
             response = JsonResponse({
                 "success": False,
-                "message": "No client available"
-            }, status=403)
+                "message": "No user match this request"
+            }, status=404)
         return response
 
-# utils function for 2fa
 import pyotp
 import qrcode
 import io
@@ -236,7 +232,6 @@ def get_qrcode(user, binary):
         image_file = ContentFile(contents, name=f"{user.profile.username}_qrcode.png")
         new_twofa.qrcode = image_file
         new_twofa.save()
-        print("number: ", Clients.objects.filter(twoFa=old_twofa).count())
         # Delete old TwoFA if not used by any other client
         if old_twofa and Clients.objects.filter(twoFa=old_twofa).count() <= 1:
             if old_twofa.qrcode:
@@ -248,31 +243,29 @@ def get_qrcode(user, binary):
 
 def post_check_qrcode(req):
     client = Clients.get_client_by_request(req)
-    if client and req.method == "POST":
-        data = json.loads(req.body.decode('utf-8'))
-        print(data)
-        print(client.twoFa.key)
-        totp = pyotp.TOTP(client.twoFa.key)
-        print(totp)
-        is_valid = totp.verify(data['code'])
-        if is_valid:
-            client.twoFa.update("enable", True)
-            if not client.twoFa.scanned:
-                client.twoFa.update("scanned", True)
-            print("client successfully validate")
-            response = formulate_json_response(True, 200, "2Fa successfully activate", "/profile/settings") 
-            return response
+    if client: 
+        if req.method == "POST":
+            data = json.loads(req.body.decode('utf-8'))
+            totp = pyotp.TOTP(client.twoFa.key)
+            is_valid = totp.verify(data['code'])
+            if is_valid:
+                client.twoFa.update("enable", True)
+                if not client.twoFa.scanned:
+                    client.twoFa.update("scanned", True)
+                response = formulate_json_response(True, 200, "2Fa successfully activate", "/profile/settings") 
+                return response
+            else:
+                return formulate_json_response(False, 200, "Invalid code", "/profile/settings")
         else:
-            print("invalid code")
-            return formulate_json_response(False, 400, "Invalid code", "/profile/settings")
-    return formulate_json_response(False, 400, "No email match this request", "/profile/settings")
+            return formulate_json_response(False, 405, "Method not allowed for this request", "/profile/settings")    
+    else:
+        return formulate_json_response(False, 404, "No user match this request", "/profile/settings")
 
 def post_twofa_code(req):
     email = req.COOKIES.get('email')
     client = Clients.get_client_by_email(email)
-    response = formulate_json_response(False, 400, "Error getting the user", "/auth/login")
     if client is None:
-        return response
+        return formulate_json_response(False, 404, "No user match this request", "/auth/login")
     if req.method == "POST":
         data = json.loads(req.body.decode('utf-8'))
         totp = pyotp.TOTP(client.twoFa.key)
@@ -285,9 +278,9 @@ def post_twofa_code(req):
             JWT(client, JWTType.REFRESH, req).set_cookie(response)
             return response
         else:
-            response = formulate_json_response(False, 400, "Invalid Code", "/auth/login")
+            response = formulate_json_response(False, 200, "Invalid Code", "/auth/login")
     else:
-        response = formulate_json_response(False, 400, "No email match this request", "/auth/login")
+        response = formulate_json_response(False, 401, "Method not allowed for this request", "/auth/login")
     return response
 
 def formulate_json_response(state, status, message, redirect):
@@ -350,7 +343,6 @@ class DeleteApiView(APIView):
             response.delete_cookie('refresh_token')
             response.delete_cookie('oauthToken')
             try:
-                # print(JWT.extract_token(request, JWTType.REFRESH))
                 JWT.extract_token(request, JWTType.REFRESH).invalidate_token()
             except Exception as e:
                 logging.getLogger('MainThread').error(str(e))
