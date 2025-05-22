@@ -360,6 +360,7 @@ class DeleteApiView(APIView):
                         "error": "You are currently in a tournament, please end it before deleting your account"
                     }, status=status.HTTP_401_UNAUTHORIZED)
             client.delete()
+            RedisConnectionPool.close_sync_connection('api')
             return response
         else:
             return Response({

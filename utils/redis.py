@@ -131,10 +131,6 @@ class RedisConnectionPool:
         except Exception as e:
             cls._logger.error(f"Redis error: {str(e)}")
             raise
-        finally:
-            # No need to explicitly close synchronous Redis connections
-            # They will be closed when the connection object is garbage collected
-            pass
 
     @classmethod
     def close_sync_connection(cls, alias: str = 'default'):
@@ -148,6 +144,19 @@ class RedisConnectionPool:
                 cls._logger.error(f"Error closing Redis sync connection: {str(e)}")
             finally:
                 del cls._sync_pools[alias][identifier]
+
+    @classmethod
+    async def close_async_connection(cls, alias: str = 'default'):
+        identifier = cls._get_identifier()
+
+        if alias in cls._pools and identifier in cls._pools[alias]:
+            try:
+                await cls._pools[alias][identifier].close()
+                cls._logger.debug(f"Closed Redis async connection for alias: {alias}, context: {identifier}")
+            except Exception as e:
+                cls._logger.error(f"Error closing Redis async connection: {str(e)}")
+            finally:
+                del cls._pools[alias][identifier]
 
     @classmethod
     async def close_all_connections(cls):
