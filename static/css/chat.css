@@ -111,6 +111,10 @@
     color: aliceblue;
 }
 
+input {
+    color: white;
+}
+
 /* Classes utilitaires (inchangées) */
 .col-4 {
     width: 33.33%;
@@ -150,6 +154,14 @@
 
 .roomroom.active-room {
     background-color: #5e7e82;
+}
+
+#messageInput {
+    color: white;
+}
+
+#messageInput::placeholder {
+    color: gray;
 }
 
 #messageInput:focus {
