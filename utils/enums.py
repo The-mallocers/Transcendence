@@ -82,6 +82,7 @@ class RequestAction(str, Enum):
     START_TOURNAMENT: str = 'start_tournament'
     LIST_PLAYERS: str = 'list_players'
     TOURNAMENT_INFO: str = 'tournament_info'
+    LIST_TOURNAMENT: str = 'list_tournament'
     GET_TOURNAMENT_CLIENTS: str = 'get_tournament_clients'
     INVITE_FRIEND: str = 'invite_friend'
     TOURNAMENT_INVITATION_RESPONSE: str = 'tournament_invitation_response'

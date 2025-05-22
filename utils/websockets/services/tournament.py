@@ -212,6 +212,22 @@ class TournamentService(BaseServices):
         }
         return roomInfos
 
+    async def _handle_list_tournament(self, data, client):
+        tournaments_in_waitting = []
+
+        async for key in self.redis.scan_iter(match=f'{RTables.JSON_TOURNAMENT("*")}'):
+            key = key.decode('utf-8')
+            tournament_status = TournamentStatus(await self.redis.json().get(key, Path('status')))
+            tournament_title = await self.redis.json().get(key, Path('title'))
+            tournaments_players_ids = await self.redis.json().get(key, Path('clients'))
+            tournaments_players = await Clients.aget_tournament_clients_infos(tournaments_players_ids)
+            tournament_info = {'title': tournament_title, 'players_infos': tournaments_players}
+            if tournament_status is TournamentStatus.WAITING or tournament_status is TournamentStatus.CREATING:
+                tournaments_in_waitting.append(tournament_info)
+
+        await asend_group(RTables.GROUP_CLIENT(client.id), EventType.TOURNAMENT, ResponseAction.TOURNAMENTS_NOTIFICATION, tournaments_in_waitting)
+
+
     async def _helper_list_tournament(self, client):
         tournaments_in_waitting = []
 
