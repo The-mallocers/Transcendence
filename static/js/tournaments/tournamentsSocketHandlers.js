@@ -108,7 +108,9 @@ export function setUpTournamentSocket (tournamentSocket) {
             case "TOURNAMENTS_NOTIFICATION":
                 console.log("tetetettyaefgiuyagwd");
                 // tournamentSocket.send(JSON.stringify(get_tournament_info));
+                console.log("jsonData.data.content", jsonData.data.content)
                 populateJoinTournament(jsonData.data.content);
+
                 // tournamentSocket.send(JSON.stringify(get_tournaments_info));
 
                 break;
