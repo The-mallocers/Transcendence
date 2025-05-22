@@ -124,6 +124,7 @@ class LoginApiView(APIView):
         else:
             response = None
             isOnline = async_to_sync(isClientOnline)(client)
+            print("isOnline: ", isOnline)
             if isOnline:
                 return Response({
                 "error": "You are already logged in somewhere else"
@@ -388,9 +389,10 @@ async def isClientOnline(client):
     if client_keys and isinstance(client_keys[0], bytes):
         client_keys = [key.decode() for key in client_keys]
     client_ids = [key.removeprefix("client_") for key in client_keys]
-    print(f"client_keys {client_ids}")
+    print(f"client keys {client_keys}")
+    print(f"client_ids {client_ids}")
     print(f"client.id {client.id}")
-    if client.id in client_ids:
+    if str(client.id) in client_ids:
         return True
     else:
         return False

@@ -58,7 +58,8 @@ class JWT:
             samesite='Lax',
             expires=self.EXP
         )
-        self._store_session_redis()
+        # self._store_session_redis()
+        #do not uncomment unless you know what you are doing
         return response
 
     def invalidate_token(self):
