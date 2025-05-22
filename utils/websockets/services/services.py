@@ -60,3 +60,10 @@ class BaseServices(ABC):
 
         except Exception as e:
             raise e
+
+    async def get_all_online_clients(self):
+        client_keys = await self.redis.keys("client_*")
+        # Decode because this gets us the results in bytes
+        if client_keys and isinstance(client_keys[0], bytes):
+            client_keys = [key.decode() for key in client_keys]
+        return client_keys

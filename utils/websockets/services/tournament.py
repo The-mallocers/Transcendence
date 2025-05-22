@@ -7,7 +7,7 @@ from redis.commands.json.path import Path
 from apps.client.models import Clients
 from apps.game.models import Game
 from apps.tournaments.models import Tournaments
-from utils.enums import EventType, GameStatus, PlayerSide
+from utils.enums import EventType, GameStatus, PlayerSide, TournamentStatus
 from utils.enums import RTables, ResponseError, ResponseAction
 from utils.pong.objects import score
 from utils.threads.matchmaking import tournament_queue
@@ -54,9 +54,14 @@ class TournamentService(BaseServices):
                 tournament_queue.put(tournament)
                 await self.channel_layer.group_add(RTables.GROUP_TOURNAMENT(tournament.code), self.channel_name)
                 await self.redis.hset(name=RTables.HASH_TOURNAMENT_QUEUE(tournament.code), key=str(client.id), value=str(True))
-                await asend_group(RTables.GROUP_TOURNAMENT(tournament.code), EventType.TOURNAMENT, ResponseAction.TOURNAMENT_CREATED, { # testing here
-                    'code': tournament.code,
-                })
+                online_clients = await self.get_all_online_clients()
+                for online_client in online_clients:
+                    if online_client.id == client.id:
+                        await asend_group(RTables.GROUP_TOURNAMENT(tournament.code), EventType.TOURNAMENT, ResponseAction.TOURNAMENT_CREATED,{
+                                  'code': tournament.code,})
+                    else:
+                        await asend_group(online_client, EventType.TOURNAMENT, ResponseAction.NEW_TOURNAMENTS, {
+                                "code": tournament.code})
             except ValueError as e:
                 await asend_group_error(self.service_group, ResponseError.KEY_ERROR, str(e))
             except Exception as e:
@@ -223,27 +228,18 @@ class TournamentService(BaseServices):
         return roomInfos
 
     async def _handle_list_tournament(self, data, client):
-        cursor = 0
-        all_tournaments = []
+        tournaments_in_waitting = []
 
-        while True:
-            cursor, keys = await self.redis.scan(cursor=cursor, match=RTables.JSON_TOURNAMENT('*'))
-            for key in keys:
-                key_str = key.decode('utf-8')
-                match = re.search(rf'{RTables.JSON_TOURNAMENT("")}(\w+)$', key_str)
-                if match:
-                    code = match.group(1)
-                    try:
-                        tournament_info = await self.redis.json().get(RTables.JSON_TOURNAMENT(code))
-                        if tournament_info:
-                            tournament_info = await self.tournament_info_helper(tournament_info, code, client)
-                            # uncomment when atresall added the new attribute if not tournament_info['tournament_ready']:
-                            all_tournaments.append(tournament_info)
-                    except Exception as e:
-                        self._logger.error(f"Error processing tournament {code}: {str(e)}")
-            if cursor == 0:
-                break
-        await asend_group(self.service_group, EventType.TOURNAMENT, ResponseAction.TOURNAMENT_LIST, all_tournaments)
+        async for key in self.redis.scan_iter(match=f'{RTables.JSON_TOURNAMENT("*")}'):
+            key = key.decode('utf-8')
+            tournament_json = await self.redis.json().get(key)
+            tournament_code = re.search(rf'{RTables.JSON_TOURNAMENT("")}(\w+)$', key).group(1)
+            tournament_status = TournamentStatus(await self.redis.json().get(key, Path('status')))
+            tournament_info = await self.tournament_info_helper(tournament_json, tournament_code, client)
+            if tournament_status is TournamentStatus.WAITING:
+                tournaments_in_waitting.append(tournament_info)
+
+        await asend_group(self.service_group, EventType.TOURNAMENT, ResponseAction.TOURNAMENT_LIST, tournaments_in_waitting)
 
     async def _handle_start_tournament(self, data, client):
         pass

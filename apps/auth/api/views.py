@@ -359,7 +359,7 @@ class DeleteApiView(APIView):
                 return Response({
                     "error": "You are currently in a match, please leave it before deleting your account"
                 }, status=status.HTTP_401_UNAUTHORIZED)
-            for key in redis.scan_iter("queue_tournament_*"):
+            for key in redis.scan_iter(RTables.HASH_TOURNAMENT_QUEUE('*')):
                 if redis.hexists(key, str(client.id)):
                     return Response({
                         "error": "You are currently in a tournament, please end it before deleting your account"

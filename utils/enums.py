@@ -118,6 +118,7 @@ class ResponseAction(str, Enum):
 
     # ── Tournaments ───────────────────────────────────────────────────────────────── #
     TOURNAMENT_CREATED: str = 'You have successfully create the tournament'
+    NEW_TOURNAMENTS: str = 'New tournaments created'
     TOURNAMENT_JOIN: str = 'You have successfully joined the tournament'
     TOURNAMENT_PLAYER_JOIN: str = 'Player join the tournament.'
     TOURNAMENT_PLAYER_LEFT: str = 'Player left the tournament.'
