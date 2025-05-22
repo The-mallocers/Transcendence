@@ -167,6 +167,9 @@ async function getImages(){
         const data = await response.json();
         if (data.status == "success") {
             const images = data.data;
+            const duelExist = data.data.duelExist;
+            if(!duelExist)
+                navigateTo("/pong/gamemodes/");
             return images;
         } else {
             throw new Error(data.error);

@@ -98,8 +98,7 @@ function sendInvitation(friendId) {
     };
     tournamentSocket.send(JSON.stringify(inviteMessage));
     
-    // Show invitation sent feedback
-    remove_toast();
-    toast_message("Invitation sent", "success");
+    
 }
-            
+
+// tournamentSocket.on
