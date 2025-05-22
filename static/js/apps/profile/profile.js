@@ -305,8 +305,14 @@ notifSocket.onmessage = (event) => {
     }
     else if(message.data.action == "DUEL_NOT_EXIST")
     {
-        remove_toast();
+        const listItems = document.querySelectorAll('.pending_item');
         
+        listItems.forEach(item => {
+            if (item.textContent.trim().startsWith(message.data.error.opponent)) {
+                item.remove();
+            }
+        });
+        remove_toast();
         navigateTo("/")
         toast_message("DUEL don't exist");
     } else if (message.data.action == "DUEL_REFUSED") {
