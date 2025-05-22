@@ -35,6 +35,10 @@
     border-radius: 10px;
 }
 
+.arenaPage img {
+    object-fit: cover;
+}
+
 
 .arenaPage .timer {
     position: absolute;

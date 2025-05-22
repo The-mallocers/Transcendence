@@ -319,7 +319,7 @@ def clean_threads(signum, frame):
 def clean_redis(sigum, frame):
     redis = RedisConnectionPool.get_sync_connection('default')
     redis.flushall()
-    RedisConnectionPool.close_all_connections()
+    RedisConnectionPool.close_all_sync_connections()
     signal.default_int_handler(sigum, frame)
 
 # Register the cleanup function to run on application exit

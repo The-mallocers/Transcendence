@@ -9,6 +9,7 @@ from apps.profile.models import Profile
 from config import settings
 from utils.enums import EventType, RTables
 from utils.redis import RedisConnectionPool
+from apps.index.views.index import get_pending_tournament_invitations 
 
 
 def get(req):
@@ -49,7 +50,8 @@ def get(req):
     online_status = redis.hget(RTables.HASH_CLIENT(client.id), str(EventType.NOTIFICATION.value)) is not None
     if client is not None:
         winrate = get_winrate(client, games_played)
-
+    pending_tournament_invitations = get_pending_tournament_invitations(client)
+    
     context = {
         "client": client,
         "clients": Clients.objects.all(),
@@ -63,6 +65,7 @@ def get(req):
         "rank_picture": rank_picture,
         "online_status": "Online" if online_status else "Offline",
         "show_friend_request": show_friend_request,
+        "pending_tournament_invitations": pending_tournament_invitations,
         "friends_online_status": {},  # no friends
     }
     html_content = render_to_string("apps/profile/profile.html", context)
@@ -136,3 +139,4 @@ def delete(request, client_id):
             'success': False,
             'message': 'Account not found'
         }, status=404)
+

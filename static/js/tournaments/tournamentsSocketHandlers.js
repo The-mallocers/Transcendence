@@ -118,13 +118,18 @@ export function setUpTournamentSocket (tournamentSocket) {
                 break;
                 
             case "TOURNAMENT_INVITATION_SENT":
+                remove_toast();
+                toast_message("Invitation sent", "success");
                 console.log(`Invitation sent to ${jsonData.data.content.target_name}`);
                 break;
                 
             case "TOURNAMENT_PLAYER_LEFT" :
                 tournamentSocket.send(JSON.stringify(get_tournament_info));
                 break;
-
+            case "BLOCKED_USER":
+                remove_toast();
+                toast_message("Cant send invitation to user block")
+                break;
             default:
                 break;
         }

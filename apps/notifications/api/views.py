@@ -81,16 +81,27 @@ class GetImages(APIView):
         client = Clients.get_client_by_request(request)
         target = Clients.get_client_by_username(opponent)
         
+        duelExist = False
+        
+        redis = RedisConnectionPool.get_sync_connection("get_duel")
+        for duel in redis.scan_iter(match=RTables.HASH_DUEL_QUEUE('*')):
+            if redis.hexists(duel, str(client.id)) and redis.hexists(duel, str(target.id)):
+                duelExist = True
+                
         if client and target:
             return Response({
                 "status": "success",
                 "data": {
                     "hostPicture": client.profile.profile_picture.url,
-                    "opponentPicture": target.profile.profile_picture.url
+                    "opponentPicture": target.profile.profile_picture.url,
+                    "duelExist": duelExist
                 }
             }, status=status.HTTP_200_OK)
         else:
             return Response({
                 "status": "error",
-                "message": "Client or opponent not found"
+                "message": "Client or opponent not found",
+                "data":{
+                    "duelExist" : duelExist,
+                }
             }, status=status.HTTP_404_NOT_FOUND)
