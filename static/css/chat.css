@@ -161,7 +161,7 @@ input {
 }
 
 #messageInput::placeholder {
-    color: gray;
+    color: #cecece;
 }
 
 #messageInput:focus {
