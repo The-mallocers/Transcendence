@@ -88,13 +88,16 @@ class GameThread(Threads):
                 if channel_name_pR and self.redis.zscore(f'channels:group:{RTables.GROUP_GAME(self.game_id)}', str(channel_name_pR)) is None:
                     async_to_sync(channel_layer.group_add)(RTables.GROUP_GAME(self.game_id), channel_name_pR)
                     send_group(RTables.GROUP_CLIENT(self.game.pR.client.id), EventType.GAME, ResponseAction.JOIN_GAME)
+                # if self.redis.hget(RTables.HASH_TOURNAMENT_QUEUE(self.game.tournament.code), str(self.game.pR.client.id)) == 'True':
                 both_joined += 1
-            if self.redis.hexists(RTables.HASH_CLIENT(self.game.pL.client.id), EventType.GAME.value):
+            if self.redis.hexists(RTables.HASH_CLIENT(self.game.pL.client.id), EventType.GAME.value): #je check si la game socket du client de
+                # gauche est connecté
                 channel_name_pL = self.redis.hget(name=RTables.HASH_CLIENT(self.game.pL.client.id), key=str(EventType.GAME.value))
                 channel_name_pL = channel_name_pL.decode('utf-8') if channel_name_pL else None
                 if channel_name_pL and self.redis.zscore(f'channels:group:{RTables.GROUP_GAME(self.game_id)}', str(channel_name_pL)) is None:
                     async_to_sync(channel_layer.group_add)(RTables.GROUP_GAME(self.game_id), channel_name_pL)
                     send_group(RTables.GROUP_CLIENT(self.game.pL.client.id), EventType.GAME, ResponseAction.JOIN_GAME)
+                # if self.redis.hget(RTables.HASH_TOURNAMENT_QUEUE(self.game.tournament.code), str(self.game.pL.client.id)) == 'True':
                 both_joined += 1
             if not self.redis.hexists(RTables.HASH_TOURNAMENT_QUEUE(self.game.tournament.code), str(self.game.pL.client.id)):
                 return True

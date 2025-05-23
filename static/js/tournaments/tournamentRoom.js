@@ -100,7 +100,7 @@ function sendInvitation(friendId) {
 }
 
 const modalElement = document.getElementById('friendSelectionModal');
-modalElement.addEventListener('hide.bs.modal', () => {
+modalElement?.addEventListener('hide.bs.modal', () => {
     if (document.activeElement instanceof HTMLElement) {
         document.activeElement.blur();
     }

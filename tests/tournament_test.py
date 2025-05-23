@@ -97,7 +97,7 @@ def join_game(client_id, is_tournament=False):
         ws.send(json.dumps(join_msg))
     except RuntimeError:
     # La socket est fermée
-        print("esquiveeee")
+        print("esquiveeee2")
         pass
 
 
@@ -257,7 +257,7 @@ def on_open(ws, client_id, is_host=False):
         ws.send(json.dumps(ping_msg))
     except RuntimeError:
         # 
-        print("esquiveeee")
+        print("esquiveeee3")
         pass
 
 
@@ -321,7 +321,7 @@ def create_tournament(client_id, num_clients):
         ws.send(json.dumps(tournament_msg))
     except RuntimeError:
         # La socket est fermée
-        print("esquiveeee")
+        print("esquiveeee4")
         pass
 
 
@@ -347,7 +347,7 @@ def join_tournament(client_id, code):
         ws.send(json.dumps(join_msg))
     except RuntimeError:
         # La socket est fermée
-        print("esquiveeee")
+        print("esquiveeee5")
         pass
 
 

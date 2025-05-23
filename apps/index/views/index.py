@@ -1,3 +1,6 @@
+import logging
+import traceback
+
 from django.http import JsonResponse
 from django.middleware.csrf import get_token
 from django.template.loader import render_to_string
@@ -166,10 +169,10 @@ def get_pending_tournament_invitations(client):
                             'inviter_username': inviter.profile.username
                         })
             except Exception as e:
-                print(f"Error processing invitation {key}: {e}")
+                logging.getLogger('MainThread').error(traceback.format_exc())
     except Exception as e:
-        print(f"Error retrieving tournament invitations: {e}")
-    
+        logging.getLogger('MainThread').error(traceback.format_exc())
+
     return pending_invitations
 
 def get_friends_online_status(friends):

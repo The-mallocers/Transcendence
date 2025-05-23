@@ -290,8 +290,11 @@ class Clients(models.Model):
             cursor, keys = await redis.scan(cursor=cursor, match=RTables.HASH_QUEUE('*'))
             for key in keys:
                 ready = await redis.hget(key, str(client.id))
-                if ready and ready.decode('utf-8') == 'True':
-                    return key
+                if ready:
+                    if RTables.HASH_TOURNAMENT_QUEUE('') in key.decode('utf-8'):
+                        return key
+                    elif ready.decode('utf-8') == 'True':
+                        return key
             if cursor == 0:
                 break
         return None
