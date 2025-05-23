@@ -169,7 +169,7 @@ export function populateTournament(tournament_data){
             <div class="content border p-3 d-flex justify-content-between align-items-center">
             <div class="d-flex align-items-center justify-content-center gap-3">
             <div class="nickname ml-3"> waiting</div>
-            <div>(add bpoyer's animation with the li dots)</div>
+
             </div>
             </div>
             </div>
