@@ -17,6 +17,7 @@ import logging.config
 import os
 import shutil
 import signal
+import socket
 import stat
 import sys
 import time
@@ -34,6 +35,7 @@ from django.middleware.common import CommonMiddleware
 from django.middleware.csrf import CsrfViewMiddleware
 from django.middleware.security import SecurityMiddleware
 
+from utils.redis import RedisConnectionPool
 from utils.threads.threads import Threads
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ PATH SETTINGS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
@@ -43,7 +45,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ CORE SETTINGS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
 
 ROOT_URLCONF = 'config.urls'
@@ -87,6 +89,7 @@ MIDDLEWARE = [
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'utils.jwt.JWTMiddleware.JWTMiddleware',
+    # 'utils.session.SessionLimitingMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -123,12 +126,20 @@ REST_FRAMEWORK = {
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ SECURITY SETTINGS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'z3r2p4']
-CSRF_TRUSTED_ORIGINS = ['https://localhost:8000', 'https://127.0.0.1:8000']
+HOSTNAME = os.getenv('DJANGO_HOSTNAME', 'localhost')
+ALLOWED_HOSTS = ['*']
+IPWARE_TRUSTED_PROXIES = ['127.0.0.1', '::1', 'django', 'nginx']
+CSRF_TRUSTED_ORIGINS = [
+    f'https://{HOSTNAME}:8000', 
+    'https://localhost:8000', 
+    'https://127.0.0.1:8000', 
+    ]
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+USE_X_FORWARDED_HOST = True
 SECURE_SSL_REDIRECT = True
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
+
 
 # Protected paths configuration
 PROTECTED_PATHS = [
@@ -150,13 +161,25 @@ ROLE_PROTECTED_PATHS = {
     '/pages/admin/*': ['admin']
 }
 
+# ────────────────────────────────── Session Limiting ────────────────────────────────── #
+
+SESSION_LIMITING_EXPIRY = 1800
+SESSION_LIMITING_BLOCK_NEW = True
+SESSION_LIMITING_EXEMPT_ADMIN = True
+SESSION_LIMITING_EXEMPT_PATHS = [
+    '/pages/',
+    '/api/',
+    '/static/',
+    '/media/'
+]
+
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ JWT SETTINGS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
 
 JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY')
 JWT_EXP_ACCESS_TOKEN = os.environ.get('JWT_EXP_ACCESS_TOKEN', default=10)  # 30 minutes
 JWT_EXP_REFRESH_TOKEN = os.environ.get('JWT_EXP_REFRESH_TOKEN', default=30)  # 30 days
 JWT_ALGORITH = 'HS256'
-JWT_ISS = 'https://localhost:8000'
+JWT_ISS = f'https://{HOSTNAME}'
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ DATABASE SETTINGS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
 DATABASES = {
@@ -287,7 +310,6 @@ def cleanup_old_logs():
                     if os.path.getmtime(file_path) < cutoff_time:
                         try:
                             os.remove(file_path)
-                            print(f"Removed old log file: {file_path}")
                         except Exception as e:
                             raise Exception(f"Failed to remove old log file {file_path}: {e}")
     except Exception as e:
@@ -298,9 +320,16 @@ def clean_threads(signum, frame):
     Threads.stop_all_threads()
     signal.default_int_handler(signum, frame)
 
+def clean_redis(sigum, frame):
+    redis = RedisConnectionPool.get_sync_connection('default')
+    redis.flushall()
+    RedisConnectionPool.close_all_sync_connections()
+    signal.default_int_handler(sigum, frame)
+
 # Register the cleanup function to run on application exit
 signal.signal(signal.SIGTERM, cleanup_old_logs)
 signal.signal(signal.SIGTERM, clean_threads)
+signal.signal(signal.SIGTERM, clean_redis)
 
 # Load logging configuration from JSON file
 with open(os.path.join(BASE_DIR, 'config', 'logging.json'), 'r') as f:

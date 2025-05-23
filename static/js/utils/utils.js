@@ -8,7 +8,6 @@ export async function getClientId() {
         if (!response.ok) {
             return null;
         }
-        // console.log("data:", data);
         if (data.client_id) {
             return data.client_id;
         } else {
@@ -17,6 +16,14 @@ export async function getClientId() {
     } catch (error) {
         console.error("Erreur lors de la récupération de l'ID :", error);
         return null;
+    }
+}
+
+export function sendWhenReady(socket, message) {
+    if (socket.readyState === WebSocket.OPEN) {
+        socket.send(message);
+    } else {
+        socket?.addEventListener('open', () => socket.send(message), { once: true });
     }
 }
 
@@ -52,8 +59,7 @@ export function create_front_chat_room(room, username, usernameId, status, profi
         const chatBlock = chatElement.querySelector(`.chat-block`);
         const chatDuel = chatElement.querySelector(`.chat-duel`);
 
-        chatButton.addEventListener('click', function() {
-            console.log(room);
+        chatButton?.addEventListener('click', function() {
             const roomroomDiv = this.closest('.roomroom');
     
             roomroomDiv.classList.add('active-room');
@@ -65,10 +71,10 @@ export function create_front_chat_room(room, username, usernameId, status, profi
             });
             clickRoom(room)
         })
-        chatProfile.addEventListener('click', function(){
+        chatProfile?.addEventListener('click', function(){
             handleChatProfile(username);
         })
-        chatBlock.addEventListener('click', function(){
+        chatBlock?.addEventListener('click', function(){
             if(this.innerHTML == "Block"){
                 this.innerHTML = "Unblock"
                 handleChatBlock(username);
@@ -79,7 +85,7 @@ export function create_front_chat_room(room, username, usernameId, status, profi
             }
             
         })
-        chatDuel.addEventListener('click', function(){
+        chatDuel?.addEventListener('click', function(){
             handleChatDuel(usernameId);
         })
         newChat.appendChild(chatElement);

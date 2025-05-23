@@ -7,17 +7,7 @@ const notifSocket = WebSocketManager.notifSocket;
 if (pathname == "/pong/gamemodes/") {
     const friends = await apiFriends("/api/friends/get_friends/");
     const duelFriends = document.querySelector(".friends-to-duel");
-    console.log(friends);
-    if (!friends.length) {
-        const parser = new DOMParser();
-        const html =
-            `<li class="list-group-item d-flex justify-content-between align-items-center">
-            <div>No friend to duel</div>
-        </li>`
-        const doc = parser.parseFromString(html, "text/html");
-        const friendElement = doc.body.firstChild;
-        duelFriends.appendChild(friendElement);
-    }
+      
     friends.forEach(friend => {
         const parser = new DOMParser();
         const html =
@@ -30,12 +20,13 @@ if (pathname == "/pong/gamemodes/") {
         const doc = parser.parseFromString(html, "text/html");
         const friendElement = doc.body.firstChild;
         const duelButton = friendElement.querySelector('.duel_friend');
-        duelButton.addEventListener('click', function () {
+        duelButton?.addEventListener('click', function () {
             hide_modal(friend.id)
         });
         duelFriends.appendChild(friendElement);
     });
 }
+
 window.choose_duel_friend = function(){
     const friendSelectionModal = new bootstrap.Modal(document.querySelector('#friendSelectionModal'));
     friendSelectionModal.show();
@@ -48,7 +39,7 @@ window.hide_modal = async function (usernameId) {
         const message = create_message_duel("create_duel", usernameId);
         notifSocket.send(JSON.stringify(message));
     } catch (error) {
-        console.log(error);
+        
     }
 }
 
@@ -64,3 +55,10 @@ export function create_message_duel(action, targetUser) {
     }
     return message;
 }
+
+const modalElement = document.getElementById('friendSelectionModal');
+modalElement?.addEventListener('hide.bs.modal', () => {
+    if (document.activeElement instanceof HTMLElement) {
+        document.activeElement.blur();
+    }
+});

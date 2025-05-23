@@ -22,18 +22,10 @@
                     </div>
                 </div>
                 <div class="col-md-6">
-                    <div class="gamemodeCardContainer" data-route="/pong/arena/">
-                        <div class="d-flex flex-column align-items-center justify-content-center gamemodeCard  front">
-                            <h2>Against A.I</h2>
-                            <img src="{% static '/assets/imgs/robot.png' %}" alt="">
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
                     <div class="gamemodeCardContainer" data-route="/pong/tournament/join/">
                         <div class="d-flex flex-column align-items-center justify-content-center gamemodeCard  front">
                             <h2>Tournament</h2>
-                            <img src="{% static '/assets/imgs/gold.png' %}" alt="">
+                            <img src="{% static '/assets/imgs/trophy.png' %}" alt="">
                         </div>
                     </div>
                 </div>
@@ -52,30 +44,9 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <ul class="friends_group list-group friends-to-duel">
+                <ul class="list-group friends-to-duel">
                 </ul>
             </div>
-            {% if friends_list %}
-            <div class="modal-header">
-                <h5 class="modal-title" id="friendSelectionModalLabel">Create or join Duel (Not working for the moment)</h5>
-            </div>
-            <div class="modal-body">
-                <ul class="friends_group list-group">
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <div>Create Room</div>
-                            <div class="d-flex align-items-center">
-                                <button type="button" class="type-intra-green delete_friend me-4">Create</button>
-                            </div>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <div>Join room</div>
-                            <div class="d-flex align-items-center">
-                                <button type="button" class="type-intra-green delete_friend me-4">Join</button>
-                            </div>
-                        </li>
-                </ul>
-            </div>
-            {% endif %}
         </div>
     </div>
 </div>

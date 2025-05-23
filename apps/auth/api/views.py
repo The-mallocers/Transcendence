@@ -1,6 +1,8 @@
 import random
 
-from django.forms import ValidationError
+# from django.forms import ValidationError
+from rest_framework.exceptions import ValidationError
+
 from django.http import HttpRequest
 from rest_framework import status
 from rest_framework.response import Response
@@ -9,13 +11,17 @@ from rest_framework.views import APIView
 from apps.auth.models import Password
 from apps.client.models import Clients
 from apps.profile.models import Profile
-from utils.enums import JWTType
+from apps.auth.models import TwoFA
+from utils import serializers
+from utils.enums import JWTType, RTables
 from utils.jwt.JWT import JWT
+from utils.redis import RedisConnectionPool
 from utils.serializers.auth import PasswordSerializer
 from utils.serializers.client import ClientSerializer
 from utils.serializers.permissions.auth import PasswordPermission
 from utils.serializers.picture import ProfilePictureValidator
-
+from django.template.loader import render_to_string
+from asgiref.sync import async_to_sync
 
 class PasswordApiView(APIView):
     permission_classes = [PasswordPermission]
@@ -57,22 +63,21 @@ class RegisterApiView(APIView):
                 print("client: ", client)
                 logger.info(f'Client create successfully: {client}')
                 response = Response(ClientSerializer(client).data, status=status.HTTP_201_CREATED)
-                JWT(client, JWTType.ACCESS).set_cookie(response)  # vous aviez raison la team c'est mieux
-                JWT(client, JWTType.REFRESH).set_cookie(response)
+                JWT(client, JWTType.ACCESS, request).set_cookie(response)  # vous aviez raison la team c'est mieux
+                JWT(client, JWTType.REFRESH, request).set_cookie(response)
                 return response
             except Exception as e:
                 import traceback
-                print("\n\nException during save:", str(e))
                 logging.getLogger('MainThread').error(traceback.format_exc())
                 return Response({"error": str(e)},
                                 status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         else:
-            print("Validation errors:", serializer.errors)
+            logging.getLogger('MainThread').error(serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UpdateApiView(APIView):
-    def post(self, request, *args, **kwargs):
+    def put(self, request, *args, **kwargs):
         try:
             data = request.data
             # We get rid of the empty fields
@@ -100,9 +105,9 @@ class UpdateApiView(APIView):
                 return Response({"message": "Infos updated succesfully"}, status=status.HTTP_200_OK)
             else:
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        except ValidationError as e:
+        except (ValidationError) as e:
             return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
+        except Exception as e: 
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR) 
 
 
@@ -114,18 +119,21 @@ class LoginApiView(APIView):
         email = request.POST.get('email')
         pwd = request.POST.get('password')
         client = Clients.get_client_by_email(email)
-        print("client: ", client)
         if client is None or client.password.check_pwd(password=pwd) is False:
-            print("error login", pwd)
             return Response({
                 "error": "Invalid credentials"
             }, status=status.HTTP_401_UNAUTHORIZED)
         else:
             response = None
+            isOnline = async_to_sync(isClientOnline)(client)
+            if isOnline:
+                return Response({
+                "error": "You are already logged in somewhere else"
+            }, status=status.HTTP_401_UNAUTHORIZED)
             # adding the 2fa check here
-            if client.twoFa.enable:
+            elif client.twoFa.enable:
                 if not client.twoFa.scanned:
-                    get_qrcode(client)
+                    get_qrcode(client, False)
                 response = Response({
                     'message': '2FA activated, redirecting',
                     'redirect': '/auth/2fa',
@@ -137,9 +145,10 @@ class LoginApiView(APIView):
                 response = Response({
                     'message': 'Login successful'
                 }, status=status.HTTP_200_OK)
-                JWT(client, JWTType.ACCESS).set_cookie(response)
-                JWT(client, JWTType.REFRESH).set_cookie(response)
+                JWT(client, JWTType.ACCESS, request).set_cookie(response)
+                JWT(client, JWTType.REFRESH, request).set_cookie(response)
             return response
+    
 
 
 # TODO, add the fact that we disconnect the notif socket/Get rid of the client in redis
@@ -156,8 +165,8 @@ class LogoutApiView(APIView):
             try:
                 JWT.extract_token(request, JWTType.REFRESH).invalidate_token()
             except Exception as e:
-                print("Couldnt invalidate the token, it was probably either deleted or modified")
-                print(f"error is {str(e)}")
+                logging.getLogger('MainThread').error("Couldnt invalidate the token, it was probably either deleted or modified")
+                logging.getLogger('MainThread').error(str(e))
             return response
         else:
             return Response({
@@ -175,60 +184,96 @@ def change_two_fa(req):
         data = json.loads(req.body.decode('utf-8'))
         client = Clients.get_client_by_request(req)
         if client is not None:
-            client.twoFa.update("enable", data['status'])
-            response = JsonResponse({
-                "success": True,
-                "message": "State 2fa change"
-            }, status=200)
+            if(data['status']):
+                if get_qrcode(client, True) == True:
+                    response = JsonResponse({
+                        "success": True,
+                        "state": True,
+                        "image": client.twoFa.qrcode.url,
+                        "message": "State 2fa change to true",
+                    }, status=200)
+            else:
+                client.twoFa.update("enable", False)
+                response = JsonResponse({
+                    "success": True,
+                    "state": False,
+                    "message": "State 2fa change to false"
+                }, status=200)
         else:
             response = JsonResponse({
                 "success": False,
-                "message": "No client available"
-            }, status=403)
+                "message": "No user match this request"
+            }, status=404)
         return response
 
-
-# utils function for 2fa
 import pyotp
 import qrcode
 import io
 from django.core.files.base import ContentFile
 
 
-def get_qrcode(user):
-    # create a qrcode and convert it
-    print("first_name: " + user.profile.username + " creating qrcode")
-    if not user.twoFa.qrcode:
-        uri = pyotp.totp.TOTP(user.twoFa.key).provisioning_uri(name=user.profile.username,
-                                                               issuer_name="Transcendance_" + str(
-                                                                   user.profile.username))
+def get_qrcode(user, binary):
+    if not user.twoFa.qrcode or binary is True:
+        old_twofa = user.twoFa
+        
+        new_key = pyotp.random_base32()
+        new_twofa = TwoFA(
+            key=new_key,
+            enable=False,
+            scanned=False
+        )
+        new_twofa.save()
+        
+        user.twoFa = new_twofa
+        user.save()
+        
+        uri = pyotp.totp.TOTP(new_key).provisioning_uri(
+            name=user.profile.username,
+            issuer_name="Transcendance_" + str(user.profile.username)
+        )
+        
         qr_image = qrcode.make(uri)
         buf = io.BytesIO()
         qr_image.save(buf, "PNG")
         contents = buf.getvalue()
-
-        # convert it to adapt to a imagefield type in my db
+        
         image_file = ContentFile(contents, name=f"{user.profile.username}_qrcode.png")
-        user.twoFa.update("qrcode", image_file)
-
+        new_twofa.qrcode = image_file
+        new_twofa.save()
+        # Delete old TwoFA if not used by any other client
+        if old_twofa and Clients.objects.filter(twoFa=old_twofa).count() <= 1:
+            if old_twofa.qrcode:
+                old_twofa.qrcode.delete(save=False)
+            old_twofa.delete()
+            
         return True
     return False
 
-
-def formulate_json_response(state, status, message, redirect):
-    return (JsonResponse({
-        "success": state,
-        "message": message,
-        "redirect": redirect
-    }, status=status))
-
+def post_check_qrcode(req):
+    client = Clients.get_client_by_request(req)
+    if client: 
+        if req.method == "POST":
+            data = json.loads(req.body.decode('utf-8'))
+            totp = pyotp.TOTP(client.twoFa.key)
+            is_valid = totp.verify(data['code'])
+            if is_valid:
+                client.twoFa.update("enable", True)
+                if not client.twoFa.scanned:
+                    client.twoFa.update("scanned", True)
+                response = formulate_json_response(True, 200, "2Fa successfully activate", "/profile/settings") 
+                return response
+            else:
+                return formulate_json_response(False, 200, "Invalid code", "/profile/settings")
+        else:
+            return formulate_json_response(False, 405, "Method not allowed for this request", "/profile/settings")    
+    else:
+        return formulate_json_response(False, 404, "No user match this request", "/profile/settings")
 
 def post_twofa_code(req):
     email = req.COOKIES.get('email')
     client = Clients.get_client_by_email(email)
-    response = formulate_json_response(False, 400, "Error getting the user", "/auth/login")
     if client is None:
-        return response
+        return formulate_json_response(False, 404, "No user match this request", "/auth/login")
     if req.method == "POST":
         data = json.loads(req.body.decode('utf-8'))
         totp = pyotp.TOTP(client.twoFa.key)
@@ -237,12 +282,21 @@ def post_twofa_code(req):
             if not client.twoFa.scanned:
                 client.twoFa.update("scanned", True)
             response = formulate_json_response(True, 200, "Login Successful", "/")
-            JWT(client, JWTType.ACCESS).set_cookie(response)
-            JWT(client, JWTType.REFRESH).set_cookie(response)
+            JWT(client, JWTType.ACCESS, req).set_cookie(response)
+            JWT(client, JWTType.REFRESH, req).set_cookie(response)
             return response
-    response = formulate_json_response(False, 400, "No email match this request", "/auth/login")
+        else:
+            response = formulate_json_response(False, 200, "Invalid Code", "/auth/login")
+    else:
+        response = formulate_json_response(False, 401, "Method not allowed for this request", "/auth/login")
     return response
 
+def formulate_json_response(state, status, message, redirect):
+    return (JsonResponse({
+        "success": state,
+        "message": message,
+        "redirect": redirect
+    }, status=status))
 
 import logging
 
@@ -266,7 +320,6 @@ class GetClientIDApiView(APIView):
 
 class UploadPictureApiView(APIView):
     def post(self, request: HttpRequest, *args, **kwargs):
-        print("Its getting here !")
         try:
             client = Clients.get_client_by_request(request)
             profile = client.profile
@@ -291,7 +344,7 @@ class UploadPictureApiView(APIView):
 # This code essentially logs out THEN delete the account.
 
 class DeleteApiView(APIView):
-    def post(self, request: HttpRequest, *args, **kwargs):
+    def delete(self, request: HttpRequest, *args, **kwargs):
         if request.COOKIES.get('access_token') is not None:
             response = Response({"message": "Successfully deleted your account."}, status=status.HTTP_200_OK)
             response.delete_cookie('access_token')
@@ -300,12 +353,37 @@ class DeleteApiView(APIView):
             try:
                 JWT.extract_token(request, JWTType.REFRESH).invalidate_token()
             except Exception as e:
-                print("Couldnt invalidate the token, it was probably either deleted or modified")
-                print(f"error is {str(e)}")
+                logging.getLogger('MainThread').error(str(e))
+            
+
+            redis = RedisConnectionPool.get_sync_connection('api')
             client = Clients.get_client_by_request(request)
+            if (redis.hexists(RTables.HASH_MATCHES, str(client.id))):
+                return Response({
+                    "error": "You are currently in a match, please leave it before deleting your account"
+                }, status=status.HTTP_401_UNAUTHORIZED)
+            for key in redis.scan_iter(RTables.HASH_TOURNAMENT_QUEUE('*')):
+                if redis.hexists(key, str(client.id)):
+                    return Response({
+                        "error": "You are currently in a tournament, please end it before deleting your account"
+                    }, status=status.HTTP_401_UNAUTHORIZED)
             client.delete()
+            RedisConnectionPool.close_sync_connection('api')
             return response
         else:
             return Response({
                 "error": "You are not logged in"
             }, status=status.HTTP_401_UNAUTHORIZED)
+
+
+async def isClientOnline(client):
+    redis = await RedisConnectionPool.get_async_connection("is_client_online")
+    client_keys = await redis.keys("client_*")
+    # Decode because this gets us the results in bytes
+    if client_keys and isinstance(client_keys[0], bytes):
+        client_keys = [key.decode() for key in client_keys]
+    client_ids = [key.removeprefix("client_") for key in client_keys]
+    if str(client.id) in client_ids:
+        return True
+    else:
+        return False

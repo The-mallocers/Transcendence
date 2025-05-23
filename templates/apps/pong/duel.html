@@ -7,7 +7,7 @@
         <h2 class="duel-title">DUEL</h2>
         <div class="player-box d-flex align-items-center justify-content-between flex-wrap">
             <div class="player-card d-flex align-items-center flex-wrap">
-                <img src="{% static 'assets/imgs/pong-player.png' %}" alt="Player 1" class="player-photo">
+                <img src="{% static 'assets/imgs/pong-player.png' %}" alt="Player 1" class="player-photo client">
                 <h2 class="player-name">{{client.profile.username}}</h2>
             </div>
             <div class="state-connected">Connected</div>
@@ -25,7 +25,7 @@
             </div>
         <div class="player-box d-flex align-items-center justify-content-between flex-wrap">
             <div class="player-card d-flex align-items-center flex-wrap">
-                <img src="{% static 'assets/imgs/pong-player.png' %}" alt="Player 2" class="player-photo">
+                <img src="{% static 'assets/imgs/pong-player.png' %}" alt="Player 2" class="player-photo opponent">
                 <h2 class="player-name opponent_player">Player Two</h2>
             </div>
             <div class="state-of-player">

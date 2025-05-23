@@ -90,10 +90,7 @@ class MatchmakingThread(Threads):
             game.pR = Player.create_player(selected_clients[1])
             if game.pL is not None and game.pR is not None:
                 return True
-        # second we check the duel for start game
-        cursor = 0
-        cursor, duels = self.redis.scan(cursor=cursor, match=RTables.HASH_DUEL_QUEUE('*'))
-        for duel in duels:
+        for duel in self.redis.scan_iter(RTables.HASH_DUEL_QUEUE('*')):
             clients = list(self.redis.hgetall(duel).items())
             if len(clients) >= 2:
                 random.shuffle(clients)

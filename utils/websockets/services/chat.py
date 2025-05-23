@@ -1,5 +1,6 @@
 import json
 import uuid
+import html
 
 from apps.chat.models import Messages, Rooms
 from apps.client.models import Clients
@@ -8,7 +9,7 @@ from utils.websockets.channel_send import asend_group, asend_group_error
 from utils.websockets.services.services import BaseServices, ServiceError
 
 uuid_global_room = uuid.UUID('00000000-0000-0000-0000-000000000000')
-
+MAX_MESSAGE_LENGTH = 200
 
 class ChatService(BaseServices):
     async def init(self, client, *args) -> bool:
@@ -25,59 +26,63 @@ class ChatService(BaseServices):
 
 
     async def _handle_create_room(self, data, client: Clients):
-        try:
-            # Retrieve the target client
-            target = await Clients.aget_client_by_id(data['data']['args']['target'])
+        # Retrieve the target client
+        target = await Clients.aget_client_by_id(data['data']['args']['target'])
 
-            # Initial checks (target does not exist or same ID)
+        # Initial checks (target does not exist or same ID)
+        if target is None:
+            target = Clients.aget_client_by_username(data['data']['args']['target'])
             if target is None:
-                target = Clients.aget_client_by_username(data['data']['args']['target'])
-                if target is None:
-                    return await asend_group_error(self.service_group, ResponseError.TARGET_NOT_FOUND)
+                return await asend_group_error(self.service_group, ResponseError.TARGET_NOT_FOUND)
 
-            if client.id == target.id:
-                return await asend_group_error(self.service_group, ResponseError.SAME_ID)
+        if client.id == target.id:
+            return await asend_group_error(self.service_group, ResponseError.SAME_ID)
 
-            # Check for common rooms between admin and target
-            rooms_admin = await Rooms.aget_room_id_by_client_id(client.id)
-            rooms_target = await Rooms.aget_room_id_by_client_id(target.id)
+        # Check for common rooms between admin and target
+        rooms_admin = await Rooms.aget_room_id_by_client_id(client.id)
+        rooms_target = await Rooms.aget_room_id_by_client_id(target.id)
 
-            common_rooms = set(rooms_admin) & set(rooms_target)  # Optimized set intersection
+        common_rooms = set(rooms_admin) & set(rooms_target)  # Optimized set intersection
 
-            if common_rooms:
-                # Use an existing common room
-                room = await Rooms.get_room_by_id(next(iter(common_rooms)))
-            else:
-                # Create a new room if no common room is found
-                room = await Rooms.create_room()
-                room.admin = client
-                await room.asave()
-                await room.add_client(client)
-                await room.add_client(target)
+        if common_rooms:
+            # Use an existing common room
+            room = await Rooms.get_room_by_id(next(iter(common_rooms)))
+        else:
+            # Create a new room if no common room is found
+            room = await Rooms.create_room()
+            room.admin = client
+            await room.asave()
+            await room.add_client(client)
+            await room.add_client(target)
 
-            room_id = str(await Rooms.get_id(room))  # Store the value to avoid redundant async calls
+        room_id = str(await Rooms.get_id(room))  # Store the value to avoid redundant async calls
 
-            # Add both admin and target to the chat group
-            await self.channel_layer.group_add(RTables.GROUP_CHAT(room_id), self.channel_name.decode('utf-8'))
+        # Add both admin and target to the chat group
+        await self.channel_layer.group_add(RTables.GROUP_CHAT(room_id), self.channel_name.decode('utf-8'))
 
-            target_channel_name = await self.redis.hget(name=RTables.HASH_CLIENT(target.id), key=str(EventType.CHAT.value))
-            if target_channel_name:
-                await self.channel_layer.group_add(RTables.GROUP_CHAT(room_id), target_channel_name.decode('utf-8'))
+        target_channel_name = await self.redis.hget(name=RTables.HASH_CLIENT(target.id), key=str(EventType.CHAT.value))
+        if target_channel_name:
+            await self.channel_layer.group_add(RTables.GROUP_CHAT(room_id), target_channel_name.decode('utf-8'))
 
-            # Notify the admin that the room was created
-            await asend_group(self.service_group, EventType.CHAT, ResponseAction.ROOM_CREATED, {'room_id': room_id})
-        except json.JSONDecodeError as e:
-            self._logger.error(f"JSON parsing error: {e}")
+        # Notify the admin that the room was created
+        await asend_group(self.service_group, EventType.CHAT, ResponseAction.ROOM_CREATED, {'room_id': room_id})
 
     async def _handle_send_message(self, data, client: Clients):
         try:
             # Validate request structure
             args = data.get('data', {}).get('args', {})
-            print(args)
             message, room_id = args.get('message'), args.get('room_id')
 
             if not message or not room_id:
                 raise ServiceError("Invalid JSON format: Missing 'message' or 'room_id'")
+
+             # Check message length
+            if len(message) > MAX_MESSAGE_LENGTH:
+                return await asend_group_error(self.service_group, ResponseError.INVALID_REQUEST, 
+                                            f"Message exceeds maximum length of {MAX_MESSAGE_LENGTH} characters")
+            
+            # Sanitize the message content
+            message = html.escape(message)
 
             # Retrieve room
             room = await Rooms.get_room_by_id(room_id)
@@ -121,10 +126,8 @@ class ChatService(BaseServices):
             })
 
         except ServiceError as e:
-            self._logger.error(f"Service error: {e}")
             await asend_group_error(self.service_group, ResponseError.JSON_ERROR)
         except json.JSONDecodeError as e:
-            self._logger.error(f"JSON parsing error: {e}")
             await asend_group_error(self.service_group, ResponseError.JSON_ERROR)
 
     async def _handle_get_history(self, data, client: Clients):
@@ -145,7 +148,9 @@ class ChatService(BaseServices):
 
             messages = await Messages.aget_message_by_room(room, target)
             if not messages:
-                await asend_group_error(self.service_group, ResponseError.NO_HISTORY)
+                await asend_group_error(self.service_group, ResponseError.NO_HISTORY, {
+                    "username": str(await target.aget_profile_username())
+                })
                 return
 
             # Sending messages in a single batch instead of multiple requests
@@ -154,7 +159,8 @@ class ChatService(BaseServices):
                 for msg in messages
             ]
             await asend_group(self.service_group, EventType.CHAT, ResponseAction.HISTORY_RECEIVED,
-                              {"messages": formatted_messages})
+                              {"messages": formatted_messages,
+                               "username": str(await target.aget_profile_username())})
 
         except json.JSONDecodeError as e:
             self._logger.error(f"JSON parsing error: {e}")
@@ -192,7 +198,6 @@ class ChatService(BaseServices):
         return await asend_group(self.service_group, EventType.CHAT, ResponseAction.PONG)
 
     async def disconnect(self, client):
-        print("In disconnect of chat")
         await self.channel_layer.group_discard(RTables.GROUP_CHAT(uuid_global_room), self.channel_name)
         rooms = await Rooms.aget_room_id_by_client_id(client.id)
         for room in rooms:

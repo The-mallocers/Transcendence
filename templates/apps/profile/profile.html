@@ -2,8 +2,6 @@
 
 <div class="informationsContainer">
     <img class="background" src="{% static 'assets/imgs/'|add:client.profile.coalition|add:'.jpg' %}">
-
-
     <h3>{{ client.profile.username }}</h3>
     <div class="avatar">
         <img src="{{ client.profile.profile_picture.url }}">
@@ -52,11 +50,14 @@
                     {% for rival_id, rival in rivals.items %}
                         <div class="lastPlayer container d-flex flex-row align-items-center justify-content-center"
                              data-route="/profile/?username={{ rival.username }}">
-                             <span class="names d-flex flex-row align-items-end justify-content-center">
+                            <span class="names d-flex flex-row align-items-center">
                                 <img src="{{ rival.profile_picture }}">
                                 <h4 class="fullName">{{ rival.username }}</h4>
-                                <h4 class="mx-2">(Wins: {{ rival.games_won }}, Losses: {{ rival.games_lost }})</h4>
                             </span>
+                            <div class="stats">
+                                <div class="wins">Wins: {{ rival.games_won }}</div>
+                                <div class="losses">Losses: {{ rival.games_lost }}</div>
+                            </div>
                         </div>
                     {% endfor %}
                 </div>
@@ -71,11 +72,14 @@
                         <div class="lastGames container d-flex flex-row align-items-center justify-content-between">
                             <span class="names d-flex flex-row justify-content-enter">
                                 <div class="nickname {% if game.won %}win{% else %} loss {% endif %}">{{ game.opponent }}</div>
-                                <div class="time">A day ago</div>
+                                <div class="time">{{ game.when }}</div>
+                            </span>
+                            <span class="scores d-flex flex-row justify-content-center align-items-center">
+                                <div class="mmr_profile">{{ game.mmr_change }}</div>
                             </span>
                             <span class="scores d-flex flex-row justify-content-center align-items-center">
                                 <div class="myScore">{{ game.myPoints }}</div>
-                                <div class="dash"></div>
+                                <div class="dash" style="background-color: #0a0909;"></div>
                                 <div class="enemyScore">{{ game.enemyPoints }}</div>
                             </span>
                         </div>
@@ -109,8 +113,10 @@
         </div>
     </div>
 </div>
-<!-- <div id="friends" data-friends={{ friends_online_status|json_script:"friends-data" }} style="display: none;"></div> -->
 {{ friends_online_status|json_script:"friends-data" }}
+
+<!-- Fix the JSON format of tournament invitations -->
+{{ pending_tournament_invitations|json_script:"pending-tournament-invitations-data" }}
 
 <script type="module" src="{% static '/js/apps/profile/profile.js' %}" defer></script>
 {% comment %} <script type="module" src="{% static '/js/apps/profile/profile.js' %}?v={% now 'U' %}" defer></script> {% endcomment %}

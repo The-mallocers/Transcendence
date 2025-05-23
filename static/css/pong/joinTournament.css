@@ -143,7 +143,7 @@
 
 
 
-.joinTournamentContainer .joinBtn {
+.joinTournamentContainer .joinTournamentBtn {
     background-color: #00BABB;
     color: white;
     align-self: center;
@@ -159,11 +159,12 @@
     height: 40px;
     width: 40px;
     border-radius: 50%;
+    
 }
 
 
 .joinTournamentContainer .avatarsContainer .imgContainer {
-    border: 2px solid #fff;
+    border: 2px solid #adadad;
     border-radius: 50%;
 }
 
@@ -176,13 +177,15 @@
     overflow: hidden;
 }
 
-.joinTournamentContainer .avatarsContainer .imgContainer:last-of-type img {
-    filter: brightness(0.3);
-}
+/* .joinTournamentContainer .avatarsContainer .imgContainer:last-of-type img {
+} */
 
 
 .joinTournamentContainer .avatarsContainer .more {
     /* margin-left: -15px; */
+    background-color: #000000af;
+    height: 100%;
+    width: 100%;
     position: absolute;
     top: 50%;
     left: 50%;

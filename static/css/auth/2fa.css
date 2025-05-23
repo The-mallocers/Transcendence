@@ -1,44 +1,51 @@
-body {
+.faPage {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 100vw;
+    background-color: #f5f5f5;
+    z-index: 76467;
+}
+
+.faPage .container {
+
     font-family: Arial, sans-serif;
     max-width: 600px;
     margin: 40px auto;
     padding: 20px;
     text-align: center;
-    background-color: #f5f5f5;
-}
-
-.container {
     background-color: white;
     padding: 30px;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-h1 {
+.faPage h1 {
     color: #333;
     margin-bottom: 30px;
 }
 
-.qr-container {
+.faPage .qr-container {
     margin: 20px 0;
     padding: 20px;
     background-color: white;
     display: inline-block;
 }
 
-img {
+.faPage img {
     max-width: 200px;
     height: auto;
 }
 
-.instructions {
+.faPage .instructions {
     color: #666;
     margin: 20px 0;
     text-align: left;
     line-height: 1.6;
 }
 
-input {
+.faPage input {
     width: 200px;
     padding: 12px;
     margin: 20px 0;
@@ -49,17 +56,16 @@ input {
     letter-spacing: 2px;
 }
 
-button {
-    background-color: #4CAF50;
+.faPage button {
+    background-color: #00babc;
     color: white;
     padding: 12px 24px;
     border: none;
-    border-radius: 4px;
     cursor: pointer;
     font-size: 16px;
     transition: background-color 0.3s;
 }
 
-button:hover {
-    background-color: #45a049;
+.faPage button:hover {
+    background-color: #008889;
 }

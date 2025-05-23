@@ -97,6 +97,11 @@ class GameRuntime:
         self.redis.hset(name=RTables.HASH_MATCHES, key=str(self.pL.client.id), value=str(self.code))
         self.redis.hset(name=RTables.HASH_MATCHES, key=str(self.pR.client.id), value=str(self.code))
 
+        #Update le JSON du tournoi.
+        if self.tournament:
+            from utils.threads.tournament import TournamentThread
+            TournamentThread.set_game_players_name(self.tournament.code, self.code, self.pL, self.pR, self.redis)
+
         if self.tournament is None:  # si la game n'est pas dans un tournois
             channel_layer = get_channel_layer()
 
@@ -123,7 +128,11 @@ class GameRuntime:
             if self.tournament is not None:
                 from utils.threads.tournament import TournamentThread
                 TournamentThread.set_game_status(self.tournament.code, self.code, status, self.redis)
-            self.redis.json().set(self.game_key, Path('status'), status)
+                send_group(RTables.GROUP_TOURNAMENT(self.tournament.code), EventType.TOURNAMENT, ResponseAction.TOURNAMENT_UPDATE)
+            try:
+                self.redis.json().set(self.game_key, Path('status'), status)
+            except Exception as e:
+                pass
 
     # ── Getter ────────────────────────────────────────────────────────────────────── #
 

@@ -14,6 +14,7 @@ const notifSocket = WebSocketManager.notifSocket;
 const clientId = await getClientId();
 export const chatSocket = await WebSocketManager.initChatSocket(clientId);
 
+const MAX_MESSAGE_LENGTH = 200;
 
 function showActiveChat(show) {
     const noChat = document.getElementById('no-chat-selected');
@@ -30,16 +31,26 @@ function showActiveChat(show) {
 
 chatSocket.onmessage = (event) => {
     const message = JSON.parse(event.data);
-    console.log(event.data);
+
     
     if (message.data.action == "HISTORY_RECEIVED") {
         showActiveChat(true);
         displayHistory(message.data.content.messages);
+        const messageId = document.getElementById("messageInput");
+        if(messageId)
+        {
+            messageId.placeholder = `Send message to ${message.data.content.username}`
+        }
     }
     else if(message.data.action == "NO_HISTORY")
         {
         showActiveChat(true);
         displayHistory([])
+        const messageId = document.getElementById("messageInput");
+        if(messageId)
+        {
+            messageId.placeholder = `Send message to ${message.data.error.username}`
+        }
     }
     else if(message.data.action == "ALL_ROOM_RECEIVED") {
         displayRooms(message.data.content.rooms);
@@ -53,7 +64,7 @@ chatSocket.onmessage = (event) => {
             const doc = parser.parseFromString(htmlString, "text/html");
             const msgElement = doc.body.firstChild; // Get the actual <div> element
             
-            chatHistory.appendChild(msgElement);
+            chatHistory?.appendChild(msgElement);
             scrollToBottom(chatHistory);
             //Do things to show the new message on the front
         }
@@ -81,8 +92,7 @@ chatSocket.onmessage = (event) => {
                         
 const messageInput = document.getElementById("messageInput")
 if(messageInput){
-    chatSocket.addEventListener("open", (event) => {
-        console.log("WebSocket is open now.");
+    chatSocket?.addEventListener("open", (event) => {
             
         const message = {
             "event": "chat",
@@ -93,25 +103,57 @@ if(messageInput){
         };
         chatSocket.send(JSON.stringify(message));
     });
-    messageInput.addEventListener("keydown", function (event) {
+    messageInput?.addEventListener("keydown", function (event) {
         if (event.key === "Enter") {
             event.preventDefault(); // Prevents the default action (like form submission)
-            let message = this.value; // Get the entered text
-            console.log("User entered:", message);
+            let messageText = this.value.trim(); // Get the entered text and trim whitespace
+            
+            // Check message length
+            if (messageText.length > MAX_MESSAGE_LENGTH) {
+                toast_message(`Message too long. Maximum ${MAX_MESSAGE_LENGTH} characters allowed.`);
+                return;
+            }
+            
+            if (messageText.length === 0) {
+                return; // Don't send empty messages
+            }
+            
             this.value = ""; // Clear the input field after handling
-            //Sending this to the websocket
-            message = {
+            
+            // Sending this to the websocket
+            const message = {
                 "event": "chat",
                 "data": {
                     "action": "send_message",
                     "args": {
                         "room_id": room_id,
-                        "message": message
+                        "message": messageText
                     }
                 }
             }
-            console.log("room: " + room_id);
+
             chatSocket.send(JSON.stringify(message));
+        }
+    });
+
+    const counterElement = document.createElement('div');
+    counterElement.className = 'char-counter';
+    counterElement.style.position = 'absolute';
+    counterElement.style.right = '10px';
+    counterElement.style.bottom = '40px';
+    counterElement.style.fontSize = '0.8rem';
+    counterElement.style.color = '#FFFFFF';
+    
+    messageInput.parentNode.insertBefore(counterElement, messageInput.nextSibling);
+    
+    messageInput?.addEventListener('input', function() {
+        const remaining = MAX_MESSAGE_LENGTH - this.value.length;
+        counterElement.textContent = `${remaining} characters remaining`;
+        
+        if (remaining < 20) {
+            counterElement.style.color = '#dc3545';
+        } else {
+            counterElement.style.color = '#FFFFFF';
         }
     });
 }
@@ -146,14 +188,14 @@ window.handleChatUnblock = function (username) {
 }
 
 window.handleChatDuel = function (usernameId) {
-    console.log(usernameId);
+
     const message = create_message_duel("create_duel", usernameId);
     notifSocket.send(JSON.stringify(message));
     // navigateTo('/pong/duel/');
 }
 
 async function displayHistory(message) {
-    console.log("Displaying history");
+
     let chatHistory = document.querySelector('.chatHistory');
     chatHistory.innerHTML = "";
     for (let i = 0; i < message.length; i++) {
@@ -162,7 +204,7 @@ async function displayHistory(message) {
         const doc = parser.parseFromString(htmlString, "text/html");
         const msgElement = doc.body.firstChild; // Get the actual <div> element
 
-        chatHistory.appendChild(msgElement);
+        chatHistory?.appendChild(msgElement);
     }
     scrollToBottom(chatHistory);
 }

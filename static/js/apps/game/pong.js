@@ -1,6 +1,9 @@
 import {WebSocketManager} from "../../websockets/websockets.js";
 import {navigateTo} from '../../spa/spa.js';
-import {isGameOver} from "./VarGame.js"
+import {isGameOver} from "./VarGame.js";
+import { tournamentData } from "./VarGame.js";
+import { remove_toast } from "../profile/toast.js";
+import { toast_message } from "../profile/toast.js";
 // import { apiFriends } from "../profile/profile.js";
 
 const socket = WebSocketManager.gameSocket;
@@ -12,6 +15,7 @@ const lpicture = document.getElementById("lpicture");
 const rpicture = document.getElementById("rpicture");
 let lscore = document.getElementById("scoreLeft");
 let rscore = document.getElementById("scoreRight");
+let timer = document.getElementById("timer");
 
 const height = 500;
 const width = 1000;
@@ -32,62 +36,55 @@ let right_last_move = "idle";
 
 //Below code might be useful one day.
 // const name_data = await apiFriends("/api/friends/whoami/");
-// console.log("my name is", name_data);
 // const my_name = name_data.data.username;
 
 //Si un petit malin va sur la page sans raison
 if (!socket || socket.readyState === WebSocket.CLOSED) {
     navigateTo("/");
+    remove_toast();
+    toast_message("Not in a game, redirecting");
 } else {
-    console.log(window.GameState);
+    tournamentData.gameIsReady = false;
+
     lusername.innerHTML = window.GameState.left.username;
     rusername.innerHTML = window.GameState.right.username;
-    console.log("WHAT ARE THE URLS:");
-    console.log(window.GameState.left.picture);
-    console.log(window.GameState.right.picture);
+
     lpicture.src = window.GameState.left.picture;
     rpicture.src = window.GameState.right.picture;
 
     socket.onmessage = (e) => {
         const jsonData = JSON.parse(e.data);
-        // console.log("received the message below");
-        // console.log(jsonData);
-        // console.log("received the message with Data");
-        // console.log(jsonData.data)
-        // if (jsonData.data) {
-        //     console.log(jsonData.data.action)
-        // }
-
         //Attempt at handling errors
         if (jsonData.data.action == "EXCEPTION") {
-            console.log("REDIRECTION BECAUSE EXCEPTION HAPPENED");
+
             isGameOver.gameIsOver = true;
             WebSocketManager.closeGameSocket();
             navigateTo("/");
+            remove_toast();
+            toast_message("something went wrong, you are being redirected")
+        }
+
+        if (jsonData.data.action == "WAITING_TO_START") {
+            is_gameplay_start = true
+            timer.innerHTML = jsonData.data.content.timer;
         }
 
         if (jsonData.event == "UPDATE") {
+            timer.remove()
 
-            if (is_gameplay_start == false) {
-                is_gameplay_start = true;
-                last_time = performance.now();
-            }
             if (jsonData.data.action == "PADDLE_LEFT_UPDATE") {
-                console.log("move from server:", jsonData.data.content.move);
                 const current_move = jsonData.data.content.move
                 if (current_move != left_last_move) {
                     window.GameState.left.y = jsonData.data.content.y;
                     left_last_move = current_move;
                 }
             } else if (jsonData.data.action == "PADDLE_RIGHT_UPDATE") {
-                console.log("move from server:", jsonData.data.content.move);
                 const current_move = jsonData.data.content.move
                 if (current_move != right_last_move) {
                     window.GameState.right.y = jsonData.data.content.y
                     right_last_move = current_move;
                 }
             } else if (jsonData.data.action == "BALL_UPDATE") {
-                // console.log("Ball update is :", jsonData.data);
                 //We only update if we changed direction, this makes things smoother.
                 if (did_tab_out || window.GameState.balldy != jsonData.data.content.dy || window.GameState.balldx != jsonData.data.content.dx) {
                     did_tab_out = false;
@@ -103,22 +100,27 @@ if (!socket || socket.readyState === WebSocket.CLOSED) {
             }
         } else if (jsonData.event == "ERROR") {
             if (jsonData.data.action == "OPPONENT_LEFT") {
-                console.log("Opponent Disconnected");
-                navigateTo("/pong/disconnect/");
+                const game_id = jsonData.data.content
+                navigateTo(`/pong/disconnect/?game=${game_id}`);
                 isGameOver.gameIsOver = true;
                 WebSocketManager.closeGameSocket();
             }
         } else if (jsonData.data.action == "GAME_ENDING") {
             const game_id = jsonData.data.content
-            console.log("GAME IS OVER");
-            navigateTo(`/pong/gameover/?game=${game_id}`);
+
+            //Hack that allows me to not change backend 
+            //otherwise game over will navigate after we redirected to tournament.
+            if (window.location.pathname != "/pong/tournament/tree/" ) {
+                navigateTo(`/pong/gameover/?game=${game_id}`);
+            }
             isGameOver.gameIsOver = true;
             WebSocketManager.closeGameSocket();
         }
     };
 }
 
-document.addEventListener('visibilitychange', () => {
+
+document?.addEventListener('visibilitychange', () => {
     did_tab_out = true;
     const isTabVisible = document.visibilityState === 'visible';
 
@@ -131,7 +133,7 @@ const keys = {};
 const previous_keys = {};
 let previous_direction = null;
 
-document.addEventListener('keydown', (event) => {
+document?.addEventListener('keydown', (event) => {
     switch (event.key) {
         case 'ArrowUp':
             keys.up = true;
@@ -142,7 +144,7 @@ document.addEventListener('keydown', (event) => {
     }
 });
 
-document.addEventListener('keyup', (event) => {
+document?.addEventListener('keyup', (event) => {
     switch (event.key) {
         case 'ArrowUp':
             keys.up = false;
@@ -182,13 +184,10 @@ function updatePaddles() {
     //     right_last_move = direction;
     // }
     // if (direction != previous_direction) {
-    //     console.log("previous direction :", previous_direction);
-    //     console.log("direction :", direction);
     // }
     // (direction && previous_direction != direction) || frameCount % 5 === 0
     if ((direction && previous_direction != direction) || frameCount % 5 === 0) { //Trying to send less updates
         previous_direction = direction;
-        console.log("Sending to server direction :", direction);
         const message = {
             "event": "game",
             "data": {

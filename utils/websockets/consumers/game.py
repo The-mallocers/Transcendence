@@ -1,4 +1,5 @@
 from json import JSONDecodeError, loads
+import traceback
 
 from utils.enums import EventType, ResponseError, RTables
 from utils.websockets.channel_send import asend_group_error
@@ -6,7 +7,6 @@ from utils.websockets.consumers.consumer import WsConsumer
 from utils.websockets.services.game import GameService
 from utils.websockets.services.matchmaking import MatchmakingService
 from utils.websockets.services.services import ServiceError
-
 
 class GameConsumer(WsConsumer):
     def __init__(self, *args, **kwargs):

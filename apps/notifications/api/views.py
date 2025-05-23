@@ -57,16 +57,6 @@ class GetPendingDuelsApiView(APIView):
 
         return Response(duel_data, status=status.HTTP_200_OK)
 
-
-# Pretty sure this is unused to im commenting it it out.
-# class GetOnlineStatus(APIView):
-#     def get(self, request: HttpRequest, *args, **kwargs):
-#         print("getting online status")
-#         data = [{
-#             "Good job getting my online status"
-#             }]
-#         return Response(data, status=status.HTTP_200_OK)
-
 class GetUserName(APIView):
     def get(self, request: HttpRequest, *args, **kwargs):
         client = Clients.get_client_by_request(request)
@@ -81,4 +71,37 @@ class GetUserName(APIView):
             return Response({
                 "status": "error",
                 "message": "Client not found"
+            }, status=status.HTTP_404_NOT_FOUND)
+
+import json
+
+class GetImages(APIView):
+    def get(self, request: HttpRequest, *args, **kwargs):
+        opponent = request.GET.get('opponent')
+        client = Clients.get_client_by_request(request)
+        target = Clients.get_client_by_username(opponent)
+        
+        duelExist = False
+        
+        redis = RedisConnectionPool.get_sync_connection("get_duel")
+        for duel in redis.scan_iter(match=RTables.HASH_DUEL_QUEUE('*')):
+            if redis.hexists(duel, str(client.id)) and redis.hexists(duel, str(target.id)):
+                duelExist = True
+                
+        if client and target:
+            return Response({
+                "status": "success",
+                "data": {
+                    "hostPicture": client.profile.profile_picture.url,
+                    "opponentPicture": target.profile.profile_picture.url,
+                    "duelExist": duelExist
+                }
+            }, status=status.HTTP_200_OK)
+        else:
+            return Response({
+                "status": "error",
+                "message": "Client or opponent not found",
+                "data":{
+                    "duelExist" : duelExist,
+                }
             }, status=status.HTTP_404_NOT_FOUND)

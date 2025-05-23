@@ -96,7 +96,7 @@ class Clients(models.Model):
 
     @staticmethod
     @sync_to_async
-    def aget_client_by_id(id: uuid.UUID):
+    def aget_client_by_id(id: uuid.UUID) -> 'Clients':
         try:
             with transaction.atomic():
                 return Clients.objects.get(id=id)
@@ -181,6 +181,7 @@ class Clients(models.Model):
 
     @staticmethod
     def get_rank(score: int) -> str:
+        # return "bronze" #While we fix this shit
         i = len(RanksThreshold)
         for rank in reversed(RanksThreshold):
             i -= 1
@@ -289,11 +290,67 @@ class Clients(models.Model):
             cursor, keys = await redis.scan(cursor=cursor, match=RTables.HASH_QUEUE('*'))
             for key in keys:
                 ready = await redis.hget(key, str(client.id))
-                if ready and ready.decode('utf-8') == 'True':
-                    return key
+                if ready:
+                    if RTables.HASH_TOURNAMENT_QUEUE('') in key.decode('utf-8'):
+                        return key
+                    elif ready.decode('utf-8') == 'True':
+                        return key
             if cursor == 0:
                 break
         return None
+
+    @staticmethod
+    @sync_to_async
+    def aget_tournament_clients_infos(client_ids):
+        """
+        Get multiple clients with all related data in a single query
+        using select_related to optimize database access
+        """
+        try:
+            with transaction.atomic():
+                # Use select_related to prefetch the related profile and stats in one query
+                clients = Clients.objects.filter(id__in=client_ids).select_related('profile', 'stats')
+                
+                result = []
+                for client in clients:
+                    rank = client.get_rank(client.stats.mmr).value
+
+                    info = {
+                        "id": str(client.id),
+                        "nickname": client.profile.username,
+                        "avatar": client.profile.profile_picture.url,
+                        "trophee": f'/media/rank_icon/{rank}.png',
+                        "mmr": client.stats.mmr,
+                    }
+                    result.append(info)
+                
+                return result
+        except Exception as e:
+            raise Exception(f"Error retrieving clients info: {e}")
+
+    @staticmethod
+    def get_tournament_clients_infos(client_ids):
+        try:
+            with transaction.atomic():
+                # Use select_related to prefetch the related profile and stats in one query
+                clients = Clients.objects.filter(id__in=client_ids).select_related('profile', 'stats')
+
+                result = []
+                for client in clients:
+                    rank = client.get_rank(client.stats.mmr).value
+
+                    info = {
+                        "id": str(client.id),
+                        "nickname": client.profile.username,
+                        "avatar": client.profile.profile_picture.url,
+                        "trophee": f'/media/rank_icon/{rank}.png',
+                        "mmr": client.stats.mmr,
+                    }
+                    result.append(info)
+
+                return result
+        except Exception as e:
+            raise Exception(f"Error retrieving clients info: {e}")
     
     @sync_to_async
     def ais_blocked(self, user_id):
@@ -302,5 +359,4 @@ class Clients(models.Model):
                 is_blocked = self.blocked_users.filter(id=user_id).exists()
                 return is_blocked
         except Exception as e:
-            print(f"Error checking blocked status: {e}")
             return False

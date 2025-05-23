@@ -19,6 +19,6 @@ groups:
 
     - record: postgresql:total_clients
       expr: pg_stat_user_tables_n_live_tup{relname="client_list", datname="dockerdjango"}
-
-    # - record: postgresql:total_game_played
-    #   expr: pg_stat_user_tables_n_live_tup{relname="client_list", datname="dockerdjango"}
+    
+    - record: postgresql:total_game_played_accurate
+      expr: pg_custom_games_count

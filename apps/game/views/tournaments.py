@@ -1,12 +1,29 @@
+from json import JSONDecodeError
+import json
+import re
+from time import sleep
 from django.http import JsonResponse
 from django.middleware.csrf import get_token
 from django.template.loader import render_to_string
+from apps.auth.api.views import formulate_json_response
+from utils.enums import RTables
+from utils.redis import RedisConnectionPool
+from redis.commands.json.path import Path
+
 
 from apps.client.models import Clients
 
+NO_TOURNEY = 0
+HALF_TOURNEY = 1
+FULL_TOURNEY = 2
 
 def create_tournament(request):
     client = Clients.get_client_by_request(request)
+    status = isInTournament(client)
+    if status == FULL_TOURNEY:
+        return formulate_json_response(True, 302, "Redirecting to tournament", "/pong/tournament/tree/")
+    elif status == HALF_TOURNEY:
+        return formulate_json_response(True, 302, "Redirecting to lobby", "/pong/tournament/")
     html_content = render_to_string("apps/pong/createTournament.html", {"csrf_token": get_token(request), "client": client})
     return JsonResponse({
         'html': html_content,
@@ -14,82 +31,26 @@ def create_tournament(request):
 
 def join_tournament(request):
     client = Clients.get_client_by_request(request)
-    rooms = [
-        {
-            "name" : "minimeow's room",
-            "leaderAvatar" : "/assets/imgs/profile/default.png",
-            "players" : 6
-        },
-        {
-            "name" : "huh",
-            "leaderAvatar" : "/assets/imgs/profile/default.png",
-            "players" : 4
-        },
-        {
-            "name" : "huh2",
-            "leaderAvatar" : "/assets/imgs/profile/default.png",
-            "players" : 8
-        },
-        {
-            "name" : "huh3",
-            "leaderAvatar" : "/assets/imgs/profile/default.png",
-            "players" : 7
-        }
-    ]
-    html_content = render_to_string("apps/pong/joinTournament.html", {"csrf_token": get_token(request), "client": client, "rooms": rooms})
+    status = isInTournament(client)
+    if status == FULL_TOURNEY:
+        return formulate_json_response(True, 302, "Redirecting to tournament", "/pong/tournament/tree/")
+    elif status == HALF_TOURNEY:
+        return formulate_json_response(True, 302, "Redirecting to lobby", "/pong/tournament/")
+    html_content = render_to_string("apps/pong/joinTournament.html", {"csrf_token": get_token(request), "client": client})
     return JsonResponse({
         'html': html_content,
     })
+
 
 def inRoom(request):
     client = Clients.get_client_by_request(request)
-
-
-    roomId = request.GET.get("roomId")
-    print(roomId, "//////////\\\\\\\\\\\\\\\\\\")
-    roomInfos = {
-        "name" : "minimeow's room",
-        "code"     : "X76BUBY"
-    }
-
-    players = [
-        {
-            "nickname" : "EZ2C",
-            "avatar" : "/static/assets/imgs/profile/default.png",
-            "mmr" : 200,
-            "winrate" : 60
-        },        
-        {
-            "nickname" : "EZ3C",
-            "avatar" : "/static/assets/imgs/profile/default.png",
-            "mmr" : 220,
-            "winrate" : 66
-        },        
-        {
-            "nickname" : "meow",
-            "avatar" : "/static/assets/imgs/profile/default.png",
-            "mmr" : 110,
-            "winrate" : 42
-        },        
-        {
-            "nickname" : "minimeow",
-            "avatar" : "/static/assets/imgs/profile/default.png",
-            "mmr" : 600,
-            "winrate" : 94
-        },        
-        {
-            "nickname" : "gigaMeow",
-            "avatar" : "/static/assets/imgs/profile/default.png",
-            "mmr" : 1000,
-            "winrate" : 100
-        },
-    ]
-    html_content = render_to_string("apps/pong/tournamentRoom.html", {"csrf_token": get_token(request), "client": client, "players": players, "roomInfos": roomInfos})
+    status = isInTournament(client)
+    if status == FULL_TOURNEY:
+        return formulate_json_response(True, 302, "Redirecting to tournament", "/pong/tournament/tree/")
+    html_content = render_to_string("apps/pong/tournamentRoom.html", {"csrf_token": get_token(request)})
     return JsonResponse({
         'html': html_content,
     })
-
-
 
 
 def tournamentTree(request):
@@ -99,3 +60,28 @@ def tournamentTree(request):
         'html': html_content,
     })
 
+def isInTournament(client):
+        redis = RedisConnectionPool.get_sync_connection("tournament_check")
+        queues = check_in_queue(client, redis)
+        if queues and RTables.HASH_TOURNAMENT_QUEUE('') in str(queues):
+            code = re.search(rf'{RTables.HASH_TOURNAMENT_QUEUE("")}(\w+)$', queues.decode('utf-8')).group(1)
+            tournament_info = redis.json().get(RTables.JSON_TOURNAMENT(code))
+            if tournament_info['status'] == 'running':
+                return FULL_TOURNEY
+            else:
+                return HALF_TOURNEY
+        return NO_TOURNEY
+
+def check_in_queue(client, redis):
+    cursor = 0
+
+    while True:
+        cursor, keys = redis.scan(cursor=cursor, match=RTables.HASH_TOURNAMENT_QUEUE('*'))
+        for key in keys:
+            ready = redis.hget(key, str(client.id))
+            if ready:
+                return key
+        if cursor == 0:
+            break
+    
+    return None

@@ -53,8 +53,6 @@ def run_docker_command(command):
         )
         return result.stdout.strip()
     except subprocess.CalledProcessError as e:
-        print(f"Error executing command: {e}")
-        print(f"Error output: {e.stderr}")
         return None
 
 
@@ -95,7 +93,13 @@ def join_game(client_id, is_tournament=False):
     }
 
     print(f"[{client_id}] Joining game...")
-    ws.send(json.dumps(join_msg))
+    try:
+        ws.send(json.dumps(join_msg))
+    except RuntimeError:
+    # La socket est fermée
+        print("esquiveeee2")
+        pass
+
 
 
 def create_game_connection(client_id):
@@ -248,7 +252,14 @@ def on_open(ws, client_id, is_host=False):
                 "action": "ping"
             }
     }
-    ws.send(json.dumps(ping_msg))
+
+    try:
+        ws.send(json.dumps(ping_msg))
+    except RuntimeError:
+        # 
+        print("esquiveeee3")
+        pass
+
 
     if is_host and not stop_event.is_set():
         global num_clients
@@ -305,7 +316,13 @@ def create_tournament(client_id, num_clients):
     }
 
     print(f"Creating tournament with {num_clients} players...")
-    ws.send(json.dumps(tournament_msg))
+
+    try:
+        ws.send(json.dumps(tournament_msg))
+    except RuntimeError:
+        # La socket est fermée
+        print("esquiveeee4")
+        pass
 
 
 def join_tournament(client_id, code):
@@ -325,7 +342,13 @@ def join_tournament(client_id, code):
     }
 
     print(f"[{client_id}] Joining tournament {code}...")
-    ws.send(json.dumps(join_msg))
+
+    try:
+        ws.send(json.dumps(join_msg))
+    except RuntimeError:
+        # La socket est fermée
+        print("esquiveeee5")
+        pass
 
 
 def close_game_connection(client_id):

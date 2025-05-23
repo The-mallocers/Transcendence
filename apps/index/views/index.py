@@ -1,3 +1,6 @@
+import logging
+import traceback
+
 from django.http import JsonResponse
 from django.middleware.csrf import get_token
 from django.template.loader import render_to_string
@@ -7,6 +10,7 @@ from apps.game.models import Game
 from config import settings
 from utils.enums import EventType, RTables
 from utils.redis import RedisConnectionPool
+import uuid
 
 
 def get(req):
@@ -20,9 +24,11 @@ def get(req):
     friends_online_status = get_friends_online_status(friends_list)
     rank_picture = settings.MEDIA_URL + "/rank_icon/" + client.get_rank(client.stats.mmr) + ".png"
     online_status = "Online"
+    pending_tournament_invitations = get_pending_tournament_invitations(client)
+    
     if client is not None:
         winrate = get_winrate(client, games_played)
-    print(winrate)
+    (winrate)
     context = {
         "client": client,
         "clients": Clients.objects.all(),
@@ -37,6 +43,7 @@ def get(req):
         "rank_picture": rank_picture,
         "online_status": online_status,
         "friends_online_status": friends_online_status,
+        "pending_tournament_invitations": pending_tournament_invitations,
     }
     html_content = render_to_string("apps/profile/profile.html", context)
     return JsonResponse({'html': html_content})
@@ -59,30 +66,36 @@ def get_last_matches(client, games_played) -> list:
         myPoints = 0
         enemyPoints = 0
         opponent = ""
-
+        mmr_change = 0
         if (game.winner.client == None):
             myPoints = game.loser.score
             enemyPoints = game.winner.score
             opponent = "[REDACTED]"
+            mmr_change = game.loser.mmr_change
         elif (game.loser.client == None):
             myPoints = game.winner.score
             enemyPoints = game.loser.score
             opponent = "[REDACTED]"
+            mmr_change = game.winner.mmr_change
         elif (client.id == game.winner.client.id):
             myPoints = game.winner.score
             enemyPoints = game.loser.score
             opponent = game.loser.client.profile.username
+            mmr_change = game.winner.mmr_change
         else:
             myPoints = game.loser.score
             enemyPoints = game.winner.score
             opponent = game.winner.client.profile.username
+            mmr_change = game.loser.mmr_change
 
+        mmr_change = f"{mmr_change:+d} mmr"
         ghistory.append({
             "opponent": opponent,
             "won": myPoints > enemyPoints,
             "myPoints": myPoints,
             "enemyPoints": enemyPoints,
-            "when": game.created_at
+            "when": game.created_at.strftime("%d %B %H:%M"),
+            "mmr_change": mmr_change,
         })
         i += 1
     return ghistory
@@ -129,6 +142,38 @@ def get_rivals(client, games_played) -> dict:
 
     return top_3_rivals
 
+def get_pending_tournament_invitations(client):
+    pending_invitations = []
+    try:
+        redis = RedisConnectionPool.get_sync_connection("Tournament_pending")
+        
+        invitation_pattern = f"{RTables.HASH_TOURNAMENT_INVITATION}:*:{client.id}"
+        keys = redis.keys(invitation_pattern)
+        
+        for key in keys:
+            try:
+                invitation_data = redis.hgetall(key)
+                if invitation_data and b'status' in invitation_data and invitation_data[b'status'] == b'pending':
+                    tournament_code = key.decode('utf-8').split(':')[1]
+                    
+                    tournament_info = redis.json().get(RTables.JSON_TOURNAMENT(tournament_code))
+                    
+                    inviter_id = invitation_data[b'inviter_id'].decode('utf-8')
+                    inviter = Clients.get_client_by_id(uuid.UUID(inviter_id))
+                    
+                    if tournament_info and inviter:
+                        pending_invitations.append({
+                            'tournament_code': tournament_code,
+                            'tournament_name': tournament_info['title'],
+                            'inviter_id': inviter_id,
+                            'inviter_username': inviter.profile.username
+                        })
+            except Exception as e:
+                logging.getLogger('MainThread').error(traceback.format_exc())
+    except Exception as e:
+        logging.getLogger('MainThread').error(traceback.format_exc())
+
+    return pending_invitations
 
 def get_friends_online_status(friends):
     friend_status = {}
@@ -138,5 +183,4 @@ def get_friends_online_status(friends):
         username = friend['username']
         online_status = redis.hget(RTables.HASH_CLIENT(id), str(EventType.NOTIFICATION.value)) is not None
         friend_status[username] = "Online" if online_status else "Offline"
-    print("friend_status:", friend_status)
     return friend_status

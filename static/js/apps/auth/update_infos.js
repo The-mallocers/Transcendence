@@ -3,11 +3,11 @@ import {handleErrorFront, isPasswordcheckValid} from './register.js';
 async function update() {
     const form = document.querySelector("form");
     const error = document.getElementById("error-message");
-    const username = document.getElementById('username').value;
-    const email = document.getElementById('email').value;
+    const username = document.getElementById('username')?.value;
+    const email = document.getElementById('email')?.value;
     const password = document.getElementById('password').value;
-    const passwordcheck = document.getElementById('password_check').value;
-    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    const passwordcheck = document.getElementById('password_check')?.value;
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
 
     if (!isPasswordcheckValid(password, passwordcheck)) {
         return;
@@ -25,7 +25,7 @@ async function update() {
             }
         }
         const response = await fetch(form.action, {
-            method: 'POST',
+            method: 'PUT',
             headers: {
                 'X-CSRFToken': csrfToken,
                 'Content-Type': 'application/json',
@@ -34,7 +34,6 @@ async function update() {
         });
 
         const data = await response.json();
-        console.log(data)
         if (response.ok) {
             error.textContent = "Informations updated succesfully";
             updateFrontInformation();
@@ -45,8 +44,6 @@ async function update() {
             handleErrorFront(data);
         }
     } catch (e) {
-        console.log("Error with the fetch operation");
-        console.log(e);
         error.textContent = "Error updating";
         error.style.color = "red";
     }
@@ -54,18 +51,19 @@ async function update() {
 
 const element = document.querySelector("#update-btn");
 
-element.addEventListener("click", (e) => {
+element?.addEventListener("click", (e) => {
     update();
 })
 
 function updateFrontInformation() {
+    
     const username = document.getElementById('username').value;
     const email = document.getElementById('email').value;
+
     if (username) {
-        document.getElementById('currusername').innerHTML = `Current Username: ${username}`;
+        document.getElementById('currusername').value = `${username}`;
     }
     if (email) {
-        document.getElementById('curremail').innerHTML = `Current Email: ${email}`;
+        document.getElementById('curremail').value = `${email}`;
     }
 }
-

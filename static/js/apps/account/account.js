@@ -1,21 +1,21 @@
-document.addEventListener("DOMContentLoaded", function () {
+document?.addEventListener("DOMContentLoaded", function () {
     // Sélectionner le formulaire et ajouter un événement de soumission
     const form = document.querySelector("form");
     const button_delete = document.getElementById("delete-account-btn");
 
     // Empêcher le comportement de soumission par défaut
-    form.addEventListener("submit", function (event) {
+    form?.addEventListener("submit", function (event) {
         event.preventDefault();
 
         // Récupérer les données du formulaire
         const formData = new FormData(form);
 
         // Utilisation de l'API Fetch pour envoyer les données
-        fetch(form.action, {
+        fetch(form?.action, {
             method: "POST",  // Méthode de la requête (POST)
             body: formData,  // Corps de la requête (les données du formulaire)
             headers: {
-                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value,
             },
         })
             .then(response => response.json())  // Réponse en JSON
@@ -33,14 +33,14 @@ document.addEventListener("DOMContentLoaded", function () {
             });
     });
 
-    button_delete.addEventListener("click", function (event) {
+    button_delete?.addEventListener("click", function (event) {
         event.preventDefault();  // Empêche le comportement par défaut du bouton
         event.stopPropagation(); // Empêche la propagation de l'événement
         if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
             fetch('/api/account/', {
                 method: "DELETE",  // Méthode de la requête (POST)
                 headers: {
-                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value,
                 },
             })
                 .then(response => response.json())  // Réponse en JSON

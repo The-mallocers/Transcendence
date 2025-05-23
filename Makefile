@@ -16,11 +16,25 @@ help:
 	@echo "  make re              - Alias for restart"
 
 up:
-	rm -rf ./docker/staticdocker
-	docker compose -f ./$(DOCKER_COMPOSE_FILE) up --build --no-attach mailhog --no-attach alertmanager
+	rm -rf ./docker/staticdocker/
+	@if grep -q "^DJANGO_HOSTNAME=" .env; then \
+		sed -i'' -e "s/^DJANGO_HOSTNAME=.*/DJANGO_HOSTNAME=$$(hostname | cut -d'.' -f1)/" .env; \
+	else \
+		{ [ -s .env ] && echo ""; } >> .env; \
+		echo "DJANGO_HOSTNAME=$$(hostname | cut -d'.' -f1)" >> .env; \
+	fi
+	docker compose -f ./$(DOCKER_COMPOSE_FILE) down
+	docker compose -f ./$(DOCKER_COMPOSE_FILE) up --build --attach django-web
 
 detach:
-	rm -rf ./docker/staticdocker
+	rm -rf ./docker/staticdocker/
+	@if grep -q "^DJANGO_HOSTNAME=" .env; then \
+		sed -i'' -e "s/^DJANGO_HOSTNAME=.*/DJANGO_HOSTNAME=$$(hostname | cut -d'.' -f1)/" .env; \
+	else \
+		{ [ -s .env ] && echo ""; } >> .env; \
+		echo "DJANGO_HOSTNAME=$$(hostname | cut -d'.' -f1)" >> .env; \
+	fi
+	docker compose -f ./$(DOCKER_COMPOSE_FILE) down
 	docker compose -f ./$(DOCKER_COMPOSE_FILE) up -d --build --no-attach mailhog --no-attach alertmanager --no-attach grafana
 
 down:

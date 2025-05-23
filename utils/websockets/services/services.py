@@ -1,5 +1,4 @@
 import logging
-import traceback
 from abc import ABC, abstractmethod
 from typing import Dict, Any
 
@@ -34,8 +33,11 @@ class BaseServices(ABC):
 
     @abstractmethod
     async def disconnect(self, client):
-        print("In disconnect of the abstract method ?!")
-        pass
+        # Base implementation for cleanup
+        # Child classes should call this via super().disconnect(client)
+        if self.service_group:
+            # Remove from service group if it exists
+            pass
 
     async def handle_disconnect(self, client):
         return await self.disconnect(client)
@@ -55,7 +57,6 @@ class BaseServices(ABC):
                 return await handler_method(data, *args)
 
         except ValueError:
-            self._logger.error(traceback.format_exc())
             raise ServiceError(f"This action is not valid: {data['data']['action']}")
 
         except ServiceError as e:
@@ -63,3 +64,4 @@ class BaseServices(ABC):
 
         except Exception as e:
             raise e
+

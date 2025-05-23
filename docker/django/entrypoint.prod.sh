@@ -8,6 +8,7 @@ _term() {
 # Set up signal trap
 trap _term SIGTERM
 
+
 # Run Django management commands before starting the server
 python manage.py collectstatic --noinput
 python manage.py makemigrations --noinput
