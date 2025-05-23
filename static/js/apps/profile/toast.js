@@ -29,14 +29,14 @@ function toast_friend(message, data, itemToDelete) {
 
     const newToast = toastContainer.lastChild;
     const acceptButton = newToast.querySelector('.accept_friend');
-    acceptButton.addEventListener('click', function () {
+    acceptButton?.addEventListener('click', function () {
         if (itemToDelete) {
             itemToDelete.remove();
         }
         window.handleAcceptFriend(data.content.username);
     });
     const refuseButton = newToast.querySelector('.refuse_friend');
-    refuseButton.addEventListener('click', function () {
+    refuseButton?.addEventListener('click', function () {
         if (itemToDelete) {
             itemToDelete.remove();
         }
@@ -45,7 +45,7 @@ function toast_friend(message, data, itemToDelete) {
     const toastBootstrap = new bootstrap.Toast(newToast);
     toastBootstrap.show();
 
-    newToast.addEventListener('hidden.bs.toast', function () {
+    newToast?.addEventListener('hidden.bs.toast', function () {
         this.remove();
     });
 }
@@ -82,11 +82,11 @@ function toast_duel(message, data, itemToDelete) {
 
     const newToast = toastContainer.lastChild;
     const acceptDuel = newToast.querySelector('.accept_duel');
-    acceptDuel.addEventListener('click', function () {
+    acceptDuel?.addEventListener('click', function () {
         window.handleAcceptDuel(data.content.code, data.content.username);
     });
     const refuseDuel = newToast.querySelector('.refuse_duel');
-    refuseDuel.addEventListener('click', function () {
+    refuseDuel?.addEventListener('click', function () {
         if (itemToDelete) {
             itemToDelete.remove();
         }
@@ -95,7 +95,7 @@ function toast_duel(message, data, itemToDelete) {
     const toastBootstrap = new bootstrap.Toast(newToast);
     toastBootstrap.show();
 
-    newToast.addEventListener('hidden.bs.toast', function () {
+    newToast?.addEventListener('hidden.bs.toast', function () {
         this.remove();
     });
 }
@@ -139,7 +139,7 @@ function toast_message(message) {
     toastInstance.show();
 
     // Make sure the toast is removed when hidden
-    toastEl.addEventListener('hidden.bs.toast', function () {
+    toastEl?.addEventListener('hidden.bs.toast', function () {
         this.remove();
     });
 
@@ -181,7 +181,7 @@ function toast_tournament(message, data, itemToDelete) {
 
     const newToast = toastContainer.lastChild;
     const acceptButton = newToast.querySelector('.accept_tournament');
-    acceptButton.addEventListener('click', function () {
+    acceptButton?.addEventListener('click', function () {
         const tournamentCode = this.getAttribute('data-tournament-code');
         const inviterUsername = this.getAttribute('data-inviter');
         
@@ -193,7 +193,7 @@ function toast_tournament(message, data, itemToDelete) {
     });
     
     const refuseButton = newToast.querySelector('.refuse_tournament');
-    refuseButton.addEventListener('click', function () {
+    refuseButton?.addEventListener('click', function () {
         const tournamentCode = this.getAttribute('data-tournament-code');
         const inviterUsername = this.getAttribute('data-inviter');
         
@@ -207,7 +207,7 @@ function toast_tournament(message, data, itemToDelete) {
     const toastBootstrap = new bootstrap.Toast(newToast);
     toastBootstrap.show();
 
-    newToast.addEventListener('hidden.bs.toast', function () {
+    newToast?.addEventListener('hidden.bs.toast', function () {
         this.remove();
     });
 }

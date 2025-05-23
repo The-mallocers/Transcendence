@@ -1,10 +1,10 @@
-document.addEventListener("DOMContentLoaded", function () {
+document?.addEventListener("DOMContentLoaded", function () {
     const addUserBtn = document.getElementById('add-user-btn');
     const addUserPopup = document.getElementById('add-user-popup');
     const addUserForm = document.getElementById('add-user-form');
 
     // Afficher le popup pour ajouter un utilisateur
-    addUserBtn.addEventListener("click", function () {
+    addUserBtn?.addEventListener("click", function () {
         addUserPopup.style.display = 'flex';
     });
 
@@ -14,7 +14,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // Soumettre le formulaire pour ajouter un utilisateur
-    addUserForm.addEventListener("submit", function (event) {
+    addUserForm?.addEventListener("submit", function (event) {
         event.preventDefault();
 
         const formData = new FormData(addUserForm);
@@ -23,7 +23,7 @@ document.addEventListener("DOMContentLoaded", function () {
             method: "POST",
             body: formData,
             headers: {
-                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value,
             },
         })
             .then(response => response.json())
@@ -46,7 +46,7 @@ document.addEventListener("DOMContentLoaded", function () {
             fetch(`/api/account/delete/${userId}`, {
                 method: "DELETE",
                 headers: {
-                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value,
                 },
             })
                 .then(response => response.json())

@@ -64,7 +64,7 @@ chatSocket.onmessage = (event) => {
             const doc = parser.parseFromString(htmlString, "text/html");
             const msgElement = doc.body.firstChild; // Get the actual <div> element
             
-            chatHistory.appendChild(msgElement);
+            chatHistory?.appendChild(msgElement);
             scrollToBottom(chatHistory);
             //Do things to show the new message on the front
         }
@@ -92,7 +92,7 @@ chatSocket.onmessage = (event) => {
                         
 const messageInput = document.getElementById("messageInput")
 if(messageInput){
-    chatSocket.addEventListener("open", (event) => {
+    chatSocket?.addEventListener("open", (event) => {
         console.log("WebSocket is open now.");
             
         const message = {
@@ -104,7 +104,7 @@ if(messageInput){
         };
         chatSocket.send(JSON.stringify(message));
     });
-    messageInput.addEventListener("keydown", function (event) {
+    messageInput?.addEventListener("keydown", function (event) {
         if (event.key === "Enter") {
             event.preventDefault(); // Prevents the default action (like form submission)
             let messageText = this.value.trim(); // Get the entered text and trim whitespace
@@ -148,7 +148,7 @@ if(messageInput){
     
     messageInput.parentNode.insertBefore(counterElement, messageInput.nextSibling);
     
-    messageInput.addEventListener('input', function() {
+    messageInput?.addEventListener('input', function() {
         const remaining = MAX_MESSAGE_LENGTH - this.value.length;
         counterElement.textContent = `${remaining} characters remaining`;
         
@@ -206,7 +206,7 @@ async function displayHistory(message) {
         const doc = parser.parseFromString(htmlString, "text/html");
         const msgElement = doc.body.firstChild; // Get the actual <div> element
 
-        chatHistory.appendChild(msgElement);
+        chatHistory?.appendChild(msgElement);
     }
     scrollToBottom(chatHistory);
 }

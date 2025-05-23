@@ -10,7 +10,7 @@ async function validateCode() {
             const response = await fetch("/api/auth/2facode", {
                 method: "POST",
                 headers: {
-                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value,
                 },
                 body: JSON.stringify({
                     code: code,
@@ -35,7 +35,7 @@ async function validateCode() {
 }
 
 // Add input validation to only allow numbers
-document.getElementById('authCode').addEventListener('input', function (e) {
+document.getElementById('authCode')?.addEventListener('input', function (e) {
     this.value = this.value.replace(/[^0-9]/g, '');
 });
 

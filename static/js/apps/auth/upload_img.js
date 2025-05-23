@@ -2,19 +2,19 @@ const upload_btn = document.getElementById("upload-img-btn");
 const file_input = document.getElementById('file_input');
 
 
-upload_btn.addEventListener('click', () => {
+upload_btn?.addEventListener('click', () => {
     file_input.click();
 });
 
 
-file_input.addEventListener('change', async () => {
+file_input?.addEventListener('change', async () => {
     const file = file_input.files[0];
     if (file) {
         try {
             const formData = new FormData();
             formData.append('profile_picture', file);
 
-            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
             const response = await fetch("/api/auth/upload_picture/", {
                 method: 'POST',
                 headers: {

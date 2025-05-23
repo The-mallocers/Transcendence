@@ -139,7 +139,7 @@ if (!socket || socket.readyState === WebSocket.CLOSED) {
 }
 
 
-document.addEventListener('visibilitychange', () => {
+document?.addEventListener('visibilitychange', () => {
     did_tab_out = true;
     const isTabVisible = document.visibilityState === 'visible';
 
@@ -152,7 +152,7 @@ const keys = {};
 const previous_keys = {};
 let previous_direction = null;
 
-document.addEventListener('keydown', (event) => {
+document?.addEventListener('keydown', (event) => {
     switch (event.key) {
         case 'ArrowUp':
             keys.up = true;
@@ -163,7 +163,7 @@ document.addEventListener('keydown', (event) => {
     }
 });
 
-document.addEventListener('keyup', (event) => {
+document?.addEventListener('keyup', (event) => {
     switch (event.key) {
         case 'ArrowUp':
             keys.up = false;

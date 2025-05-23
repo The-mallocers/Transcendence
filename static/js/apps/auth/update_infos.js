@@ -3,11 +3,11 @@ import {handleErrorFront, isPasswordcheckValid} from './register.js';
 async function update() {
     const form = document.querySelector("form");
     const error = document.getElementById("error-message");
-    const username = document.getElementById('username').value;
-    const email = document.getElementById('email').value;
+    const username = document.getElementById('username')?.value;
+    const email = document.getElementById('email')?.value;
     const password = document.getElementById('password').value;
-    const passwordcheck = document.getElementById('password_check').value;
-    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    const passwordcheck = document.getElementById('password_check')?.value;
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
 
     if (!isPasswordcheckValid(password, passwordcheck)) {
         return;
@@ -51,7 +51,7 @@ async function update() {
 
 const element = document.querySelector("#update-btn");
 
-element.addEventListener("click", (e) => {
+element?.addEventListener("click", (e) => {
     update();
 })
 

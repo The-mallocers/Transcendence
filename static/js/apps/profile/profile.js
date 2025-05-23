@@ -56,7 +56,7 @@ if (!searchParams.has('username') && pathname == '/') {
         const friendElement = doc.body.firstChild;
 
         const deleteButton = friendElement.querySelector('.delete_friend');
-        deleteButton.addEventListener('click', function () {
+        deleteButton?.addEventListener('click', function () {
             friendElement.remove();
             handleDeleteFriend(friend.username);
         });
@@ -79,13 +79,13 @@ if (!searchParams.has('username') && pathname == '/') {
         const pendingElement = doc.body.firstChild;
 
         const acceptButton = pendingElement.querySelector('.accept_friend');
-        acceptButton.addEventListener('click', function () {
+        acceptButton?.addEventListener('click', function () {
             pendingElement.remove();
             handleAcceptFriend(pending_friend.username);
         });
 
         const deleteButton = pendingElement.querySelector('.refuse_friend');
-        deleteButton.addEventListener('click', function () {
+        deleteButton?.addEventListener('click', function () {
             pendingElement.remove();
             handleRefuseFriend(pending_friend.username);
         });
@@ -107,7 +107,7 @@ if (!searchParams.has('username') && pathname == '/') {
         const pendingElement = doc.body.firstChild;
 
         const acceptButton = pendingElement.querySelector('.accept_duel');
-        acceptButton.addEventListener('click', function () {
+        acceptButton?.addEventListener('click', function () {
             const parentListItem = this.closest('li.pending_item');
             if (parentListItem) {
                 parentListItem.remove();
@@ -117,7 +117,7 @@ if (!searchParams.has('username') && pathname == '/') {
         });
 
         const deleteButton = pendingElement.querySelector('.refuse_duel');
-        deleteButton.addEventListener('click', function () {
+        deleteButton?.addEventListener('click', function () {
             const parentListItem = this.closest('li.pending_item');
             if (parentListItem) {
                 parentListItem.remove();
@@ -142,13 +142,13 @@ if (!searchParams.has('username') && pathname == '/') {
         const pendingElement = doc.body.firstChild;
 
         const acceptButton = pendingElement.querySelector('.accept_tournament');
-        acceptButton.addEventListener('click', function () {
+        acceptButton?.addEventListener('click', function () {
             pendingElement.remove();
             handleAcceptTour(invitation.tournament_code, invitation.inviter_username);
         });
 
         const deleteButton = pendingElement.querySelector('.refuse_tournament');
-        deleteButton.addEventListener('click', function () {
+        deleteButton?.addEventListener('click', function () {
             pendingElement.remove();
             handleRefuseTour(invitation.tournament_code, invitation.inviter_username);
         });
@@ -185,13 +185,13 @@ notifSocket.onmessage = (event) => {
         const pendingElement = doc.body.firstChild;
 
         const acceptButton = pendingElement.querySelector('.accept_friend');
-        acceptButton.addEventListener('click', function () {
+        acceptButton?.addEventListener('click', function () {
             pendingElement.remove();
             handleAcceptFriend(message.data.content.username);
         });
 
         const deleteButton = pendingElement.querySelector('.refuse_friend');
-        deleteButton.addEventListener('click', function () {
+        deleteButton?.addEventListener('click', function () {
             pendingElement.remove();
             handleRefuseFriend(message.data.content.username);
         });
@@ -223,7 +223,7 @@ notifSocket.onmessage = (event) => {
             const friendElement = doc.body.firstChild;
 
             const deleteButton = friendElement.querySelector('.delete_friend');
-            deleteButton.addEventListener('click', function () {
+            deleteButton?.addEventListener('click', function () {
                 friendElement.remove();
                 handleDeleteFriend(message.data.content.username);
             });
@@ -244,7 +244,7 @@ notifSocket.onmessage = (event) => {
             const doc = parser.parseFromString(html, "text/html");
             const friendElement = doc.body.firstChild;
             const duelButton = friendElement.querySelector('.duel_friend');
-            duelButton.addEventListener('click', function () {
+            duelButton?.addEventListener('click', function () {
                 hide_modal(message.data.content.sender)
             });
             friend_duel.appendChild(friendElement);
@@ -287,11 +287,11 @@ notifSocket.onmessage = (event) => {
         const pendingElement = doc.body.firstChild;
 
         const acceptDuel = pendingElement.querySelector('.accept_duel');
-        acceptDuel.addEventListener('click', function () {
+        acceptDuel?.addEventListener('click', function () {
             handleAcceptDuel(message.data.content.code, message.data.content.username);
         });
         const refuseDuel = pendingElement.querySelector('.refuse_duel');
-        refuseDuel.addEventListener('click', function () {
+        refuseDuel?.addEventListener('click', function () {
             pendingElement.remove();
             handleRefuseDuel(message.data.content.code, message.data.content.username);
         });
@@ -386,14 +386,14 @@ notifSocket.onmessage = (event) => {
         const pendingElement = doc.body.firstChild;
 
         const acceptButton = pendingElement.querySelector('.accept_tournament');
-        acceptButton.addEventListener('click', function () {
+        acceptButton?.addEventListener('click', function () {
             pendingElement.remove();
             console.log(`accepting tournament ${message.data.content.tournament_code}`);
             handleAcceptTour(tournament_code, inviter_username);
         });
 
         const deleteButton = pendingElement.querySelector('.refuse_tournament');
-        deleteButton.addEventListener('click', function () {
+        deleteButton?.addEventListener('click', function () {
             pendingElement.remove();
             handleRefuseTour(tournament_code, inviter_username);
         });

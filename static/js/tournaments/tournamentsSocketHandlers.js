@@ -92,7 +92,7 @@ export function setUpTournamentSocket (tournamentSocket) {
                 let btn = document.createElement("div")
                 btn.classList.add('btn', 'intra-btn')
                 btn.innerText = 'ready'
-                btn.addEventListener('click', function(){
+                btn?.addEventListener('click', function(){
                     navigateTo('/pong/matchmaking/');
                     remove_toast()
                 })

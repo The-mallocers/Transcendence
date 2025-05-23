@@ -19,11 +19,11 @@ function login(e) {
     const form = document.querySelector("form");
     const formData = new FormData(form);
     const errorDiv = document.getElementById("error-message")
-    fetch(form.action, {
+    fetch(form?.action, {
         method: "POST",
         body: formData,
         headers: {
-            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value,
         },
     })
         .then(async response => {
@@ -48,14 +48,12 @@ function login(e) {
 
 let element = document.querySelector("#login-btn");
 
-element.addEventListener("click", (e)=>{login(e)} )
-let popRef = null
-let meow = document.querySelector("#cancel")
+element?.addEventListener("click", (e)=>{login(e)} )
 
 
 const login42Button = document.getElementById('auth42');
 if (login42Button) {
-    login42Button.addEventListener('click', () => {
+    login42Button?.addEventListener('click', () => {
         const params = new URLSearchParams({
             client_id: AUTH_CONFIG.clientId,
             redirect_uri: AUTH_CONFIG.redirectUri,
