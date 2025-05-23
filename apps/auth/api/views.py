@@ -59,6 +59,8 @@ class RegisterApiView(APIView):
         if serializer.is_valid():
             try:
                 client = serializer.save()  # this can fail so we added a catch
+                
+                print("client: ", client)
                 logger.info(f'Client create successfully: {client}')
                 response = Response(ClientSerializer(client).data, status=status.HTTP_201_CREATED)
                 JWT(client, JWTType.ACCESS, request).set_cookie(response)  # vous aviez raison la team c'est mieux

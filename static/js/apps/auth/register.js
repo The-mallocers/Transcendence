@@ -78,6 +78,7 @@ export function handleErrorFront(errorData) {
         }
     }
     if ("password" in errorData) {
+        console.log("password in error data")
         if ("password" in errorData['password']) {
                 displayErrorMessage('password', errorData['password']['password']);
         }
