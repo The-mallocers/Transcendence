@@ -77,10 +77,11 @@
     padding: 0.8rem 1.2rem;
     border-radius: 12px;
     word-wrap: break-word;
-    white-space: pre-wrap; /* Respecte les sauts de ligne */
-    overflow-wrap: break-word; /* Empêche le débordement */
+    white-space: pre-wrap; /* Respects line breaks */
+    overflow-wrap: break-word; /* Prevents overflow */
     max-width: 75%; /* Largeur maximale pour éviter un étirement excessif */
     width: fit-content; /* S'adapte au contenu */
+    word-break: break-word; /* Handles very long words */
 }
 
 .chatBox .me {

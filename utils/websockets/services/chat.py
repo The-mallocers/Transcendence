@@ -1,5 +1,6 @@
 import json
 import uuid
+import html
 
 from apps.chat.models import Messages, Rooms
 from apps.client.models import Clients
@@ -80,6 +81,9 @@ class ChatService(BaseServices):
                 return await asend_group_error(self.service_group, ResponseError.INVALID_REQUEST, 
                                             f"Message exceeds maximum length of {MAX_MESSAGE_LENGTH} characters")
             
+            # Sanitize the message content
+            message = html.escape(message)
+
             # Retrieve room
             room = await Rooms.get_room_by_id(room_id)
             if room is None:
