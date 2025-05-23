@@ -97,8 +97,11 @@ function sendInvitation(friendId) {
         }
     };
     tournamentSocket.send(JSON.stringify(inviteMessage));
-    
-    
 }
 
-// tournamentSocket.on
+const modalElement = document.getElementById('friendSelectionModal');
+modalElement.addEventListener('hide.bs.modal', () => {
+    if (document.activeElement instanceof HTMLElement) {
+        document.activeElement.blur();
+    }
+});

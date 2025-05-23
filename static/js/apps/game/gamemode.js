@@ -55,3 +55,10 @@ export function create_message_duel(action, targetUser) {
     }
     return message;
 }
+
+const modalElement = document.getElementById('friendSelectionModal');
+modalElement.addEventListener('hide.bs.modal', () => {
+    if (document.activeElement instanceof HTMLElement) {
+        document.activeElement.blur();
+    }
+});
