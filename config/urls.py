@@ -10,6 +10,8 @@ from utils.websockets.consumers.notification import NotificationfConsumer
 from utils.websockets.consumers.tournament import TournamentConsumer
 from django.views.static import serve
 
+
+
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ HTTP ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
 urlpatterns = [
     path('pages/', include("config.pages")),  # Html view path
