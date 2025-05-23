@@ -2,7 +2,7 @@ console.log("in the myinformations file");
 let enable = false;
 
 
-document.getElementById('twoFactorModal').addEventListener('hidden.bs.modal', function () {
+document.getElementById('twoFactorModal')?.addEventListener('hidden.bs.modal', function () {
     const switchElement = document.querySelector('.switch');
     let currentState = switchElement.getAttribute('data-status');
     if(enable == false && currentState == "on"){
@@ -53,7 +53,7 @@ function create_modal(res){
         imageElement.src = image;
     enable = false;
     const modalElement = document.getElementById('twoFactorModal');
-    modalElement.addEventListener('shown.bs.modal', function () {
+    modalElement?.addEventListener('shown.bs.modal', function () {
         // Focus on the input field
         document.getElementById('authCode').focus();
     }, { once: true }); 

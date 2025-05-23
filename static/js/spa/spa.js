@@ -16,7 +16,7 @@ class Router {
 
     init() {
         console.log("init router ||||||||||||||||||||||||||||||")
-        window.addEventListener('popstate', () => this.handleLocation());
+        window?.addEventListener('popstate', () => this.handleLocation());
     }
 
     async handleLocation() {
@@ -167,7 +167,7 @@ export async function fetchRoute(path) {
 }
 
 //Need to do this so that the event listerner also listens to the dynamic html
-document.addEventListener('click', async (e) => {
+document?.addEventListener('click', async (e) => {
     const routeElement = e.target.closest('[data-route]');
     if (routeElement) {
         const route = routeElement.dataset.route;
@@ -178,7 +178,7 @@ document.addEventListener('click', async (e) => {
 
 
 
-document.addEventListener("keypress", function (event) {
+document?.addEventListener("keypress", function (event) {
     const routeElement = event.target.closest('.searchBar');
     if (event.key === "Enter") {
         if (routeElement) {

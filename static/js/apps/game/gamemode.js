@@ -20,7 +20,7 @@ if (pathname == "/pong/gamemodes/") {
         const doc = parser.parseFromString(html, "text/html");
         const friendElement = doc.body.firstChild;
         const duelButton = friendElement.querySelector('.duel_friend');
-        duelButton.addEventListener('click', function () {
+        duelButton?.addEventListener('click', function () {
             hide_modal(friend.id)
         });
         duelFriends.appendChild(friendElement);
@@ -57,7 +57,7 @@ export function create_message_duel(action, targetUser) {
 }
 
 const modalElement = document.getElementById('friendSelectionModal');
-modalElement.addEventListener('hide.bs.modal', () => {
+modalElement?.addEventListener('hide.bs.modal', () => {
     if (document.activeElement instanceof HTMLElement) {
         document.activeElement.blur();
     }

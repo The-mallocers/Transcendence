@@ -133,7 +133,7 @@ export function populateTree(tournamentInfos) {
                 let btn = document.createElement('div')
                 btn.classList.add('btn', 'intra-btn');
                 btn.innerText = 'Ready';
-                btn.addEventListener('click', ()=>{navigateTo(`/pong/matchmaking/`);})
+                btn?.addEventListener('click', ()=>{navigateTo(`/pong/matchmaking/`);})
                 btns.appendChild(btn)
             // }
         }

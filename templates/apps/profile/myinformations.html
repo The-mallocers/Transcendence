@@ -6,11 +6,11 @@
         <div class="col-6 col-md-6">
             <div class="box box-top d-flex flex-column align-items-start">
                 <h4>Personal informations</h4>
-                <label class="control-label string optional disabled" for="user_first_name">Name</label>
+                <label for="currusername" class="control-label string optional disabled" >Name</label>
                 <input class="form-control string optional disabled" disabled="disabled" 
                     type="text" value={{ client.profile.username }} name="user[first_name]" 
                     id="currusername">
-                <label class="control-label string optional disabled" for="user_first_name">Email</label>
+                <label for="curremail" class="control-label string optional disabled">Email</label>
                 <input class="form-control string optional disabled" disabled="disabled" 
                     type="text" value={{ client.profile.email }} name="user[first_name]" 
                     id="curremail">
@@ -57,19 +57,19 @@
                     <form id="register-form" method="PUT" action="{% url 'update' %}" enctype="multipart/form-data">
                         <div id="error-message" style="color: red;"></div>
                         <div>
-                            <label class="control-label username optional">Username</label>
+                            <label for="username" class="control-label username optional">Username</label>
                             <input class="form-control string optional" id="username" name="username" type="text" placeholder={{client.profile.username}} required>
                         </div>
                         <div>
-                            <label class="control-label email optional">Email</label>
+                            <label for="email" class="control-label email optional">Email</label>
                             <input class="form-control string optional" id="email" type="email" name="email" placeholder={{client.profile.email}} required>
                         </div>
                         <div>
-                            <label class="control-label password optional">Password</label>
+                            <label for="password" class="control-label password optional">Password</label>
                             <input class="form-control string optional" id="password" type="password" name="password" required>
                         </div>
                         <div>
-                            <label class="control-label email optional">Verify password</label>
+                            <label for="password_check" class="control-label email optional">Verify password</label>
                             <input class="form-control string optional" id="password_check" type="password" name="password_check" required>
                         </div>
                         <div class="type-intra-green mt-4" id="update-btn">Update informations</div>

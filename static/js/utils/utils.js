@@ -24,7 +24,7 @@ export function sendWhenReady(socket, message) {
     if (socket.readyState === WebSocket.OPEN) {
         socket.send(message);
     } else {
-        socket.addEventListener('open', () => socket.send(message), { once: true });
+        socket?.addEventListener('open', () => socket.send(message), { once: true });
     }
 }
 
@@ -60,7 +60,7 @@ export function create_front_chat_room(room, username, usernameId, status, profi
         const chatBlock = chatElement.querySelector(`.chat-block`);
         const chatDuel = chatElement.querySelector(`.chat-duel`);
 
-        chatButton.addEventListener('click', function() {
+        chatButton?.addEventListener('click', function() {
             console.log(room);
             const roomroomDiv = this.closest('.roomroom');
     
@@ -73,10 +73,10 @@ export function create_front_chat_room(room, username, usernameId, status, profi
             });
             clickRoom(room)
         })
-        chatProfile.addEventListener('click', function(){
+        chatProfile?.addEventListener('click', function(){
             handleChatProfile(username);
         })
-        chatBlock.addEventListener('click', function(){
+        chatBlock?.addEventListener('click', function(){
             if(this.innerHTML == "Block"){
                 this.innerHTML = "Unblock"
                 handleChatBlock(username);
@@ -87,7 +87,7 @@ export function create_front_chat_room(room, username, usernameId, status, profi
             }
             
         })
-        chatDuel.addEventListener('click', function(){
+        chatDuel?.addEventListener('click', function(){
             handleChatDuel(usernameId);
         })
         newChat.appendChild(chatElement);

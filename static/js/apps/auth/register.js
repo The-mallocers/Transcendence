@@ -106,7 +106,7 @@ export function displayErrorMessage(fieldId, message) {
 
     field.parentNode.insertBefore(errorElement, field.nextSibling);
 
-    field.addEventListener('focus', function() {
+    field?.addEventListener('focus', function() {
         const errorMsg = this.parentNode.querySelector('.error-message');
         if (errorMsg) {
             errorMsg.remove();

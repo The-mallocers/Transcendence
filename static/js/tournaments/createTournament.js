@@ -23,8 +23,8 @@ function increase(){
     }
 }
 
-minus.addEventListener("click", decrease);
-plus.addEventListener("click", increase);
+minus?.addEventListener("click", decrease);
+plus?.addEventListener("click", increase);
 
 function getTournamentSettings(){
     let score = document.querySelector(".score");

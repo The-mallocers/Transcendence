@@ -23,7 +23,7 @@ const notifSocket = WebSocketManager.notifSocket;
 
 const cancelDuel = document.querySelector(".cancel-duel");
 if (cancelDuel) {
-    cancelDuel.addEventListener('click', function (event) {
+    cancelDuel?.addEventListener('click', function (event) {
         navigateTo('/pong/gamemodes/')
     })
 }

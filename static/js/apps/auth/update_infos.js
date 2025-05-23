@@ -51,7 +51,7 @@ async function update() {
 
 const element = document.querySelector("#update-btn");
 
-element.addEventListener("click", (e) => {
+element?.addEventListener("click", (e) => {
     update();
 })
 

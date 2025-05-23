@@ -48,14 +48,14 @@ function login(e) {
 
 let element = document.querySelector("#login-btn");
 
-element.addEventListener("click", (e)=>{login(e)} )
+element?.addEventListener("click", (e)=>{login(e)} )
 let popRef = null
 let meow = document.querySelector("#cancel")
 
 
 const login42Button = document.getElementById('auth42');
 if (login42Button) {
-    login42Button.addEventListener('click', () => {
+    login42Button?.addEventListener('click', () => {
         const params = new URLSearchParams({
             client_id: AUTH_CONFIG.clientId,
             redirect_uri: AUTH_CONFIG.redirectUri,

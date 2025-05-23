@@ -74,7 +74,7 @@ async function populateFriendsModal() {
             const doc = parser.parseFromString(html, "text/html");
             const friendElement = doc.body.firstChild;
             const inviteButton = friendElement.querySelector('.invite_friend');
-            inviteButton.addEventListener('click', function () {
+            inviteButton?.addEventListener('click', function () {
                 sendInvitation(friend.id);
             });
             inviteFriends.appendChild(friendElement);
@@ -100,7 +100,7 @@ function sendInvitation(friendId) {
 }
 
 const modalElement = document.getElementById('friendSelectionModal');
-modalElement.addEventListener('hide.bs.modal', () => {
+modalElement?.addEventListener('hide.bs.modal', () => {
     if (document.activeElement instanceof HTMLElement) {
         document.activeElement.blur();
     }

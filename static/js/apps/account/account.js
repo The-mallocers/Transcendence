@@ -1,10 +1,10 @@
-document.addEventListener("DOMContentLoaded", function () {
+document?.addEventListener("DOMContentLoaded", function () {
     // Sélectionner le formulaire et ajouter un événement de soumission
     const form = document.querySelector("form");
     const button_delete = document.getElementById("delete-account-btn");
 
     // Empêcher le comportement de soumission par défaut
-    form.addEventListener("submit", function (event) {
+    form?.addEventListener("submit", function (event) {
         event.preventDefault();
 
         // Récupérer les données du formulaire
@@ -33,7 +33,7 @@ document.addEventListener("DOMContentLoaded", function () {
             });
     });
 
-    button_delete.addEventListener("click", function (event) {
+    button_delete?.addEventListener("click", function (event) {
         event.preventDefault();  // Empêche le comportement par défaut du bouton
         event.stopPropagation(); // Empêche la propagation de l'événement
         if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {

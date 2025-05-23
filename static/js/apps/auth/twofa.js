@@ -35,7 +35,7 @@ async function validateCode() {
 }
 
 // Add input validation to only allow numbers
-document.getElementById('authCode').addEventListener('input', function (e) {
+document.getElementById('authCode')?.addEventListener('input', function (e) {
     this.value = this.value.replace(/[^0-9]/g, '');
 });
 

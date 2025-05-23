@@ -17,7 +17,7 @@ function joinTournament(code) {
 }
 
 //Need to do this so that the event listerner also listens to the dynamic html
-document.addEventListener('click', async (e) => {
+document?.addEventListener('click', async (e) => {
     const joinBtn = e.target.closest('.joinTournamentBtn');
     if (joinBtn) {
         const parentRoom = joinBtn.closest('.room');
