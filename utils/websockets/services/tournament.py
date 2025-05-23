@@ -237,11 +237,14 @@ class TournamentService(BaseServices):
 
         async for key in self.redis.scan_iter(match=f'{RTables.JSON_TOURNAMENT("*")}'):
             key = key.decode('utf-8')
+            code = key.split('_')[-1]
+
             tournament_status = TournamentStatus(await self.redis.json().get(key, Path('status')))
             tournament_title = await self.redis.json().get(key, Path('title'))
             tournaments_players_ids = await self.redis.json().get(key, Path('clients'))
+            
             tournaments_players = await Clients.aget_tournament_clients_infos(tournaments_players_ids)
-            tournament_info = {'title': tournament_title, 'players_infos': tournaments_players}
+            tournament_info = {'title': tournament_title, 'players_infos': tournaments_players, 'code': code}
             if tournament_status is TournamentStatus.WAITING or tournament_status is TournamentStatus.CREATING:
                 tournaments_in_waitting.append(tournament_info)
 
