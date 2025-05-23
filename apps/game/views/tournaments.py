@@ -80,7 +80,7 @@ def check_in_queue(client, redis):
         cursor, keys = redis.scan(cursor=cursor, match=RTables.HASH_TOURNAMENT_QUEUE('*'))
         for key in keys:
             ready = redis.hget(key, str(client.id))
-            if ready and ready.decode('utf-8') == 'True':
+            if ready:
                 return key
         if cursor == 0:
             break
