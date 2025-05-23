@@ -155,7 +155,7 @@ if(messageInput){
         if (remaining < 20) {
             counterElement.style.color = '#dc3545';
         } else {
-            counterElement.style.color = '#6c757d';
+            counterElement.style.color = '#FFFFFF';
         }
     });
 }
