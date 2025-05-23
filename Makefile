@@ -17,13 +17,23 @@ help:
 
 up:
 	rm -rf ./docker/staticdocker/
-	echo "DJANGO_HOSTNAME=$(shell hostname | cut -d'.' -f1)" >> .env
+	@if grep -q "^DJANGO_HOSTNAME=" .env; then \
+		sed -i'' -e "s/^DJANGO_HOSTNAME=.*/DJANGO_HOSTNAME=$$(hostname | cut -d'.' -f1)/" .env; \
+	else \
+		{ [ -s .env ] && echo ""; } >> .env; \
+		echo "DJANGO_HOSTNAME=$$(hostname | cut -d'.' -f1)" >> .env; \
+	fi
 	docker compose -f ./$(DOCKER_COMPOSE_FILE) down
 	docker compose -f ./$(DOCKER_COMPOSE_FILE) up --build --attach django-web
 
 detach:
 	rm -rf ./docker/staticdocker/
-	echo "DJANGO_HOSTNAME=$(shell hostname | cut -d'.' -f1)" >> .envaaaaaaaawdawdawdawd
+	@if grep -q "^DJANGO_HOSTNAME=" .env; then \
+		sed -i'' -e "s/^DJANGO_HOSTNAME=.*/DJANGO_HOSTNAME=$$(hostname | cut -d'.' -f1)/" .env; \
+	else \
+		{ [ -s .env ] && echo ""; } >> .env; \
+		echo "DJANGO_HOSTNAME=$$(hostname | cut -d'.' -f1)" >> .env; \
+	fi
 	docker compose -f ./$(DOCKER_COMPOSE_FILE) down
 	docker compose -f ./$(DOCKER_COMPOSE_FILE) up -d --build --no-attach mailhog --no-attach alertmanager --no-attach grafana
 
