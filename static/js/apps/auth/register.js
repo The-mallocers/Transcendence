@@ -37,7 +37,7 @@ function register(event) {
                 navigateTo('/');
             } else {
                 response.json().then(errorData => {
-                    error?.textContent = "Error registering";
+                    error.textContent = "Error registering";
                     handleErrorFront(errorData);
                 });
             }

@@ -97,7 +97,7 @@ function leaveTournament() {
 
 
 export function populateTree(tournamentInfos) {
-        let meow = null
+        let treeParent = null
         // const btnsRoom = document.querySelector("#btnsRoom")
 
         // if (btnsRoom) {
@@ -105,14 +105,14 @@ export function populateTree(tournamentInfos) {
         //                 <div id="leave-btn" class="btn btn-intra-outlined">Leave</div>
         //     `
         // }
-        meow = document.querySelector("#tree")
-        if (meow == null) return ;
-        meow.innerHTML = '';
+        treeParent = document.querySelector("#tree")
+        if (treeParent == null) return ;
+        treeParent.innerHTML = '';
         for (const key in tournamentInfos?.scoreboard.rounds) {
-            meow.innerHTML += buildRound(tournamentInfos?.scoreboard.rounds[key], key)
+            treeParent.innerHTML += buildRound(tournamentInfos?.scoreboard.rounds[key], key)
         }
         
-        meow.innerHTML += `<div class="btns d-flex flex-row justify-content-between gap-3 align-items-center mt-3"></div>`
+        treeParent.innerHTML += `<div class="btns d-flex flex-row justify-content-between gap-3 align-items-center mt-3"></div>`
 
 
         let leaveBtn = document.createElement("div")

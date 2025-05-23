@@ -64,49 +64,6 @@ if (login42Button) {
         window.location.href = `${AUTH_CONFIG.authorizationEndpoint}?${params}`
 
 
-        /// leaving this in comments in case i think i should go back later (i hope i wont tho)
-        // // Open the login page in a new tab
-        // const authWindow = window.open(
-        //     `${AUTH_CONFIG.authorizationEndpoint}?${params}`,
-        //     '42Auth',
-        //     'width=600,height=700'
-        // );
-
-        // const popRef = window.open(
-        //     `${AUTH_CONFIG.authorizationEndpoint}?${params}`,
-        // );
-        // );`;
-
-
-        // let meowInterval = setInterval(async ()=>{
-        //     const response = await fetch("/api/auth/getId/", {
-        //         method: "GET",
-        //         credentials: "include",
-        //     });
-
-        //     if (response.status == 200){
-        //         clearInterval(meowInterval)
-        //         navigateTo("/")
-        //     }
-
-        //     // if (document.cookie !== previousCookies) {
-        //     //     // previousCookies = document.cookie;
-        //     //     // // Do something with the new cookies
-
-
-        //     // }
-        // },3000)
-
-        // setTimeout(() => {
-        //     popRef.close()
-        //     clearInterval(meowInterval)
-        //     // throw timeout error toast to notify user they should close the tab and 
-        // }, 10000);
-
-        // setTimeout(()=>{
-        //     navigateTo("/")
-        // }, 2000)
-
     });
 }
 

@@ -14,7 +14,7 @@ from apps.index.views.index import get_pending_tournament_invitations
 
 def get(req):
     # Profile specific code
-    requestUsername = req.GET.get("username", "minimeow")
+    requestUsername = req.GET.get("username", "randomUser")
     target = Clients.get_client_by_username(requestUsername)
     # do something if client not found
     if target is None : 
