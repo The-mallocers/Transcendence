@@ -93,5 +93,5 @@ class WsConsumer(AsyncWebsocketConsumer):
             await self.send(text_data=json.dumps(message, ensure_ascii=False), close=bool(close))
         except RuntimeError:
         # La socket est fermée
-            print("esquiveeee")
+            print("esquiveeee1")
             pass

@@ -1,4 +1,5 @@
 from json import JSONDecodeError, loads
+import traceback
 
 from utils.enums import EventType, ResponseError, RTables
 from utils.websockets.channel_send import asend_group_error
@@ -6,7 +7,6 @@ from utils.websockets.consumers.consumer import WsConsumer
 from utils.websockets.services.game import GameService
 from utils.websockets.services.matchmaking import MatchmakingService
 from utils.websockets.services.services import ServiceError
-
 
 class GameConsumer(WsConsumer):
     def __init__(self, *args, **kwargs):
@@ -21,6 +21,7 @@ class GameConsumer(WsConsumer):
                 self.service = GameService()
 
             if data['event'] == EventType.GAME.value and await self._redis.hget(name=RTables.HASH_MATCHES, key=str(self.client.id)) is None:
+                print(data['event'])
                 raise ServiceError('You are not in game')
             return await super().receive(text_data, bytes_data)
 

@@ -19,6 +19,7 @@ class GameService(BaseServices):
             self.pR = await self.redis.json().get(self.game_key, Path(PlayerSide.RIGHT))
             return True
         else:
+            print("zebi 1")
             await asend_group_error(self.service_group, ResponseError.NO_GAME)
             self._logger.error(f"No active game found for client {client.id}")
         return True
