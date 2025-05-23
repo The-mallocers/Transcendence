@@ -20,7 +20,7 @@ const buildTr = (matchInfos) => {
                 <div>-- tbd --</div>
         `
 
-    }else if (matchInfos.status == "finished"){
+    }else if (matchInfos.status == "finished" || matchInfos.status == "ending"){
 
         left = `
                 <img src="${matchInfos.winner_picture}" alt="">
