@@ -23,6 +23,7 @@ up:
 
 detach:
 	rm -rf ./docker/staticdocker/
+	echo "DJANGO_HOSTNAME=$(shell hostname | cut -d'.' -f1)" >> .envaaaaaaaawdawdawdawd
 	docker compose -f ./$(DOCKER_COMPOSE_FILE) down
 	docker compose -f ./$(DOCKER_COMPOSE_FILE) up -d --build --no-attach mailhog --no-attach alertmanager --no-attach grafana
 
