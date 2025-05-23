@@ -92,7 +92,11 @@ export function setUpTournamentSocket (tournamentSocket) {
                 let btn = document.createElement("div")
                 btn.classList.add('btn', 'intra-btn')
                 btn.innerText = 'ready'
-                btn.dataset.route = '/pong/matchmaking/'
+                btn.addEventListener('click', function(){
+                    navigateTo('/pong/matchmaking/');
+                    remove_toast()
+                })
+                // btn.dataset.route = '/pong/matchmaking/'
                 toast.appendChild(btn)
 
                 tournamentData.gameIsReady = true;
