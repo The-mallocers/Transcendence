@@ -8,7 +8,7 @@ from utils.websockets.channel_send import asend_group, asend_group_error
 from utils.websockets.services.services import BaseServices, ServiceError
 
 uuid_global_room = uuid.UUID('00000000-0000-0000-0000-000000000000')
-
+MAX_MESSAGE_LENGTH = 200
 
 class ChatService(BaseServices):
     async def init(self, client, *args) -> bool:
@@ -75,6 +75,11 @@ class ChatService(BaseServices):
             if not message or not room_id:
                 raise ServiceError("Invalid JSON format: Missing 'message' or 'room_id'")
 
+             # Check message length
+            if len(message) > MAX_MESSAGE_LENGTH:
+                return await asend_group_error(self.service_group, ResponseError.INVALID_REQUEST, 
+                                            f"Message exceeds maximum length of {MAX_MESSAGE_LENGTH} characters")
+            
             # Retrieve room
             room = await Rooms.get_room_by_id(room_id)
             if room is None:
