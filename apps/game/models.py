@@ -94,13 +94,8 @@ class GameRuntime:
         existing_data.update(players_serializer.data)
         self.redis.json().set(self.game_key, Path.root_path(), existing_data)
 
-        print('init player left: ', self.pL.client.id)
         self.redis.hset(name=RTables.HASH_MATCHES, key=str(self.pL.client.id), value=str(self.code))
-        print('init player right: ', self.pR.client.id)
         self.redis.hset(name=RTables.HASH_MATCHES, key=str(self.pR.client.id), value=str(self.code))
-
-        print('pl: ', self.redis.hget(name=RTables.HASH_MATCHES, key=str(self.pL.client.id)))
-        print('pr: ', self.redis.hget(name=RTables.HASH_MATCHES, key=str(self.pR.client.id)))
 
         #Update le JSON du tournoi.
         if self.tournament:

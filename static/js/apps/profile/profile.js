@@ -11,7 +11,6 @@ const notifSocket = WebSocketManager.notifSocket;
 
 const searchParams = new URLSearchParams(window.location.search);
 const pathname = window.location.pathname;
-// console.log(pathname);
 
 if (!searchParams.has('username') && pathname == '/') {
     const friends_group = document.querySelector('.friends_group');
@@ -43,7 +42,7 @@ if (!searchParams.has('username') && pathname == '/') {
         const friends_group = document.querySelector('.friends_group');
         const parser = new DOMParser();
         const status = friends_online_status[friend.username];
-        console.log("status:", status);
+
         const html_friend =
             `<li id="friend-${friend.username.replace(/\s+/g, '-')}" class="list-group-item d-flex justify-content-between align-items-center">
             <div>${friend.username}</div>
@@ -112,7 +111,6 @@ if (!searchParams.has('username') && pathname == '/') {
             if (parentListItem) {
                 parentListItem.remove();
             }
-            console.log(duel.duel_id)
             handleAcceptDuel(duel.duel_id, duel.username);
         });
 
@@ -160,7 +158,6 @@ if (!searchParams.has('username') && pathname == '/') {
 }
 
 notifSocket.onmessage = (event) => {
-    console.log(event.data);
     const message = JSON.parse(event.data);
 
     if (message.data.action == "SESSION_EXPIRED") {
@@ -271,7 +268,6 @@ notifSocket.onmessage = (event) => {
             chatElement.parentElement.remove();
     }
     else if(message.data.action == "ACK_ASK_DUEL") {
-        console.log("dans handle l'opponent vaut: " + message.data.content.username);
         let pending_group = document.querySelector('.pending_group');
         const parser = new DOMParser();
         const htmlString =
@@ -337,9 +333,7 @@ notifSocket.onmessage = (event) => {
         } //Woopsie !
         const query_username = searchParams.get("username");
         const friend_div = document.getElementById(`${username}_status`);
-        // console.log(`the username is ${username}`);
-        // console.log(`the combo is ${username}_status`);
-        // console.log("Hello I got a message, friend div is", friend_div);
+
         if (friend_div) {
             if (online == true) {
                 friend_div.innerHTML = "Online";
@@ -388,7 +382,7 @@ notifSocket.onmessage = (event) => {
         const acceptButton = pendingElement.querySelector('.accept_tournament');
         acceptButton?.addEventListener('click', function () {
             pendingElement.remove();
-            console.log(`accepting tournament ${message.data.content.tournament_code}`);
+
             handleAcceptTour(tournament_code, inviter_username);
         });
 
@@ -409,7 +403,6 @@ notifSocket.onmessage = (event) => {
 };
 
 window.handleAskFriend = function(username) {
-    console.log("the friend to add is " + username);
     const message = create_message_notif("send_friend_request", username);
     notifSocket.send(JSON.stringify(message));
     navigateTo('/');
@@ -531,7 +524,7 @@ window.hide_modal = async function (usernameId) {
         const message = create_message_duel("create_duel", usernameId);
         notifSocket.send(JSON.stringify(message));
     } catch (error) {
-        console.log(error);
+
     }
 }
 

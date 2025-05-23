@@ -78,10 +78,6 @@ class SessionLimitingMiddleware:
             if request.path.startswith(path):
                 return self.get_response(request)
 
-        # if request.headers.get('upgrade', '').lower() == 'websocket':
-        #     print('test')
-        #     return self.get_response(request)
-
         try:
             client = Clients.get_client_by_request(request)
 

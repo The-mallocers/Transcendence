@@ -1,4 +1,3 @@
-console.log("coucou je suis matchmaking")
 import {navigateTo} from "../../spa/spa.js";
 import {WebSocketManager} from "../../websockets/websockets.js"
 
@@ -8,7 +7,6 @@ const clientId = element.dataset.clientId
 
 const gameStatusDiv = document.querySelector("#gameStatus")
 
-console.log(element.dataset.clientId)
 let height = 500;
 const width = 1000;
 
@@ -74,7 +72,7 @@ socket.onopen = () => {
     socket.send(JSON.stringify(message));
 }
 socket.onclose = () => {
-    console.log("You disconnected your matchmaking socket");
+
 }
 
 socket.onmessage = (e) => {
@@ -82,16 +80,11 @@ socket.onmessage = (e) => {
 
     if ((typeof jsonData?.data?.content) == "string")
         gameStatusDiv.innerHTML = jsonData.data.content
-    console.log(jsonData, gameStatusDiv)
-    console.log(jsonData.data.action)
-    console.log(jsonData.data.content )
     //We should only get the response that a match was found
 
     //On message on regarde si c'est que la game a commencer
     //on renvois le json approprie
     if (jsonData.data.action == "PLAYER_INFOS") {
-        console.log("PLAYER INFOS IS:")
-        console.log(jsonData.data.content)
         window.GameState = {
             ballY: height / 2,
             ballX: width / 2,
@@ -115,11 +108,9 @@ socket.onmessage = (e) => {
     }
     if (jsonData.data.action == "STARTING") {
         navigateTo("/pong/arena/")
-        console.log()
 
         socket.send(JSON.stringify(startGameMessage))
     }
     ////// navigate to arena and then startGame would be better
     // if ()
 }
-console.log(socket)
