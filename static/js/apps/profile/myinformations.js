@@ -1,4 +1,3 @@
-console.log("in the myinformations file");
 let enable = false;
 
 
@@ -38,10 +37,8 @@ window.switchToggle = async function switchToggle(e) {
     {
         const res = await response.json();
         if(res.state == true){
-            console.log(res.image);
             create_modal(res);
         }
-        console.log(res.message);
     }
 }
 
@@ -76,8 +73,6 @@ async function validateCode() {
             });
 
             const result = await response.json();
-            console.log(result);
-            console.log(result.message);
             if (response.status === 200 && result.success) {
                 alert("2fa successfully implemented");
                 hide_modal();
@@ -91,7 +86,6 @@ async function validateCode() {
             }
         } catch (err) {
             alert(`${err.message}`)
-            console.log("erreur ", err);
             hide_modal();
         }
     } else {

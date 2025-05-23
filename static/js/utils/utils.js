@@ -8,7 +8,6 @@ export async function getClientId() {
         if (!response.ok) {
             return null;
         }
-        // console.log("data:", data);
         if (data.client_id) {
             return data.client_id;
         } else {
@@ -61,7 +60,6 @@ export function create_front_chat_room(room, username, usernameId, status, profi
         const chatDuel = chatElement.querySelector(`.chat-duel`);
 
         chatButton?.addEventListener('click', function() {
-            console.log(room);
             const roomroomDiv = this.closest('.roomroom');
     
             roomroomDiv.classList.add('active-room');

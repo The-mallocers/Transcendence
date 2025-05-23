@@ -24,10 +24,8 @@ delete_btn?.addEventListener('click', ()=>{
     leaveTournament();
 });
 
-console.log(leave_btn);
 
 leave_btn?.addEventListener('click', ()=>{
-    console.log("Leave tournament button clicked");
     leaveTournament();
 });
 
@@ -86,7 +84,6 @@ function sendInvitation(friendId) {
     const modal = bootstrap.Modal.getInstance(document.getElementById('friendSelectionModal'));
     modal.hide();
     
-    console.log(`Invitation sent to friend with ID: ${friendId}`);
     const inviteMessage = {
         "event": "tournament",
         "data": {

@@ -31,7 +31,7 @@ function showActiveChat(show) {
 
 chatSocket.onmessage = (event) => {
     const message = JSON.parse(event.data);
-    console.log(event.data);
+
     
     if (message.data.action == "HISTORY_RECEIVED") {
         showActiveChat(true);
@@ -93,7 +93,6 @@ chatSocket.onmessage = (event) => {
 const messageInput = document.getElementById("messageInput")
 if(messageInput){
     chatSocket?.addEventListener("open", (event) => {
-        console.log("WebSocket is open now.");
             
         const message = {
             "event": "chat",
@@ -119,7 +118,6 @@ if(messageInput){
                 return; // Don't send empty messages
             }
             
-            console.log("User entered:", messageText);
             this.value = ""; // Clear the input field after handling
             
             // Sending this to the websocket
@@ -133,7 +131,7 @@ if(messageInput){
                     }
                 }
             }
-            console.log("room: " + room_id);
+
             chatSocket.send(JSON.stringify(message));
         }
     });
@@ -190,14 +188,14 @@ window.handleChatUnblock = function (username) {
 }
 
 window.handleChatDuel = function (usernameId) {
-    console.log(usernameId);
+
     const message = create_message_duel("create_duel", usernameId);
     notifSocket.send(JSON.stringify(message));
     // navigateTo('/pong/duel/');
 }
 
 async function displayHistory(message) {
-    console.log("Displaying history");
+
     let chatHistory = document.querySelector('.chatHistory');
     chatHistory.innerHTML = "";
     for (let i = 0; i < message.length; i++) {
