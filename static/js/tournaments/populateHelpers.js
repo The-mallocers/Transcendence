@@ -224,7 +224,7 @@ export function populateJoinTournament(tournamentList){
     let clientsDiv = []
     if (tournaments == null) return ;
     tournaments.innerHTML = ``
-    
+    //                                // ${(i == 2) ? `<div class="more">+${room.players_infos.length - (i + 1)}</div>`: ''}
     tournamentList.forEach((room)=>{
         clientsDiv.push(`
         <div class="col room d-flex justify-content-center align-items-center" data-code="${room.code}" >
@@ -235,14 +235,13 @@ export function populateJoinTournament(tournamentList){
                 <div class="d-flex flex-row align-items-center justify-content-between">
                     <div class="btn joinTournamentBtn">join</div>
                     <div class="avatarsContainer mt-2">
-                        ${room.players_infos.map((player, i)=>
-                            `
+                        ${room.players_infos.map((player, i)=>{
+                            return`
                             <div class="imgContainer">
                                 <img src="${player.avatar}" alt="">
-                                ${(i == 2) ? `<div class="more">+${room.max_clients - (i + 1)}</div>`: ''}
                             </div>
                             `
-
+                        }
                         ).join('')}
 
 
