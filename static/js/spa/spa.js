@@ -185,6 +185,7 @@ document.addEventListener("keypress", function (event) {
             event.preventDefault();
             const inputElement = routeElement.querySelector('input');
             let query = inputElement.value;
+            query = query.substring(0, 50);
             navigateTo('/profile/?username=' + query)
             inputElement.value = '';
         }
