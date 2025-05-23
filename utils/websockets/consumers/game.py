@@ -21,7 +21,8 @@ class GameConsumer(WsConsumer):
                 self.service = GameService()
 
             if data['event'] == EventType.GAME.value and await self._redis.hget(name=RTables.HASH_MATCHES, key=str(self.client.id)) is None:
-                print(data['event'])
+
+                print(await self._redis.hget(name=RTables.HASH_MATCHES, key=str(self.client.id)))
                 raise ServiceError('You are not in game')
             return await super().receive(text_data, bytes_data)
 

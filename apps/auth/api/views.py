@@ -124,7 +124,6 @@ class LoginApiView(APIView):
         else:
             response = None
             isOnline = async_to_sync(isClientOnline)(client)
-            print("isOnline: ", isOnline)
             if isOnline:
                 return Response({
                 "error": "You are already logged in somewhere else"

@@ -50,7 +50,6 @@ class TournamentService(BaseServices):
             except ValueError as e:
                 await asend_group_error(self.service_group, ResponseError.KEY_ERROR, str(e))
             except Exception as e:
-                print(traceback.format_exc())
                 await asend_group_error(self.service_group, ResponseError.TOURNAMENT_NOT_CREATE, str(e))
 
     async def _handle_join_tournament(self, data, client):

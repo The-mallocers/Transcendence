@@ -101,13 +101,8 @@ class TournamentThread(Threads):
         if self.tournament.status is TournamentStatus.RUNNING:
             if self.get_match_complete() == self.get_total_matches() and self.get_current_round() <= self.rounds:
                 self.set_current_round(self.get_current_round() + 1)
+                sleep(2)
                 self.place_players()
-                timer = 15
-                while timer > 0:
-                    send_group(RTables.GROUP_TOURNAMENT(self.tournament.code), EventType.TOURNAMENT, ResponseAction.WAITING_FOR_NEXT_ROUND,
-                               {'timer': timer})
-                    sleep(1)
-                    timer -= 1
             elif self.get_current_round() == self.rounds and self.games[-1].rget_status() is GameStatus.FINISHED:
                 tournament = Tournaments.get_tournament_by_code(self.tournament.code)
                 tournament.winner = Game.get_game_by_id(self.games[-1].code).winner.client
@@ -296,7 +291,6 @@ class TournamentThread(Threads):
             if key == RTables.JSON_TOURNAMENT(self.tournament.code):
                 continue
 
-            print("lllllllllllllllllllllllllllllllll", key)
             tournament_status = TournamentStatus(self.redis.json().get(key, Path('status')))
             tournament_title = self.redis.json().get(key, Path('title'))
             tournaments_code = self.redis.json().get(key, Path('clients'))
