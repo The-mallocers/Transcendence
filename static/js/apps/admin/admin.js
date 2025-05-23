@@ -23,7 +23,7 @@ document?.addEventListener("DOMContentLoaded", function () {
             method: "POST",
             body: formData,
             headers: {
-                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value,
             },
         })
             .then(response => response.json())
@@ -46,7 +46,7 @@ document?.addEventListener("DOMContentLoaded", function () {
             fetch(`/api/account/delete/${userId}`, {
                 method: "DELETE",
                 headers: {
-                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value,
                 },
             })
                 .then(response => response.json())

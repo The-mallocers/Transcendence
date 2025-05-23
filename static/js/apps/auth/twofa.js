@@ -10,7 +10,7 @@ async function validateCode() {
             const response = await fetch("/api/auth/2facode", {
                 method: "POST",
                 headers: {
-                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value,
                 },
                 body: JSON.stringify({
                     code: code,

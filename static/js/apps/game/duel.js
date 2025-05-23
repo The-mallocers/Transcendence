@@ -13,6 +13,7 @@ if(images){
     const player2Image = document.querySelector('.player-photo.opponent');
     const newPlayer1ImageUrl = images.hostPicture; 
     const newPlayer2ImageUrl = images.opponentPicture;
+    
     player1Image.src = newPlayer1ImageUrl;
     player2Image.src = newPlayer2ImageUrl;
 }

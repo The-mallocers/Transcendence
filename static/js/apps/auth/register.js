@@ -24,11 +24,11 @@ function register(event) {
     }
     if (!isPasswordcheckValid(password, passwordcheck)) {return ;}
 
-    fetch(form.action, {
+    fetch(form?.action, {
         method: "POST",
         body: JSON.stringify(data),
         headers: {
-            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value,
             "Content-Type": "application/json"
         },
     })
@@ -37,7 +37,7 @@ function register(event) {
                 navigateTo('/');
             } else {
                 response.json().then(errorData => {
-                    error.textContent = "Error registering";
+                    error?.textContent = "Error registering";
                     handleErrorFront(errorData);
                 });
             }
@@ -104,7 +104,7 @@ export function displayErrorMessage(fieldId, message) {
     errorElement.style.fontSize = '0.8rem';
     errorElement.style.marginTop = '4px';
 
-    field.parentNode.insertBefore(errorElement, field.nextSibling);
+    field.parentNode?.insertBefore(errorElement, field.nextSibling);
 
     field?.addEventListener('focus', function() {
         const errorMsg = this.parentNode.querySelector('.error-message');

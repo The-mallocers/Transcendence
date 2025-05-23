@@ -3,7 +3,7 @@ import {WebSocketManager} from "../../websockets/websockets.js"
 
 
 async function logout() {
-    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
     WebSocketManager.closeNotifSocket();
     WebSocketManager.closeTournamentSocket();
 

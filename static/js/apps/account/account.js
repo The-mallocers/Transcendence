@@ -11,11 +11,11 @@ document?.addEventListener("DOMContentLoaded", function () {
         const formData = new FormData(form);
 
         // Utilisation de l'API Fetch pour envoyer les données
-        fetch(form.action, {
+        fetch(form?.action, {
             method: "POST",  // Méthode de la requête (POST)
             body: formData,  // Corps de la requête (les données du formulaire)
             headers: {
-                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value,
             },
         })
             .then(response => response.json())  // Réponse en JSON
@@ -40,7 +40,7 @@ document?.addEventListener("DOMContentLoaded", function () {
             fetch('/api/account/', {
                 method: "DELETE",  // Méthode de la requête (POST)
                 headers: {
-                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value,
                 },
             })
                 .then(response => response.json())  // Réponse en JSON

@@ -64,7 +64,7 @@ chatSocket.onmessage = (event) => {
             const doc = parser.parseFromString(htmlString, "text/html");
             const msgElement = doc.body.firstChild; // Get the actual <div> element
             
-            chatHistory.appendChild(msgElement);
+            chatHistory?.appendChild(msgElement);
             scrollToBottom(chatHistory);
             //Do things to show the new message on the front
         }
@@ -206,7 +206,7 @@ async function displayHistory(message) {
         const doc = parser.parseFromString(htmlString, "text/html");
         const msgElement = doc.body.firstChild; // Get the actual <div> element
 
-        chatHistory.appendChild(msgElement);
+        chatHistory?.appendChild(msgElement);
     }
     scrollToBottom(chatHistory);
 }
