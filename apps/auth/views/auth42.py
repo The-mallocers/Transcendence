@@ -36,7 +36,9 @@ def add_suffix_until_unique(username):
 def auth42(request):
     try : 
         auth_code = request.GET.get('code')
-        hostname = request.get_host().split(':')[0]  # Remove port if present
+        print('code :', auth_code)
+        hostname = request.get_host().split(':')[0]
+        print('host :', hostname)
         token_params = {
             'grant_type': 'authorization_code',
             'client_id': os.environ.get('AUTH_42_CLIENT'),
@@ -44,23 +46,31 @@ def auth42(request):
             'code': auth_code,
             'redirect_uri': f'https://{hostname}:8000/auth/auth42'
         }
-
+        print('token params :', token_params)
         token_response = requests.post(
             'https://api.intra.42.fr/oauth/token',
             json=token_params
         )
-
+        print('token response :', token_response)
+        print('response code :', token_response.status_code)
         if token_response.status_code != 200:
             response = formulate_json_response(True, 302, "Login Unsuccessful", "/")
             return response
-
         token_data = token_response.json()
+        print('token data :', token_data)
         access_token = token_data.get('access_token')
+        print('access_token :', access_token)
         user_response = requests.get(
             'https://api.intra.42.fr/v2/me',
             headers={'Authorization': f'Bearer {access_token}'}
         )
+        if (user_response.status_code != 200):
+            print("MWHAHAHA JE T'AI EU ERREUR DE MIERDA (1)")
+        print('access_token :', user_response, "user_response_code", user_response.status_code)
         user_data = user_response.json()
+        print('user_data :', user_data)
+
+
         id = user_data.get('id')
         email = user_data.get('email')
         first_name = user_data.get('first_name')
@@ -75,6 +85,8 @@ def auth42(request):
             f'https://api.intra.42.fr/v2/users/{id}/coalitions',
             headers={'Authorization': f'Bearer {access_token}'})
 
+        if (coa_response.status_code != 200):
+            print("MWHAHAHA JE T'AI EU ERREUR DE MIERDA (1)")
         coa_data = coa_response.json()
         coa = coa_data[0].get('name')
         client = Clients.get_client_by_email(email)
@@ -114,4 +126,4 @@ def auth42(request):
 
         return response
     except :
-        return formulate_json_response(False, 401, "We couldn't log you in", "/")
+        return formulate_json_response(False, 302, "There was an error while trying to comunicate to 42 api , please try again", "/")
