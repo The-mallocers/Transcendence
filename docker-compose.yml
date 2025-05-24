@@ -53,7 +53,8 @@ services:
       - .env
     volumes:
       - ./docker/staticdocker:/static:ro
-      - ./docker/secrets:/etc/nginx/certs:ro
+      - ${SSL_CERT_PATH}:/etc/nginx/certs/cert.pem:ro
+      - ${SSL_KEY_PATH}:/etc/nginx/certs/key.pem:ro
     networks:
       - Tnetwork
     restart: always
@@ -61,9 +62,9 @@ services:
   redis:
     image: redis/redis-stack-server:latest
     container_name: redis
-    command: 'redis-stack-server --port ${REDIS_PORT}'
+    command: 'redis-stack-server --port 6380'
     ports:
-      - "${REDIS_PORT}:${REDIS_PORT}"
+      - "6380:6380"
     networks:
       - Tnetwork
     restart: unless-stopped
