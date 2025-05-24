@@ -15,11 +15,13 @@ from utils.threads.tournament import TournamentThread
 from utils.websockets.channel_send import send_group_error
 
 tournament_queue = Queue()
+local_queue = Queue()
 
 class MatchmakingThread(Threads):
     def __init__(self, name):
         super().__init__(name)
         self.tournament = None
+        self.local = None
 
     def main(self):
         self.tournament: Tournaments = None
@@ -30,10 +32,14 @@ class MatchmakingThread(Threads):
                 if self.check_tournament():
                     TournamentThread(self.tournament).start()
 
+                if self.check_local():
+                    game = self.local
+                    print(f'game: {game}')
+
                 if game is None:
                     game = Game.create_game(runtime=True)
 
-                if self.select_players(game):
+                if self.select_players(game) or game.local:
                     game.create_redis_game()
                     game.rset_status(GameStatus.MATCHMAKING)
 
@@ -73,6 +79,13 @@ class MatchmakingThread(Threads):
     def check_tournament(self) -> Tournaments:
         try:
             self.tournament = tournament_queue.get_nowait()
+            return True
+        except Empty:
+            return False
+
+    def check_local(self) -> Tournaments:
+        try:
+            self.local = local_queue.get_nowait()
             return True
         except Empty:
             return False
@@ -130,6 +143,6 @@ class MatchmakingThread(Threads):
             return True
         if self.select_duel(game):
             return True
-        if self.select_local(game):
-            return True
+        # if self.select_local(game):
+        #     return True
         return False

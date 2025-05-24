@@ -1,5 +1,12 @@
+import traceback
+
+from asgiref.sync import sync_to_async
+
 from apps.client.models import Clients
+from apps.game.models import Game
+from apps.player.models import Player
 from utils.enums import EventType, ResponseAction, ResponseError, RTables
+from utils.threads.matchmaking import local_queue
 from utils.websockets.channel_send import asend_group, asend_group_error
 from utils.websockets.services.services import BaseServices
 
@@ -43,13 +50,29 @@ class MatchmakingService(BaseServices):
 
     # ════════════════════════════════════ Duels ═════════════════════════════════════ #
     async def _handle_local_game(self, data, client):
-        if await Clients.acheck_in_queue(client, self.redis):
+        queues = await Clients.acheck_in_queue(client, self.redis)
+        if queues:
             return await asend_group_error(self.service_group, ResponseError.ALREADY_IN_QUEUE)
         if await self.redis.hget(name=RTables.HASH_MATCHES, key=str(client.id)) is not None:
             return await asend_group_error(self.service_group, ResponseError.ALREAY_IN_GAME)
         else:
-            await self.redis.hset(name=RTables.HASH_LOCAL_QUEUE, key=str(client.id), value='True')
-            await asend_group(self.service_group, EventType.MATCHMAKING, ResponseAction.JOIN_QUEUE)
+            try:
+                game = await sync_to_async(Game.create_game)(runtime=True)
+                game.local = True
+                game.points_to_win = data['data']['args']['points_to_win']
+                game.pL = Player.create_player(client)
+                # game.pL.client.profile.username = data['data']['args']['player_left_name']
+                game.pR = Player.create_player(client)
+                # game.pR.client.profile.username = data['data']['args']['player_right_name']
+                local_queue.put(game)
+                # await self.channel_layer.group_add(RTables.GROUP_TOURNAMENT(tournament.code), self.channel_name)
+                await self.redis.hset(name=RTables.HASH_LOCAL_QUEUE, key=str(client.id), value=str(True))
+                await asend_group(RTables.GROUP_CLIENT(client.id), EventType.TOURNAMENT, ResponseAction.GAME_CREATED)
+            except ValueError as e:
+                await asend_group_error(self.service_group, ResponseError.KEY_ERROR, str(e))
+            except Exception as e:
+                self._logger.error(traceback.format_exc())
+                await asend_group_error(self.service_group, ResponseError.TOURNAMENT_NOT_CREATE, str(e))
 
     async def _handle_ping(self, data, client):
         return await asend_group(self.service_group, EventType.MATCHMAKING, ResponseAction.PONG)

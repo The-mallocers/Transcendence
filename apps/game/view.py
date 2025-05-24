@@ -52,3 +52,9 @@ def inTournamentTree(req):
 def disconnect_get(req):
     from apps.game.views.disconnect import get
     return get(req)
+
+
+@require_http_methods(["GET"])
+def create_local_get(req):
+    from apps.game.views.localGame import create_local
+    return create_local(req)

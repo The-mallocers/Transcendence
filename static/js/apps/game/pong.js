@@ -1,9 +1,7 @@
 import {WebSocketManager} from "../../websockets/websockets.js";
 import {navigateTo} from '../../spa/spa.js';
-import {isGameOver} from "./VarGame.js";
-import { tournamentData } from "./VarGame.js";
-import { remove_toast } from "../profile/toast.js";
-import { toast_message } from "../profile/toast.js";
+import {isGameOver, tournamentData} from "./VarGame.js";
+import {remove_toast, toast_message} from "../profile/toast.js";
 // import { apiFriends } from "../profile/profile.js";
 
 const socket = WebSocketManager.gameSocket;
@@ -192,7 +190,9 @@ function updatePaddles() {
             "event": "game",
             "data": {
                 "action": "paddle_move",
-                "args": direction
+                "args": {
+                    "move": direction,
+                }
             }
         }
         socket.send(JSON.stringify(message));

@@ -1,0 +1,43 @@
+{% load static %}
+
+<div class="createLocalContainer">
+    <div id="clientID" data-client-id="{{ client.id }}"></div>
+    <div class="box">
+        <h1 class="text-center">Create a local game</h1>
+
+        <div class="points text-center mt-2">
+            <div>Points to win</div>
+            <div class="counter">
+                <div class="minus">-</div>
+                <div class="score">3</div>
+                <div class="plus">+</div>
+            </div>
+        </div>
+
+        <div class="container-fluid mt-3">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="d-flex roomNameContainer align-items-center justify-content-between mt-4">
+                        <div>Player left name</div>
+                        <input id="playerLeft" type="text" placeholder="Player left">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="d-flex roomNameContainer align-items-center justify-content-between mt-4">
+                        <div>Player right name</div>
+                        <input id="playerRight" type="text" placeholder="Player right">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div id="play-btn" class="btn createBtn mt-4">Play</div>
+        <div id="errDiv" class="mt-2"></div>
+
+        <!-- data-route="/pong/tournament/" -->
+    </div>
+</div>
+
+<script type="module" src="{% static '/js/apps/game/createLocal.js' %}"></script>
+<link rel="stylesheet" href="{% static '/css/pong/createLocal.css' %}">

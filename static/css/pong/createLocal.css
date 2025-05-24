@@ -1,0 +1,75 @@
+.createLocalContainer {
+    padding: 2rem;
+}
+
+.createLocalContainer .box {
+    padding: 1rem;
+    background-color: white;
+    color: #141414;
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+
+.createLocalContainer, .createLocalContainer .points, .createLocalContainer .counter, .createLocalContainer .playNum {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    font-size: 1.5rem;
+}
+
+.createLocalContainer .minus, .createLocalContainer .score, .createLocalContainer .plus {
+    padding: 1rem;
+}
+
+
+.createLocalContainer .roomNameContainer, .createLocalContainer .points, .createLocalContainer .playNum {
+    justify-content: space-between;
+    padding: 0 10rem;
+}
+
+.createLocalContainer .roomPrivateContainer {
+    gap: 2rem;
+    padding: 0 10rem;
+}
+
+.createLocalContainer .minus, .createLocalContainer .plus {
+    background-color: #00BABB;
+    color: white;
+    cursor: pointer;
+}
+
+.createLocalContainer .minus {
+    border-radius: 5px 0 0 5px;
+}
+
+.createLocalContainer .score {
+    background-color: #fcfcfc;
+}
+
+.createLocalContainer .plus {
+    border-radius: 0 5px 5px 0;
+
+}
+
+.createLocalContainer .createBtn {
+    background-color: #00BABB;
+    color: white;
+    align-self: center;
+}
+
+.createLocalContainer .roomNameContainer input {
+    border: none;
+    background-color: #efecec;
+
+    padding: .5rem;
+}
+
+.roomPrivateContainer input[type="checkbox"] {
+    height: 1.5rem;
+    width: 1.5rem;
+
+    accent-color: #00BABB;
+}
