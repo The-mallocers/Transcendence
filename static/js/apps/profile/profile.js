@@ -5,12 +5,14 @@ import { toast_duel } from "./toast.js";
 import { toast_message } from "./toast.js";
 import { toast_tournament } from "./toast.js";
 import { remove_toast } from "./toast.js";
-import { create_front_chat_room } from "../../utils/utils.js";
+import { create_front_chat_room, logger} from "../../utils/utils.js";
 
 const notifSocket = WebSocketManager.notifSocket;
 
 const searchParams = new URLSearchParams(window.location.search);
 const pathname = window.location.pathname;
+
+logger.log("ca search le param: ", pathname)
 
 if (!searchParams.has('username') && pathname == '/') {
     const friends_group = document.querySelector('.friends_group');
@@ -159,6 +161,7 @@ if (!searchParams.has('username') && pathname == '/') {
 
 notifSocket.onmessage = (event) => {
     const message = JSON.parse(event.data);
+    console.log(message);
 
     if (message.data.action == "SESSION_EXPIRED") {
         remove_toast();

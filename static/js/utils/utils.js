@@ -91,3 +91,12 @@ export function create_front_chat_room(room, username, usernameId, status, profi
         newChat.appendChild(chatElement);
     }
 }
+
+const isDevelopment = window.print;
+
+export const logger = {
+    log: (...args) => isDevelopment && console.log(...args),
+    warn: (...args) => isDevelopment && console.warn(...args),
+    error: (...args) => console.error(...args),
+    debug: (...args) => isDevelopment && console.debug(...args),
+};
