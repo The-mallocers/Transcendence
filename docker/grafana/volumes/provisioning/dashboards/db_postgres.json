@@ -18,7 +18,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 4,
+  "id": 1,
   "links": [],
   "panels": [
     {
@@ -83,7 +83,7 @@
         "textMode": "name",
         "wideLayout": true
       },
-      "pluginVersion": "12.0.0",
+      "pluginVersion": "12.0.1",
       "targets": [
         {
           "disableTextWrap": false,
@@ -132,7 +132,7 @@
               },
               {
                 "color": "red",
-                "value": 80
+                "value": 1000000
               }
             ]
           },
@@ -164,7 +164,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "12.0.0",
+      "pluginVersion": "12.0.1",
       "targets": [
         {
           "disableTextWrap": false,
@@ -209,8 +209,12 @@
                 "color": "green"
               },
               {
+                "color": "#EAB839",
+                "value": 5000
+              },
+              {
                 "color": "red",
-                "value": 80
+                "value": 10000
               }
             ]
           },
@@ -242,12 +246,12 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "12.0.0",
+      "pluginVersion": "12.0.1",
       "targets": [
         {
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "sum(pg_stat_database_tup_inserted{datname=\"postgres\"})",
+          "expr": "sum(pg_stat_database_tup_inserted{datname=\"dockerdjango\"})",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "legendFormat": "",
@@ -277,8 +281,12 @@
                 "color": "green"
               },
               {
+                "color": "#EAB839",
+                "value": 5000
+              },
+              {
                 "color": "red",
-                "value": 80
+                "value": 10000
               }
             ]
           },
@@ -310,12 +318,12 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "12.0.0",
+      "pluginVersion": "12.0.1",
       "targets": [
         {
           "disableTextWrap": false,
           "editorMode": "builder",
-          "expr": "sum(pg_stat_database_tup_updated{datname=\"postgres\"})",
+          "expr": "sum(pg_stat_database_tup_updated{datname=\"dockerdjango\"})",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "legendFormat": "",
@@ -332,6 +340,7 @@
         "type": "prometheus",
         "uid": "PBFA97CFB590B2093"
       },
+      "description": "Program believe it uses",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -383,7 +392,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.0",
+      "pluginVersion": "12.0.1",
       "targets": [
         {
           "datasource": {
@@ -411,6 +420,7 @@
         "type": "prometheus",
         "uid": "PBFA97CFB590B2093"
       },
+      "description": " Resident Set Size => memory it actually uses",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -464,7 +474,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.0",
+      "pluginVersion": "12.0.1",
       "targets": [
         {
           "datasource": {
@@ -586,7 +596,7 @@
         "xTickLabelRotation": 0,
         "xTickLabelSpacing": 0
       },
-      "pluginVersion": "12.0.0",
+      "pluginVersion": "12.0.1",
       "targets": [
         {
           "disableTextWrap": false,
@@ -671,7 +681,7 @@
         "showThresholdMarkers": true,
         "sizing": "auto"
       },
-      "pluginVersion": "12.0.0",
+      "pluginVersion": "12.0.1",
       "targets": [
         {
           "disableTextWrap": false,
@@ -787,7 +797,7 @@
         "xTickLabelRotation": 0,
         "xTickLabelSpacing": 0
       },
-      "pluginVersion": "12.0.0",
+      "pluginVersion": "12.0.1",
       "targets": [
         {
           "disableTextWrap": false,
@@ -824,5 +834,5 @@
   "timezone": "browser",
   "title": "db_dashboard",
   "uid": "aegeahsaq4agwf",
-  "version": 5
+  "version": 9
 }

@@ -64,15 +64,25 @@ status:
 
 restart: down up
 
-dbclean:
-	docker compose -f ./$(DOCKER_COMPOSE_FILE) down -v
+dbclean: down
+	docker compose down -v
+	@if [ "$$(docker ps -q)" ]; then \
+		docker volume rm $$(docker volume ls -q) --force;\
+	fi
 
 reload:
 	cp -r static/css ./docker/staticdocker
 	cp -r static/js ./docker/staticdocker
 
-clean: dbclean
-	docker compose -f ./$(DOCKER_COMPOSE_FILE) down --rmi all
+clean:
+	@if [ "$$(docker ps -q)" ]; then \
+		docker stop $$(docker ps -q);\
+	fi
+	@if [ "$$(docker images -q)" ]; then \
+		docker rmi $$(docker images -q) --force;\
+	fi
+	$(MAKE) dbclean
+	docker system prune -a --volumes --force
 
 re: down up
 
