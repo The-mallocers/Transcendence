@@ -61,9 +61,7 @@ class MatchmakingService(BaseServices):
                 game.local = True
                 game.points_to_win = data['data']['args']['points_to_win']
                 game.pL = Player.create_player(client)
-                # game.pL.client.profile.username = data['data']['args']['player_left_name']
                 game.pR = Player.create_player(client)
-                # game.pR.client.profile.username = data['data']['args']['player_right_name']
                 local_queue.put(game)
                 # await self.channel_layer.group_add(RTables.GROUP_TOURNAMENT(tournament.code), self.channel_name)
                 await self.redis.hset(name=RTables.HASH_LOCAL_QUEUE, key=str(client.id), value=str(True))

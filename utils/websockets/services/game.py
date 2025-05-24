@@ -41,9 +41,9 @@ class GameService(BaseServices):
         is_local = await self.redis.json().get(self.game_key, Path('local'))
         if status is GameStatus.RUNNING:
             if is_local is True:
-                if data['side'] == PlayerSide.LEFT:
+                if PlayerSide(data['data']['args']['side']) == PlayerSide.LEFT:
                     await self.redis.json().set(self.game_key, Path('player_left.paddle.move'), data['data']['args']['move'])
-                if data['side'] == PlayerSide.RIGHT:
+                if PlayerSide(data['data']['args']['side']) == PlayerSide.RIGHT:
                     await self.redis.json().set(self.game_key, Path('player_right.paddle.move'), data['data']['args']['move'])
             else:
                 if str(client.id) == self.pL['id']:

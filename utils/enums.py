@@ -139,6 +139,7 @@ class ResponseAction(str, Enum):
 
     # ── Game Actions ──────────────────────────────────────────────────────────────────
     JOIN_GAME: str = 'You have successfully joined the game'
+    JOIN_LOCAL: str = 'You have successfully joined the local game'
     GAME_CREATED: str = 'You have successfully create the game'
     LEFT_GAME: str = 'You have successfully left the game'
     STARTING: str = 'The game is about to start'

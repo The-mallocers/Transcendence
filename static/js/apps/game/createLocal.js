@@ -39,6 +39,9 @@ function increase() {
 minus?.addEventListener("click", decrease);
 plus?.addEventListener("click", increase);
 
+const player_left_name = document.querySelector("#playerLeft");
+const player_right_name = document.querySelector("#playerRight");
+
 window.GameState = {
     ballY: height / 2,
     ballX: width / 2,
@@ -46,13 +49,13 @@ window.GameState = {
     left: {
         x: paddleDefaultPos,
         y: paddleDefaultPos,
-        username: "",
+        username: player_left_name,
         id: ""
     },
     right: {
         x: paddleDefaultPos,
         y: paddleDefaultPos,
-        username: "",
+        username: player_right_name,
         id: ""
     }
 }
@@ -60,8 +63,6 @@ window.GameState = {
 function getLocalSettings() {
     let score = document.querySelector(".score");
     let points = parseInt(score.innerHTML);
-    const player_left_name = document.querySelector("#playerLeft");
-    const player_right_name = document.querySelector("#playerRight");
 
     const creationMessage = {
         "event": "matchmaking",
@@ -69,8 +70,6 @@ function getLocalSettings() {
             "action": "local_game",
             "args": {
                 "points_to_win": points,
-                "player_left_name": player_left_name,
-                "player_right_name": player_right_name,
             }
         }
     };
