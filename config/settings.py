@@ -46,6 +46,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
+PRINT = 'true'
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
 
 ROOT_URLCONF = 'config.urls'
@@ -108,6 +109,7 @@ TEMPLATES = [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.messages.context_processors.messages',
+                'apps.core.context_processors.spa_context',
             ],
         },
     },
