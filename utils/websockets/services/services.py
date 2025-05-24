@@ -40,7 +40,8 @@ class BaseServices(ABC):
             pass
 
     async def handle_disconnect(self, client):
-        return await self.disconnect(client)
+        if self._initialized:
+            return await self.disconnect(client)
 
     async def process_action(self, data: Dict[str, Any], *args):
         try:

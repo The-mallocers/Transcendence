@@ -32,8 +32,6 @@ class MatchmakingService(BaseServices):
 
     # ════════════════════════════════════ Duels ═════════════════════════════════════ #
 
-    async def _handle_ping(self, data, client):
-        return await asend_group(self.service_group, EventType.MATCHMAKING, ResponseAction.PONG)
 
     async def _handle_leave_duel(self, data, client: Clients):
         queues = await Clients.acheck_in_queue(client, self.redis)
@@ -42,6 +40,19 @@ class MatchmakingService(BaseServices):
             await asend_group(self.service_group, EventType.MATCHMAKING, ResponseAction.LEFT_QUEUE)
         else:
             return await asend_group_error(self.service_group, ResponseError.NOT_IN_QUEUE)
+
+    # ════════════════════════════════════ Duels ═════════════════════════════════════ #
+    async def _handle_local_game(self, data, client):
+        if await Clients.acheck_in_queue(client, self.redis):
+            return await asend_group_error(self.service_group, ResponseError.ALREADY_IN_QUEUE)
+        if await self.redis.hget(name=RTables.HASH_MATCHES, key=str(client.id)) is not None:
+            return await asend_group_error(self.service_group, ResponseError.ALREAY_IN_GAME)
+        else:
+            await self.redis.hset(name=RTables.HASH_LOCAL_QUEUE, key=str(client.id), value='True')
+            await asend_group(self.service_group, EventType.MATCHMAKING, ResponseAction.JOIN_QUEUE)
+
+    async def _handle_ping(self, data, client):
+        return await asend_group(self.service_group, EventType.MATCHMAKING, ResponseAction.PONG)
 
     async def disconnect(self, client):
         queues = await Clients.acheck_in_queue(client, self.redis)

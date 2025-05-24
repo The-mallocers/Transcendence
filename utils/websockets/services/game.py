@@ -38,11 +38,18 @@ class GameService(BaseServices):
 
     async def _handle_paddle_move(self, data, client: Clients):
         status = GameStatus(await self.redis.json().get(self.game_key, Path('status')))
+        is_local = await self.redis.json().get(self.game_key, Path('local'))
         if status is GameStatus.RUNNING:
-            if str(client.id) == self.pL['id']:
-                await self.redis.json().set(self.game_key, Path('player_left.paddle.move'), data['data']['args'])
-            if str(client.id) == self.pR['id']:
-                await self.redis.json().set(self.game_key, Path('player_right.paddle.move'), data['data']['args'])
+            if is_local is True:
+                if data['side'] == PlayerSide.LEFT:
+                    await self.redis.json().set(self.game_key, Path('player_left.paddle.move'), data['data']['args'])
+                if data['side'] == PlayerSide.RIGHT:
+                    await self.redis.json().set(self.game_key, Path('player_right.paddle.move'), data['data']['args'])
+            else:
+                if str(client.id) == self.pL['id']:
+                    await self.redis.json().set(self.game_key, Path('player_left.paddle.move'), data['data']['args'])
+                if str(client.id) == self.pR['id']:
+                    await self.redis.json().set(self.game_key, Path('player_right.paddle.move'), data['data']['args'])
 
     async def disconnect(self, client):
         pass

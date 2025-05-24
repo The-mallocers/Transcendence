@@ -48,10 +48,12 @@ class PlayerRuntime:
         player.redis = RedisConnectionPool.get_sync_connection(player.__class__.__name__)
         return player
 
-    def leave_queue(self, game_id, is_duel):
-        if is_duel is True:
+    def leave_queue(self, game_id, is_duel, local):
+        if is_duel:
             self.redis.hdel(RTables.HASH_DUEL_QUEUE(game_id), str(self.client.id))
-        if is_duel is False:
+        if local:
+            self.redis.hdel(RTables.HASH_LOCAL_QUEUE, str(self.client.id))
+        else:
             self.redis.hdel(RTables.HASH_G_QUEUE, str(self.client.id))
 
     # ── Getter ────────────────────────────────────────────────────────────────────── #

@@ -53,6 +53,7 @@ class RequestAction(str, Enum):
     # ── Matchmaking Actions ───────────────────────────────────────────────────────────
     JOIN_QUEUE: str = 'join_queue'
     LEAVE_QUEUE: str = 'leave_queue'
+    LOCAL_GAME: str = 'local_game'
 
     # ── Duels ─────────────────────────────────────────────────────────────────────── #
     CREATE_DUEL: str = 'create_duel'
@@ -261,11 +262,13 @@ class RTables(str, Enum):
     HASH_CLIENT: str = 'client_{}'
     HASH_CLIENT_SESSION: str = 'client_session_{}'
     HASH_MATCHES: str = 'current_matches'
+    HASH_TOURNAMENT_INVITATION = "tournament_invitation"
+    # Queues
     HASH_QUEUE: str = 'queue_{}'
     HASH_G_QUEUE: str = HASH_QUEUE.format('global')
     HASH_DUEL_QUEUE: str = HASH_QUEUE.format("duel_{}")
+    HASH_LOCAL_QUEUE: str = HASH_QUEUE.format("local")
     HASH_TOURNAMENT_QUEUE: str = HASH_QUEUE.format("tournament_{}")
-    HASH_TOURNAMENT_INVITATION = "tournament_invitation"
 
     # ── Json ──────────────────────────────────────────────────────────────────────── #
     JSON_GAME: str = 'game_{}'
