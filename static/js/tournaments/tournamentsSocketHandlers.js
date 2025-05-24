@@ -15,14 +15,6 @@ const get_tournament_info = {
     }    
 }
 
-const get_tournaments_info = {
-    "event": "tournament",
-    "data": {
-        "action": "list_tournament"
-    }    
-}
-
-
 export function setUpTournamentSocket (tournamentSocket) {
     tournamentSocket.onmessage = (message) => {
         const jsonData = JSON.parse(message.data);
