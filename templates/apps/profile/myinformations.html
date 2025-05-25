@@ -2,9 +2,9 @@
 
 {% csrf_token %}
 <div class="container-fluid main mt-4">
-    <div class="row row-information g-4 align-items-start justify-content-start">
-        <div class="col-6 col-md-6">
-            <div class="box box-top d-flex flex-column align-items-start">
+    <div class="row gx-4 gy-4 align-items-stretch mt-2">
+        <div class="col-12 col-lg-6 ">
+            <div class="box box-information d-flex flex-column align-items-start">
                 <h4>Personal informations</h4>
                 <label for="currusername" class="control-label string optional disabled" >Name</label>
                 <input class="form-control string optional disabled" disabled="disabled" 
@@ -24,8 +24,8 @@
                 {%endif%}
             </div>
         </div>
-        <div class="col-6 col-md-6">
-            <div class="box box-top">
+        <div class="col-12 col-lg-6 ">
+            <div class="box box-information">
                 <div class="content d-flex flex-column justify-content-center align-items-center">
                     <h4 class="align-self-start">Enable 2-FA</h4>
                     <svg class="shield" viewBox="0 0 94 125" xmlns="http://www.w3.org/2000/svg">
@@ -40,43 +40,43 @@
             </div>
         </div>
     </div>
-        <div class="row row-information g-4 align-items-start justify-content-start">
-            <div class="col-6 col-md-6">
-                <div class="box box-bottom">
-                    <h4>Current picture</h4>
-                    <div class=" d-flex flex-column align-items-center justify-content-center inputs">
-                        <div id="upload-feedback"></div>
-                        <img src="{{ client.profile.profile_picture.url }}" id="profile_picture">
-                        <div class="type-intra-green mt-4" id="upload-img-btn">Upload new profile picture</div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-6 col-md-6">
-                <div class="box box-bottom">
-                    <h4>Update Personal informations</h4>
-                    <form id="register-form" method="PUT" action="{% url 'update' %}" enctype="multipart/form-data">
-                        <div id="error-message" style="color: red;"></div>
-                        <div>
-                            <label for="username" class="control-label username optional">Username</label>
-                            <input class="form-control string optional" id="username" name="username" type="text" placeholder={{client.profile.username}} required>
-                        </div>
-                        <div>
-                            <label for="email" class="control-label email optional">Email</label>
-                            <input class="form-control string optional" id="email" type="email" name="email" placeholder={{client.profile.email}} required>
-                        </div>
-                        <div>
-                            <label for="password" class="control-label password optional">Password</label>
-                            <input class="form-control string optional" id="password" type="password" name="password" required>
-                        </div>
-                        <div>
-                            <label for="password_check" class="control-label email optional">Verify password</label>
-                            <input class="form-control string optional" id="password_check" type="password" name="password_check" required>
-                        </div>
-                        <div class="type-intra-green mt-4" id="update-btn">Update informations</div>
-                    </form>
+    <div class="row gx-4 gy-4 align-items-stretch mt-2">
+        <div class="col-12 col-lg-6 ">
+            <div class="box box-information">
+                <h4>Current picture</h4>
+                <div class=" d-flex flex-column align-items-center justify-content-center inputs">
+                    <div id="upload-feedback"></div>
+                    <img src="{{ client.profile.profile_picture.url }}" id="profile_picture">
+                    <div class="type-intra-green mt-4" id="upload-img-btn">Upload new profile picture</div>
                 </div>
             </div>
         </div>
+        <div class="col-12 col-lg-6 ">
+            <div class="box box-information">
+                <h4>Update Personal informations</h4>
+                <form id="register-form" method="PUT" action="{% url 'update' %}" enctype="multipart/form-data">
+                    <div id="error-message" style="color: red;"></div>
+                    <div>
+                        <label for="username" class="control-label username optional">Username</label>
+                        <input class="form-control string optional" id="username" name="username" type="text" placeholder={{client.profile.username}} required>
+                    </div>
+                    <div>
+                        <label for="email" class="control-label email optional">Email</label>
+                        <input class="form-control string optional" id="email" type="email" name="email" placeholder={{client.profile.email}} required>
+                    </div>
+                    <div>
+                        <label for="password" class="control-label password optional">Password</label>
+                        <input class="form-control string optional" id="password" type="password" name="password" required>
+                    </div>
+                    <div>
+                        <label for="password_check" class="control-label email optional">Verify password</label>
+                        <input class="form-control string optional" id="password_check" type="password" name="password_check" required>
+                    </div>
+                    <div class="type-intra-green mt-4" id="update-btn">Update informations</div>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
 
 <div class="modal fade" id="twoFactorModal" tabindex="-1" aria-labelledby="twoFactorModalLabel" aria-hidden="true">

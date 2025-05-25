@@ -27,6 +27,15 @@ if (pathname == "/pong/gamemodes/") {
     });
 }
 
+const btnkey = document.querySelector(".btn-key-to-play")
+if(btnkey){
+    btnkey.addEventListener('click', function(){
+        const htmlmodal = document.getElementById('modal-key-to-play')
+        const modal = new bootstrap.Modal(htmlmodal);
+        modal.show();
+    })
+}
+
 window.choose_duel_friend = function(){
     const friendSelectionModal = new bootstrap.Modal(document.querySelector('#friendSelectionModal'));
     friendSelectionModal.show();
@@ -57,6 +66,13 @@ export function create_message_duel(action, targetUser) {
 }
 
 const modalElement = document.getElementById('friendSelectionModal');
+modalElement?.addEventListener('hide.bs.modal', () => {
+    if (document.activeElement instanceof HTMLElement) {
+        document.activeElement.blur();
+    }
+});
+
+const modalKeyElement = document.getElementById('modal-key-to-play');
 modalElement?.addEventListener('hide.bs.modal', () => {
     if (document.activeElement instanceof HTMLElement) {
         document.activeElement.blur();

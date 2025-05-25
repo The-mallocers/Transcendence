@@ -225,5 +225,3 @@ async function displayRooms(rooms) {
 function scrollToBottom(element){
     element.scrollTop = element.scrollHeight;
 }
-
-export {create_front_chat_room}
