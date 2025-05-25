@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 # Define the secret folder path
 SECRET_FOLDER="./secrets"
 VENV_FOLDER="./.venv" # Temporary virtual environment folder
@@ -12,9 +14,40 @@ BLUE='\033[0;34m'
 CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
-# Create a virtual environment
+# Detect python
+if command -v "$PYTHON" >/dev/null 2>&1; then
+    PYTHON="$PYTHON"
+elif command -v python >/dev/null 2>&1; then
+    PYTHON=python
+else
+    echo "Python is not installed." >&2
+    exit 1
+fi
+
+# Check OS for sed compatibility
+SED_INPLACE() {
+  # Usage: SED_INPLACE <expression> <file>
+  if [[ "$(uname)" == "Darwin" ]]; then
+    sed -i '' "$1" "$2"
+  else
+    sed -i "$1" "$2"
+  fi
+}
+
+# Create a virtual environment (Linux: ensure python-venv is installed)
 create_venv() {
-  python3 -m venv "$VENV_FOLDER"
+  if ! "$PYTHON" -m venv --help > /dev/null 2>&1; then
+    echo -e "${RED}Error: python-venv is not installed.${NC}"
+    if [[ "$(uname)" == "Darwin" ]]; then
+      echo -e "${YELLOW}Install Python 3 from Homebrew or official installer, which includes venv.${NC}"
+    else
+      echo -e "${YELLOW}On Debian/Ubuntu, run: sudo apt install python-venv${NC}"
+    fi
+    exit 1
+  fi
+
+  "$PYTHON" -m venv "$VENV_FOLDER"
+  # shellcheck disable=SC1091
   source "$VENV_FOLDER/bin/activate"
   export PIP_DISABLE_PIP_VERSION_CHECK=1
   pip install --quiet django
@@ -22,26 +55,32 @@ create_venv() {
 
 # Destroy the virtual environment
 destroy_venv() {
-  deactivate
+  # deactivate only if venv is active
+  if [[ "$VIRTUAL_ENV" != "" ]]; then
+    deactivate
+  fi
   rm -rf "$VENV_FOLDER"
 }
 
 # Generate a Django SECRET_KEY using the virtual environment
 generate_django_secret_key() {
+  # shellcheck disable=SC1091
   source "$VENV_FOLDER/bin/activate"
-  python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
+  "$PYTHON" -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
 }
 
 # Generate a JWT SECRET_KEY using the virtual environment
 generate_jwt_secret_key() {
+  # shellcheck disable=SC1091
   source "$VENV_FOLDER/bin/activate"
-  python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
+  "$PYTHON" -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
 }
 
 # Generate a base32 SECRET_FA_KEY using the virtual environment
 generate_secret_fa_key() {
+  # shellcheck disable=SC1091
   source "$VENV_FOLDER/bin/activate"
-  python -c "import secrets, base64; random_bytes = secrets.token_bytes(20); print(base64.b32encode(random_bytes).decode('utf-8').rstrip('='))"
+  "$PYTHON" -c "import secrets, base64; random_bytes = secrets.token_bytes(20); print(base64.b32encode(random_bytes).decode('utf-8').rstrip('='))"
 }
 
 # Get the hostname
@@ -54,6 +93,7 @@ generate_pem_files() {
   local cert_path="$SECRET_FOLDER/cert.pem"
   local key_path="$SECRET_FOLDER/key.pem"
 
+  mkdir -p "$SECRET_FOLDER"
   if [ ! -f "$cert_path" ]; then
     echo -e "${YELLOW}Creating $cert_path...${NC}"
     openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout "$key_path" -out "$cert_path" -subj "/CN=localhost"
@@ -83,17 +123,17 @@ check_42_files() {
 # Generate .env if missing
 generate_env_file() {
   if [ -f .env ]; then
-    echo -e "${CYAN}Environement file already exists. Updating required fields...${NC}"
+    echo -e "${CYAN}Environment file already exists. Updating required fields...${NC}"
 
-    # Update DJANGO_HOSTNAME
+    # Update DJANGO_HOSTNAME with cross-platform sed
     if grep -q "^DJANGO_HOSTNAME=" .env; then
-      sed -i '' "s/^DJANGO_HOSTNAME=.*/DJANGO_HOSTNAME=$(get_hostname)/" .env
+      SED_INPLACE "s/^DJANGO_HOSTNAME=.*/DJANGO_HOSTNAME=$(get_hostname)/" .env
     else
       echo "DJANGO_HOSTNAME=$(get_hostname)" >> .env
     fi
-    echo -e "${GREEN}DJANGO_HOSTNAME has been updated in the existing environement file.${NC}"
+    echo -e "${GREEN}DJANGO_HOSTNAME has been updated in the existing environment file.${NC}"
   else
-    echo -e "${BLUE}Creating a new environement file with dynamic values...${NC}"
+    echo -e "${BLUE}Creating a new environment file with dynamic values...${NC}"
     cat <<EOL > .env
 # ══ Secrets ═════════════════════════════════════════════════════════════════════════ #
 # Keys
@@ -129,7 +169,7 @@ ADMIN_USERNAME='admin'
 
 DJANGO_HOSTNAME='$(get_hostname)'
 EOL
-    echo -e "${GREEN}Environement file has been created with dynamic values.${NC}"
+    echo -e "${GREEN}Environment file has been created with dynamic values.${NC}"
   fi
 }
 
