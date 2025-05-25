@@ -200,6 +200,8 @@ class PongLogic:
                        self.score_pR.get_score())
 
     def set_result(self, disconnect=False):
+        if self.game.local == True:
+            return
         winner = Player.create_player()
         loser = Player.create_player()
 
@@ -241,7 +243,7 @@ class PongLogic:
         finished_game = Game.objects.create(code=self.game.code, winner=winner, loser=loser,
                                             points_to_win=self.game.points_to_win, is_duel=self.game.rget_is_duel(), tournament=tournament)
 
-        # mmr gain would happen here.
+
         self.compute_mmr_change(winner, loser)
         winner.client.stats.wins = F('wins') + 1
         loser.client.stats.losses = F('losses') + 1

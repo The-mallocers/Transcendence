@@ -2,6 +2,7 @@ import {WebSocketManager} from "../../websockets/websockets.js";
 import {navigateTo} from '../../spa/spa.js';
 import {isGameOver, tournamentData} from "./VarGame.js";
 import {remove_toast, toast_message} from "../profile/toast.js";
+import { localState } from "./VarGame.js";
 // import { apiFriends } from "../profile/profile.js";
 
 const socket = WebSocketManager.gameSocket;
@@ -51,11 +52,14 @@ if (!socket || socket.readyState === WebSocket.CLOSED) {
     rpicture.src = window.GameState.right.picture;
 
     socket.onmessage = (e) => {
+        console.log("Salut la team game socket avec ptit message");
         const jsonData = JSON.parse(e.data);
+        console.log(jsonData);
         //Attempt at handling errors
         if (jsonData.data.action == "EXCEPTION") {
 
             isGameOver.gameIsOver = true;
+            localState.gameIsLocal = false;
             WebSocketManager.closeGameSocket();
             navigateTo("/");
             remove_toast();
@@ -101,6 +105,8 @@ if (!socket || socket.readyState === WebSocket.CLOSED) {
                 const game_id = jsonData.data.content
                 navigateTo(`/pong/disconnect/?game=${game_id}`);
                 isGameOver.gameIsOver = true;
+                localState.gameIsLocal = false;
+
                 WebSocketManager.closeGameSocket();
             }
         } else if (jsonData.data.action == "GAME_ENDING") {
@@ -112,6 +118,7 @@ if (!socket || socket.readyState === WebSocket.CLOSED) {
                 navigateTo(`/pong/gameover/?game=${game_id}`);
             }
             isGameOver.gameIsOver = true;
+            localState.gameIsLocal = false;
             WebSocketManager.closeGameSocket();
         }
     };
@@ -130,6 +137,12 @@ document?.addEventListener('visibilitychange', () => {
 const keys = {};
 const previous_keys = {};
 let previous_direction = null;
+
+const keys_local = {};
+const previous_keys_local = {};
+let previous_direction_local = null;
+
+
 
 document?.addEventListener('keydown', (event) => {
     switch (event.key) {
@@ -153,6 +166,76 @@ document?.addEventListener('keyup', (event) => {
     }
 });
 
+function addLocalDown(event) {
+    const key = event.key.toLowerCase();
+    switch (key) {
+        case 's':
+            previous_keys.up = false;
+            break;
+        case 'x':
+            previous_keys.down = false;
+            break;
+    }
+}
+
+function addLocalUp(event) {
+    const key = event.key.toLowerCase();
+    switch (key) {
+        case 's':
+            previous_keys.up = false;
+            break;
+        case 'x':
+            previous_keys.down = false;
+            break;
+    }
+}
+
+
+if (localState.gameIsLocal == true) {
+    document?.addEventListener('keyup', addLocalUp);
+    document?.addEventListener('keydown', addLocalDown);
+}
+
+
+function updateLocalPaddles() {
+    let direction = null;
+    //This might look confusing, but this is to simulate strafing keys
+    if (keys_local.up && keys_local.down) {
+        if (previous_keys_local.up) {
+            direction = 'down';
+        } else if (previous_keys_local.down) {
+            direction = 'up';
+        }
+    } else if (keys_local.up) {
+        direction = 'up';
+        previous_keys_local.up = true;
+        previous_keys_local.down = false;
+    } else if (keys_local.down) {
+        direction = 'down';
+        previous_keys_local.down = true;
+        previous_keys_local.up = false;
+    } else { direction = 'idle';}
+    if ((direction && previous_direction != direction) || frameCount % 5 === 0) { //Trying to send less updates
+        previous_direction_local = direction;
+        const message = {
+            "event": "game",
+            "data": {
+                "action": "paddle_move",
+                "args": {
+                    "move": direction,
+                    "side": "left"
+                }
+            }
+        }
+        socket.send(JSON.stringify(message));
+    }
+}
+
+
+
+
+
+
 
 function updatePaddles() {
     let direction = null;
@@ -171,19 +254,7 @@ function updatePaddles() {
         direction = 'down';
         previous_keys.down = true;
         previous_keys.up = false;
-    } else {
-        direction = 'idle';
-    }
-    //the code below might be useful later, idk it doesnt work rn
-    // if (my_name == lusername) {
-    //     left_last_move = direction;
-    // }
-    // else if (my_name == rusername) {
-    //     right_last_move = direction;
-    // }
-    // if (direction != previous_direction) {
-    // }
-    // (direction && previous_direction != direction) || frameCount % 5 === 0
+    } else { direction = 'idle';}
     if ((direction && previous_direction != direction) || frameCount % 5 === 0) { //Trying to send less updates
         previous_direction = direction;
         const message = {
@@ -192,6 +263,7 @@ function updatePaddles() {
                 "action": "paddle_move",
                 "args": {
                     "move": direction,
+                    "side": "right"
                 }
             }
         }
@@ -291,6 +363,7 @@ function gameLoop() {
     }
     frameCount++;
     computeDelta();
+    if (localState.gameIsLocal == true) { updateLocalPaddles};
     updatePaddles();
     render();
     requestAnimationFrame(gameLoop);

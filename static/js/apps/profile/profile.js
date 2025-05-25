@@ -6,6 +6,7 @@ import { toast_message } from "./toast.js";
 import { toast_tournament } from "./toast.js";
 import { remove_toast } from "./toast.js";
 import { create_front_chat_room, logger} from "../../utils/utils.js";
+import { localState } from "../game/VarGame.js";
 
 const notifSocket = WebSocketManager.notifSocket;
 
@@ -168,7 +169,11 @@ notifSocket.onmessage = (event) => {
         toast_message("Session expired");
         navigateTo('/auth/login');
     }
-    
+    if (message.data.action == "GAME_CREATED") {
+        localState.gameIsLocal = true;
+        navigateTo('/pong/arena/');
+
+    }
     if(message.data.action == "ACK_SEND_FRIEND_REQUEST") {
         const pending_group = document.querySelector('.pending_group');
         const parser = new DOMParser();

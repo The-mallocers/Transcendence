@@ -78,5 +78,5 @@ function getLocalSettings() {
 
 btn?.addEventListener('click', () => {
     getLocalSettings();
-    navigateTo('/pong/arena/');
+    // navigateTo('/pong/arena/');
 })
