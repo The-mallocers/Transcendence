@@ -231,12 +231,6 @@ function updateLocalPaddles() {
     }
 }
 
-
-
-
-
-
-
 function updatePaddles() {
     let direction = null;
     //This might look confusing, but this is to simulate strafing keys

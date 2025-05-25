@@ -65,6 +65,7 @@ class MatchmakingService(BaseServices):
                 local_queue.put(game)
                 # await self.channel_layer.group_add(RTables.GROUP_TOURNAMENT(tournament.code), self.channel_name)
                 await self.redis.hset(name=RTables.HASH_LOCAL_QUEUE, key=str(client.id), value=str(True))
+                print(f" sending to group {self.service_group}")
                 await asend_group(self.service_group, EventType.MATCHMAKING, ResponseAction.GAME_CREATED)
             except ValueError as e:
                 await asend_group_error(self.service_group, ResponseError.KEY_ERROR, str(e))

@@ -169,11 +169,6 @@ notifSocket.onmessage = (event) => {
         toast_message("Session expired");
         navigateTo('/auth/login');
     }
-    if (message.data.action == "GAME_CREATED") {
-        localState.gameIsLocal = true;
-        navigateTo('/pong/arena/');
-
-    }
     if(message.data.action == "ACK_SEND_FRIEND_REQUEST") {
         const pending_group = document.querySelector('.pending_group');
         const parser = new DOMParser();
