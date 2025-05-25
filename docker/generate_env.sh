@@ -14,16 +14,6 @@ BLUE='\033[0;34m'
 CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
-# Detect python
-if command -v "$PYTHON" >/dev/null 2>&1; then
-    PYTHON="$PYTHON"
-elif command -v python >/dev/null 2>&1; then
-    PYTHON=python
-else
-    echo "Python is not installed." >&2
-    exit 1
-fi
-
 # Check OS for sed compatibility
 SED_INPLACE() {
   # Usage: SED_INPLACE <expression> <file>
@@ -36,7 +26,7 @@ SED_INPLACE() {
 
 # Create a virtual environment (Linux: ensure python-venv is installed)
 create_venv() {
-  if ! "$PYTHON" -m venv --help > /dev/null 2>&1; then
+  if ! python3 -m venv --help > /dev/null 2>&1; then
     echo -e "${RED}Error: python-venv is not installed.${NC}"
     if [[ "$(uname)" == "Darwin" ]]; then
       echo -e "${YELLOW}Install Python 3 from Homebrew or official installer, which includes venv.${NC}"
@@ -46,7 +36,7 @@ create_venv() {
     exit 1
   fi
 
-  "$PYTHON" -m venv "$VENV_FOLDER"
+  python3 -m venv "$VENV_FOLDER"
   # shellcheck disable=SC1091
   source "$VENV_FOLDER/bin/activate"
   export PIP_DISABLE_PIP_VERSION_CHECK=1
@@ -66,21 +56,21 @@ destroy_venv() {
 generate_django_secret_key() {
   # shellcheck disable=SC1091
   source "$VENV_FOLDER/bin/activate"
-  "$PYTHON" -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
+  python3 -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
 }
 
 # Generate a JWT SECRET_KEY using the virtual environment
 generate_jwt_secret_key() {
   # shellcheck disable=SC1091
   source "$VENV_FOLDER/bin/activate"
-  "$PYTHON" -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
+  python3 -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
 }
 
 # Generate a base32 SECRET_FA_KEY using the virtual environment
 generate_secret_fa_key() {
   # shellcheck disable=SC1091
   source "$VENV_FOLDER/bin/activate"
-  "$PYTHON" -c "import secrets, base64; random_bytes = secrets.token_bytes(20); print(base64.b32encode(random_bytes).decode('utf-8').rstrip('='))"
+  python3 -c "import secrets, base64; random_bytes = secrets.token_bytes(20); print(base64.b32encode(random_bytes).decode('utf-8').rstrip('='))"
 }
 
 # Get the hostname
