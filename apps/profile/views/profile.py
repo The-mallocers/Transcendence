@@ -44,7 +44,7 @@ def get(req):
     friends_pending = client.get_all_pending_request()
     rivals = get_rivals(client, games_played)
     ghistory = get_last_matches(client, games_played)
-    rank_picture = settings.MEDIA_URL + "/rank_icon/" + client.get_rank(client.stats.mmr) + ".png"
+    rank_picture = settings.STATIC_URL + "assets/imgs/rank_icon/" + client.get_rank(client.stats.mmr) + ".png"
     online_status = "Loading"
     redis = RedisConnectionPool.get_sync_connection("Profile_get")
     online_status = redis.hget(RTables.HASH_CLIENT(client.id), str(EventType.NOTIFICATION.value)) is not None
