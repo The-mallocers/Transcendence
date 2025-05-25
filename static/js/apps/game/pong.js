@@ -217,6 +217,7 @@ function updateLocalPaddles() {
     } else { direction = 'idle';}
     if ((direction && previous_direction != direction) || frameCount % 5 === 0) { //Trying to send less updates
         previous_direction_local = direction;
+        console.log("Sending local left paddle updates");
         const message = {
             "event": "game",
             "data": {
@@ -251,6 +252,7 @@ function updatePaddles() {
     } else { direction = 'idle';}
     if ((direction && previous_direction != direction) || frameCount % 5 === 0) { //Trying to send less updates
         previous_direction = direction;
+        console.log("Sending paddle updates, direction is :", direction);
         const message = {
             "event": "game",
             "data": {

@@ -68,7 +68,6 @@ const message = {
     }
 }
 socket.onopen = () => {
-
     socket.send(JSON.stringify(message));
 }
 socket.onclose = () => {
@@ -108,7 +107,6 @@ socket.onmessage = (e) => {
     }
     if (jsonData.data.action == "STARTING") {
         navigateTo("/pong/arena/")
-
         socket.send(JSON.stringify(startGameMessage))
     }
     ////// navigate to arena and then startGame would be better

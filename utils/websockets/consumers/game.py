@@ -14,10 +14,14 @@ class GameConsumer(WsConsumer):
         self.service = MatchmakingService()
 
     async def receive(self, text_data=None, bytes_data=None):
+        # print("game ws Receiving a message, its current service is :", self.service)
+        # print("I got the data: ", text_data)
         try:
             data = loads(text_data)
             if self.event_type is EventType.MATCHMAKING and data['event'] == EventType.GAME.value:
+                print('switching from matchmaking to game service !')
                 self.event_type = EventType(data['event'])
+                print('its current event type is now', self.event_type)
                 self.service = GameService()
 
             if data['event'] == EventType.GAME.value and await self._redis.hget(name=RTables.HASH_MATCHES, key=str(self.client.id)) is None:

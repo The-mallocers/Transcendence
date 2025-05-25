@@ -81,6 +81,13 @@ gameSocket.onmessage = (e) => {
     if (message.data.action == "GAME_CREATED") {
         console.log("IN", e.data.action);
         localState.gameIsLocal = true;
+        const startGameMessage = {
+            "event": "game",
+            "data": {
+                "action": "start_game"
+            }
+        }
+        gameSocket.send(JSON.stringify(startGameMessage))
         navigateTo('/pong/arena/');
     }
 }

@@ -37,14 +37,21 @@ class GameService(BaseServices):
         pass
 
     async def _handle_paddle_move(self, data, client: Clients):
+        # print("in paddle move")
         status = GameStatus(await self.redis.json().get(self.game_key, Path('status')))
         is_local = await self.redis.json().get(self.game_key, Path('local'))
         if status is GameStatus.RUNNING:
+            # print("Game is running")
             if is_local is True:
-                print(PlayerSide(data['data']['args']['side']))
+                # print('game is local')
+                # print(f'data is ', data['data']['args']['side'])
+                # print("printing the weird player side thing")
+                # print(PlayerSide(data['data']['args']['side']))
                 if PlayerSide(data['data']['args']['side']) == PlayerSide.LEFT:
+                    print("move is left")
                     await self.redis.json().set(self.game_key, Path('player_left.paddle.move'), data['data']['args']['move'])
                 if PlayerSide(data['data']['args']['side']) == PlayerSide.RIGHT:                    
+                    print("move is right")
                     await self.redis.json().set(self.game_key, Path('player_right.paddle.move'), data['data']['args']['move'])
             else:
                 if str(client.id) == self.pL['id']:
