@@ -4,7 +4,6 @@ set -e
 
 # Define the secret folder path
 SECRET_FOLDER="./secrets"
-VENV_FOLDER="./.venv" # Temporary virtual environment folder
 
 # Define color variables
 RED='\033[0;31m'
@@ -24,52 +23,18 @@ SED_INPLACE() {
   fi
 }
 
-# Create a virtual environment (Linux: ensure python-venv is installed)
-create_venv() {
-  if ! python3 -m venv --help > /dev/null 2>&1; then
-    echo -e "${RED}Error: python-venv is not installed.${NC}"
-    if [[ "$(uname)" == "Darwin" ]]; then
-      echo -e "${YELLOW}Install Python 3 from Homebrew or official installer, which includes venv.${NC}"
-    else
-      echo -e "${YELLOW}On Debian/Ubuntu, run: sudo apt install python-venv${NC}"
-    fi
-    exit 1
-  fi
-
-  python3 -m venv "$VENV_FOLDER"
-  # shellcheck disable=SC1091
-  source "$VENV_FOLDER/bin/activate"
-  export PIP_DISABLE_PIP_VERSION_CHECK=1
-  pip install --quiet django
-}
-
-# Destroy the virtual environment
-destroy_venv() {
-  # deactivate only if venv is active
-  if [[ "$VIRTUAL_ENV" != "" ]]; then
-    deactivate
-  fi
-  rm -rf "$VENV_FOLDER"
-}
-
 # Generate a Django SECRET_KEY using the virtual environment
 generate_django_secret_key() {
-  # shellcheck disable=SC1091
-  source "$VENV_FOLDER/bin/activate"
   python3 -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
 }
 
 # Generate a JWT SECRET_KEY using the virtual environment
 generate_jwt_secret_key() {
-  # shellcheck disable=SC1091
-  source "$VENV_FOLDER/bin/activate"
   python3 -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
 }
 
 # Generate a base32 SECRET_FA_KEY using the virtual environment
 generate_secret_fa_key() {
-  # shellcheck disable=SC1091
-  source "$VENV_FOLDER/bin/activate"
   python3 -c "import secrets, base64; random_bytes = secrets.token_bytes(20); print(base64.b32encode(random_bytes).decode('utf-8').rstrip('='))"
 }
 
@@ -164,8 +129,6 @@ EOL
 }
 
 # Main execution
-create_venv
 check_42_files
 generate_pem_files
 generate_env_file
-destroy_venv
