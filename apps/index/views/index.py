@@ -22,7 +22,7 @@ def get(req):
     friends_pending = client.get_all_pending_request()
     rivals = get_rivals(client, games_played)
     friends_online_status = get_friends_online_status(friends_list)
-    rank_picture = settings.MEDIA_URL + "/rank_icon/" + client.get_rank(client.stats.mmr) + ".png"
+    rank_picture = settings.STATIC_URL + "assets/imgs/rank_icon/" + client.get_rank(client.stats.mmr) + ".png"
     online_status = "Online"
     pending_tournament_invitations = get_pending_tournament_invitations(client)
     
