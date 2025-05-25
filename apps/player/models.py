@@ -1,7 +1,7 @@
 import json
 
 from django.db import models, transaction
-from django.db.models import ForeignKey, BigAutoField
+from django.db.models import ForeignKey, BigAutoField, CharField
 from django.db.models.fields import IntegerField
 
 from utils.enums import PlayerSide, RTables
@@ -97,6 +97,7 @@ class Player(models.Model, PlayerRuntime):
     # ━━ PRIMARY FIELD ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
     game = ForeignKey('game.Game', on_delete=models.SET_NULL, null=True)
     client = ForeignKey('client.Clients', on_delete=models.SET_NULL, null=True)
+    local_username = CharField(null=False, max_length=50, editable=True)
 
     # ━━ PLAYER INFOS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
     score = IntegerField(default=0)

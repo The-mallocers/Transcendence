@@ -34,7 +34,6 @@ class MatchmakingThread(Threads):
 
                 if self.check_local():
                     game = self.local
-                    print(f'game: {game}')
 
                 if game is None:
                     game = Game.create_game(runtime=True)
