@@ -64,7 +64,7 @@ function getLocalSettings() {
     let points = parseInt(score.innerHTML);
 
     const creationMessage = {
-        "event": "game",
+        "event": "matchmaking",
         "data": {
             "action": "local_game",
             "args": {
@@ -77,7 +77,7 @@ function getLocalSettings() {
 
 gameSocket.onmessage = (e) => {
     const message = JSON.parse(e.data);
-    console.log(e.data.action);
+    console.log(message.data.action);
     if (message.data.action == "GAME_CREATED") {
         console.log("IN", e.data.action);
         localState.gameIsLocal = true;
