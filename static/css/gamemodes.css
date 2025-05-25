@@ -10,14 +10,12 @@
     border-radius: 5px;
 }
 
-
 .gamemodesContainer h1 {
-    text-align: center;
+    text-align: end;
 }
 
 .gamemodeCardContainer {
     padding: 1rem;
-
 }
 
 .gamemodeCard {
@@ -39,4 +37,10 @@
 .gamemodeCard:hover {
     background-color: #007d7f;
     cursor: pointer;
+}
+
+.img-key{
+    width: 50px;
+    height: 50px;
+    margin-right: 10px;
 }

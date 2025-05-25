@@ -2,7 +2,16 @@
 
 <div class="gamemodesPage">
     <div class="container-fluid gamemodesContainer ">
-        <h1>Gamemodes</h1>
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col">
+                    <h1>Gamemodes</h1>
+                </div>
+                <div class="col">
+                    <button class="type-intra-green btn-key-to-play"> Keys to play </button>
+                </div>
+            </div>
+        </div>
         <div class="container-fluid mt-3">
             <div class="row g-3">
                 <div class="col-md-6">
@@ -34,8 +43,6 @@
     </div>
 </div>
 
-
-
 <div class="modal fade" id="friendSelectionModal" tabindex="-1" aria-labelledby="friendSelectionModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -50,4 +57,39 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="modal-key-to-play" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Keys for playing pong</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <h2>Muliplayer keys</h2>
+            <div class="d-flex">
+                <img class="img-key" src="{% static '/assets/imgs/up.png' %}" alt="up">
+                <div class="align-self-center">Move paddle up</div>
+            </div>
+            <div  class="d-flex">
+                <img class="img-key" src="{% static '/assets/imgs/down.png' %}" alt="down">
+                <div class="align-self-center">Move paddle down</div>
+            </div>
+            <h2 class="mt-2">Other keys (playing on the same keyboard)</h2>
+            <div  class="d-flex">
+                <img class="img-key" src="{% static '/assets/imgs/letter-w.png' %}" alt="w">
+                <div class="align-self-center">Move paddle up</div>
+            </div>
+            <div class="d-flex">
+                <img class="img-key" src="{% static '/assets/imgs/letter-s.png' %}" alt="s">
+                <div class="align-self-center">Move paddle down</div>
+            </div>    
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="type-intra-green" data-bs-dismiss="modal" aria-label="Close">Close</button>
+        </div>
+      </div>
+    </div>
+</div>
+
 <script type="module" src="{% static '/js/apps/game/gamemode.js' %}" defer></script>

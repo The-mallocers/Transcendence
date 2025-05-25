@@ -169,6 +169,10 @@ ul.friends_group .list-group-item{
 
 /* in myinformations.html */
 
+.box-information{
+    height: 100%;
+}
+
 .title-personal-info{
     color: #2c2c34;
     font-family: "futura-pt", "Helvetica", "Sans serif";
@@ -211,17 +215,6 @@ label{
     transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
     margin-bottom: 10px;
 }
-.row-information{
-    min-height: 46vh;
-}
-
-/* .box-top{
-    height: 40vh;
-}
-
-.box-bottom{
-    height: 45vh;
-} */
 
 .twofa-image{
     width:400px;
