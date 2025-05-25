@@ -104,6 +104,8 @@ jobs:
           echo "DATABASE_PORT=${{ vars.DATABASE_PORT }}" >> .env
           echo "JWT_EXP_ACCESS_TOKEN=${{ vars.JWT_EXP_ACCESS_TOKEN }}" >> .env
           echo "JWT_EXP_REFRESH_TOKEN=${{ vars.JWT_EXP_REFRESH_TOKEN }}" >> .env
+          echo "SSL_CERT_PATH=${{ vars.SSL_CERT_PATH }}" >> .env
+          echo "SSL_KEY_PATH=${{ vars.SSL_KEY_PATH }}" >> .env
           echo "REDIS_HOST=${{ vars.REDIS_HOST }}" >> .env
           echo "REDIS_PORT=${{ vars.REDIS_PORT }}" >> .env
           echo "ADMIN_EMAIL=${{ vars.ADMIN_EMAIL }}" >> .env

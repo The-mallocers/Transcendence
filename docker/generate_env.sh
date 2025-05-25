@@ -1,8 +1,9 @@
 #!/bin/bash
 
+set -e
+
 # Define the secret folder path
 SECRET_FOLDER="./secrets"
-VENV_FOLDER="./.venv" # Temporary virtual environment folder
 
 # Define color variables
 RED='\033[0;31m'
@@ -12,36 +13,29 @@ BLUE='\033[0;34m'
 CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
-# Create a virtual environment
-create_venv() {
-  python3 -m venv "$VENV_FOLDER"
-  source "$VENV_FOLDER/bin/activate"
-  export PIP_DISABLE_PIP_VERSION_CHECK=1
-  pip install --quiet django
-}
-
-# Destroy the virtual environment
-destroy_venv() {
-  deactivate
-  rm -rf "$VENV_FOLDER"
+# Check OS for sed compatibility
+SED_INPLACE() {
+  # Usage: SED_INPLACE <expression> <file>
+  if [[ "$(uname)" == "Darwin" ]]; then
+    sed -i '' "$1" "$2"
+  else
+    sed -i "$1" "$2"
+  fi
 }
 
 # Generate a Django SECRET_KEY using the virtual environment
 generate_django_secret_key() {
-  source "$VENV_FOLDER/bin/activate"
-  python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
+  python3 -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
 }
 
 # Generate a JWT SECRET_KEY using the virtual environment
 generate_jwt_secret_key() {
-  source "$VENV_FOLDER/bin/activate"
-  python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
+  python3 -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
 }
 
 # Generate a base32 SECRET_FA_KEY using the virtual environment
 generate_secret_fa_key() {
-  source "$VENV_FOLDER/bin/activate"
-  python -c "import secrets, base64; random_bytes = secrets.token_bytes(20); print(base64.b32encode(random_bytes).decode('utf-8').rstrip('='))"
+  python3 -c "import secrets, base64; random_bytes = secrets.token_bytes(20); print(base64.b32encode(random_bytes).decode('utf-8').rstrip('='))"
 }
 
 # Get the hostname
@@ -54,6 +48,7 @@ generate_pem_files() {
   local cert_path="$SECRET_FOLDER/cert.pem"
   local key_path="$SECRET_FOLDER/key.pem"
 
+  mkdir -p "$SECRET_FOLDER"
   if [ ! -f "$cert_path" ]; then
     echo -e "${YELLOW}Creating $cert_path...${NC}"
     openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout "$key_path" -out "$cert_path" -subj "/CN=localhost"
@@ -83,17 +78,17 @@ check_42_files() {
 # Generate .env if missing
 generate_env_file() {
   if [ -f .env ]; then
-    echo -e "${CYAN}Environement file already exists. Updating required fields...${NC}"
+    echo -e "${CYAN}Environment file already exists. Updating required fields...${NC}"
 
-    # Update DJANGO_HOSTNAME
+    # Update DJANGO_HOSTNAME with cross-platform sed
     if grep -q "^DJANGO_HOSTNAME=" .env; then
-      sed -i '' "s/^DJANGO_HOSTNAME=.*/DJANGO_HOSTNAME=$(get_hostname)/" .env
+      SED_INPLACE "s/^DJANGO_HOSTNAME=.*/DJANGO_HOSTNAME=$(get_hostname)/" .env
     else
       echo "DJANGO_HOSTNAME=$(get_hostname)" >> .env
     fi
-    echo -e "${GREEN}DJANGO_HOSTNAME has been updated in the existing environement file.${NC}"
+    echo -e "${GREEN}DJANGO_HOSTNAME has been updated in the existing environment file.${NC}"
   else
-    echo -e "${BLUE}Creating a new environement file with dynamic values...${NC}"
+    echo -e "${BLUE}Creating a new environment file with dynamic values...${NC}"
     cat <<EOL > .env
 # ══ Secrets ═════════════════════════════════════════════════════════════════════════ #
 # Keys
@@ -129,13 +124,11 @@ ADMIN_USERNAME='admin'
 
 DJANGO_HOSTNAME='$(get_hostname)'
 EOL
-    echo -e "${GREEN}Environement file has been created with dynamic values.${NC}"
+    echo -e "${GREEN}Environment file has been created with dynamic values.${NC}"
   fi
 }
 
 # Main execution
-create_venv
 check_42_files
 generate_pem_files
 generate_env_file
-destroy_venv

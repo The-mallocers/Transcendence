@@ -91,7 +91,16 @@ re: down up
 redetach: down detach
 
 # Create or update .env file and validate dependencies
-env:
+env: secrets
+	@if ! python3 -m venv --help > /dev/null 2>&1; then \
+		echo "\033[0;31mError: python3-venv is not installed.\033[0m"; \
+		if [ "$$(uname)" = "Darwin" ]; then \
+			echo "\033[0;33mInstall Python 3 from Homebrew or official installer, which includes venv.\033[0m"; \
+		else \
+			echo "\033[0;33mOn Debian/Ubuntu, run: sudo apt install python3-venv\033[0m"; \
+		fi; \
+		exit 1; \
+	fi
 	@$(GENERATE_ENV_SCRIPT)
 
 # Create 42_client and 42_secret files
@@ -102,16 +111,12 @@ secrets:
 		read client_key; \
 		echo "$$client_key" > ./secrets/42_client; \
 		echo "42_client file created."; \
-	else \
-		echo "42_client file already exists."; \
 	fi
 	@if [ ! -f ./secrets/42_secret ]; then \
 		echo "Enter the key for 42_secret:"; \
 		read secret_key; \
 		echo "$$secret_key" > ./secrets/42_secret; \
 		echo "42_secret file created."; \
-	else \
-		echo "42_secret file already exists."; \
 	fi
 
 .PHONY: help up down test test-coverage logs status restart dbclean reload clean re env secrets
