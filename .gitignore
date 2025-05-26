@@ -91,6 +91,7 @@ local_settings.py
 
 .env
 secrets
+media
 my_fixture.json
 test_db.sqlite3
 staticfiles
