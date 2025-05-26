@@ -19,6 +19,7 @@ if(images){
 }
 
 clientId = await getClientId();
+WebSocketManager.closeGameSocket();
 const gameSocket = await WebSocketManager.initGameSocket(clientId);
 const notifSocket = WebSocketManager.notifSocket;
 

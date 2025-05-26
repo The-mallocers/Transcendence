@@ -19,12 +19,14 @@ class Router {
     }
 
     async handleLocation() {
+        console.log("handle location !");
+        console.log(window.location.pathname);
         for (let id of window.intervalsManager) {
             clearInterval(id);
-            
         }
         window.intervalsManager.length = 0;
         //Now making the notif ws in navigation
+        navigationChecks();
         if (WebSocketManager.isSocketClosed(WebSocketManager.notifSocket)) {
             const clientId = await getClientId();
             if (clientId) {
@@ -76,29 +78,34 @@ class Router {
     }
 
     navigate(path) {
-        console.log("NAVIGATING");
-        let splitedPath = path.split("/")
-        if (path != '/pong/arena/') {
-            localState.gameIsLocal = false;
-        };
-        if (splitedPath.includes("pong")) {
-            if (splitedPath.includes("duel") || splitedPath.includes("arena") || splitedPath.includes("matchmaking")) {
-                WebSocketManager.closeChatSocket();
-            } else {
-                WebSocketManager.closeAllSockets();
-            }
-        } else {
-            WebSocketManager.closeAllSockets(); //for now we close all
-        }
         if (window.location.pathname == path) {
             return;
         }
-
-        isGameOver.gameIsOver = true;
         window.history.pushState({}, '', path);
         this.handleLocation();
     }
 }
+
+function navigationChecks() {
+    const path = window.location.pathname;
+    let splitedPath = path.split("/")
+    if (path != '/pong/arena/') {
+        localState.gameIsLocal = false;
+    };
+    if (splitedPath.includes("pong")) {
+        if (splitedPath.includes("duel") || splitedPath.includes("arena") || splitedPath.includes("matchmaking")) {
+            console.log("Closing chat sockets");
+            WebSocketManager.closeChatSocket();
+        } else {
+            console.log("Closing all sockets");
+            WebSocketManager.closeAllSockets();
+        }
+    } else {
+        WebSocketManager.closeAllSockets(); //for now we close all
+    }
+    isGameOver.gameIsOver = true;
+}
+
 
 window.onload = async () => {
     await router.handleLocation();
