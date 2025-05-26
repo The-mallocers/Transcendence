@@ -133,8 +133,8 @@ if (!socket || socket.readyState === WebSocket.CLOSED) {
             isGameOver.gameIsOver = true;
             WebSocketManager.closeGameSocket();
             if (localState.gameIsLocal) {
-                navigateTo('/');
                 localState.gameIsLocal = false;
+                navigateTo('/pong/local/gameover/');
                 return
             }
             localState.gameIsLocal = false;
