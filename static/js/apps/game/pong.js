@@ -50,7 +50,15 @@ if (!socket || socket.readyState === WebSocket.CLOSED) {
     rusername.innerHTML = sanitizeHTML(window.GameState.right.username);
 
     lpicture.src = window.GameState.left.picture;
+    if (!window.GameState.left.picture || window.GameState.left.picture === "") {
+        lpicture.src = "/static/img/gallery/Dogs/cookedDog.png";
+    }
+
     rpicture.src = window.GameState.right.picture;
+    if (!window.GameState.right.picture || window.GameState.right.picture === "") {
+        rpicture.src = "/static/img/gallery/Cats/mewingCat.png";
+    }
+
 
     socket.onmessage = (e) => {
         console.log("Salut la team game socket avec ptit message");

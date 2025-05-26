@@ -100,5 +100,11 @@ btn?.addEventListener('click', () => {
     
     getLocalSettings();
     window.GameState.left.username = player_left_name?.value;
+    if (!window.GameState.left.username) {
+        window.GameState.left.username = "Player 1";
+    }
     window.GameState.right.username = player_right_name?.value;
+    if (!window.GameState.right.username) {
+        window.GameState.right.username = "Player 2";
+    }
 })
