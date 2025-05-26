@@ -60,7 +60,7 @@ class RegisterApiView(APIView):
             try:
                 client = serializer.save()  # this can fail so we added a catch
                 
-                print("client: ", client)
+
                 logger.info(f'Client create successfully: {client}')
                 response = Response(ClientSerializer(client).data, status=status.HTTP_201_CREATED)
                 JWT(client, JWTType.ACCESS, request).set_cookie(response)  # vous aviez raison la team c'est mieux
@@ -321,31 +321,20 @@ class GetClientIDApiView(APIView):
 class UploadPictureApiView(APIView):
     def post(self, request: HttpRequest, *args, **kwargs):
         try:
-            print('okayyyyyyyyyyyyyyyyyyyyyy 1')
+
             client = Clients.get_client_by_request(request)
             profile = client.profile
-
             if not profile:
                 return Response({"error": "Profile not found"}, status=status.HTTP_404_NOT_FOUND)
-            print('okayyyyyyyyyyyyyyyyyyyyyy 2')
-
             serializer = ProfilePictureValidator(data=request.data)
-
             if serializer.is_valid():
-                print('okayyyyyyyyyyyyyyyyyyyyyy 3')
-
                 profile.profile_picture = serializer.validated_data['profile_picture']
                 profile.save()
-                print('okayyyyyyyyyyyyyyyyyyyyyy 4')
-
                 return Response({"message": "Profile picture updated successfully",
                                  "picture": profile.profile_picture.url}, status=status.HTTP_200_OK)
             else:
-                print('okayyyyyyyyyyyyyyyyyyyyyy 5')
-
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            print('okayyyyyyyyyyyyyyyyyyyyyy 6')
 
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
