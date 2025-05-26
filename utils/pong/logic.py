@@ -11,7 +11,7 @@ from apps.client.models import Clients
 from apps.game.models import Game
 from apps.player.models import Player
 from apps.tournaments.models import Tournaments
-from utils.enums import EventType, ResponseAction, RTables
+from utils.enums import EventType, PlayerSide, ResponseAction, RTables
 from utils.enums import GameStatus
 from utils.enums import PaddleMove
 from utils.pong.objects import *
@@ -34,8 +34,8 @@ class PongLogic:
 
         # ── Objects ───────────────────────────────────────────────────────────────────
         self.ball: Ball = Ball(game_id=self.game_id, redis=redis)
-        self.paddle_pL: Paddle = Paddle(game_id=self.game_id, redis=redis, client_id=self.game.pL.client.id, x=OFFSET_PADDLE)
-        self.paddle_pR: Paddle = Paddle(game_id=self.game_id, redis=redis, client_id=self.game.pR.client.id, x=CANVAS_WIDTH - OFFSET_PADDLE -
+        self.paddle_pL: Paddle = Paddle(side=PlayerSide.LEFT ,game_id=self.game_id, redis=redis, client_id=self.game.pL.client.id, x=OFFSET_PADDLE)
+        self.paddle_pR: Paddle = Paddle(side=PlayerSide.RIGHT, game_id=self.game_id, redis=redis, client_id=self.game.pR.client.id, x=CANVAS_WIDTH - OFFSET_PADDLE -
                                                                                                                PADDLE_WIDTH)
         self.score_pL: Score = Score(game_id=self.game_id, redis=redis, client_id=self.game.pL.client.id)
         self.score_pR: Score = Score(game_id=self.game_id, redis=redis, client_id=self.game.pR.client.id)

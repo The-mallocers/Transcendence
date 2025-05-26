@@ -3,25 +3,26 @@ from dataclasses import dataclass
 from redis.commands.json.path import Path
 
 from apps.player.models import Player
-from utils.enums import PaddleMove, RTables
+from utils.enums import PaddleMove, PlayerSide, RTables
 from utils.pong.objects import PADDLE_WIDTH, PADDLE_HEIGHT, PADDLE_SPEED, CANVAS_HEIGHT
 
 
 @dataclass
 class Paddle:
-    def __init__(self, game_id=None, redis=None, client_id=None, x=0):
+    def __init__(self, side: PlayerSide, game_id=None, redis=None, client_id=None, x=0):
         # ── Fields ────────────────────────────────────────────────────────────────────────
         self.width: float = PADDLE_WIDTH
         self.height: float = PADDLE_HEIGHT
         self.x: float = x
         self.y: float = (CANVAS_HEIGHT / 2) - (PADDLE_HEIGHT / 2)
         self.speed: float = PADDLE_SPEED
+        self.side = side
 
         # ── Utils ─────────────────────────────────────────────────────────────────────────    
         self.redis = redis
         self.game_key = RTables.JSON_GAME(game_id)
         self.move: PaddleMove = PaddleMove.IDLE
-        self.player_side = Player.get_player_side(client_id, self.game_key, self.redis)
+        self.player_side = side.value
 
     def update(self):
         self.width = self.get_width()
@@ -45,47 +46,47 @@ class Paddle:
     # ── Getter ────────────────────────────────────────────────────────────────────────
 
     def get_width(self):
-        return self.redis.json().get(self.game_key, Path(f'player_{self.player_side}.paddle.width'))
+        return self.redis.json().get(self.game_key, Path(f'{self.player_side}.paddle.width'))
 
     def get_height(self):
-        return self.redis.json().get(self.game_key, Path(f'player_{self.player_side}.paddle.height'))
+        return self.redis.json().get(self.game_key, Path(f'{self.player_side}.paddle.height'))
 
     def get_x(self):
-        return self.redis.json().get(self.game_key, Path(f'player_{self.player_side}.paddle.x'))
+        return self.redis.json().get(self.game_key, Path(f'{self.player_side}.paddle.x'))
 
     def get_y(self):
-        return self.redis.json().get(self.game_key, Path(f'player_{self.player_side}.paddle.y'))
+        return self.redis.json().get(self.game_key, Path(f'{self.player_side}.paddle.y'))
 
     def get_speed(self):
-        return self.redis.json().get(self.game_key, Path(f'player_{self.player_side}.paddle.speed'))
+        return self.redis.json().get(self.game_key, Path(f'{self.player_side}.paddle.speed'))
 
     def get_move(self):
-        return self.redis.json().get(self.game_key, Path(f'player_{self.player_side}.paddle.move'))
+        return self.redis.json().get(self.game_key, Path(f'{self.player_side}.paddle.move'))
 
     # ── Setter ────────────────────────────────────────────────────────────────────────
 
     def set_width(self, width):
-        self.redis.json().set(self.game_key, Path(f'player_{self.player_side}.paddle.width'), width)
+        self.redis.json().set(self.game_key, Path(f'{self.player_side}.paddle.width'), width)
         self.width = width
 
     def set_height(self, height):
-        self.redis.json().set(self.game_key, Path(f'player_{self.player_side}.paddle.height'), height)
+        self.redis.json().set(self.game_key, Path(f'{self.player_side}.paddle.height'), height)
         self.height = height
 
     def set_x(self, x):
-        self.redis.json().set(self.game_key, Path(f'player_{self.player_side}.paddle.x'), x)
+        self.redis.json().set(self.game_key, Path(f'{self.player_side}.paddle.x'), x)
         self.x = x
 
     def set_y(self, y):
-        self.redis.json().set(self.game_key, Path(f'player_{self.player_side}.paddle.y'), y)
+        self.redis.json().set(self.game_key, Path(f'{self.player_side}.paddle.y'), y)
         self.y = y
 
     def set_speed(self, speed):
-        self.redis.json().set(self.game_key, Path(f'player_{self.player_side}.paddle.speed'), speed)
+        self.redis.json().set(self.game_key, Path(f'{self.player_side}.paddle.speed'), speed)
         self.speed = speed
 
     def set_move(self, move):
-        self.redis.json().set(self.game_key, Path(f'player_{self.player_side}.paddle.move'), move)
+        self.redis.json().set(self.game_key, Path(f'{self.player_side}.paddle.move'), move)
         self.move = move
 
     # ── Helper Methods for Incrementing/Decrementing ─────────────────────────────────
