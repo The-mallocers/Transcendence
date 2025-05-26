@@ -113,15 +113,17 @@ if (!socket || socket.readyState === WebSocket.CLOSED) {
             }
         } else if (jsonData.data.action == "GAME_ENDING") {
             const game_id = jsonData.data.content
-
-            //Hack that allows me to not change backend 
+            isGameOver.gameIsOver = true;
+            localState.gameIsLocal = false;
+            WebSocketManager.closeGameSocket();
+            if (localState.gameIsLocal) {
+                navigateTo('/');
+                return
+            }
             //otherwise game over will navigate after we redirected to tournament.
             if (window.location.pathname != "/pong/tournament/tree/" ) {
                 navigateTo(`/pong/gameover/?game=${game_id}`);
             }
-            isGameOver.gameIsOver = true;
-            localState.gameIsLocal = false;
-            WebSocketManager.closeGameSocket();
         }
     };
 }
