@@ -23,6 +23,12 @@ def gameover_get(req):
     return get(req)
 
 @require_http_methods(["GET"])
+def gameover_local_get(req):
+    from apps.game.views.localGame import localGameover
+    return localGameover(req)
+
+
+@require_http_methods(["GET"])
 def duel_get(req):
     from apps.game.views.duel import get
     return get(req)

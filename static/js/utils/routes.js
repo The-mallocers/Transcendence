@@ -56,7 +56,8 @@ const routes = [
     '/pong/duel/',
     '/pong/tournament/create/',
     '/pong/tournament/join/',
-    '/pong/local/create/'
+    '/pong/local/create/',
+    '/pong/local/gameover/'
 ].map(route => {
     if (typeof route === 'object') return route;
 

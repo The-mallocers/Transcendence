@@ -16,6 +16,9 @@ const rpicture = document.getElementById("rpicture");
 let lscore = document.getElementById("scoreLeft");
 let rscore = document.getElementById("scoreRight");
 let timer = document.getElementById("timer");
+let btns = document.getElementById("btns");
+
+
 
 const height = 500;
 const width = 1000;
@@ -37,8 +40,13 @@ let right_last_move = "idle";
 //Below code might be useful one day.
 // const name_data = await apiFriends("/api/friends/whoami/");
 // const my_name = name_data.data.username;
+function makeBtns(){
+    btns.innerHTML = `
+        <div class="btn intra-btn" data-route="/pong/local/create/">play again</div>
+        <div class="btn intra-btn" data-route="/pong/gamemodes/">quit</div>
+    `
+}
 
-//Si un petit malin va sur la page sans raison
 if (!socket || socket.readyState === WebSocket.CLOSED) {
     navigateTo("/");
     remove_toast();

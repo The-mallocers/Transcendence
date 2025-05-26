@@ -2,7 +2,7 @@ function setAnimationDelay(el, multiplier) {
   el.style.animationDelay = `calc(0.1s * ${multiplier})`;
 }
 
-function endStateThingy() {
+export function endStateThingy() {
     let globalLetterIndex  = 0
 
     const msg = document.querySelector(".endState");

@@ -5,6 +5,28 @@
     padding: 20px;
 }
 
+.arenaPage #overlay {
+    background-color: #171717;
+    flex-direction: column;
+    gap: 3rem;
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 100vw;
+}
+
+
+
+/* .arenaPage #overlay {
+    color: #ececec;
+}
+
+.arenaPage #overlay .btns .btn {
+    background-color: #ececec;
+    padding: 2rem 5rem;
+} */
+
 .arenaPage #pongCanvas {
     border: 1px white solid;
 }

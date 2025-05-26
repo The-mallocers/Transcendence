@@ -319,7 +319,7 @@ class Clients(models.Model):
                         "id": str(client.id),
                         "nickname": client.profile.username,
                         "avatar": client.profile.profile_picture.url,
-                        "trophee": f'/media/rank_icon/{rank}.png',
+                        "trophee": f'/static/assets/imgs/rank_icon/{rank}.png',
                         "mmr": client.stats.mmr,
                     }
                     result.append(info)
@@ -343,7 +343,7 @@ class Clients(models.Model):
                         "id": str(client.id),
                         "nickname": client.profile.username,
                         "avatar": client.profile.profile_picture.url,
-                        "trophee": f'/media/rank_icon/{rank}.png',
+                        "trophee": f'/static/assets/imgs/rank_icon/{rank}.png',
                         "mmr": client.stats.mmr,
                     }
                     result.append(info)
