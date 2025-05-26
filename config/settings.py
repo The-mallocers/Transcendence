@@ -132,6 +132,8 @@ REST_FRAMEWORK = {
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ SECURITY SETTINGS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
 
 HOSTNAME = os.getenv('DJANGO_HOSTNAME', 'localhost')
+HOSTNAME = HOSTNAME.split('.')[0]
+
 ALLOWED_HOSTS = ['*']
 IPWARE_TRUSTED_PROXIES = ['127.0.0.1', '::1', 'django', 'nginx']
 CSRF_TRUSTED_ORIGINS = [

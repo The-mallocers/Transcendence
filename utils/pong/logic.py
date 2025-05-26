@@ -37,8 +37,8 @@ class PongLogic:
         self.paddle_pL: Paddle = Paddle(side=PlayerSide.LEFT ,game_id=self.game_id, redis=redis, client_id=self.game.pL.client.id, x=OFFSET_PADDLE)
         self.paddle_pR: Paddle = Paddle(side=PlayerSide.RIGHT, game_id=self.game_id, redis=redis, client_id=self.game.pR.client.id, x=CANVAS_WIDTH - OFFSET_PADDLE -
                                                                                                                PADDLE_WIDTH)
-        self.score_pL: Score = Score(game_id=self.game_id, redis=redis, client_id=self.game.pL.client.id)
-        self.score_pR: Score = Score(game_id=self.game_id, redis=redis, client_id=self.game.pR.client.id)
+        self.score_pL: Score = Score(side=PlayerSide.LEFT ,game_id=self.game_id, redis=redis, client_id=self.game.pL.client.id)
+        self.score_pR: Score = Score(side=PlayerSide.RIGHT ,game_id=self.game_id, redis=redis, client_id=self.game.pR.client.id)
         self.points_to_win = self.game.points_to_win
 
     def game_task(self):
