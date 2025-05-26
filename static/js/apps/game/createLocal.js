@@ -39,10 +39,6 @@ minus?.addEventListener("click", decrease);
 plus?.addEventListener("click", increase);
 
 
-
-// console.log("Player left name", player_left_name);
-// console.log("Player right name", player_right_name);
-
 window.GameState = {
     ballY: height / 2,
     ballX: width / 2,
