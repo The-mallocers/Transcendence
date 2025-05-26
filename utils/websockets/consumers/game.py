@@ -55,10 +55,10 @@ class GameConsumer(WsConsumer):
                 try:
                     result = await self._redis.execute_command(
                         'JSON.GET', 
-                        game_key, 
-                        '$[?(@.player_left.id == "' + client_id + '" || @.player_right.id == "' + client_id + '")]'
+                        game_key,
+                        '$[?(@.tournament_code == null && (@.player_left.id == "' + client_id + '" || @.player_right.id == "' + client_id + '"))]'
                     )
-                    if result and result != '[]':  
+                    if result and result.decode("utf-8") != '[]':
                         return True
                 except Exception as e:
                     self._logger.warning(f"Error checking game {game_key}: {e}")
