@@ -15,7 +15,6 @@ file_input?.addEventListener('change', async () => {
             formData.append('profile_picture', file);
 
             const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-            console.log(csrfToken)
             const response = await fetch("/api/auth/upload_picture/", {
                 method: 'POST',
                 headers: {

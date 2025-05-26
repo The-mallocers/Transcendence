@@ -19,8 +19,6 @@ class Router {
     }
 
     async handleLocation() {
-        console.log("handle location !");
-        console.log(window.location.pathname);
         for (let id of window.intervalsManager) {
             clearInterval(id);
         }
@@ -94,10 +92,10 @@ function navigationChecks() {
     };
     if (splitedPath.includes("pong")) {
         if (splitedPath.includes("duel") || splitedPath.includes("arena") || splitedPath.includes("matchmaking")) {
-            console.log("Closing chat sockets");
+            // console.log("Closing chat sockets");
             WebSocketManager.closeChatSocket();
         } else {
-            console.log("Closing all sockets");
+            // console.log("Closing all sockets");
             WebSocketManager.closeAllSockets();
         }
     } else {

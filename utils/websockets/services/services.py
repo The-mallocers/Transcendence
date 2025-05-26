@@ -58,7 +58,6 @@ class BaseServices(ABC):
                 return await handler_method(data, *args)
 
         except ValueError:
-            print("Value error - data :", data)
             raise ServiceError(f"This action is not valid: {data['data']['action']}")
 
         except ServiceError as e:
