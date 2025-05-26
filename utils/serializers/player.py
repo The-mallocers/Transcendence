@@ -61,6 +61,7 @@ class PlayerInformationSerializer(serializers.ModelSerializer):
         # Create Paddle with necessary context
         x = self._get_paddle_x(side)
         paddle = Paddle(
+            side=side,
             game_id=game_id,
             client_id=player_id,
             x=x
@@ -85,8 +86,8 @@ class PlayersRedisSerializer(serializers.ModelSerializer):
         fields = ['player_left', 'player_right']
 
     def to_representation(self, instance):
-        paddle_left = Paddle(x=OFFSET_PADDLE)
-        paddle_right = Paddle(x=CANVAS_WIDTH - OFFSET_PADDLE - PADDLE_WIDTH)
+        paddle_left = Paddle(side=PlayerSide.LEFT, x=OFFSET_PADDLE)
+        paddle_right = Paddle(side=PlayerSide.RIGHT, x=CANVAS_WIDTH - OFFSET_PADDLE - PADDLE_WIDTH)
         pl = instance.get(PlayerSide.LEFT)
         pr = instance.get(PlayerSide.RIGHT)
         return {

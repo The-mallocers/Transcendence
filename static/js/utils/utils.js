@@ -100,3 +100,9 @@ export const logger = {
     error: (...args) => console.error(...args),
     debug: (...args) => isDevelopment && console.debug(...args),
 };
+
+export const sanitizeHTML = function (str) {
+	return str.replace(/[^\w. ]/gi, function (c) {
+		return '&#' + c.charCodeAt(0) + ';';
+	});
+};

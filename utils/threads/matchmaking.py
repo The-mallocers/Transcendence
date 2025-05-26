@@ -15,11 +15,13 @@ from utils.threads.tournament import TournamentThread
 from utils.websockets.channel_send import send_group_error
 
 tournament_queue = Queue()
+local_queue = Queue()
 
 class MatchmakingThread(Threads):
     def __init__(self, name):
         super().__init__(name)
         self.tournament = None
+        self.local = None
 
     def main(self):
         self.tournament: Tournaments = None
@@ -30,12 +32,14 @@ class MatchmakingThread(Threads):
                 if self.check_tournament():
                     TournamentThread(self.tournament).start()
 
+                if self.check_local():
+                    game = self.local
+
                 if game is None:
                     game = Game.create_game(runtime=True)
 
-                if self.select_players(game):
+                if self.select_players(game) or game.local:
                     game.create_redis_game()
-                    self._logger.info(f"Found match: {game.pL} vs {game.pR}")
                     game.rset_status(GameStatus.MATCHMAKING)
 
                     game.init_players()
@@ -51,10 +55,10 @@ class MatchmakingThread(Threads):
                     game.error_game()
                 if game.pL:
                     send_group_error(RTables.GROUP_CLIENT(game.pL.id), ResponseError.MATCHMAKING_ERROR)
-                    game.pL.leave_queue(game.code, game.is_duel)
+                    game.pL.leave_queue(game.code, game.is_duel, game.local)
                 if game.pR:
                     send_group_error(RTables.GROUP_CLIENT(game.pR.id), ResponseError.MATCHMAKING_ERROR)
-                    game.pR.leave_queue(game.code, game.is_duel)
+                    game.pR.leave_queue(game.code, game.is_duel, game.local)
 
     def cleanup(self):
         game_keys = self.redis.keys('game:*')
@@ -78,11 +82,17 @@ class MatchmakingThread(Threads):
         except Empty:
             return False
 
-    def select_players(self, game):
-        # First we check the global queue
+    def check_local(self) -> Tournaments:
+        try:
+            self.local = local_queue.get_nowait()
+            return True
+        except Empty:
+            return False
+
+    def select_global(self, game):
         clients_queue = self.redis.hgetall(RTables.HASH_G_QUEUE)
         clients = [Clients.get_client_by_id(client.decode('utf-8')) for client in clients_queue]
-        if len(clients) >= 2:  # il faudra ce base sur les mmr
+        if len(clients) >= 2:
             selected_clients = clients[:2]  # this gets the first 2 players of the list
             random.shuffle(selected_clients)
             game.is_duel = False
@@ -90,6 +100,9 @@ class MatchmakingThread(Threads):
             game.pR = Player.create_player(selected_clients[1])
             if game.pL is not None and game.pR is not None:
                 return True
+        return False
+
+    def select_duel(self, game):
         for duel in self.redis.scan_iter(RTables.HASH_DUEL_QUEUE('*')):
             clients = list(self.redis.hgetall(duel).items())
             if len(clients) >= 2:
@@ -98,7 +111,7 @@ class MatchmakingThread(Threads):
                 client_2 = clients[1][0].decode('utf-8')
                 stat_p1 = clients[0][1].decode('utf-8')
                 stat_p2 = clients[1][1].decode('utf-8')
-                
+
                 client_id_1 = Clients.get_client_by_id(client_1)
                 client_id_2 = Clients.get_client_by_id(client_2)
                 channel_p1 = self.redis.hget(name=RTables.HASH_CLIENT(client_id_1.id), key=str(EventType.GAME.value))
@@ -112,4 +125,23 @@ class MatchmakingThread(Threads):
                     game.pL = Player.create_player(client_id_1)
                     game.pR = Player.create_player(client_id_2)
                     return True
+        return False
+
+    def select_local(self, game):
+        for local_client in self.redis.hgetall(RTables.HASH_LOCAL_QUEUE):
+            client = Clients.get_client_by_id(local_client.decode('utf-8'))
+            game.local = True
+            game.pL = Player.create_player(client)
+            game.pR = Player.create_player(client)
+            return True
+        return False
+
+    def select_players(self, game):
+        # First we check the global queue
+        if self.select_global(game):
+            return True
+        if self.select_duel(game):
+            return True
+        # if self.select_local(game):
+        #     return True
         return False

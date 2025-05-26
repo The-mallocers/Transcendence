@@ -7,3 +7,7 @@ export const isGameOver = {
 export const tournamentData = {
     gameIsReady: false
 }
+
+export const localState = {
+    gameIsLocal: false
+}

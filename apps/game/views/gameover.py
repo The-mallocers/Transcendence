@@ -58,6 +58,7 @@ def get(request):
         'html': html_content,
     })
 
+
 def zeroMmrSlander() -> str:
     slander = [
         'Cannot go below 0 mmr !',

@@ -36,7 +36,9 @@ def add_suffix_until_unique(username):
 def auth42(request):
     try : 
         auth_code = request.GET.get('code')
-        hostname = request.get_host().split(':')[0]  # Remove port if present
+        print('code :', auth_code)
+        hostname = request.get_host().split(':')[0]
+        print('host :', hostname)
         token_params = {
             'grant_type': 'authorization_code',
             'client_id': os.environ.get('AUTH_42_CLIENT'),
@@ -44,23 +46,31 @@ def auth42(request):
             'code': auth_code,
             'redirect_uri': f'https://{hostname}:8000/auth/auth42'
         }
-
+        print('token params :', token_params)
         token_response = requests.post(
             'https://api.intra.42.fr/oauth/token',
             json=token_params
         )
-
+        print('token response :', token_response)
+        print('response code :', token_response.status_code)
         if token_response.status_code != 200:
-            response = formulate_json_response(True, 302, "Login Unsuccessful", "/")
-            return response
-
+            raise Exception('Provided code is not correct')
         token_data = token_response.json()
+        print('token data :', token_data)
         access_token = token_data.get('access_token')
+        print('access_token :', access_token)
         user_response = requests.get(
             'https://api.intra.42.fr/v2/me',
             headers={'Authorization': f'Bearer {access_token}'}
         )
+        if (user_response.status_code != 200):
+            raise Exception("Api couldn't return user data")
+
+        print('access_token :', user_response, "user_response_code", user_response.status_code)
         user_data = user_response.json()
+        print('user_data :', user_data)
+
+
         id = user_data.get('id')
         email = user_data.get('email')
         first_name = user_data.get('first_name')
@@ -75,6 +85,9 @@ def auth42(request):
             f'https://api.intra.42.fr/v2/users/{id}/coalitions',
             headers={'Authorization': f'Bearer {access_token}'})
 
+        if (coa_response.status_code != 200):
+            raise Exception("Api couldn't return coalition data")
+
         coa_data = coa_response.json()
         coa = coa_data[0].get('name')
         client = Clients.get_client_by_email(email)
@@ -83,7 +96,8 @@ def auth42(request):
         if client:
             isOnline = async_to_sync(isClientOnline)(client)
             if isOnline:
-                return formulate_json_response(False, 401, "You are already logged in somewhere else", "/")
+                # return formulate_json_response(False, 401, "You are already logged in somewhere else", "/")
+                raise Exception("You are already logged in somewhere else")
         
         if not client:
             generated_pwd = generate_password()
@@ -101,17 +115,21 @@ def auth42(request):
                 }
             }
 
-            serializer = ClientSerializer(data=data, context={'is_admin': False})
-
-            if serializer.is_valid():
-                client = serializer.save()
+            try : 
+                serializer = ClientSerializer(data=data, context={'is_admin': False})
+                if serializer.is_valid():
+                    client = serializer.save()
         
-        response = formulate_json_response(True, 302, "Login Successful", "/")
+                response = formulate_json_response(True, 302, "Login Successful", "/")
 
-        # response.set_cookie("oauthToken", access_token)
-        JWT(client, JWTType.ACCESS, request).set_cookie(response)
-        JWT(client, JWTType.REFRESH, request).set_cookie(response)
+                # response.set_cookie("oauthToken", access_token)
+                JWT(client, JWTType.ACCESS, request).set_cookie(response)
+                JWT(client, JWTType.REFRESH, request).set_cookie(response)
+            except :
+                raise Exception("Couldn't create the client")
+
 
         return response
-    except :
-        return formulate_json_response(False, 401, "We couldn't log you in", "/")
+    except Exception as e:
+        print(e)
+        return formulate_json_response(False, 302, f"{e}, please try again", "/")

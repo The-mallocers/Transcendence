@@ -40,7 +40,8 @@ class BaseServices(ABC):
             pass
 
     async def handle_disconnect(self, client):
-        return await self.disconnect(client)
+        if self._initialized:
+            return await self.disconnect(client)
 
     async def process_action(self, data: Dict[str, Any], *args):
         try:
@@ -57,6 +58,7 @@ class BaseServices(ABC):
                 return await handler_method(data, *args)
 
         except ValueError:
+            print("Value error - data :", data)
             raise ServiceError(f"This action is not valid: {data['data']['action']}")
 
         except ServiceError as e:

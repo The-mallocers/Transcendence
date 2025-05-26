@@ -244,7 +244,7 @@ USE_L10N = True
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ STATIC & MEDIA ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]

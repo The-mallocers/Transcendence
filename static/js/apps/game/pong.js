@@ -1,9 +1,9 @@
 import {WebSocketManager} from "../../websockets/websockets.js";
 import {navigateTo} from '../../spa/spa.js';
-import {isGameOver} from "./VarGame.js";
-import { tournamentData } from "./VarGame.js";
-import { remove_toast } from "../profile/toast.js";
-import { toast_message } from "../profile/toast.js";
+import {isGameOver, tournamentData} from "./VarGame.js";
+import {remove_toast, toast_message} from "../profile/toast.js";
+import { localState } from "./VarGame.js";
+import { sanitizeHTML } from "../../utils/utils.js";
 // import { apiFriends } from "../profile/profile.js";
 
 const socket = WebSocketManager.gameSocket;
@@ -16,6 +16,9 @@ const rpicture = document.getElementById("rpicture");
 let lscore = document.getElementById("scoreLeft");
 let rscore = document.getElementById("scoreRight");
 let timer = document.getElementById("timer");
+let btns = document.getElementById("btns");
+
+
 
 const height = 500;
 const width = 1000;
@@ -37,8 +40,13 @@ let right_last_move = "idle";
 //Below code might be useful one day.
 // const name_data = await apiFriends("/api/friends/whoami/");
 // const my_name = name_data.data.username;
+function makeBtns(){
+    btns.innerHTML = `
+        <div class="btn intra-btn" data-route="/pong/local/create/">play again</div>
+        <div class="btn intra-btn" data-route="/pong/gamemodes/">quit</div>
+    `
+}
 
-//Si un petit malin va sur la page sans raison
 if (!socket || socket.readyState === WebSocket.CLOSED) {
     navigateTo("/");
     remove_toast();
@@ -46,18 +54,21 @@ if (!socket || socket.readyState === WebSocket.CLOSED) {
 } else {
     tournamentData.gameIsReady = false;
 
-    lusername.innerHTML = window.GameState.left.username;
-    rusername.innerHTML = window.GameState.right.username;
+    lusername.innerHTML = sanitizeHTML(window.GameState.left.username);
+    rusername.innerHTML = sanitizeHTML(window.GameState.right.username);
 
     lpicture.src = window.GameState.left.picture;
     rpicture.src = window.GameState.right.picture;
 
     socket.onmessage = (e) => {
+        // console.log("Salut la team game socket avec ptit message");
         const jsonData = JSON.parse(e.data);
+        // console.log(jsonData);
         //Attempt at handling errors
         if (jsonData.data.action == "EXCEPTION") {
 
             isGameOver.gameIsOver = true;
+            localState.gameIsLocal = false;
             WebSocketManager.closeGameSocket();
             navigateTo("/");
             remove_toast();
@@ -73,12 +84,14 @@ if (!socket || socket.readyState === WebSocket.CLOSED) {
             timer.remove()
 
             if (jsonData.data.action == "PADDLE_LEFT_UPDATE") {
+                console.log("Receiving a paddle left update");
                 const current_move = jsonData.data.content.move
                 if (current_move != left_last_move) {
                     window.GameState.left.y = jsonData.data.content.y;
                     left_last_move = current_move;
                 }
             } else if (jsonData.data.action == "PADDLE_RIGHT_UPDATE") {
+                console.log("Receiving a paddle right update");
                 const current_move = jsonData.data.content.move
                 if (current_move != right_last_move) {
                     window.GameState.right.y = jsonData.data.content.y
@@ -103,18 +116,23 @@ if (!socket || socket.readyState === WebSocket.CLOSED) {
                 const game_id = jsonData.data.content
                 navigateTo(`/pong/disconnect/?game=${game_id}`);
                 isGameOver.gameIsOver = true;
+                localState.gameIsLocal = false;
+
                 WebSocketManager.closeGameSocket();
             }
         } else if (jsonData.data.action == "GAME_ENDING") {
             const game_id = jsonData.data.content
-
-            //Hack that allows me to not change backend 
+            isGameOver.gameIsOver = true;
+            localState.gameIsLocal = false;
+            WebSocketManager.closeGameSocket();
+            if (localState.gameIsLocal) {
+                navigateTo('/');
+                return
+            }
             //otherwise game over will navigate after we redirected to tournament.
             if (window.location.pathname != "/pong/tournament/tree/" ) {
                 navigateTo(`/pong/gameover/?game=${game_id}`);
             }
-            isGameOver.gameIsOver = true;
-            WebSocketManager.closeGameSocket();
         }
     };
 }
@@ -132,6 +150,12 @@ document?.addEventListener('visibilitychange', () => {
 const keys = {};
 const previous_keys = {};
 let previous_direction = null;
+
+const keys_local = {};
+const previous_keys_local = {};
+let previous_direction_local = null;
+
+
 
 document?.addEventListener('keydown', (event) => {
     switch (event.key) {
@@ -155,6 +179,71 @@ document?.addEventListener('keyup', (event) => {
     }
 });
 
+function addLocalDown(event) {
+    const key = event.key.toLowerCase();
+    switch (key) {
+        case 'w':
+            keys_local.up = true;
+            break;
+        case 's':
+            keys_local.down = true;
+            break;
+    }
+}
+
+function addLocalUp(event) {
+    const key = event.key.toLowerCase();
+    switch (key) {
+        case 'w':
+            keys_local.up = false;
+            break;
+        case 's':
+            keys_local.down = false;
+            break;
+    }
+}
+
+
+if (localState.gameIsLocal == true) {
+    document?.addEventListener('keyup', addLocalUp);
+    document?.addEventListener('keydown', addLocalDown);
+}
+
+
+function updateLocalPaddles() {
+    let direction = null;
+    //This might look confusing, but this is to simulate strafing keys
+    if (keys_local.up && keys_local.down) {
+        if (previous_keys_local.up) {
+            direction = 'down';
+        } else if (previous_keys_local.down) {
+            direction = 'up';
+        }
+    } else if (keys_local.up) {
+        direction = 'up';
+        previous_keys_local.up = true;
+        previous_keys_local.down = false;
+    } else if (keys_local.down) {
+        direction = 'down';
+        previous_keys_local.down = true;
+        previous_keys_local.up = false;
+    } else { direction = 'idle';}
+    if ((direction && previous_direction != direction) || frameCount % 5 === 0) { //Trying to send less updates
+        previous_direction_local = direction;
+        console.log("Sending local left paddle updates");
+        const message = {
+            "event": "game",
+            "data": {
+                "action": "paddle_move",
+                "args": {
+                    "move": direction,
+                    "side": "left"
+                }
+            }
+        }
+        socket.send(JSON.stringify(message));
+    }
+}
 
 function updatePaddles() {
     let direction = null;
@@ -173,26 +262,18 @@ function updatePaddles() {
         direction = 'down';
         previous_keys.down = true;
         previous_keys.up = false;
-    } else {
-        direction = 'idle';
-    }
-    //the code below might be useful later, idk it doesnt work rn
-    // if (my_name == lusername) {
-    //     left_last_move = direction;
-    // }
-    // else if (my_name == rusername) {
-    //     right_last_move = direction;
-    // }
-    // if (direction != previous_direction) {
-    // }
-    // (direction && previous_direction != direction) || frameCount % 5 === 0
+    } else { direction = 'idle';}
     if ((direction && previous_direction != direction) || frameCount % 5 === 0) { //Trying to send less updates
         previous_direction = direction;
+        console.log("Sending paddle updates, direction is :", direction);
         const message = {
             "event": "game",
             "data": {
                 "action": "paddle_move",
-                "args": direction
+                "args": {
+                    "move": direction,
+                    "side": "right"
+                }
             }
         }
         socket.send(JSON.stringify(message));
@@ -291,6 +372,7 @@ function gameLoop() {
     }
     frameCount++;
     computeDelta();
+    if (localState.gameIsLocal == true) { updateLocalPaddles()};
     updatePaddles();
     render();
     requestAnimationFrame(gameLoop);

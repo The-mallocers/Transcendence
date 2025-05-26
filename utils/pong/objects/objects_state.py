@@ -1,3 +1,4 @@
+from utils.enums import PlayerSide
 from utils.pong.objects.ball import Ball
 from utils.pong.objects.paddle import Paddle
 from utils.pong.objects.score import Score
@@ -22,7 +23,7 @@ class GameState:
         ball_copy.dx = logic.ball.dx
         ball_copy.dy = logic.ball.dy
 
-        paddle_pL_copy = Paddle()
+        paddle_pL_copy = Paddle(side=PlayerSide.LEFT)
         paddle_pL_copy.width = logic.paddle_pL.width
         paddle_pL_copy.height = logic.paddle_pL.height
         paddle_pL_copy.x = logic.paddle_pL.x
@@ -30,7 +31,7 @@ class GameState:
         paddle_pL_copy.speed = logic.paddle_pL.speed
         paddle_pL_copy.move = logic.paddle_pL.move  # Added for frontend rendering
 
-        paddle_pR_copy = Paddle()
+        paddle_pR_copy = Paddle(side=PlayerSide.RIGHT)
         paddle_pR_copy.width = logic.paddle_pR.width
         paddle_pR_copy.height = logic.paddle_pR.height
         paddle_pR_copy.x = logic.paddle_pR.x
