@@ -117,7 +117,7 @@ class ChatService(BaseServices):
                                                  'room_id': str(room.id)
                                              })
             await Messages.objects.acreate(sender=client, content=message, room=room)
-            # Send the message to the group
+            # Send the message to the group 
             room_group = str(await Rooms.get_id(room))
             await asend_group(RTables.GROUP_CHAT(room_group), EventType.CHAT, ResponseAction.MESSAGE_RECEIVED, {
                 'message': message,

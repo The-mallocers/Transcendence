@@ -38,8 +38,10 @@ function increase() {
 minus?.addEventListener("click", decrease);
 plus?.addEventListener("click", increase);
 
-const player_left_name = document.querySelector("#playerLeft");
-const player_right_name = document.querySelector("#playerRight");
+
+
+// console.log("Player left name", player_left_name);
+// console.log("Player right name", player_right_name);
 
 window.GameState = {
     ballY: height / 2,
@@ -48,13 +50,13 @@ window.GameState = {
     left: {
         x: paddleDefaultPos,
         y: paddleDefaultPos,
-        username: player_left_name,
+        username: "",
         id: ""
     },
     right: {
         x: paddleDefaultPos,
         y: paddleDefaultPos,
-        username: player_right_name,
+        username: "",
         id: ""
     }
 }
@@ -93,5 +95,10 @@ gameSocket.onmessage = (e) => {
 }
 
 btn?.addEventListener('click', () => {
+    const player_left_name = document.querySelector("#playerLeft");
+    const player_right_name = document.querySelector("#playerRight");
+    
     getLocalSettings();
+    window.GameState.left.username = player_left_name?.value;
+    window.GameState.right.username = player_right_name?.value;
 })

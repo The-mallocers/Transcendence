@@ -3,6 +3,7 @@ import {navigateTo} from '../../spa/spa.js';
 import {isGameOver, tournamentData} from "./VarGame.js";
 import {remove_toast, toast_message} from "../profile/toast.js";
 import { localState } from "./VarGame.js";
+import { sanitizeHTML } from "../../utils/utils.js";
 // import { apiFriends } from "../profile/profile.js";
 
 const socket = WebSocketManager.gameSocket;
@@ -45,8 +46,8 @@ if (!socket || socket.readyState === WebSocket.CLOSED) {
 } else {
     tournamentData.gameIsReady = false;
 
-    lusername.innerHTML = window.GameState.left.username;
-    rusername.innerHTML = window.GameState.right.username;
+    lusername.innerHTML = sanitizeHTML(window.GameState.left.username);
+    rusername.innerHTML = sanitizeHTML(window.GameState.right.username);
 
     lpicture.src = window.GameState.left.picture;
     rpicture.src = window.GameState.right.picture;
