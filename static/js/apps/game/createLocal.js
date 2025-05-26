@@ -11,7 +11,7 @@ const width = 1000;
 const paddleHeight = 100;
 let paddleDefaultPos = 250 - (paddleHeight / 2)
 
-
+WebSocketManager.closeGameSocket();
 WebSocketManager.initGameSocket(clientId);
 const gameSocket = WebSocketManager.gameSocket
 
