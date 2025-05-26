@@ -3,11 +3,10 @@ import traceback
 
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
-from django.conf import settings
 
 from apps.game.models import Game
 from utils.enums import GameStatus, EventType, ResponseAction, \
-    ResponseError, PlayerSide, RTables, game_status_order
+    ResponseError, PlayerSide, RTables
 from utils.pong.logic import PongLogic
 from utils.serializers.player import PlayerInformationSerializer
 from utils.threads.threads import Threads
@@ -157,6 +156,7 @@ class GameThread(Threads):
                 TournamentThread.set_game_players(self.game.tournament.code, self.game.code, self.game.winner, self.game.loser, self.redis)
                 #Changed the above to be just the object
 
+            self.game.rset_status(GameStatus.FINISHED)
             self._stop_event.set()
             self._stopping()
 

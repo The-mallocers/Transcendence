@@ -29,6 +29,7 @@ class GameRuntime:
         self._code = None
         self._tournament: Tournaments = None
         self._is_duel = False
+        self._local = False
         self._points_to_win = 3
 
     # ═══════════════════════════════════ Properties ═══════════════════════════════════ #
@@ -58,6 +59,14 @@ class GameRuntime:
         self._is_duel = value
 
     @property
+    def local(self):
+        return self._local
+
+    @local.setter
+    def local(self, local):
+        self._local = local
+
+    @property
     def points_to_win(self):
         return self._points_to_win
 
@@ -82,10 +91,14 @@ class GameRuntime:
 
     def create_redis_game(self):
         from utils.serializers.game import GameSerializer
-        if self.tournament is None:
+        if self.tournament:
+            serializer = GameSerializer(self, context={'id': self.code, 'tournament_code': self.tournament.code})
+        elif self.local:
+            serializer = GameSerializer(self, context={'id': self.code, 'local': True})
+        elif self.is_duel:
             serializer = GameSerializer(self, context={'id': self.code, 'is_duel': self.is_duel})
         else:
-            serializer = GameSerializer(self, context={'id': self.code, 'is_duel': self.is_duel, 'tournament_code': self.tournament.code})
+            serializer = GameSerializer(self, context={'id': self.code})
         self.redis.json().set(self.game_key, Path.root_path(), serializer.data)
 
     def init_players(self):
@@ -112,8 +125,8 @@ class GameRuntime:
             async_to_sync(channel_layer.group_add)(RTables.GROUP_GAME(self.code), channel_name_pL)
             async_to_sync(channel_layer.group_add)(RTables.GROUP_GAME(self.code), channel_name_pR)
 
-            self.pL.leave_queue(self.code, self.is_duel)
-            self.pR.leave_queue(self.code, self.is_duel)
+            self.pL.leave_queue(self.code, self.is_duel, self.local)
+            self.pR.leave_queue(self.code, self.is_duel, self.local)
 
             send_group(RTables.GROUP_GAME(self.code), EventType.GAME, ResponseAction.JOIN_GAME)
 
@@ -163,6 +176,7 @@ class Game(models.Model, GameRuntime):
     tournament = ForeignKey(Tournaments, on_delete=models.SET_NULL, null=True, related_name='tournament', blank=True)
     created_at = DateTimeField(default=timezone.now)
     is_duel = BooleanField(default=False)
+    local = BooleanField(default=False)
     points_to_win = IntegerField(default=3)
 
     def __str__(self):

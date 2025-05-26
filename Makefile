@@ -75,6 +75,8 @@ dbclean: down
 reload:
 	@cp -r static/css ./docker/staticdocker
 	@cp -r static/js ./docker/staticdocker
+	@cp -r static/assets ./docker/staticdocker
+	@echo "Static files reloaded"
 
 clean:
 	@if [ "$$(docker ps -q)" ]; then \
