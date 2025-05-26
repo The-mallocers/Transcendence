@@ -148,7 +148,7 @@ export function populateTournament(tournament_data){
     
     if (btnsRoom) {
         btnsRoom.innerHTML = `
-                    <div class="btn btn-intra" onclick="invite_friends()">Invite</div>
+                    <div class="btn btn-intra type-intra-green" onclick="invite_friends()">Invite</div>
                     <div id="leave-btn" class="btn btn-intra-outlined">Leave</div>
         `
     }
