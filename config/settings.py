@@ -45,7 +45,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ CORE SETTINGS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 PRINT = 'true'
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
 
