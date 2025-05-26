@@ -45,13 +45,17 @@ class GameService(BaseServices):
             if is_local is True:
                 # print('game is local')
                 # print(f'data is ', data['data']['args']['side'])
+                # print("data:", data)
                 # print("printing the weird player side thing")
-                # print(PlayerSide(data['data']['args']['side']))
-                if PlayerSide(data['data']['args']['side']) == PlayerSide.LEFT:
-                    print("move is left")
-                    await self.redis.json().set(self.game_key, Path('player_left.paddle.move'), data['data']['args']['move'])
-                if PlayerSide(data['data']['args']['side']) == PlayerSide.RIGHT:                    
-                    print("move is right")
+                # print("WEIRD:", data['data']['args']['side'])
+                # print(f"Its being compared to {PlayerSide.LEFT.value}") #PlayerSide.LEFT.value
+                if data['data']['args']['side'] == "left":
+                    # print("move is left")
+                    print("move is :", data['data']['args']['move'])
+                    await self.redis.json().set(self.game_key, Path('player_left.paddle.move'), data['data']['args']['move'])  #data['data']['args']['move'])
+                elif data['data']['args']['side'] == "right": #PlayerSide.RIGHT.value
+                    # print("move is right")
+                    print("move is :", data['data']['args']['move'])
                     await self.redis.json().set(self.game_key, Path('player_right.paddle.move'), data['data']['args']['move'])
             else:
                 if str(client.id) == self.pL['id']:

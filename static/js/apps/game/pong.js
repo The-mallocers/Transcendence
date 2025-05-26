@@ -52,9 +52,9 @@ if (!socket || socket.readyState === WebSocket.CLOSED) {
     rpicture.src = window.GameState.right.picture;
 
     socket.onmessage = (e) => {
-        console.log("Salut la team game socket avec ptit message");
+        // console.log("Salut la team game socket avec ptit message");
         const jsonData = JSON.parse(e.data);
-        console.log(jsonData);
+        // console.log(jsonData);
         //Attempt at handling errors
         if (jsonData.data.action == "EXCEPTION") {
 
@@ -75,12 +75,14 @@ if (!socket || socket.readyState === WebSocket.CLOSED) {
             timer.remove()
 
             if (jsonData.data.action == "PADDLE_LEFT_UPDATE") {
+                console.log("Receiving a paddle left update");
                 const current_move = jsonData.data.content.move
                 if (current_move != left_last_move) {
                     window.GameState.left.y = jsonData.data.content.y;
                     left_last_move = current_move;
                 }
             } else if (jsonData.data.action == "PADDLE_RIGHT_UPDATE") {
+                console.log("Receiving a paddle right update");
                 const current_move = jsonData.data.content.move
                 if (current_move != right_last_move) {
                     window.GameState.right.y = jsonData.data.content.y
@@ -169,11 +171,11 @@ document?.addEventListener('keyup', (event) => {
 function addLocalDown(event) {
     const key = event.key.toLowerCase();
     switch (key) {
-        case 's':
-            previous_keys.up = false;
+        case 'w':
+            keys_local.up = true;
             break;
-        case 'x':
-            previous_keys.down = false;
+        case 's':
+            keys_local.down = true;
             break;
     }
 }
@@ -181,11 +183,11 @@ function addLocalDown(event) {
 function addLocalUp(event) {
     const key = event.key.toLowerCase();
     switch (key) {
-        case 's':
-            previous_keys.up = false;
+        case 'w':
+            keys_local.up = false;
             break;
-        case 'x':
-            previous_keys.down = false;
+        case 's':
+            keys_local.down = false;
             break;
     }
 }
@@ -359,7 +361,7 @@ function gameLoop() {
     }
     frameCount++;
     computeDelta();
-    if (localState.gameIsLocal == true) { updateLocalPaddles};
+    if (localState.gameIsLocal == true) { updateLocalPaddles()};
     updatePaddles();
     render();
     requestAnimationFrame(gameLoop);

@@ -131,10 +131,13 @@ class PongLogic:
 
     def _handle_paddle_direction(self, paddle: Paddle, delta_time):
         move = paddle.move
+        # print("move is :", move)
+        # print("PaddleMove.DOWN is: ", PaddleMove.DOWN)
         if move == PaddleMove.UP:
             paddle.y = paddle.y - paddle.speed * delta_time
             paddle.y = paddle.handle_wall_collision(paddle.y)
         elif move == PaddleMove.DOWN:
+            print("going down going down")
             paddle.y = paddle.y + paddle.speed * delta_time
             paddle.y = paddle.handle_wall_collision(paddle.y)
         elif move == PaddleMove.IDLE:
