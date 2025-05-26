@@ -39,10 +39,6 @@ minus?.addEventListener("click", decrease);
 plus?.addEventListener("click", increase);
 
 
-
-// console.log("Player left name", player_left_name);
-// console.log("Player right name", player_right_name);
-
 window.GameState = {
     ballY: height / 2,
     ballX: width / 2,
@@ -100,5 +96,11 @@ btn?.addEventListener('click', () => {
     
     getLocalSettings();
     window.GameState.left.username = player_left_name?.value;
+    if (!window.GameState.left.username) {
+        window.GameState.left.username = "Player 1";
+    }
     window.GameState.right.username = player_right_name?.value;
+    if (!window.GameState.right.username) {
+        window.GameState.right.username = "Player 2";
+    }
 })
