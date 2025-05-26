@@ -39,10 +39,10 @@ class GameState:
         paddle_pR_copy.speed = logic.paddle_pR.speed
         paddle_pR_copy.move = logic.paddle_pR.move
 
-        score_pL_copy = Score()
+        score_pL_copy = Score(side=PlayerSide.LEFT)
         score_pL_copy.score = logic.score_pL.score
 
-        score_pR_copy = Score()
+        score_pR_copy = Score(side=PlayerSide.RIGHT)
         score_pR_copy.score = logic.score_pR.score
 
         return cls(ball_copy, paddle_pL_copy, paddle_pR_copy, score_pL_copy, score_pR_copy)
