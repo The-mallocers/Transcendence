@@ -102,4 +102,11 @@ function hide_modal(){
         modal.hide();
 }
 
+const modalKeyElement = document.getElementById('twoFactorModal');
+modalKeyElement?.addEventListener('hide.bs.modal', () => {
+    if (document.activeElement instanceof HTMLElement) {
+        document.activeElement.blur();
+    }
+});
+
 window.validateCode = validateCode;

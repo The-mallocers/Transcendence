@@ -73,7 +73,7 @@ modalElement?.addEventListener('hide.bs.modal', () => {
 });
 
 const modalKeyElement = document.getElementById('modal-key-to-play');
-modalElement?.addEventListener('hide.bs.modal', () => {
+modalKeyElement?.addEventListener('hide.bs.modal', () => {
     if (document.activeElement instanceof HTMLElement) {
         document.activeElement.blur();
     }
