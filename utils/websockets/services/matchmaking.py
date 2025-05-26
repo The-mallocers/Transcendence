@@ -79,9 +79,10 @@ class MatchmakingService(BaseServices):
     async def disconnect(self, client):
         queues = await Clients.acheck_in_queue(client, self.redis)
         if queues:
+            print("la queue: ", queues)
             if queues is RTables.HASH_G_QUEUE:
                 await self.redis.hdel(RTables.HASH_G_QUEUE, str(client.id))
-            if RTables.HASH_TOURNAMENT_QUEUE('') in queues.decode('utf-8'):
+            elif RTables.HASH_TOURNAMENT_QUEUE('') in queues.decode('utf-8'):
                 await self.redis.hset(queues.decode('utf-8'), str(client.id), str(False))
             else:
                 await self.redis.delete(queues)
