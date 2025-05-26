@@ -162,7 +162,7 @@ if (!searchParams.has('username') && pathname == '/') {
 
 notifSocket.onmessage = (event) => {
     const message = JSON.parse(event.data);
-    console.log(message);
+    // console.log(message);
 
     if (message.data.action == "SESSION_EXPIRED") {
         remove_toast();

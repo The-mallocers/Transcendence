@@ -77,7 +77,6 @@ gameSocket.onmessage = (e) => {
     const message = JSON.parse(e.data);
     console.log(message.data.action);
     if (message.data.action == "GAME_CREATED") {
-        console.log("IN", e.data.action);
         localState.gameIsLocal = true;
         const startGameMessage = {
             "event": "game",

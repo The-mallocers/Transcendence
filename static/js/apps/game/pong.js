@@ -69,10 +69,8 @@ if (!socket || socket.readyState === WebSocket.CLOSED) {
 
 
     socket.onmessage = (e) => {
-        // console.log("Salut la team game socket avec ptit message");
         const jsonData = JSON.parse(e.data);
         // console.log(jsonData);
-        //Attempt at handling errors
         if (jsonData.data.action == "EXCEPTION") {
 
             isGameOver.gameIsOver = true;
@@ -92,14 +90,12 @@ if (!socket || socket.readyState === WebSocket.CLOSED) {
             timer.remove()
 
             if (jsonData.data.action == "PADDLE_LEFT_UPDATE") {
-                console.log("Receiving a paddle left update");
                 const current_move = jsonData.data.content.move
                 if (current_move != left_last_move) {
                     window.GameState.left.y = jsonData.data.content.y;
                     left_last_move = current_move;
                 }
             } else if (jsonData.data.action == "PADDLE_RIGHT_UPDATE") {
-                console.log("Receiving a paddle right update");
                 const current_move = jsonData.data.content.move
                 if (current_move != right_last_move) {
                     window.GameState.right.y = jsonData.data.content.y
@@ -134,6 +130,13 @@ if (!socket || socket.readyState === WebSocket.CLOSED) {
             WebSocketManager.closeGameSocket();
             if (localState.gameIsLocal) {
                 localState.gameIsLocal = false;
+                //Update window avec les noms et le score.
+                window.local = {
+                    left_name: lusername.innerText,
+                    right_name: rusername.innerText,
+                    left_score: lscore.innerText,
+                    right_score: rscore.innerText,
+                }
                 navigateTo('/pong/local/gameover/');
                 return
             }
@@ -220,8 +223,11 @@ if (localState.gameIsLocal == true) {
 
 
 function updateLocalPaddles() {
+    console.log(
+        "updating local paddles !, game is loca is :", localState.gameIsLocal
+    )
     let direction = null;
-    //This might look confusing, but this is to simulate strafing keys
+    //This might look confusing, but this is to simulate strafing key   s
     if (keys_local.up && keys_local.down) {
         if (previous_keys_local.up) {
             direction = 'down';
@@ -239,7 +245,6 @@ function updateLocalPaddles() {
     } else { direction = 'idle';}
     if ((direction && previous_direction != direction) || frameCount % 5 === 0) { //Trying to send less updates
         previous_direction_local = direction;
-        console.log("Sending local left paddle updates");
         const message = {
             "event": "game",
             "data": {
@@ -274,7 +279,6 @@ function updatePaddles() {
     } else { direction = 'idle';}
     if ((direction && previous_direction != direction) || frameCount % 5 === 0) { //Trying to send less updates
         previous_direction = direction;
-        console.log("Sending paddle updates, direction is :", direction);
         const message = {
             "event": "game",
             "data": {

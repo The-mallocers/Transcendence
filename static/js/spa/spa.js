@@ -1,5 +1,5 @@
 import {WebSocketManager} from "../websockets/websockets.js"
-import {isGameOver} from "../apps/game/VarGame.js"
+import {isGameOver, localState} from "../apps/game/VarGame.js"
 import * as html from "../utils/html_forms.js"
 import {routes} from "../utils/routes.js";
 import {getClientId} from "../utils/utils.js";
@@ -76,8 +76,11 @@ class Router {
     }
 
     navigate(path) {
-
+        console.log("NAVIGATING");
         let splitedPath = path.split("/")
+        if (path != '/pong/arena/') {
+            localState.gameIsLocal = false;
+        };
         if (splitedPath.includes("pong")) {
             if (splitedPath.includes("duel") || splitedPath.includes("arena") || splitedPath.includes("matchmaking")) {
                 WebSocketManager.closeChatSocket();
