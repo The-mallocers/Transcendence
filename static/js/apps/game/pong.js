@@ -134,6 +134,7 @@ if (!socket || socket.readyState === WebSocket.CLOSED) {
                 window.local = {
                     left_name: lusername.innerText,
                     right_name: rusername.innerText,
+
                     left_score: lscore.innerText,
                     right_score: rscore.innerText,
                 }
@@ -223,9 +224,6 @@ if (localState.gameIsLocal == true) {
 
 
 function updateLocalPaddles() {
-    console.log(
-        "updating local paddles !, game is loca is :", localState.gameIsLocal
-    )
     let direction = null;
     //This might look confusing, but this is to simulate strafing key   s
     if (keys_local.up && keys_local.down) {

@@ -19,8 +19,18 @@ class Router {
     }
 
     async handleLocation() {
-        console.log("handle location !");
-        console.log(window.location.pathname);
+
+        if (document.body.classList.contains('modal-open')) {
+            document.body.removeAttribute('style');
+            let modal = document.querySelector('.modal-dialog');
+            let backdrop = document.querySelector('.modal-backdrop');
+            
+            if (modal)
+                modal.parentNode.removeChild(modal);
+            if (backdrop)
+                backdrop.parentNode.removeChild(backdrop)
+            document.body.classList.remove('modal-open')
+        }
         for (let id of window.intervalsManager) {
             clearInterval(id);
         }
@@ -94,10 +104,10 @@ function navigationChecks() {
     };
     if (splitedPath.includes("pong")) {
         if (splitedPath.includes("duel") || splitedPath.includes("arena") || splitedPath.includes("matchmaking")) {
-            console.log("Closing chat sockets");
+            // console.log("Closing chat sockets");
             WebSocketManager.closeChatSocket();
         } else {
-            console.log("Closing all sockets");
+            // console.log("Closing all sockets");
             WebSocketManager.closeAllSockets();
         }
     } else {
