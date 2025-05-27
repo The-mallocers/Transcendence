@@ -1,3 +1,5 @@
+import logging
+import traceback
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 from django.db import models
@@ -10,12 +12,12 @@ from redis.commands.json.path import Path
 from apps.client.models import Clients
 from apps.player.models import Player
 from apps.tournaments.models import Tournaments
-from utils.enums import EventType, ResponseAction, RTables, PlayerSide
+from utils.enums import EventType, ResponseAction, RTables, PlayerSide, ResponseError
 from utils.enums import GameStatus
 from utils.redis import RedisConnectionPool
 from utils.serializers.player import PlayersRedisSerializer
 from utils.util import create_game_id
-from utils.websockets.channel_send import send_group
+from utils.websockets.channel_send import send_group, send_group_error
 
 
 class GameRuntime:
@@ -117,19 +119,23 @@ class GameRuntime:
 
         if self.tournament is None:  # si la game n'est pas dans un tournois
             channel_layer = get_channel_layer()
+            try :
+                channel_name_pL = self.redis.hget(name=RTables.HASH_CLIENT(self.pL.client.id), key=str(EventType.GAME.value))
+                channel_name_pL = channel_name_pL.decode('utf-8')
+                channel_name_pR = self.redis.hget(name=RTables.HASH_CLIENT(self.pR.client.id), key=str(EventType.GAME.value))
+                channel_name_pR = channel_name_pR.decode('utf-8')
+                async_to_sync(channel_layer.group_add)(RTables.GROUP_GAME(self.code), channel_name_pL)
+                async_to_sync(channel_layer.group_add)(RTables.GROUP_GAME(self.code), channel_name_pR)
 
-            channel_name_pL = self.redis.hget(name=RTables.HASH_CLIENT(self.pL.client.id), key=str(EventType.GAME.value))
-            channel_name_pL = channel_name_pL.decode('utf-8')
-            channel_name_pR = self.redis.hget(name=RTables.HASH_CLIENT(self.pR.client.id), key=str(EventType.GAME.value))
-            channel_name_pR = channel_name_pR.decode('utf-8')
-            async_to_sync(channel_layer.group_add)(RTables.GROUP_GAME(self.code), channel_name_pL)
-            async_to_sync(channel_layer.group_add)(RTables.GROUP_GAME(self.code), channel_name_pR)
+                self.pL.leave_queue(self.code, self.is_duel, self.local)
+                self.pR.leave_queue(self.code, self.is_duel, self.local)
 
-            self.pL.leave_queue(self.code, self.is_duel, self.local)
-            self.pR.leave_queue(self.code, self.is_duel, self.local)
-
-            send_group(RTables.GROUP_GAME(self.code), EventType.GAME, ResponseAction.JOIN_GAME)
-
+                send_group(RTables.GROUP_GAME(self.code), EventType.GAME, ResponseAction.JOIN_GAME)
+            except AttributeError as e:
+                logging.error(traceback.format_exc())
+                send_group_error(RTables.GROUP_GAME(self.code), ResponseError.INIT_PLAYER_ERROR)
+                return False
+        return True
     def error_game(self):
         self.rset_status(GameStatus.ERROR)
         self.redis.delete(self.game_key)
