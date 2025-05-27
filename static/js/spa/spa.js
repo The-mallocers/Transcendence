@@ -104,10 +104,10 @@ function navigationChecks() {
     };
     if (splitedPath.includes("pong")) {
         if (splitedPath.includes("duel") || splitedPath.includes("arena") || splitedPath.includes("matchmaking")) {
-            // console.log("Closing chat sockets");
+
             WebSocketManager.closeChatSocket();
         } else {
-            // console.log("Closing all sockets");
+
             WebSocketManager.closeAllSockets();
         }
     } else {

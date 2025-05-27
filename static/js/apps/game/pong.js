@@ -70,7 +70,7 @@ if (!socket || socket.readyState === WebSocket.CLOSED) {
 
     socket.onmessage = (e) => {
         const jsonData = JSON.parse(e.data);
-        // console.log(jsonData);
+
         if (jsonData.data.action == "EXCEPTION") {
 
             isGameOver.gameIsOver = true;
