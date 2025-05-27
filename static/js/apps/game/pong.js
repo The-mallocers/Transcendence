@@ -193,26 +193,30 @@ document?.addEventListener('keyup', (event) => {
 });
 
 function addLocalDown(event) {
-    const key = event.key.toLowerCase();
-    switch (key) {
-        case 'w':
-            keys_local.up = true;
-            break;
-        case 's':
-            keys_local.down = true;
-            break;
+    if (event.key) {
+        const key = event.key.toLowerCase();
+        switch (key) {
+            case 'w':
+                keys_local.up = true;
+                break;
+            case 's':
+                keys_local.down = true;
+                break;
+        }
     }
 }
 
 function addLocalUp(event) {
-    const key = event.key.toLowerCase();
-    switch (key) {
-        case 'w':
-            keys_local.up = false;
-            break;
-        case 's':
-            keys_local.down = false;
-            break;
+    if (event.key) {
+        const key = event.key.toLowerCase();
+        switch (key) {
+            case 'w':
+                keys_local.up = false;
+                break;
+            case 's':
+                keys_local.down = false;
+                break;
+        }
     }
 }
 
