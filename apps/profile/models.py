@@ -11,7 +11,7 @@ class Profile(models.Model):
     last_name = models.CharField(null=True, max_length=50, editable=True)
 
     profile_picture = models.ImageField(upload_to='profile/',
-                                        default="profile/default.png",
+                                        default="../static/assets/imgs/profile/default.png",
                                         editable=True, null=True)
     # I want to add this !
     coalition = models.CharField(null=True, max_length=50, editable=True)

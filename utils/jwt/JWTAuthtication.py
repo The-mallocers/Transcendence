@@ -11,16 +11,10 @@ from utils.jwt.JWT import JWT
 
 class JWTAuthentication(BaseAuthentication):
     def authenticate(self, request: HttpRequest):
-        print("in middleware")
         if request.method in ('POST', 'PUT', 'PATCH', 'DELETE'):
-            print("checking crsf")
-            print("whaaaaaaaaaaaaaaaaaaat")
             csrf_middleware = CsrfViewMiddleware(lambda r: None)
-            print("double whattttt")
             
-            print("middleware: ", csrf_middleware)
             response = csrf_middleware.process_view(request, None, (), {})
-            print("response of csrf check: ", response)
             if response is not None:
                 raise AuthenticationFailed("CSRF validation failed")
         auth_header = request.headers.get('Authorization')

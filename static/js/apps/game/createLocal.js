@@ -11,10 +11,7 @@ const width = 1000;
 const paddleHeight = 100;
 let paddleDefaultPos = 250 - (paddleHeight / 2)
 
-
-WebSocketManager.initGameSocket(clientId);
-const gameSocket = WebSocketManager.gameSocket
-
+WebSocketManager.closeGameSocket();
 
 let minus = document.querySelector(".minus");
 let plus = document.querySelector(".plus");
@@ -57,7 +54,7 @@ window.GameState = {
     }
 }
 
-function getLocalSettings() {
+function getLocalSettings(gameSocket) {
     let score = document.querySelector(".score");
     let points = parseInt(score.innerHTML);
 
@@ -73,28 +70,33 @@ function getLocalSettings() {
     gameSocket.send(JSON.stringify(creationMessage));
 }
 
-gameSocket.onmessage = (e) => {
-    const message = JSON.parse(e.data);
-    console.log(message.data.action);
-    if (message.data.action == "GAME_CREATED") {
-        console.log("IN", e.data.action);
-        localState.gameIsLocal = true;
-        const startGameMessage = {
-            "event": "game",
-            "data": {
-                "action": "start_game"
-            }
-        }
-        gameSocket.send(JSON.stringify(startGameMessage))
-        navigateTo('/pong/arena/');
-    }
-}
 
 btn?.addEventListener('click', () => {
     const player_left_name = document.querySelector("#playerLeft");
     const player_right_name = document.querySelector("#playerRight");
-    
-    getLocalSettings();
+    WebSocketManager.initGameSocket(clientId);
+    const gameSocket = WebSocketManager.gameSocket;
+
+    gameSocket.onopen = () => {
+        gameSocket.onmessage = (e) => {
+            const message = JSON.parse(e.data);
+            console.log(message.data.action);
+            if (message.data.action == "GAME_CREATED") {
+                localState.gameIsLocal = true;
+                const startGameMessage = {
+                    "event": "game",
+                    "data": {
+                        "action": "start_game"
+                    }
+                }
+                gameSocket.send(JSON.stringify(startGameMessage))
+                navigateTo('/pong/arena/');
+            }
+        }
+        getLocalSettings(gameSocket);
+    };
+
+
     window.GameState.left.username = player_left_name?.value;
     if (!window.GameState.left.username) {
         window.GameState.left.username = "Player 1";

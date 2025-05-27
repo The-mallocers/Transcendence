@@ -22,6 +22,7 @@
 
 .createLocalContainer .minus, .createLocalContainer .score, .createLocalContainer .plus {
     padding: 1rem;
+    user-select: none;
 }
 
 

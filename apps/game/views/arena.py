@@ -8,7 +8,6 @@ from config import settings
 def get(request):
     # arena_picture = settings.MEDIA_URL + "art/arena-wallpaper.jpg"
     arena_picture = settings.STATIC_URL + "assets/imgs/art/42.png"
-    print(arena_picture)
     html_content = render_to_string("apps/pong/arena.html", { 
         "csrf_token": get_token(request),
         "arena_picture": arena_picture,

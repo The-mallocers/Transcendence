@@ -14,6 +14,9 @@ const paddleHeight = 100;
 
 let paddleDefaultPos = 250 - (paddleHeight / 2)
 
+
+
+WebSocketManager.closeGameSocket();
 WebSocketManager.initGameSocket(clientId);
 const socket = WebSocketManager.gameSocket;
 
@@ -70,8 +73,10 @@ const message = {
 socket.onopen = () => {
     socket.send(JSON.stringify(message));
 }
-socket.onclose = () => {
-
+socket.onclose = (event) => {
+    if (event.code === 4001) {
+        navigateTo("/pong/gamemodes/");
+    };
 }
 
 socket.onmessage = (e) => {

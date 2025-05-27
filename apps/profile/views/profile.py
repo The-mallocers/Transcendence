@@ -21,7 +21,7 @@ def get(req):
         html_content = render_to_string("apps/error/404.html", {"csrf_token": get_token(req), "error_code": "404"})
         return JsonResponse({
             'html': html_content,
-        })
+        }, status=404)
     
     #test if I have a friend
     #If I have it i dont display the friend request button

@@ -13,8 +13,6 @@ const notifSocket = WebSocketManager.notifSocket;
 const searchParams = new URLSearchParams(window.location.search);
 const pathname = window.location.pathname;
 
-logger.log("ca search le param: ", pathname)
-
 if (!searchParams.has('username') && pathname == '/') {
     const friends_group = document.querySelector('.friends_group');
     const pending_group = document.querySelector('.pending_group');
@@ -162,7 +160,6 @@ if (!searchParams.has('username') && pathname == '/') {
 
 notifSocket.onmessage = (event) => {
     const message = JSON.parse(event.data);
-    console.log(message);
 
     if (message.data.action == "SESSION_EXPIRED") {
         remove_toast();
