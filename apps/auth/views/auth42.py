@@ -2,6 +2,7 @@ import os
 import random
 import string
 
+from django.forms import ValidationError
 import requests
 
 from apps.auth.api.views import formulate_json_response
@@ -17,9 +18,10 @@ from asgiref.sync import async_to_sync
 
 
 def generate_password():
-    length = random.randint(8, 32)
+    length = random.randint(16, 32)
     characters = string.ascii_letters + string.digits + string.punctuation.replace('$', '')
     password = ''.join(random.choice(characters) for _ in range(length))
+    password += '42ab)'
     return password
 
 
@@ -123,7 +125,7 @@ def auth42(request):
                     raise Exception("Couldn't create the client")
 
             except :
-                raise Exception("Couldn't create the client")
+                raise Exception(f"Couldn't create the client")
 
         response = formulate_json_response(True, 302, "Login Successful", "/")
 
