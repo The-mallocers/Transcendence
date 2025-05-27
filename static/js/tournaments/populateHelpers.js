@@ -98,7 +98,7 @@ const buildRound = (roundInfos, name) => {
 
 const buildControlsCard = (tournamentInfos) => {
     return `
-    <div class="controls-card mt-3">
+    <div id="controls-card-fixed" class="controls-card mt-3">
         <div class="card-header d-flex justify-content-between align-items-center">
             <h3 class="mb-0">Tournament Controls</h3>
         </div>

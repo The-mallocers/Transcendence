@@ -104,6 +104,15 @@
         border-bottom: 2px solid #dee2e6;
     }
 
+    #controls-card-fixed {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        background: white; /* Or your card background color */
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04); /* Optional, for visual separation */
+        border-radius: 0 0 8px 8px; /* Optional, if you want rounded edges only at bottom */
+    }
+
     @media (max-width: 768px) {
         .treePage {
             padding: 10px;
