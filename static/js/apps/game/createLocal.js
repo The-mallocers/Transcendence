@@ -100,9 +100,14 @@ btn?.addEventListener('click', () => {
     window.GameState.left.username = player_left_name?.value;
     if (!window.GameState.left.username) {
         window.GameState.left.username = "Player 1";
+    } else if (window.GameState.left.username.length > 12) {
+        window.GameState.left.username = window.GameState.left.username.substring(0, 12);
     }
+    
     window.GameState.right.username = player_right_name?.value;
     if (!window.GameState.right.username) {
         window.GameState.right.username = "Player 2";
+    } else if (window.GameState.right.username.length > 20) {
+        window.GameState.right.username = window.GameState.right.username.substring(0, 20);
     }
 })
