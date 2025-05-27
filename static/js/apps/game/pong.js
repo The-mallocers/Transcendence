@@ -134,6 +134,7 @@ if (!socket || socket.readyState === WebSocket.CLOSED) {
                 window.local = {
                     left_name: lusername.innerText,
                     right_name: rusername.innerText,
+
                     left_score: lscore.innerText,
                     right_score: rscore.innerText,
                 }

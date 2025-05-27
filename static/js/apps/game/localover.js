@@ -3,6 +3,14 @@ const right_score = document.getElementById('enemyScore');
 const vs = document.querySelector('.vs')
 
 
+if (!window.local){
+    window.local= {
+        left_score : '0',
+        right_score : '0',
+        left_name : 'TBD',
+        right_name : 'TBD' 
+    }
+}
 
 if (left_score && right_score) {
     left_score.innerText = window.local.left_score
@@ -10,15 +18,12 @@ if (left_score && right_score) {
 }
 
 if (vs) {
-    
     if(window.local.left_name == '') {
         window.local.left_name = 'Guest'
     }
     if(window.local.right_name == '') {
         window.local.right_name = 'Guest'
     }
-
-
     vs.innerText = `${window.local.left_name} vs ${window.local.right_name}`
 }
 
