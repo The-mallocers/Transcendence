@@ -98,6 +98,7 @@ validate_admin_password() {
 
 generate_env_file() {
   local admin_pwd db_pwd grafana_pwd
+  pip install django > /dev/null 2>&1
   if [ -f .env ]; then
 
     local current_hostname
