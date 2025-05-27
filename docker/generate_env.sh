@@ -80,6 +80,22 @@ warn_if_default_passwords() {
   return 0
 }
 
+validate_admin_password() {
+  local pwd="$1"
+  if [[ ${#pwd} -lt 8 ]]; then
+    echo -e "${RED}Error: ADMIN_PWD must be at least 8 characters long.${NC}"
+    exit 1
+  fi
+  if ! [[ "$pwd" =~ [^a-zA-Z0-9] ]]; then
+    echo -e "${RED}Error: ADMIN_PWD must contain at least one special character.${NC}"
+    exit 1
+  fi
+  if ! [[ "$pwd" =~ [0-9] ]]; then
+    echo -e "${RED}Error: ADMIN_PWD must contain at least one digit.${NC}"
+    exit 1
+  fi
+}
+
 generate_env_file() {
   local admin_pwd db_pwd grafana_pwd
   if [ -f .env ]; then
@@ -96,6 +112,8 @@ generate_env_file() {
       SED_INPLACE "s/^DJANGO_HOSTNAME=.*/DJANGO_HOSTNAME=$new_hostname/" .env
       echo -e "${GREEN}DJANGO_HOSTNAME has been updated in the environment file.${NC}"
     fi
+    admin_pwd=$(grep "^ADMIN_PWD=" .env | head -n1 | cut -d= -f2- | tr -d "'\"" || true)
+    validate_admin_password "$admin_pwd"
     warn_if_default_passwords
   else
     admin_pwd=$(prompt_password "ADMIN_PWD" "Set ADMIN_PWD" "123456789!")
