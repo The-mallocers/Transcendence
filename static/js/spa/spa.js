@@ -19,6 +19,18 @@ class Router {
     }
 
     async handleLocation() {
+
+        if (document.body.classList.contains('modal-open')) {
+            document.body.removeAttribute('style');
+            let modal = document.querySelector('.modal-dialog');
+            let backdrop = document.querySelector('.modal-backdrop');
+            
+            if (modal)
+                modal.parentNode.removeChild(modal);
+            if (backdrop)
+                backdrop.parentNode.removeChild(backdrop)
+            document.body.classList.remove('modal-open')
+        }
         for (let id of window.intervalsManager) {
             clearInterval(id);
         }
