@@ -5,6 +5,9 @@
     <h3>{{ client.profile.username }}</h3>
     <div class="avatar">
         <img src="{{ client.profile.profile_picture.url }}">
+        {% if is_client_profile %}
+        <img class="star" src="/static/img/star.png" alt="" style="width: 5rem; height: 5rem;">
+        {% endif %}
     </div>
     <div class="container infos">
         <div class="row">

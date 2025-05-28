@@ -35,15 +35,13 @@ class PongLogic:
         # ── Objects ───────────────────────────────────────────────────────────────────
         self.ball: Ball = Ball(game_id=self.game_id, redis=redis)
         self.paddle_pL: Paddle = Paddle(side=PlayerSide.LEFT ,game_id=self.game_id, redis=redis, client_id=self.game.pL.client.id, x=OFFSET_PADDLE)
-        self.paddle_pR: Paddle = Paddle(side=PlayerSide.RIGHT, game_id=self.game_id, redis=redis, client_id=self.game.pR.client.id, x=CANVAS_WIDTH - OFFSET_PADDLE -
-                                                                                                               PADDLE_WIDTH)
+        self.paddle_pR: Paddle = Paddle(side=PlayerSide.RIGHT, game_id=self.game_id, redis=redis, client_id=self.game.pR.client.id, x=CANVAS_WIDTH - OFFSET_PADDLE -PADDLE_WIDTH)
         self.score_pL: Score = Score(side=PlayerSide.LEFT ,game_id=self.game_id, redis=redis, client_id=self.game.pL.client.id)
         self.score_pR: Score = Score(side=PlayerSide.RIGHT ,game_id=self.game_id, redis=redis, client_id=self.game.pR.client.id)
         self.points_to_win = self.game.points_to_win
 
     def game_task(self):
         try:
-            # Regular game update logic
             previous_state = GameState.create_copy(self)
             self._game_loop()
             current_state = GameState.create_copy(self)
