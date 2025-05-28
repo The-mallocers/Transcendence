@@ -160,8 +160,8 @@ export function populateTournament(tournament_data){
     const btnsRoom = document.querySelector("#btnsRoom")
     const h1 = document.querySelector("h1")
     if (h1) {
-        const parser = new DOMParser();
-        const html = parser.parseFromString(tournament_data.title, "text/html");
+        // const parser = new DOMParser();
+        // const html = parser.parseFromString(tournament_data.title, "text/html");
         h1.innerHTML = tournament_data.title;
     }
 
