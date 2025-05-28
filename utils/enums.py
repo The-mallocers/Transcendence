@@ -192,6 +192,7 @@ class ResponseError(str, Enum):
     NOT_IN_QUEUE: str = 'You are not currently in the queue.'
     MATCHMAKING_ERROR: str = 'Leaving matchmaking due to an error.'
     ALREADY_CONNECTED: str = 'You are already connected.'
+    INIT_PLAYER_ERROR: str = 'Error initializing players'
 
     # ── Duels ─────────────────────────────────────────────────────────────────────── #
     DUEL_HIMSELF: str = 'You cannot duel yourself.'

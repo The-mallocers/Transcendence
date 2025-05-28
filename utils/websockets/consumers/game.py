@@ -63,7 +63,6 @@ class GameConsumer(WsConsumer):
                 except Exception as e:
                     self._logger.warning(f"Error checking game {game_key}: {e}")
                     continue
-                    
             return False
             
         except Exception as e:

@@ -80,7 +80,7 @@ btn?.addEventListener('click', () => {
     gameSocket.onopen = () => {
         gameSocket.onmessage = (e) => {
             const message = JSON.parse(e.data);
-            console.log(message.data.action);
+
             if (message.data.action == "GAME_CREATED") {
                 localState.gameIsLocal = true;
                 const startGameMessage = {

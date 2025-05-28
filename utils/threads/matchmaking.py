@@ -41,8 +41,15 @@ class MatchmakingThread(Threads):
                 if self.select_players(game) or game.local:
                     game.create_redis_game()
                     game.rset_status(GameStatus.MATCHMAKING)
+                    
+                    if not game.init_players():
+                        self._logger.error("Salut la team on est la")
+                        GameThread(game=game).cleanup()
+                        if game.local:
+                            self.redis.hdel(RTables.HASH_LOCAL_QUEUE, str(game.pL.client.id))
+                        game = None
+                        continue
 
-                    game.init_players()
                     game.rset_status(GameStatus.STARTING)
                     GameThread(game=game).start()
                     game = None

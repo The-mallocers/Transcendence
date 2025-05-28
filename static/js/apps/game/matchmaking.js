@@ -1,5 +1,6 @@
 import {navigateTo} from "../../spa/spa.js";
 import {WebSocketManager} from "../../websockets/websockets.js"
+import { remove_toast, toast_message } from "../profile/toast.js";
 
 //Fetch pour dire au serveur qu'on veut join la queue
 const element = document.querySelector("#clientID");
@@ -113,6 +114,12 @@ socket.onmessage = (e) => {
     if (jsonData.data.action == "STARTING") {
         navigateTo("/pong/arena/")
         socket.send(JSON.stringify(startGameMessage))
+    }
+    else if (jsonData.data.action == "ALREAY_IN_GAME") {
+        WebSocketManager.closeGameSocket();
+        remove_toast();
+        toast_message("You are already in a game");
+        navigateTo("/pong/gamemodes/");
     }
     ////// navigate to arena and then startGame would be better
     // if ()

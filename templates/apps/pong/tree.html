@@ -1,17 +1,43 @@
 {% load static %}
 
 <style>
-
     .treePage {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
 
+    .treePage .controls-card {
+        width: 100%;
+        max-width: 800px;
+        background-color: white;
+        border: rgb(228, 228, 228) 1px solid;
+        border-radius: 20px;
+        padding: 0;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+    }
+
+    .treePage .controls-card .card-header {
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #dee2e6;
+        border-radius: 20px 20px 0 0;
+        padding: 15px 25px;
+    }
+
+    .treePage .controls-card .card-body {
+        padding: 20px 25px;
     }
 
     .treePage .round {
-        width: 50%;
+        width: 100%;
+        max-width: 800px;
         background-color: white;
         border: rgb(228, 228, 228) 1px solid;
         border-radius: 20px;
         padding: 20px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
     }
 
     .treePage .players {
@@ -26,60 +52,90 @@
         align-items: center;
         justify-content: center;
         flex-direction: column;
+        gap: 8px;
     }
 
     .treePage .players img {
         height: 40px;
         width: 40px;
         border-radius: 50%;
+        object-fit: cover;
     }
 
-    .treePage .players td {
-        display: flex;
+    .treePage .players .vs {
+        font-weight: bold;
+        color: #6c757d;
+        font-size: 1.1rem;
     }
 
     .treePage th {
         vertical-align: middle;
         text-align: center;
+        background-color: #f8f9fa;
+        border-top: none;
     }
 
     .treePage td {
         vertical-align: middle;
         text-align: center;
         padding: 25px;
+        border-top: 1px solid #dee2e6;
     }
 
     .treePage .winner {
-        color: green;
+        color: #28a745;
+        font-weight: bold;
     }
 
     .treePage .loser {
-        color: red;
+        color: #dc3545;
     }
 
-
-    .treePage  .btn-intra-outlined {
-        border-color: #00BABB;
-        color: #00BABB;
+    .treePage .badge {
+        font-size: 0.9rem;
+        padding: 6px 12px;
     }
 
-    .treePage  .btn-intra-outlined {
-        border-color: #00BABB;
-        color: #00BABB;
+    .treePage .table {
+        margin-bottom: 0;
     }
 
+    .treePage .table thead th {
+        border-bottom: 2px solid #dee2e6;
+    }
+
+    #controls-card-fixed {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        background: white; /* Or your card background color */
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04); /* Optional, for visual separation */
+        border-radius: 0 0 8px 8px; /* Optional, if you want rounded edges only at bottom */
+    }
+
+    @media (max-width: 768px) {
+        .treePage {
+            padding: 10px;
+        }
+
+        .treePage .players {
+            padding: 15px 20px;
+        }
+
+        .treePage .controls-card .card-body .btns {
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .treePage .controls-card .card-body .btns .btn {
+            width: 100%;
+        }
+    }
 </style>
 
-<!-- <div id="btnsRoom" class="btns d-flex flex-row justify-content-between gap-3 align-items-center mt-3">
-    <div id="leave-btn" class="btn btn-intra-outlined">Leave</div>
-</div> -->
-
 <div id="tree" class="treePage d-flex flex-column justify-content-center align-items-center">
-    <div>BONJOUUUUUUUUUUR</div>
-    
-
+    <!-- Controls and rounds will be populated by JavaScript -->
 </div>
-
 
 <script type="module" src="{% static '/js/tournaments/treeTournament.js' %}"></script>
 <script type="module" src="{% static '/js/tournaments/tournamentRoom.js' %}"></script>

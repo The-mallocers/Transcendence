@@ -16,12 +16,15 @@
 }
 
 .matchmakingContainer .btn {
-    background-color: #FFA042;
+    background-color: #00babc;
     color: white;
     width: 10rem;
+    border-radius: 0;
     transition: background-color .2s;
 }
 
 .matchmakingContainer .btn:hover {
-    background-color: #eb9034;
+    border-radius: 0;
+    background-color: #008889;
+    border-color: #007d7f;
 }

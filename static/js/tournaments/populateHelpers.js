@@ -1,10 +1,27 @@
 import { tournamentData } from "../apps/game/VarGame.js"
 import { navigateTo } from "../spa/spa.js"  
-
-
-
 import { WebSocketManager } from "../websockets/websockets.js"
 
+// Text formatting functions
+const formatRoundName = (roundName) => {
+    // Convert "round_1" to "Round 1", "semi_final" to "Semi Final", etc.
+    return roundName
+        .replace(/_/g, ' ')
+        .replace(/\b\w/g, l => l.toUpperCase());
+}
+
+const formatStatus = (status) => {
+    // Convert "waiting_to_start" to "Waiting to Start", "creating" to "Creating", etc.
+    const statusMap = {
+        'creating': 'Creating',
+        'waiting_to_start': 'Waiting to Start',
+        'in_progress': 'In Progress',
+        'finished': 'Finished',
+        'ending': 'Ending'
+    };
+
+    return statusMap[status] || status.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+}
 
 //Build TREE
 const buildTr = (matchInfos) => {
@@ -52,16 +69,15 @@ const buildTr = (matchInfos) => {
                         ${right}
                     </div>
                 </td>
-                <td><span class="badge bg-success">${matchInfos.status}</span></td>
+                <td><span class="badge bg-success">${formatStatus(matchInfos.status)}</span></td>
                 <td><span class="left-score winner">${matchInfos.winner_score}</span> - <span class="right-score loser">${matchInfos.loser_score}</span></td>
             </tr>`
 }
 
-const buildRound = (roundInfos, name)=> {
-
+const buildRound = (roundInfos, name) => {
     return `
-    <div class="round mt-5">
-        <h2>${name}</h2>
+    <div class="round mt-3">
+        <h2>${formatRoundName(name)}</h2>
         <table class="table mt-2">
             <thead>
             <tr>
@@ -71,12 +87,27 @@ const buildRound = (roundInfos, name)=> {
             </tr>
             </thead>
             <tbody>
-
     ${Object.entries(roundInfos.games)
         .map(([key, round]) => buildTr(round, key))
         .join("")}
             </tbody>
         </table>
+    </div>
+    `
+}
+
+const buildControlsCard = (tournamentInfos) => {
+    return `
+    <div id="controls-card-fixed" class="controls-card mt-3">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h3 class="mb-0">Tournament Controls</h3>
+        </div>
+        <div class="card-body">
+            <div class="btns d-flex flex-row justify-content-between gap-3 align-items-center">
+                <div id="leave-btn-tree" class="btn type-intra-white">Leave Tournament</div>
+                ${tournamentData.gameIsReady ? '<div id="ready-btn" class="btn type-intra-green">Ready</div>' : ''}
+            </div>
+        </div>
     </div>
     `
 }
@@ -90,52 +121,38 @@ const leave_tournament = {
 
 function leaveTournament() {
     WebSocketManager.tournamentSocket.send(JSON.stringify(leave_tournament))
-    // WebSocketManager.closeTournamentSocket();
     navigateTo("/pong/gamemodes/");
 }
 
-
-
 export function populateTree(tournamentInfos) {
-        let treeParent = null
-        // const btnsRoom = document.querySelector("#btnsRoom")
+    const treeParent = document.querySelector("#tree")
+    if (treeParent == null) return;
 
-        // if (btnsRoom) {
-        //     btnsRoom.innerHTML = `
-        //                 <div id="leave-btn" class="btn btn-intra-outlined">Leave</div>
-        //     `
-        // }
-        treeParent = document.querySelector("#tree")
-        if (treeParent == null) return ;
-        treeParent.innerHTML = '';
-        for (const key in tournamentInfos?.scoreboard.rounds) {
-            treeParent.innerHTML += buildRound(tournamentInfos?.scoreboard.rounds[key], key)
-        }
-        
-        treeParent.innerHTML += `<div class="btns d-flex flex-row justify-content-between gap-3 align-items-center mt-3"></div>`
+    treeParent.innerHTML = '';
 
+    // Add controls card at the top
+    treeParent.innerHTML += buildControlsCard(tournamentInfos);
 
-        let leaveBtn = document.createElement("div")
-        leaveBtn.innerText = "leave"
-        leaveBtn.classList.add('btn','btn-intra-outlined')
+    // Add rounds
+    for (const key in tournamentInfos?.scoreboard.rounds) {
+        treeParent.innerHTML += buildRound(tournamentInfos?.scoreboard.rounds[key], key)
+    }
+
+    // Attach event listeners
+    const leaveBtn = document.querySelector("#leave-btn-tree");
+    if (leaveBtn) {
         leaveBtn.onclick = function() {
             leaveTournament();
         }
+    }
 
-        let btns = document.querySelector(".btns")
-        btns.appendChild(leaveBtn)
-        if (tournamentData.gameIsReady) {
-            // const parrent = document.querySelector('#tree')
-            // if (parrent){
-                let btn = document.createElement('div')
-                btn.classList.add('btn', 'intra-btn');
-                btn.innerText = 'Ready';
-                btn?.addEventListener('click', ()=>{navigateTo(`/pong/matchmaking/`);})
-                btns.appendChild(btn)
-            // }
-        }
+    const readyBtn = document.querySelector("#ready-btn");
+    if (readyBtn) {
+        readyBtn.addEventListener('click', () => {
+            navigateTo(`/pong/matchmaking/`);
+        });
+    }
 }
-
 
 //TOURNAMENT ROOM
 export function populateTournament(tournament_data){
@@ -147,14 +164,13 @@ export function populateTournament(tournament_data){
         const html = parser.parseFromString(tournament_data.title, "text/html");
         h1.innerHTML = tournament_data.title;
     }
-    
+
     if (btnsRoom) {
         btnsRoom.innerHTML = `
                     <div class="btn btn-intra type-intra-green" onclick="invite_friends()">Invite</div>
-                    <div id="leave-btn" class="btn btn-intra-outlined">Leave</div>
+                    <div id="leave-btn" class="btn type-intra-white">Leave</div>
         `
     }
-
 
     const leave_btn = document.querySelector("#leave-btn");
     if (leave_btn == null) return ;
@@ -178,8 +194,8 @@ export function populateTournament(tournament_data){
             </div>
             `)
         }
-        
-        
+
+
         tournament_data?.players_infos?.forEach((player , i)=> {
             clientsDiv[i] = `
             <div class="position-relative col p-2">
@@ -205,13 +221,12 @@ export function populateTournament(tournament_data){
             });
     clientsDiv.forEach(htmlString => {
         const temp = document.createElement("div");
-        temp.innerHTML = htmlString; 
+        temp.innerHTML = htmlString;
 
         while (temp.firstChild) {
             clientsInTournament.appendChild(temp.firstChild);
         }
     });
-
 }
 
 ///JOIN TOURNAMENT
@@ -220,13 +235,12 @@ export function populateJoinTournament(tournamentList){
     let clientsDiv = []
     if (tournaments == null) return ;
     tournaments.innerHTML = ``
-    //                                // ${(i == 2) ? `<div class="more">+${room.players_infos.length - (i + 1)}</div>`: ''}
+
     tournamentList.forEach((room)=>{
         clientsDiv.push(`
         <div class="col room d-flex justify-content-center align-items-center" data-code="${room.code}" >
             <div class="cardContainer">
                 <h4>${room.title}</h4>
-
 
                 <div class="d-flex flex-row align-items-center justify-content-between">
                     <div class="btn joinTournamentBtn">join</div>
@@ -239,7 +253,6 @@ export function populateJoinTournament(tournamentList){
                             `
                         }
                         ).join('')}
-
 
                     </div>
                 </div>
