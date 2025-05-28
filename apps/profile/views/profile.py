@@ -34,6 +34,8 @@ def get(req):
         show_friend_request = True
     if requestUsername == me.profile.username:
         show_friend_request = False
+    elif me in target.friend.pending_friends.all():
+        show_friend_request = False
     # End of specific profile content
 
     client = target  # The client is not us its the target we are looking at !
@@ -53,6 +55,7 @@ def get(req):
     pending_tournament_invitations = get_pending_tournament_invitations(client)
     
     context = {
+        "is_client_profile": False,
         "client": client,
         "clients": Clients.objects.all(),
         "gamesHistory": ghistory,
