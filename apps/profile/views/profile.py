@@ -34,6 +34,12 @@ def get(req):
         show_friend_request = True
     if requestUsername == me.profile.username:
         show_friend_request = False
+    elif me in target.friend.pending_friends.all():
+        print("somehow we are here")
+        show_friend_request = False
+    print(vars(target.friend.pending_friends))
+    # elif client.id in target.friend.pending_friends:
+
     # End of specific profile content
 
     client = target  # The client is not us its the target we are looking at !
@@ -53,6 +59,7 @@ def get(req):
     pending_tournament_invitations = get_pending_tournament_invitations(client)
     
     context = {
+        "is_client_profile": False,
         "client": client,
         "clients": Clients.objects.all(),
         "gamesHistory": ghistory,

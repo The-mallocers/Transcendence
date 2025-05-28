@@ -27,6 +27,9 @@
             <div class="col-md-4 currentActivity box">
                 <div class="p-3 text-center minibox">
                     <h2 id="online-status">{{ online_status }}</h2>
+                    {% if show_friend_request %}
+                    <button type="button" class="type-intra-green friendrequest" onclick="handleAskFriend(new URLSearchParams(window.location.search).get('username'))">Friend Request</button>
+                    {%endif%}
                 </div>
             </div>
             <div class="col-md-4 mmr box">
@@ -90,6 +93,7 @@
         </div>
     </div>
     <div class="row mt-0 g-4 align-items-start justify-content-start flex-wrap">
+        {% if is_client_profile %}
         <div class="col-12 col-lg-6">
             <div class="box">
                 <h4>Friends List</h4>
@@ -101,6 +105,8 @@
                 </ul>
             </div>
         </div>
+        {% endif %}
+        {% if is_client_profile %}
         <div class="col-12 col-lg-6">
             <div class="box">
                 <h4>Friends Pending</h4>
@@ -111,6 +117,7 @@
                 </div>
             </div>
         </div>
+        {% endif %}
     </div>
 </div>
 {{ friends_online_status|json_script:"friends-data" }}
