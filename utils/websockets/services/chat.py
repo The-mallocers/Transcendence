@@ -122,7 +122,8 @@ class ChatService(BaseServices):
             await asend_group(RTables.GROUP_CHAT(room_group), EventType.CHAT, ResponseAction.MESSAGE_RECEIVED, {
                 'message': message,
                 'sender': str(client.id),
-                'room_id': str(room_group)
+                'room_id': str(room_group),
+                'unread_messages': await Rooms.aget_unread_messages_count(room_id, client.id)
             })
 
             username = await client.aget_profile_username() if target else "Unknown User"
