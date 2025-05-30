@@ -6,6 +6,7 @@ import { toast_message } from "../profile/toast.js";
 import { remove_toast } from "../profile/toast.js";
 import { getClientId } from "../../utils/utils.js";
 import { create_front_chat_room } from "../../utils/utils.js";
+import { updateUnreadMessageBadge } from "../../utils/utils.js";
 
 let client_id = null;
 let room_id = null;
@@ -56,17 +57,19 @@ chatSocket.onmessage = (event) => {
         displayRooms(message.data.content.rooms);
     }
     else if(message.data.action == "MESSAGE_RECEIVED") {
+        // if (message.data.content.unread_messages > 0) {
+        //     updateUnreadMessageBadge(message.data.content.room_id ,message.data.content.unread_messages);
+        // }
         if (message.data.content.room_id === room_id) {
             let chatHistory = document.querySelector('.chatHistory');
             
             const parser = new DOMParser();
             const htmlString = `<div class="msg ${clientId == message.data.content.sender ? "me align-self-end" : "you align-self-start"}">${message.data.content.message}</div>`;
             const doc = parser.parseFromString(htmlString, "text/html");
-            const msgElement = doc.body.firstChild; // Get the actual <div> element
+            const msgElement = doc.body.firstChild;
             
             chatHistory?.appendChild(msgElement);
             scrollToBottom(chatHistory);
-            //Do things to show the new message on the front
         }
     }
     else if(message.data.action == "ERROR_MESSAGE_USER_BLOCK"){
@@ -89,7 +92,7 @@ chatSocket.onmessage = (event) => {
         navigateTo('');
     }
 }
-                        
+
 const messageInput = document.getElementById("messageInput")
 if(messageInput){
     chatSocket?.addEventListener("open", (event) => {
@@ -172,6 +175,12 @@ window.clickRoom = function (room) {
     if (chatSocket.readyState === WebSocket.OPEN) {
         chatSocket.send(JSON.stringify(message));
     }
+    // const badge = document.getElementById(`${room_id}`);
+    // if (badge) {
+    //     const badgeContainer = badge.querySelector('.position-relative');
+    //     const existingBadge = badgeContainer?.querySelector('.badge');
+    //     existingBadge?.remove();
+    // }
 }
 window.handleChatProfile = function (username) {
     navigateTo(`/profile/?username=${username}`)

@@ -36,7 +36,7 @@ export function create_front_chat_room(room, username, usernameId, status, profi
         const parser = new DOMParser();
         const htmlChat = 
         `<div class="roomroom container d-flex flex-wrap align-items-center justify-content-between">
-            <div class="chat-${username} chat-button btn d-flex align-items-center gap-3">
+            <div id=${room} class="chat-${username} chat-button btn d-flex align-items-center gap-3">
                 <div class="position-relative">
                     <img src="${imgSrc}" alt="${username}'s profile picture">
                     ${unread_messages > 0 ? `<span class="badge bg-danger position-absolute top-0 start-0 translate-middle rounded-pill">${unread_messages}</span>` : ''}
@@ -100,6 +100,28 @@ export function create_front_chat_room(room, username, usernameId, status, profi
             event.stopPropagation();
         });
         newChat.appendChild(chatElement);
+    }
+}
+
+export function updateUnreadMessageBadge(room, unreadCount) {
+    console.log("username:", room, "unreadCount:", unreadCount);
+    const chatRoom = document.getElementById(`${room}`);
+    if (chatRoom) {
+        const badgeContainer = chatRoom.querySelector('.position-relative');
+        const existingBadge = badgeContainer?.querySelector('.badge');
+        
+        if (unreadCount > 0) {
+            if (existingBadge) {
+                existingBadge.textContent = unreadCount;
+            } else {
+                const badge = document.createElement('span');
+                badge.className = 'badge bg-danger position-absolute top-0 start-0 translate-middle rounded-pill';
+                badge.textContent = unreadCount;
+                badgeContainer?.appendChild(badge);
+            }
+        } else {
+            existingBadge?.remove();
+        }
     }
 }
 
