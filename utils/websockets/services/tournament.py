@@ -1,3 +1,4 @@
+import html
 import re
 import traceback
 
@@ -39,6 +40,7 @@ class TournamentService(BaseServices):
         else:
             try:
                 data['data']['args']['host'] = str(client.id)
+                data['data']['args']['title'] = html.escape(data['data']['args']['title'])
                 tournament = await Tournaments.create_tournament(data['data']['args'], self.redis, runtime=True)
                 json = await self.redis.json().get(RTables.JSON_TOURNAMENT(tournament.code))
                 tournament_queue.put(tournament)

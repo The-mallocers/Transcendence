@@ -28,8 +28,8 @@ def get(req):
     
     if client is not None:
         winrate = get_winrate(client, games_played)
-    (winrate)
     context = {
+        "is_client_profile": True,
         "client": client,
         "clients": Clients.objects.all(),
         "gamesHistory": ghistory,

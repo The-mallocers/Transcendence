@@ -95,7 +95,7 @@ if (!searchParams.has('username') && pathname == '/') {
         const pending_group = document.querySelector('.pending_group');
         const parser = new DOMParser();
         const html_string =
-            `<li class="list-group-item pending_item d-flex justify-content-between align-items-center">
+            `<li class="list-group-item pending_item d-flex justify-content-between align-items-center" data-duel-username="${duel.username}">
                     ${duel.username} wants to duel
                     <div class="btn-group d-grid gap-2 d-md-flex justify-content-md-end"  role="group" aria-label="Basic example">
                         <button type="button" class="type-intra-green accept_duel">accept</button>
@@ -195,6 +195,7 @@ notifSocket.onmessage = (event) => {
         if (pending_group) {
             pending_group.appendChild(pendingElement);
         }
+        
         remove_toast();
         toast_friend(`New friend request from ${message.data.content.username}`, message.data, pendingElement);
     }
@@ -245,6 +246,7 @@ notifSocket.onmessage = (event) => {
                 hide_modal(message.data.content.sender)
             });
             friend_duel.appendChild(friendElement);
+
         }
     }
     else if(message.data.action == "ACK_DELETE_FRIEND") {
@@ -271,7 +273,7 @@ notifSocket.onmessage = (event) => {
         let pending_group = document.querySelector('.pending_group');
         const parser = new DOMParser();
         const htmlString =
-            `<li class="list-group-item pending_item d-flex justify-content-between align-items-center">
+            `<li class="list-group-item pending_item d-flex justify-content-between align-items-center" data-duel-username="${message.data.content.username}">
         ${message.data.content.username} wants to duel
         <div class="btn-group d-grid gap-2 d-md-flex justify-content-md-end"  role="group" aria-label="Basic example">
         <button type="button" class="type-intra-green accept_duel">accept</button>
@@ -292,6 +294,9 @@ notifSocket.onmessage = (event) => {
             handleRefuseDuel(message.data.content.code, message.data.content.username);
         });
         if (pending_group) {
+            //remove previous element if there is already a duel on the duel page
+            const previousDuel = pending_group.querySelector(`[data-duel-username="${message.data.content.username}"]`)
+            previousDuel?.remove();
             pending_group.appendChild(pendingElement);
         }
         remove_toast();
