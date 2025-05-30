@@ -69,17 +69,28 @@ This project implements the following modules as part of the 42 curriculum requi
 
 ## 🚀 Installation
 
-1. Clone the repository:
+0. Dependencies :
+   - Make (You most likely have it by default)
+   - Docker
+   
+2. Clone the repository:
    ```bash
    git clone <repository-url>
    cd Transcendence
    ```
+3. Start the application:
+   ```bash
+   make up
+   ```
+   Notes: We will install Django as part of the build process, but its just to generate the env.
+   This will build and start all containers. The application will be available at http://localhost:8000.
 
+##### Make up will execute the following commands if it's the first time you run it:
 2. Create the necessary secret files:
    ```bash
    make secrets
    ```
-   You will be prompted to enter your 42 API client ID and secret.
+   You will be prompted to enter your 42 API client ID and secret, if you arent a 42 student, feel free to skip this.
 
 3. Generate the environment file:
    ```bash
@@ -93,11 +104,6 @@ This project implements the following modules as part of the 42 curriculum requi
    ```
    This allows you to set custom passwords for the admin user, database, and Grafana.
 
-5. Start the application:
-   ```bash
-   make up
-   ```
-   This will build and start all containers. The application will be available at http://localhost:8000.
 
 ## 🎮 Usage
 
