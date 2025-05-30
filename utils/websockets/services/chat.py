@@ -119,19 +119,18 @@ class ChatService(BaseServices):
             await Messages.objects.acreate(sender=client, content=message, room=room)
             # Send the message to the group 
             room_group = str(await Rooms.get_id(room))
-            await asend_group(RTables.GROUP_CHAT(room_group), EventType.CHAT, ResponseAction.MESSAGE_RECEIVED, {
+            await asend_group(RTables.GROUP_CHAT(client.id), EventType.CHAT, ResponseAction.MESSAGE_RECEIVED, {
+                'message': message,
+                'sender': str(client.id),
+                'room_id': str(room_group)
+            })
+
+            await asend_group(RTables.GROUP_CHAT(target.id), EventType.CHAT, ResponseAction.MESSAGE_RECEIVED, {
                 'message': message,
                 'sender': str(client.id),
                 'room_id': str(room_group),
-                'unread_messages': await Rooms.aget_unread_messages_count(room.id, target.id)
+                'unread_messages': await Rooms.aget_unread_messages_count(room_id, target.id)
             })
-
-            # await asend_group(RTables.GROUP_CHAT(target.id), EventType.CHAT, ResponseAction.MESSAGE_RECEIVED, {
-            #     'message': message,
-            #     'sender': str(client.id),
-            #     'room_id': str(room_group),
-            #     'unread_messages': await Rooms.aget_unread_messages_count(room_id, target.id)
-            # })
 
             username = await client.aget_profile_username() if target else "Unknown User"
             await asend_group(RTables.GROUP_NOTIF(str(target.id)), EventType.NOTIFICATION, ResponseAction.NEW_MESSAGE, {

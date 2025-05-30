@@ -57,9 +57,9 @@ chatSocket.onmessage = (event) => {
         displayRooms(message.data.content.rooms);
     }
     else if(message.data.action == "MESSAGE_RECEIVED") {
-        // if (message.data.content.unread_messages > 0) {
-        //     updateUnreadMessageBadge(message.data.content.room_id ,message.data.content.unread_messages);
-        // }
+        if (message.data.content.unread_messages > 0) {
+            updateUnreadMessageBadge(message.data.content.room_id ,message.data.content.unread_messages);
+        }
         if (message.data.content.room_id === room_id) {
             let chatHistory = document.querySelector('.chatHistory');
             
@@ -175,12 +175,12 @@ window.clickRoom = function (room) {
     if (chatSocket.readyState === WebSocket.OPEN) {
         chatSocket.send(JSON.stringify(message));
     }
-    // const badge = document.getElementById(`${room_id}`);
-    // if (badge) {
-    //     const badgeContainer = badge.querySelector('.position-relative');
-    //     const existingBadge = badgeContainer?.querySelector('.badge');
-    //     existingBadge?.remove();
-    // }
+    const badge = document.getElementById(`${room_id}`);
+    if (badge) {
+        const badgeContainer = badge.querySelector('.position-relative');
+        const existingBadge = badgeContainer?.querySelector('.badge');
+        existingBadge?.remove();
+    }
 }
 window.handleChatProfile = function (username) {
     navigateTo(`/profile/?username=${username}`)
