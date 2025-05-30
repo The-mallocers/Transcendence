@@ -65,7 +65,6 @@ This project implements the following modules as part of the 42 curriculum requi
 - Docker and Docker Compose
 - Make
 - Python 3.x (for local development)
-- 42 API credentials (client ID and secret)
 
 ## 🚀 Installation
 
@@ -74,30 +73,32 @@ This project implements the following modules as part of the 42 curriculum requi
    git clone <repository-url>
    cd Transcendence
    ```
+2. Start the application:
+   ```bash
+   make up
+   ```
+   This will build and start all containers. The application will be available at http://localhost:8000.
+   Notes: We will install Django as part of the build process, but its just to generate the env.
 
-2. Create the necessary secret files:
+##### Make up will execute the following commands if it's the first time you run it:
+1. Create the necessary secret files:
    ```bash
    make secrets
    ```
-   You will be prompted to enter your 42 API client ID and secret.
+   You will be prompted to enter your 42 API client ID and secret, if you arent a 42 student, feel free to skip this.
 
-3. Generate the environment file:
+2. Generate the environment file:
    ```bash
    make env
    ```
    This will create a `.env` file with all necessary configuration.
 
-4. (Optional) Update passwords:
+3. (Optional) Update passwords:
    ```bash
    make passwords
    ```
    This allows you to set custom passwords for the admin user, database, and Grafana.
 
-5. Start the application:
-   ```bash
-   make up
-   ```
-   This will build and start all containers. The application will be available at http://localhost:8000.
 
 ## 🎮 Usage
 
