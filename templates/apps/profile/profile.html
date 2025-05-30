@@ -109,6 +109,30 @@
             </div>
         </div>
         {% endif %}
+
+        <div class="col-12 col-lg-6">
+            <div class="box">
+                <h4>Tournaments</h4>
+                {% for tournament in tournaments %}
+                    <div class="tournament">
+                        {% for game in tournament.scoreboards.scoreboards %}
+                            <div>{{game}}</div>
+                            <div>{{ game.points }}</div>
+                        {%endfor%}
+                    </div>
+                {%endfor%}
+                <!-- <ul class="friends_group list-group"> -->
+                    <!-- {% if show_friend_request %}
+                        <button type="button" class="type-intra-green friendrequest" onclick="handleAskFriend(new URLSearchParams(window.location.search).get('username'))">Friend Request</button>
+                    {%endif%}
+                    {% comment %} get all the friends from js {% endcomment %} -->
+                <!-- </ul> -->
+            </div>
+        </div>
+
+    </div>
+    <div class="row mt-0 g-4 align-items-start justify-content-start flex-wrap">
+
         {% if is_client_profile %}
         <div class="col-12 col-lg-6">
             <div class="box">

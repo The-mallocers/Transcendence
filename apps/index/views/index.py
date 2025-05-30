@@ -7,10 +7,12 @@ from django.template.loader import render_to_string
 
 from apps.client.models import Clients
 from apps.game.models import Game
+from apps.tournaments.models import Tournaments
 from config import settings
 from utils.enums import EventType, RTables
 from utils.redis import RedisConnectionPool
 import uuid
+# from apps.tournaments.models import Tournament  
 
 
 def get(req):
@@ -18,6 +20,11 @@ def get(req):
     winrate = ghistory = rivals = None
     games_played = client.stats.games.all().order_by('-created_at')
     ghistory = get_last_matches(client, games_played)
+
+    tournaments = Tournaments.objects.filter(clients__id=client.id)
+
+    for i in range(len(tournaments)) :
+        print(tournaments[i])
     friends_list = client.get_all_friends()
     friends_pending = client.get_all_pending_request()
     rivals = get_rivals(client, games_played)
@@ -44,6 +51,7 @@ def get(req):
         "online_status": online_status,
         "friends_online_status": friends_online_status,
         "pending_tournament_invitations": pending_tournament_invitations,
+        "tournaments" : tournaments,
     }
     html_content = render_to_string("apps/profile/profile.html", context)
     return JsonResponse({'html': html_content})
