@@ -177,7 +177,7 @@ class Rooms(models.Model):
     def aget_unread_messages_count(roomId, clientId):
         try:
             with transaction.atomic():
-                count = Messages.objects.filter(room_id=roomId, is_read=False, sender__id__ne=clientId).count()
+                count = Messages.objects.filter(room_id=roomId, is_read=False).exclude(sender__id=clientId).count()
                 return count
         except Exception as e:
             return 0

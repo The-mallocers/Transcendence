@@ -159,7 +159,7 @@ class ChatService(BaseServices):
                 })
                 return
             
-            await Messages.objects.filter(room=room, is_read=False, sender__id__ne=client.id).aupdate(is_read=True)
+            await Messages.objects.filter(room=room, is_read=False).exclude(sender__id=client.id).aupdate(is_read=True)
 
             # Sending messages in a single batch instead of multiple requests
             formatted_messages = [
