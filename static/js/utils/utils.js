@@ -27,7 +27,7 @@ export function sendWhenReady(socket, message) {
     }
 }
 
-export function create_front_chat_room(room, username, usernameId, status, profilePicture = null){
+export function create_front_chat_room(room, username, usernameId, status, profilePicture = null, unread_messages) {
     const newChat = document.querySelector('.chatRooms');
     if(newChat)
     {
@@ -37,7 +37,10 @@ export function create_front_chat_room(room, username, usernameId, status, profi
         const htmlChat = 
         `<div class="roomroom container d-flex flex-wrap align-items-center justify-content-between">
             <div class="chat-${username} chat-button btn d-flex align-items-center gap-3">
-                <img src="${imgSrc}" alt="${username}'s profile picture">
+                <div class="position-relative">
+                    <img src="${imgSrc}" alt="${username}'s profile picture">
+                    ${unread_messages > 0 ? `<span class="badge bg-danger position-absolute top-0 start-0 translate-middle rounded-pill">${unread_messages}</span>` : ''}
+                </div>
                 <div>${username}</div>
             </div>
             

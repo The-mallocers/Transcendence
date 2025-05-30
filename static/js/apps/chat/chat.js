@@ -210,6 +210,7 @@ async function displayHistory(message) {
 }
 
 async function displayRooms(rooms) {
+
     let chatRooms = document.querySelector('.chatRooms');
     
     for (let i = 0; i < rooms.length; i++) {
@@ -217,7 +218,8 @@ async function displayRooms(rooms) {
                             rooms[i].player[0].username, 
                             rooms[i].player[0].id, 
                             rooms[i].player[0].status,
-                            rooms[i].player[0].profile_picture)
+                            rooms[i].player[0].profile_picture,
+                            rooms[i].unread_messages);
     }
     scrollToBottom(chatRooms);
 }
