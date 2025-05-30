@@ -11,9 +11,13 @@ BLUE='\033[0;34m'
 CYAN='\033[0;36m'
 NC='\033[0m'
 
-# Check OS for sed compatibility
+# Cross-platform sed -i compatibility
 SED_INPLACE() {
-  if [[ "$(uname)" == "Darwin" ]]; then sed -i '' "$1" "$2"; else sed -i "$1" "$2"; fi
+  if [[ "$(uname)" == "Darwin" ]]; then
+    sed -i '' "$1" "$2"
+  else
+    sed -i "$1" "$2"
+  fi
 }
 
 # Generate keys
@@ -22,6 +26,40 @@ generate_jwt_secret_key()    { python3 -c "from django.core.management.utils imp
 generate_secret_fa_key()     { python3 -c "import secrets, base64; random_bytes = secrets.token_bytes(20); print(base64.b32encode(random_bytes).decode('utf-8').rstrip('='))"; }
 get_hostname()               { hostname; }
 
+# Early check for secrets folder and required files
+check_secrets_accessible() {
+  if [ ! -d "$SECRET_FOLDER" ] || [ ! -r "$SECRET_FOLDER" ]; then
+    echo -e "${RED}Error: '$SECRET_FOLDER' directory does not exist or is not readable.${NC}"
+    exit 1
+  fi
+
+  local files=("42_client" "42_secret")
+  local missing=0
+  for f in "${files[@]}"; do
+    local path="$SECRET_FOLDER/$f"
+    if [ ! -f "$path" ] || [ ! -r "$path" ]; then
+      echo -e "${RED}Error: $f is missing or not readable in $SECRET_FOLDER.${NC}"
+      missing=1
+    fi
+  done
+
+  if [ "$missing" -eq 1 ]; then
+    echo -e "${YELLOW}You can create missing files with: make secrets${NC}"
+    exit 1
+  fi
+}
+
+# Remove ALL whitespace from 42_secret and 42_client
+trim_42_files_whitespace() {
+  local files=("$SECRET_FOLDER/42_secret" "$SECRET_FOLDER/42_client")
+  for file in "${files[@]}"; do
+    if [ -f "$file" ]; then
+      tr -d '[:space:]' < "$file" > "${file}.tmp" && mv "${file}.tmp" "$file"
+    fi
+  done
+}
+
+# Generate cert.pem and key.pem if not present
 generate_pem_files() {
   local cert_path="$SECRET_FOLDER/cert.pem" key_path="$SECRET_FOLDER/key.pem"
   mkdir -p "$SECRET_FOLDER"
@@ -31,32 +69,6 @@ generate_pem_files() {
   if [ ! -f "$key_path" ]; then
     openssl genrsa -out "$key_path" 2048 >/dev/null 2>&1
   fi
-}
-
-check_42_files() {
-  local client_file="$SECRET_FOLDER/42_client" secret_file="$SECRET_FOLDER/42_secret"
-  if [ ! -f "$client_file" ] || [ ! -f "$secret_file" ]; then
-    echo -e "${RED}Error: Missing required files in $SECRET_FOLDER directory:${NC}"
-    [ ! -f "$client_file" ] && echo -e "${RED}  - 42_client${NC}"
-    [ ! -f "$secret_file" ] && echo -e "${RED}  - 42_secret${NC}"
-    echo -e "${YELLOW}You can create files with this command: make secrets${NC}"
-    exit 1
-  fi
-}
-
-# Generic prompt function for passwords
-prompt_password() {
-  local varname="$1"
-  local prompt_text="$2"
-  local default_pwd="$3"
-  local result
-  if [ -t 0 ]; then
-    read -r -p "$prompt_text (default: ${default_pwd}): " result
-    result="${result:-$default_pwd}"
-  else
-    result="$default_pwd"
-  fi
-  echo "$result"
 }
 
 # Check for default passwords and warn user
@@ -73,7 +85,7 @@ warn_if_default_passwords() {
     fi
   done
   if [ "$warn" = 1 ]; then
-    echo -e "${YELLOW}It is strongly recommended to change these passwords in your .env file.\nRun 'make password' for change password${NC}"
+    echo -e "${YELLOW}It is strongly recommended to change these passwords in your .env file.\nRun 'make password' to change password.${NC}"
   fi
   return 0
 }
@@ -94,29 +106,19 @@ validate_admin_password() {
   fi
 }
 
-check_secrets_permissions() {
-  # Check if the folder exists and is readable
-  if [ ! -d "$SECRET_FOLDER" ] || [ ! -r "$SECRET_FOLDER" ]; then
-    echo -e "${RED}Error: $SECRET_FOLDER directory is not readable.${NC}"
-    exit 1
+# Prompt for passwords
+prompt_password() {
+  local varname="$1"
+  local prompt_text="$2"
+  local default_pwd="$3"
+  local result
+  if [ -t 0 ]; then
+    read -r -p "$prompt_text (default: ${default_pwd}): " result
+    result="${result:-$default_pwd}"
+  else
+    result="$default_pwd"
   fi
-
-  # Check each file in the folder for readability
-  local unreadable_files=()
-  for f in "$SECRET_FOLDER"/*; do
-    [ -e "$f" ] || continue  # skip if no files match
-    if [ ! -r "$f" ]; then
-      unreadable_files+=("$(basename "$f")")
-    fi
-  done
-
-  if [ ${#unreadable_files[@]} -gt 0 ]; then
-    echo -e "${RED}Error: The following files in $SECRET_FOLDER are not readable:${NC}"
-    for f in "${unreadable_files[@]}"; do
-      echo -e "${RED}  - $f${NC}"
-    done
-    exit 1
-  fi
+  echo "$result"
 }
 
 generate_env_file() {
@@ -179,7 +181,9 @@ EOL
   fi
 }
 
-check_secrets_permissions 
-check_42_files
+# --- Main script execution order ---
+
+check_secrets_accessible
+trim_42_files_whitespace
 generate_pem_files
 generate_env_file
