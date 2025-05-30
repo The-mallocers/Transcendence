@@ -65,20 +65,15 @@ This project implements the following modules as part of the 42 curriculum requi
 - Docker and Docker Compose
 - Make
 - Python 3.x (for local development)
-- 42 API credentials (client ID and secret)
 
 ## 🚀 Installation
 
-0. Dependencies :
-   - Make (You most likely have it by default)
-   - Docker
-   
-2. Clone the repository:
+1. Clone the repository:
    ```bash
    git clone <repository-url>
    cd Transcendence
    ```
-3. Start the application:
+2. Start the application:
    ```bash
    make up
    ```
@@ -86,19 +81,19 @@ This project implements the following modules as part of the 42 curriculum requi
    This will build and start all containers. The application will be available at http://localhost:8000.
 
 ##### Make up will execute the following commands if it's the first time you run it:
-2. Create the necessary secret files:
+1. Create the necessary secret files:
    ```bash
    make secrets
    ```
    You will be prompted to enter your 42 API client ID and secret, if you arent a 42 student, feel free to skip this.
 
-3. Generate the environment file:
+2. Generate the environment file:
    ```bash
    make env
    ```
    This will create a `.env` file with all necessary configuration.
 
-4. (Optional) Update passwords:
+3. (Optional) Update passwords:
    ```bash
    make passwords
    ```
