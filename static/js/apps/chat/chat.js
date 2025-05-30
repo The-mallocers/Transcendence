@@ -31,6 +31,7 @@ function showActiveChat(show) {
 
 chatSocket.onmessage = (event) => {
     const message = JSON.parse(event.data);
+    console.log("Chat message received:", message);
     
     if (message.data.action == "HISTORY_RECEIVED") {
         showActiveChat(true);

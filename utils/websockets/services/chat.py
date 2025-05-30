@@ -158,6 +158,8 @@ class ChatService(BaseServices):
                     "username": str(await target.aget_profile_username())
                 })
                 return
+            
+            await Messages.objects.filter(room=room, is_read=False, sender__id__ne=client.id).aupdate(is_read=True)
 
             # Sending messages in a single batch instead of multiple requests
             formatted_messages = [
@@ -188,6 +190,7 @@ class ChatService(BaseServices):
                         status = "Unblock" if await friend.ais_blocked(user['id']) else "Block"
                         formatted_messages.append({
                             'room': str(room_id),
+                            'unread_messages': await Rooms.aget_unread_messages_count(room_id, client.id),
                             'player': [{
                                 'id': user['id'],
                                 'username': user['username'],

@@ -171,6 +171,16 @@ class Rooms(models.Model):
             return True
         except Exception:
             return None
+        
+    @staticmethod
+    @sync_to_async
+    def aget_unread_messages_count(roomId, clientId):
+        try:
+            with transaction.atomic():
+                count = Messages.objects.filter(room_id=roomId, is_read=False, sender__id__ne=clientId).count()
+                return count
+        except Exception as e:
+            return 0
 
 
 class Messages(models.Model):
