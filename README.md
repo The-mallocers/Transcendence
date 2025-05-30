@@ -77,8 +77,8 @@ This project implements the following modules as part of the 42 curriculum requi
    ```bash
    make up
    ```
-   Notes: We will install Django as part of the build process, but its just to generate the env.
    This will build and start all containers. The application will be available at http://localhost:8000.
+   Notes: We will install Django as part of the build process, but its just to generate the env.
 
 ##### Make up will execute the following commands if it's the first time you run it:
 1. Create the necessary secret files:
