@@ -125,6 +125,12 @@ class ChatService(BaseServices):
                 'room_id': str(room_group)
             })
 
+            username = await client.aget_profile_username() if target else "Unknown User"
+
+            await asend_group(RTables.GROUP_NOTIF(str(target.id)), EventType.NOTIFICATION, ResponseAction.NEW_MESSAGE, {
+                    "sender_id": username,
+            })
+
         except ServiceError as e:
             await asend_group_error(self.service_group, ResponseError.JSON_ERROR)
         except json.JSONDecodeError as e:

@@ -173,6 +173,7 @@ class ResponseAction(str, Enum):
     ACK_ONLINE_STATUS: str = "ack_online_status"
     FRIEND_BLOCKED: str = "friend_blocked"
     FRIEND_UNBLOCKED: str = "friend_unblocked"
+    NEW_MESSAGE: str = "new_message"
     NOTIF_TEST = "notification_test"
 
     PONG: str = 'pong'
