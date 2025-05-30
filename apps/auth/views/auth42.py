@@ -43,8 +43,8 @@ def auth42(request):
 
         token_params = {
             'grant_type': 'authorization_code',
-            'client_id': os.environ.get('AUTH_42_CLIENT'),
-            'client_secret': os.environ.get('AUTH_42_SECRET'),
+            'client_id': settings.U_42_API,
+            'client_secret': settings.S_42_API,
             'code': auth_code,
             'redirect_uri': f'https://{hostname}:8000/auth/auth42'
         }

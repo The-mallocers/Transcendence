@@ -48,6 +48,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 DEBUG = True
 PRINT = 'true'
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
+S_42_API = open(os.environ.get('S_42_AUTH_PATH')).read()
+U_42_API = open(os.environ.get('U_42_AUTH_PATH')).read()
 
 ROOT_URLCONF = 'config.urls'
 WSGI_APPLICATION = 'config.wsgi.application'

@@ -125,8 +125,6 @@ generate_env_file() {
 DJANGO_SECRET_KEY='$(generate_django_secret_key)'
 JWT_SECRET_KEY='$(generate_jwt_secret_key)'
 SECRET_FA_KEY='$(generate_secret_fa_key)'
-AUTH_42_CLIENT='$(cat $SECRET_FOLDER/42_client)'
-AUTH_42_SECRET='$(cat $SECRET_FOLDER/42_secret)'
 
 # Password
 DATABASE_PASSWORD='${db_pwd}'
@@ -136,6 +134,9 @@ ADMIN_PWD='${admin_pwd}'
 # ══ Variables ═══════════════════════════════════════════════════════════════════════ #
 SSL_CERT_PATH=$SECRET_FOLDER/cert.pem
 SSL_KEY_PATH=$SECRET_FOLDER/key.pem
+
+S_42_AUTH_PATH=./secrets/42_secret
+U_42_AUTH_PATH=./secrets/42_client
 
 DATABASE_NAME='dockerdjango'
 DATABASE_USERNAME='postgres'
