@@ -40,7 +40,8 @@ def auth42(request):
         auth_code = request.GET.get('code')
 
         hostname = request.get_host().split(':')[0]
-
+        print(settings.U_42_API)
+        print(settings.S_42_API)
         token_params = {
             'grant_type': 'authorization_code',
             'client_id': settings.U_42_API,

@@ -153,18 +153,18 @@ env: secrets
 	@$(GENERATE_ENV_SCRIPT)
 
 secrets:
-	@mkdir -p ./secrets
+	@mkdir -m 700 -p ./secrets
 	@if [ ! -f ./secrets/42_client ]; then \
 		echo "$(CYAN)Enter the key for 42_client:$(NC)"; \
 		read client_key; \
-		echo "$$client_key" > ./secrets/42_client; \
-		echo "$(GREEN)42_client file created.$(NC)"; \
+		client_key=$$(echo "$$client_key" | tr -d '\r' | xargs); \
+		printf "%s" "$$client_key" > ./secrets/42_client; \
 	fi
 	@if [ ! -f ./secrets/42_secret ]; then \
 		echo "$(CYAN)Enter the key for 42_secret:$(NC)"; \
 		read secret_key; \
-		echo "$$secret_key" > ./secrets/42_secret; \
-		echo "$(GREEN)42_secret file created.$(NC)"; \
+		secret_key=$$(echo "$$secret_key" | tr -d '\r' | xargs); \
+		printf "%s" "$$secret_key" > ./secrets/42_secret; \
 	fi
 
 passwords: check-env

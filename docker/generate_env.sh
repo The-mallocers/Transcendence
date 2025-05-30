@@ -96,6 +96,31 @@ validate_admin_password() {
   fi
 }
 
+check_secrets_permissions() {
+  # Check if the folder exists and is readable
+  if [ ! -d "$SECRET_FOLDER" ] || [ ! -r "$SECRET_FOLDER" ]; then
+    echo -e "${RED}Error: $SECRET_FOLDER directory is not readable.${NC}"
+    exit 1
+  fi
+
+  # Check each file in the folder for readability
+  local unreadable_files=()
+  for f in "$SECRET_FOLDER"/*; do
+    [ -e "$f" ] || continue  # skip if no files match
+    if [ ! -r "$f" ]; then
+      unreadable_files+=("$(basename "$f")")
+    fi
+  done
+
+  if [ ${#unreadable_files[@]} -gt 0 ]; then
+    echo -e "${RED}Error: The following files in $SECRET_FOLDER are not readable:${NC}"
+    for f in "${unreadable_files[@]}"; do
+      echo -e "${RED}  - $f${NC}"
+    done
+    exit 1
+  fi
+}
+
 generate_env_file() {
   local admin_pwd db_pwd grafana_pwd
   pip install django > /dev/null 2>&1
@@ -157,5 +182,6 @@ EOL
 }
 
 check_42_files
+check_secrets_permissions 
 generate_pem_files
 generate_env_file
