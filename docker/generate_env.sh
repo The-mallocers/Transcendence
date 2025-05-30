@@ -26,11 +26,9 @@ generate_pem_files() {
   local cert_path="$SECRET_FOLDER/cert.pem" key_path="$SECRET_FOLDER/key.pem"
   mkdir -p "$SECRET_FOLDER"
   if [ ! -f "$cert_path" ]; then
-    echo -e "${YELLOW}Creating $cert_path...${NC}"
     openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout "$key_path" -out "$cert_path" -subj "/CN=localhost" >/dev/null 2>&1
   fi
   if [ ! -f "$key_path" ]; then
-    echo -e "${YELLOW}Creating $key_path...${NC}"
     openssl genrsa -out "$key_path" 2048 >/dev/null 2>&1
   fi
 }
@@ -181,7 +179,7 @@ EOL
   fi
 }
 
-check_42_files
 check_secrets_permissions 
+check_42_files
 generate_pem_files
 generate_env_file
