@@ -12,16 +12,7 @@ NC=\033[0m
 all: help
 
 # =============================================================================
-# Utility: .env check
-# =============================================================================
-check-env:
-	@if [ ! -f .env ]; then \
-		echo "$(RED).env file not found! Please run 'make env' to create it.$(NC)"; \
-		exit 1; \
-	fi
-
-# =============================================================================
-# 🛈 Help & Info
+# Help & Info
 # =============================================================================
 
 help:
@@ -47,8 +38,7 @@ help:
 	@echo "  $(GREEN)make clean$(NC)           - Remove all containers, images, and prune the system"
 	@echo "  $(GREEN)make re$(NC)              - Alias for 'restart'"
 	@echo "  $(GREEN)make redetach$(NC)        - Restart all containers in detached mode"
-	@echo "  $(GREEN)make env$(NC)             - Create or update the .env file and validate dependencies"
-	@echo "  $(GREEN)make secrets$(NC)         - Create 42_client and 42_secret files in the secrets folder"
+	@echo "  $(GREEN)make env$(NC)             - Create or update the .env file, secrets directory, and validate dependencies"
 	@echo "  $(GREEN)make passwords$(NC)       - Update application/service passwords in .env"
 	@echo ""
 	@echo "$(CYAN)Notes:$(NC)"
@@ -57,22 +47,22 @@ help:
 	@echo "  - For detailed logs, use 'make logs'."
 
 # =============================================================================
-# 🏗️  Build & Run
+# Build & Run
 # =============================================================================
 
-up: env check-env
+up: env
 	@echo "$(CYAN)Bringing up containers...$(NC)"
 	@rm -rf ./docker/staticdocker/
 	@docker compose -f ./$(DOCKER_COMPOSE_FILE) down
 	@docker compose -f ./$(DOCKER_COMPOSE_FILE) up --build --attach django-web
 
-detach: env check-env
+detach: env
 	@echo "$(CYAN)Bringing up containers in detached mode...$(NC)"
 	@rm -rf ./docker/staticdocker/
 	@docker compose -f ./$(DOCKER_COMPOSE_FILE) down
 	@docker compose -f ./$(DOCKER_COMPOSE_FILE) up -d --build --no-attach mailhog --no-attach alertmanager --no-attach grafana
 
-down: check-env
+down:
 	@echo "$(YELLOW)Stopping containers...$(NC)"
 	@docker compose -f ./$(DOCKER_COMPOSE_FILE) down
 
@@ -80,7 +70,7 @@ restart: down up
 re: down up
 redetach: down detach
 
-status: check-env
+status:
 	@echo "$(CYAN)Containers:$(NC)"
 	@docker compose -f ./$(DOCKER_COMPOSE_FILE) ps
 	@echo "$(CYAN)Volumes:$(NC)"
@@ -88,22 +78,22 @@ status: check-env
 	@echo "$(CYAN)Images:$(NC)"
 	@docker image ls
 
-logs: check-env
+logs:
 	@echo "$(CYAN)Showing logs...$(NC)"
 	@docker compose -f ./$(DOCKER_COMPOSE_FILE) logs
 
 # =============================================================================
-# 🧪 Test & Coverage
+# Test & Coverage
 # =============================================================================
 
-test: env check-env
+test: env
 	@echo "$(CYAN)Running tests...$(NC)"
 	@docker compose -f ./$(DOCKER_COMPOSE_FILE) up -d db redis
 	@docker compose -f ./$(DOCKER_COMPOSE_FILE) exec -T db sh -c 'until pg_isready -U ${DATABASE_USERNAME} -d ${DATABASE_NAME}; do sleep 1; done'
 	@docker compose -f ./$(DOCKER_COMPOSE_FILE) run --rm django-web sh -c "python manage.py test"
 	@docker compose -f ./$(DOCKER_COMPOSE_FILE) down
 
-test-coverage: env check-env
+test-coverage: env
 	@echo "$(CYAN)Running tests with coverage...$(NC)"
 	@docker compose -f ./$(DOCKER_COMPOSE_FILE) up -d db redis
 	@docker compose -f ./$(DOCKER_COMPOSE_FILE) exec -T db sh -c 'until pg_isready -U ${DATABASE_USERNAME} -d ${DATABASE_NAME}; do sleep 1; done'
@@ -115,7 +105,7 @@ test-coverage: env check-env
 	@docker compose -f ./$(DOCKER_COMPOSE_FILE) down
 
 # =============================================================================
-# 🧹 Clean & Maintenance
+# Clean & Maintenance
 # =============================================================================
 
 dbclean: down
@@ -137,7 +127,7 @@ clean: dbclean
 	$(MAKE) dbclean
 	@docker system prune -a --volumes --force
 
-reload: check-env
+reload:
 	@echo "$(CYAN)Reloading static files...$(NC)"
 	@cp -r static/css ./docker/staticdocker
 	@cp -r static/js ./docker/staticdocker
@@ -145,58 +135,105 @@ reload: check-env
 	@echo "$(GREEN)Static files reloaded$(NC)"
 
 # =============================================================================
-# ⚙️  Environment & Secrets
+# Environment & Secrets
 # =============================================================================
 
-env: secrets
-	@echo "$(CYAN)Creating or updating .env file and validating dependencies...$(NC)"
-	@$(GENERATE_ENV_SCRIPT)
-
-secrets:
-	@mkdir -m 700 -p ./secrets
-	@if [ ! -f ./secrets/42_client ]; then \
-		echo "$(CYAN)Enter the key for 42_client:$(NC)"; \
-		read client_key; \
-		client_key=$$(echo "$$client_key" | tr -d '\r' | xargs); \
-		printf "%s" "$$client_key" > ./secrets/42_client; \
+env:
+	@if ! $(GENERATE_ENV_SCRIPT); then \
+		echo "$(RED)Failed to generate or update .env file. See error messages above.$(NC)"; \
+		exit 1; \
 	fi
-	@if [ ! -f ./secrets/42_secret ]; then \
-		echo "$(CYAN)Enter the key for 42_secret:$(NC)"; \
-		read secret_key; \
-		secret_key=$$(echo "$$secret_key" | tr -d '\r' | xargs); \
-		printf "%s" "$$secret_key" > ./secrets/42_secret; \
-	fi
+	@echo "$(GREEN)Environment file is created or correctly updated."
 
-passwords: check-env
+re-env:
+	@rm -rfd .env
+	@$(MAKE) env
+
+passwords:
 	@echo "$(CYAN)Updating ADMIN_PWD, DATABASE_PASSWORD and GRAFANA_PASSWORD in .env...$(NC)"
 	@if [ ! -f .env ]; then \
 		echo "$(RED).env does not exist. Run 'make env' first.$(NC)"; \
 		exit 1; \
 	fi; \
+	if [ ! -r ".env" ] || [ ! -w ".env" ]; then \
+		echo "$(RED).env file exists but has incorrect permissions. Run 'chmod 600 .env' to fix.$(NC)"; \
+		exit 1; \
+	fi; \
 	for var in ADMIN_PWD DATABASE_PASSWORD GRAFANA_PASSWORD; do \
 		case $$var in \
-			ADMIN_PWD) default="123456789!"; prompt="Set ADMIN_PWD";; \
-			DATABASE_PASSWORD) default="admin"; prompt="Set DATABASE_PASSWORD";; \
-			GRAFANA_PASSWORD) default="admin"; prompt="Set GRAFANA_PASSWORD";; \
+			ADMIN_PWD) \
+				default="123456789!"; \
+				prompt="Set ADMIN_PWD"; \
+				;; \
+			DATABASE_PASSWORD) \
+				default="admin"; \
+				prompt="Set DATABASE_PASSWORD"; \
+				;; \
+			GRAFANA_PASSWORD) \
+				default="admin"; \
+				prompt="Set GRAFANA_PASSWORD"; \
+				;; \
 		esac; \
 		if [ -t 0 ]; then \
-			read -p "$$prompt (default: $$default): " val; \
+			echo -e "$(CYAN)$$prompt$(NC) (default: $$default): \c"; \
+			read val; \
 			val=$${val:-$$default}; \
+			\
+			# Validate ADMIN_PWD if it's being set \
+			if [[ "$$var" == "ADMIN_PWD" ]]; then \
+				while true; do \
+					if [[ $${#val} -lt 8 ]]; then \
+						echo "$(YELLOW)Password must be at least 8 characters long. Please try again.$(NC)"; \
+					elif ! [[ "$$val" =~ [^a-zA-Z0-9] ]]; then \
+						echo "$(YELLOW)Password must contain at least one special character. Please try again.$(NC)"; \
+					elif ! [[ "$$val" =~ [0-9] ]]; then \
+						echo "$(YELLOW)Password must contain at least one digit. Please try again.$(NC)"; \
+					else \
+						break; \
+					fi; \
+					echo -e "$(CYAN)$$prompt$(NC) (default: $$default): \c"; \
+					read val; \
+					val=$${val:-$$default}; \
+				done; \
+			fi; \
 		else \
 			val=$$default; \
+			if [[ "$$var" == "ADMIN_PWD" ]]; then \
+				if [[ $${#val} -lt 8 ]] || ! [[ "$$val" =~ [^a-zA-Z0-9] ]] || ! [[ "$$val" =~ [0-9] ]]; then \
+					echo "$(YELLOW)Using default password for $$var. It's recommended to change it later with 'make passwords' in interactive mode.$(NC)"; \
+				fi; \
+			fi; \
 		fi; \
+		\
+		# Update or add the variable to .env \
 		if grep -q "^$$var=" .env; then \
+			# Use cross-platform sed \
 			if [ "$$(uname)" = "Darwin" ]; then \
-				sed -i '' "s/^$$var=.*/$$var='$$val'/" .env; \
+				sed -i '' "s/^$$var=.*/$$var='$$val'/" .env || { \
+					echo "$(RED)Failed to update $$var in .env file.$(NC)"; \
+					exit 1; \
+				}; \
 			else \
-				sed -i "s/^$$var=.*/$$var='$$val'/" .env; \
+				sed -i "s/^$$var=.*/$$var='$$val'/" .env || { \
+					echo "$(RED)Failed to update $$var in .env file.$(NC)"; \
+					exit 1; \
+				}; \
 			fi; \
 			echo "$(GREEN)$$var updated.$(NC)"; \
 		else \
-			echo "$$var='$$val'" >> .env; \
+			if ! echo "$$var='$$val'" >> .env; then \
+				echo "$(RED)Failed to add $$var to .env file.$(NC)"; \
+				exit 1; \
+			fi; \
 			echo "$(GREEN)$$var added.$(NC)"; \
 		fi; \
-	done
-	@echo "$(CYAN)Done updating passwords.$(NC)"
+	done; \
+	\
+	# Set proper permissions for .env file \
+	if ! chmod 600 .env; then \
+		echo "$(YELLOW)Warning: Failed to set secure permissions on .env file.$(NC)"; \
+	fi; \
+	\
+	echo "$(GREEN)Done updating passwords.$(NC)"
 
-.PHONY: help up down test test-coverage logs status restart dbclean reload clean re redetach env secrets passwords
+.PHONY: help up down test test-coverage logs status restart dbclean reload clean re redetach env re-env passwords
