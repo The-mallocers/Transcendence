@@ -23,8 +23,6 @@ def get(req):
 
     tournaments = Tournaments.objects.filter(clients__id=client.id)
 
-    for i in range(len(tournaments)) :
-        print(tournaments[i])
     friends_list = client.get_all_friends()
     friends_pending = client.get_all_pending_request()
     rivals = get_rivals(client, games_played)

@@ -111,22 +111,14 @@
         {% endif %}
 
         <div class="col-12 col-lg-6">
-            <div class="box">
+            <div class="box tournamentBox">
                 <h4>Tournaments</h4>
                 {% for tournament in tournaments %}
-                    <div class="tournament">
-                        {% for game in tournament.scoreboards.scoreboards %}
-                            <div>{{game}}</div>
-                            <div>{{ game.points }}</div>
-                        {%endfor%}
+                    <div class="tournament" data-route="/pong/tournament/treequery/?code={{tournament.code}}">
+                        <img class="tournamentDiamond" src="{% static '/assets/imgs/diamond.png' %}" />
+                        <span>{{tournament.scoreboards.title|safe}}</span>
                     </div>
                 {%endfor%}
-                <!-- <ul class="friends_group list-group"> -->
-                    <!-- {% if show_friend_request %}
-                        <button type="button" class="type-intra-green friendrequest" onclick="handleAskFriend(new URLSearchParams(window.location.search).get('username'))">Friend Request</button>
-                    {%endif%}
-                    {% comment %} get all the friends from js {% endcomment %} -->
-                <!-- </ul> -->
             </div>
         </div>
 
