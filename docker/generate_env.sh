@@ -50,9 +50,9 @@ SED_INPLACE() {
 generate_django_secret_key() {
   local key
   # Try using Django's get_random_secret_key
-  key=$(python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())" 2>/dev/null) && echo "$key" && return
+  key=$(python3 -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())" 2>/dev/null) && echo "$key" && return
   # Fallback to a custom implementation if Django is not available
-  key=$(python -c "import random, string; print(''.join(random.SystemRandom().choice(string.ascii_letters + string.digits + '!@#$%^&*(-_=+)') for i in range(50)))" 2>/dev/null) && echo "$key" && return
+  key=$(python3 -c "import random, string; print(''.join(random.SystemRandom().choice(string.ascii_letters + string.digits + '!@#$%^&*(-_=+)') for i in range(50)))" 2>/dev/null) && echo "$key" && return
   # Final fallback using /dev/urandom
   key=$(LC_ALL=C tr -dc 'a-zA-Z0-9!@#$%^&*(-_=+)' < /dev/urandom | head -c 50) && echo "$key" && return
   # If all methods fail
@@ -62,9 +62,9 @@ generate_django_secret_key() {
 generate_jwt_secret_key() {
   local key
   # Try using Django's get_random_secret_key
-  key=$(python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())" 2>/dev/null) && echo "$key" && return
+  key=$(python3 -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())" 2>/dev/null) && echo "$key" && return
   # Fallback to a custom implementation if Django is not available
-  key=$(python -c "import random, string; print(''.join(random.SystemRandom().choice(string.ascii_letters + string.digits + '!@#$%^&*(-_=+)') for i in range(50)))" 2>/dev/null) && echo "$key" && return
+  key=$(python3 -c "import random, string; print(''.join(random.SystemRandom().choice(string.ascii_letters + string.digits + '!@#$%^&*(-_=+)') for i in range(50)))" 2>/dev/null) && echo "$key" && return
   # Final fallback using /dev/urandom
   key=$(LC_ALL=C tr -dc 'a-zA-Z0-9!@#$%^&*(-_=+)' < /dev/urandom | head -c 50) && echo "$key" && return
   # If all methods fail
@@ -74,9 +74,9 @@ generate_jwt_secret_key() {
 generate_secret_fa_key() {
   local key
   # Try using Python's secrets module
-  key=$(python -c "import secrets, base64; random_bytes = secrets.token_bytes(20); print(base64.b32encode(random_bytes).decode('utf-8').rstrip('='))" 2>/dev/null) && echo "$key" && return
+  key=$(python3 -c "import secrets, base64; random_bytes = secrets.token_bytes(20); print(base64.b32encode(random_bytes).decode('utf-8').rstrip('='))" 2>/dev/null) && echo "$key" && return
   # Fallback if Python's secrets module is not available
-  key=$(python -c "import os, base64; random_bytes = os.urandom(20); print(base64.b32encode(random_bytes).decode('utf-8').rstrip('='))" 2>/dev/null) && echo "$key" && return
+  key=$(python3 -c "import os, base64; random_bytes = os.urandom(20); print(base64.b32encode(random_bytes).decode('utf-8').rstrip('='))" 2>/dev/null) && echo "$key" && return
   # Final fallback using /dev/urandom and base32 encoding
   key=$(head -c 20 /dev/urandom | base64 | tr -d '=+/' | tr -d '\n' | head -c 32) && echo "$key" && return
   # If all methods fail
@@ -113,9 +113,9 @@ create_secrets_files() {
     echo -e "${CYAN}Enter the key for 42_client:${NC} \c"
     read client_key
     client_key=$(echo "$client_key" | tr -d '\r' | xargs)
-    if [ -z "$client_key" ]; then
-      error_exit "Error: 42_client key cannot be empty."
-    fi
+    # if [ -z "$client_key" ]; then
+    #   error_exit "Error: 42_client key cannot be empty."
+    # fi
     if ! printf "%s" "$client_key" > "$SECRET_FOLDER/42_client"; then
       error_exit "Failed to write to $SECRET_FOLDER/42_client file."
     fi
@@ -132,9 +132,9 @@ create_secrets_files() {
     echo -e "${CYAN}Enter the key for 42_secret:${NC} \c"
     read secret_key
     secret_key=$(echo "$secret_key" | tr -d '\r' | xargs)
-    if [ -z "$secret_key" ]; then
-      error_exit "Error: 42_secret key cannot be empty."
-    fi
+    # if [ -z "$secret_key" ]; then
+    #   error_exit "Error: 42_secret key cannot be empty."
+    # fi
     if ! printf "%s" "$secret_key" > "$SECRET_FOLDER/42_secret"; then
       error_exit "Failed to write to $SECRET_FOLDER/42_secret file."
     fi
@@ -470,7 +470,7 @@ EOL
 # Function to check if required commands are available
 check_required_commands() {
   local missing=0
-  local commands=("python" "openssl" "grep" "sed" "tr")
+  local commands=("python3" "openssl" "grep" "sed" "tr")
 
   for cmd in "${commands[@]}"; do
     if ! command -v "$cmd" >/dev/null 2>&1; then
