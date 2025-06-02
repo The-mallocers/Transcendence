@@ -204,7 +204,7 @@ notifSocket.onmessage = (event) => {
         create_front_chat_room(message.data.content.room,
             message.data.content.username, 
             message.data.content.sender, 
-            "Block",
+            message.data.content.textBlock,
             message.data.content.profile_picture);
         const friends_group = document.querySelector('.friends_group');
         const friend_duel = document.querySelector(".friends-to-duel");
@@ -407,7 +407,7 @@ notifSocket.onmessage = (event) => {
         navigateTo(`/pong/tournament/?code=${message.data.content.tournament_code}`);
     }
     else if(message.data.action == "NEW_MESSAGE") {
-        console.log("New message received", message.data.content.sender_id);
+        // console.log("New message received", message.data.content.sender_id);
         remove_toast();
         toast_message(`New message from ${message.data.content.sender_id}`);
     }
