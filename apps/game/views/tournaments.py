@@ -10,7 +10,7 @@ from utils.enums import RTables
 from utils.redis import RedisConnectionPool
 from redis.commands.json.path import Path
 
-
+from apps.tournaments.models import Tournaments
 from apps.client.models import Clients
 
 NO_TOURNEY = 0
@@ -59,6 +59,23 @@ def tournamentTree(request):
     return JsonResponse({
         'html': html_content,
     })
+
+def tournamentTreeQuery(request):
+    tournamentCode = request.GET.get("code", "000000")
+
+    tournament = Tournaments.get_tournament_by_code(tournamentCode)
+
+    if tournament is None:
+        html_content = render_to_string("apps/error/404.html", {"error_code": "404"})
+        return JsonResponse({
+            'html': html_content,
+        }, status=404)
+    print("SALUT:", tournamentCode, tournament.scoreboards)
+    html_content = render_to_string("apps/pong/treeHistory.html", {"csrf_token": get_token(request), "roomInfos": json.dumps(tournament.scoreboards)})
+    return JsonResponse({
+        'html': html_content,
+    })
+
 
 def isInTournament(client):
         redis = RedisConnectionPool.get_sync_connection("tournament_check")

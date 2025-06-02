@@ -236,6 +236,27 @@ main {
     margin-bottom: 25px;
 }
 
+.tournamentDiamond {
+    height: 42px;
+    width: 42px;
+}
+
+.tournamentBox .tournament {
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 2rem;
+    cursor: pointer;
+    transition: all .5s;
+}
+
+.tournamentBox .tournament:hover {
+    background-color: rgb(225, 225, 225);
+}
+
+
+
 .main .box h2{
     font-family: "futura-pt", "Helvetica", "Sans serif";
     text-transform: uppercase;
