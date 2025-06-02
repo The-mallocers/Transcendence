@@ -8,7 +8,6 @@
     height: 100vh;
 }
 
-
 .loginPage .container {
     max-width: 42rem;
     height: 100%;
@@ -16,17 +15,12 @@
 
 .logo-tran{
     width: 250px;
-    height: 250px;
     object-fit: fill;
+    margin-bottom: 20px;
 }
 
 .loginPage form {
-    /* position: relative;
-    flex-direction: column;
-    display: flex;
-    top: 40%;
-    left: 50%;
-    transform: translate(-50%, -50%); */
+    width: 80%;
 }
 
 
@@ -44,15 +38,6 @@
 .loginPage form .ibtn {
     border: 2px solid #06a1a1;
     background-color: #00BABB;
-}
-
-.loginPage img {
-    /* position: relative;
-    top: 20%;
-    left: 50%;
-    transform: translate(-50%, -50%); */
-    width: 142px;
-    height: 142px;
 }
 
 .loginPage form button {

@@ -2,9 +2,8 @@
 
 <div class="loginPage" style="background-image: url('{% static 'assets/imgs/loginBackground.jpg' %}');">
     <div class="container d-flex flex-column align-items-center justify-content-center">
-        {% comment %} <img class="bgrImg" src="{% static 'assets/imgs/42_logo.svg' %}" alt=""> {% endcomment %}
-        <img class="logo-tran d-flex alig" src="{% static 'assets/imgs/42_logo_tran.svg' %}" alt="">
-        <form class="d-flex flex-column" id="register-form" enctype="multipart/form-data" action="{% url 'login' %}">
+        <img class="logo-tran d-flex alig" src="{% static 'assets/imgs/42_logo_tran.png' %}" alt="">
+        <form class="d-flex flex-column form-login" id="register-form" enctype="multipart/form-data" action="{% url 'login' %}">
             <div id="error-message" style="color: red;"></div>
             {% csrf_token %}
             <input class="p-3" type="email" id="email" name="email" placeholder="Enter your email" required>
