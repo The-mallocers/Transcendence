@@ -80,10 +80,10 @@ class WsConsumer(AsyncWebsocketConsumer):
             await asend_group_error(RTables.GROUP_CLIENT(self.client.id), ResponseError.JSON_ERROR)
 
         except ServiceError as e:
-            await asend_group_error(RTables.GROUP_CLIENT(self.client.id), ResponseError.SERVICE_ERROR, content=str(e))
+            if self.client is not None:
+                await asend_group_error(RTables.GROUP_CLIENT(self.client.id), ResponseError.SERVICE_ERROR, content=str(e))
 
         except Exception as e:
-            self._logger.error(traceback.format_exc())
             await asend_group_error(RTables.GROUP_CLIENT(self.client.id), ResponseError.EXCEPTION, content=str(e), close=True)
 
     async def send_channel(self, event):

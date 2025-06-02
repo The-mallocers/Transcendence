@@ -217,3 +217,13 @@ class Messages(models.Model):
                 return True
         except Exception:
             return None
+        
+    @staticmethod
+    @sync_to_async
+    def aget_unread_messages(room_id, client_id):
+        try:
+            with transaction.atomic():
+                msg = list(Messages.objects.filter(room_id=room_id, is_read=False, sender__id=client_id))
+                return len(msg)
+        except Exception as e:
+            return []

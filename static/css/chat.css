@@ -151,7 +151,7 @@
 }
 
 .roomroom.active-room {
-    background-color: #5e7e82;
+    background-color: #045f61;
 }
 
 #messageInput::placeholder {
@@ -165,4 +165,9 @@
 
 .no-caret::after {
     display: none !important;
+}
+
+.profilePictureContainer > span {
+    top: 5px !important;
+    left: 5px;
 }

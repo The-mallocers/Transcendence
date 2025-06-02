@@ -27,7 +27,7 @@ export function sendWhenReady(socket, message) {
     }
 }
 
-export function create_front_chat_room(room, username, usernameId, status, profilePicture = null){
+export function create_front_chat_room(room, username, usernameId, status, profilePicture = null, unread_messages){
     const newChat = document.querySelector('.chatRooms');
     if(newChat)
     {
@@ -37,7 +37,11 @@ export function create_front_chat_room(room, username, usernameId, status, profi
         const htmlChat = 
         `<div class="roomroom container d-flex flex-wrap align-items-center justify-content-between">
             <div class="chat-${username} chat-button btn d-flex align-items-center gap-3">
+            <div class="position-relative profilePictureContainer">
                 <img src="${imgSrc}" alt="${username}'s profile picture">
+                <span class="notification-badge pFosition-absolute translate-middle badge rounded-pill bg-danger" style="display:${unread_messages > 0 ? 'inline-block' : 'none'}">${unread_messages > 99 ? '99+' : unread_messages}</span>
+            </div>
+               
                 <div>${username}</div>
             </div>
             
@@ -63,12 +67,16 @@ export function create_front_chat_room(room, username, usernameId, status, profi
         console.log(chatElement)
         chatElement?.addEventListener('click', function() {
             // const roomroomDiv = this.closest('.roomroom');
-            console.log("je clique");
             this.classList.add('active-room');
             
-            document.querySelectorAll('.roomroom.active-room').forEach(div => {
+            document.querySelectorAll('.active-room').forEach(div => {
                 if (div !== this) {
                     div.classList.remove('active-room');
+                    const badge = div.querySelector('.notification-badge');
+                    if (badge) {
+                        console.log("Hiding badge for room:", div);
+                        badge.style.display = 'none'; // Hide the badge when viewing profile
+                    }
                 }
             });
             clickRoom(room)
@@ -97,6 +105,36 @@ export function create_front_chat_room(room, username, usernameId, status, profi
             event.stopPropagation();
         });
         newChat.appendChild(chatElement);
+    }
+}
+
+export function addNotificationBadge(username) {
+    const chatRoom = document.querySelector(`.chat-${username}`);
+    console.log("Chat room found:", chatRoom);
+    if (chatRoom) {
+        const badge = document.querySelector('.notification-badge');
+        const profileContainer = document.querySelector('.profile-picture-container');
+        let unreadCount = parseInt(badge.innerText) || 0;
+        unreadCount += 1; // Increment unread count
+        
+        if (unreadCount > 0) {
+            if (badge) {
+                // Update existing badge
+                badge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+                badge.style.display = 'inline-block';
+            } else {
+                // Create new badge
+                const newBadge = document.createElement('span');
+                newBadge.className = 'notification-badge position-absolute top-0 start-0 translate-middle badge rounded-pill bg-danger';
+                newBadge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+                profileContainer.appendChild(newBadge);
+            }
+        } else {
+            // Hide badge when no unread messages
+            if (badge) {
+                badge.style.display = 'none';
+            }
+        }
     }
 }
 

@@ -116,13 +116,15 @@ class ChatService(BaseServices):
                                                  'sender': str(client.id),
                                                  'room_id': str(room.id)
                                              })
+                
             await Messages.objects.acreate(sender=client, content=message, room=room)
             # Send the message to the group 
             room_group = str(await Rooms.get_id(room))
             await asend_group(RTables.GROUP_CHAT(room_group), EventType.CHAT, ResponseAction.MESSAGE_RECEIVED, {
                 'message': message,
                 'sender': str(client.id),
-                'room_id': str(room_group)
+                'username': await client.aget_profile_username(),
+                'room_id': str(room_group),
             })
 
             username = await client.aget_profile_username() if target else "Unknown User"
@@ -158,6 +160,9 @@ class ChatService(BaseServices):
                     "username": str(await target.aget_profile_username())
                 })
                 return
+            
+            # set has true all the messages is_read
+            await Messages.objects.filter(room=room, sender=target, is_read=False).aupdate(is_read=True)
 
             # Sending messages in a single batch instead of multiple requests
             formatted_messages = [
@@ -188,6 +193,7 @@ class ChatService(BaseServices):
                         status = "Unblock" if await friend.ais_blocked(user['id']) else "Block"
                         formatted_messages.append({
                             'room': str(room_id),
+                            'unread_messages': await Messages.aget_unread_messages(room_id, user['id']),
                             'player': [{
                                 'id': user['id'],
                                 'username': user['username'],
