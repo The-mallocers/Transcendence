@@ -52,8 +52,9 @@ const leftGameMessage = {
 }
 
 window.leftQueue = function () {
-    socket.send(JSON.stringify((leftGameMessage)));
-    // socket.close();
+    if (socket && WebSocketManager.isSocketOpen(socket)) {
+        socket.send(JSON.stringify((leftGameMessage)));
+    }
     navigateTo('/pong/gamemodes/');
 }
 
@@ -121,6 +122,18 @@ socket.onmessage = (e) => {
         toast_message("You are already in a game");
         navigateTo("/pong/gamemodes/");
     }
+    else if (jsonData.data.action == "JOINING_ERROR") {
+        WebSocketManager.closeGameSocket();
+        remove_toast();
+        toast_message("Error joining the queue");
+        navigateTo("/pong/gamemodes/");
+    } 
+    // else if (jsonData.data.action == "ALREADY_IN_QUEUE") {
+    //     WebSocketManager.closeGameSocket();
+    //     remove_toast();
+    //     toast_message("Error joining the queue");
+    //     navigateTo("/pong/gamemodes/");
+    // }
     ////// navigate to arena and then startGame would be better
     // if ()
 }

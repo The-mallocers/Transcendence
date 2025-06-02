@@ -86,7 +86,7 @@ class JWT:
                 raise jwt.InvalidTokenError(f'Validating token with type {token.TYPE} failed due to invalide token type.')
             return token
         except jwt.DecodeError as e:
-            raise jwt.InvalidTokenError(f'Error decoding token, it is either invalid or expired. {str(e)}') 
+            raise jwt.InvalidTokenError(f'Error decoding token, it is either invalid or expired')
         except jwt.ExpiredSignatureError as e:
             raise jwt.ExpiredSignatureError(f'Validating token with type {token_type.value} failed due to expired signature. {str(e)}')
         except (jwt.InvalidTokenError, jwt.DecodeError) as e:
