@@ -63,8 +63,6 @@ export function create_front_chat_room(room, username, usernameId, status, profi
         const chatProfile = chatElement.querySelector(`.chat-profile`);
         const chatBlock = chatElement.querySelector(`.chat-block`);
         const chatDuel = chatElement.querySelector(`.chat-duel`);
-        // console.log(roomroom);
-        console.log(chatElement)
         chatElement?.addEventListener('click', function() {
             // const roomroomDiv = this.closest('.roomroom');
             this.classList.add('active-room');

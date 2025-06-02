@@ -245,7 +245,7 @@ function updateLocalPaddles() {
         previous_keys_local.down = true;
         previous_keys_local.up = false;
     } else { direction = 'idle';}
-    if ((direction && previous_direction != direction) || frameCount % 5 === 0) { //Trying to send less updates
+    if ((direction)){// && previous_direction != direction) || frameCount % 3 === 0) { //Trying to send less updates
         previous_direction_local = direction;
         const message = {
             "event": "game",
