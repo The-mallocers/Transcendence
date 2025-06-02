@@ -53,6 +53,10 @@ def inTournamentTree(req):
     from apps.game.views.tournaments import tournamentTree
     return tournamentTree(req)
 
+@require_http_methods(["GET"])
+def inTournamentTreeQuery(req):
+    from apps.game.views.tournaments import tournamentTreeQuery
+    return tournamentTreeQuery(req)
 
 @require_http_methods(["GET"])
 def disconnect_get(req):

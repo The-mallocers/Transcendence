@@ -10,6 +10,7 @@ from config import settings
 from utils.enums import EventType, RTables
 from utils.redis import RedisConnectionPool
 from apps.index.views.index import get_pending_tournament_invitations 
+from apps.tournaments.models import Tournaments
 
 
 def get(req):
@@ -53,7 +54,8 @@ def get(req):
     if client is not None:
         winrate = get_winrate(client, games_played)
     pending_tournament_invitations = get_pending_tournament_invitations(client)
-    
+    tournaments = Tournaments.objects.filter(clients__id=client.id).order_by('-created_at')[:4]
+
     context = {
         "is_client_profile": False,
         "client": client,
@@ -70,6 +72,8 @@ def get(req):
         "show_friend_request": show_friend_request,
         "pending_tournament_invitations": pending_tournament_invitations,
         "friends_online_status": {},  # no friends
+        "tournaments" : tournaments,
+
     }
     html_content = render_to_string("apps/profile/profile.html", context)
     return JsonResponse({'html': html_content})

@@ -228,6 +228,7 @@ class PongLogic:
             tournament = Tournaments.get_tournament_by_code(self.game.tournament.code)
             current_round = self.redis.json().get(RTables.JSON_TOURNAMENT(tournament.code), Path('scoreboards.current_round'))
             max_round = self.redis.json().get(RTables.JSON_TOURNAMENT(tournament.code), Path('scoreboards.num_rounds'))
+            #Yes, we do not use this variable, but if you get rid of it sometimes when leaving tournament it crashes.
             client_pos = PlayerScoreSerializer(loser, context={
                 'position': (max_round-current_round)*2,
                 'client_id': str(loser.client.id),
@@ -236,7 +237,7 @@ class PongLogic:
                 'matches_won': 0,
                 'points': 0,
             })
-            tournament.scoreboards['scoreboards'].append(client_pos.data)
+            # tournament.scoreboards['scoreboards'].append(client_pos.data)
             tournament.save()
         finished_game = Game.objects.create(code=self.game.code, winner=winner, loser=loser,
                                             points_to_win=self.game.points_to_win, is_duel=self.game.rget_is_duel(), tournament=tournament)
@@ -260,6 +261,8 @@ class PongLogic:
 
     def compute_mmr_change(self, winner, loser):
             K = 50
+
+            print(winner, loser)
             winner_mmr = winner.client.stats.mmr
             loser_mmr = loser.client.stats.mmr
 

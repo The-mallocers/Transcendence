@@ -59,8 +59,8 @@ help:
 # =============================================================================
 # 🏗️  Build & Run
 # =============================================================================
-
-up: env check-env
+# env check-env
+up: 
 	@echo "$(CYAN)Bringing up containers...$(NC)"
 	@rm -rf ./docker/staticdocker/
 	@docker compose -f ./$(DOCKER_COMPOSE_FILE) down

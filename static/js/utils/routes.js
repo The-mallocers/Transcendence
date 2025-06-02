@@ -33,6 +33,12 @@ const routes = [
         },
     },
     {
+        path: '/pong/tournament/treequery/',
+        template: async (query) => {
+            return await fetchRoute(`/pages/pong/tournament/treequery/${query}`);
+        },
+    },
+    {
         path: '/pong/tournament/tree/',
         template: async (query) => {
             return await fetchRoute(`/pages/pong/tournament/tree/${query}`);

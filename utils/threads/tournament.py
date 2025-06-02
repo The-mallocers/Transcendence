@@ -81,6 +81,8 @@ class TournamentThread(Threads):
         if self.tournament.status is TournamentStatus.STARTING:
             send_group(RTables.GROUP_TOURNAMENT(self.tournament.code), EventType.TOURNAMENT, ResponseAction.TOURNAMENT_STARTING)
             random.shuffle(self.tournament.clients)
+            tournament = Tournaments.objects.get(code=self.tournament.code)
+            tournament.clients.set(self.tournament.clients)
             player = 0
             for game in self.games[:int(self.tournament.max_clients / 2)]:
                 game.pL = Player.create_player(self.tournament.clients[player])
@@ -106,13 +108,22 @@ class TournamentThread(Threads):
             elif self.get_current_round() == self.rounds and self.games[-1].rget_status() is GameStatus.FINISHED:
                 tournament = Tournaments.get_tournament_by_code(self.tournament.code)
                 tournament.winner = Game.get_game_by_id(self.games[-1].code).winner.client
+                #Je choppe les infos et je les fous dans le tournoi
+                try:
+                    print("Trying to print tournament result")
+                    tournament_json_redis = self.redis.json().get(RTables.JSON_TOURNAMENT(self.tournament.code))
+                    tournament_model_info = self.tournament_info_helper(tournament_json_redis, self.tournament.code, tournament.winner)
+                    print("Im about to save to tournament.scoreboards : ", tournament_model_info)
+                    tournament.scoreboards = tournament_model_info
+                except Exception as e:
+                    print(f"Could not save the tournament scoreboard : {e}")
+                    #its not like i can try again 
+                    pass
                 tournament.save()
                 self.set_status(TournamentStatus.ENDING)
                 return True
             else:
                 self.manage_games()
-            # todo, il faut que je fasse le systeme de classment, on se base sur le nombre de points marque, si il y a egalite, on se base sur celui
-            # qui a perdu le plus tot
         return False
 
     def stoping(self):
