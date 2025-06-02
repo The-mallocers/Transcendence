@@ -96,6 +96,17 @@
         </div>
     </div>
     <div class="row mt-0 g-4 align-items-start justify-content-start flex-wrap">
+        <div class="col-12 col-lg-6">
+            <div class="box tournamentBox">
+                <h4>Tournaments</h4>
+                {% for tournament in tournaments %}
+                    <div class="tournament" data-route="/pong/tournament/treequery/?code={{tournament.code}}">
+                        <img class="tournamentDiamond" src="{% static '/assets/imgs/diamond.png' %}" />
+                        <span>{{tournament.scoreboards.title|safe}}</span>
+                    </div>
+                {%endfor%}
+            </div>
+        </div>
         {% if is_client_profile %}
         <div class="col-12 col-lg-6">
             <div class="box">
@@ -110,17 +121,6 @@
         </div>
         {% endif %}
 
-        <div class="col-12 col-lg-6">
-            <div class="box tournamentBox">
-                <h4>Tournaments</h4>
-                {% for tournament in tournaments %}
-                    <div class="tournament" data-route="/pong/tournament/treequery/?code={{tournament.code}}">
-                        <img class="tournamentDiamond" src="{% static '/assets/imgs/diamond.png' %}" />
-                        <span>{{tournament.scoreboards.title|safe}}</span>
-                    </div>
-                {%endfor%}
-            </div>
-        </div>
 
     </div>
     <div class="row mt-0 g-4 align-items-start justify-content-start flex-wrap">
