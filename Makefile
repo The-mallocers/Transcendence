@@ -150,13 +150,14 @@ re-env:
 	@$(MAKE) env
 
 passwords:
-	@echo "$(CYAN)Updating ADMIN_PWD, DATABASE_PASSWORD and GRAFANA_PASSWORD in .env...$(NC)"
-	@if [ ! -f .env ]; then \
-		echo "$(RED).env does not exist. Run 'make env' first.$(NC)"; \
+	@CYAN='$(CYAN)'; NC='$(NC)'; YELLOW='$(YELLOW)'; GREEN='$(GREEN)'; RED='$(RED)'; \
+	echo "$${CYAN}Updating ADMIN_PWD, DATABASE_PASSWORD and GRAFANA_PASSWORD in .env...$${NC}"; \
+	if [ ! -f .env ]; then \
+		echo "$${RED}.env does not exist. Run 'make env' first.$${NC}"; \
 		exit 1; \
 	fi; \
 	if [ ! -r ".env" ] || [ ! -w ".env" ]; then \
-		echo "$(RED).env file exists but has incorrect permissions. Run 'chmod 600 .env' to fix.$(NC)"; \
+		echo "$${RED}.env file exists but has incorrect permissions. Run 'chmod 600 .env' to fix.$${NC}"; \
 		exit 1; \
 	fi; \
 	for var in ADMIN_PWD DATABASE_PASSWORD GRAFANA_PASSWORD; do \
@@ -175,65 +176,56 @@ passwords:
 				;; \
 		esac; \
 		if [ -t 0 ]; then \
-			echo -e "$(CYAN)$$prompt$(NC) (default: $$default): \c"; \
-			read val; \
-			val=$${val:-$$default}; \
-			\
-			# Validate ADMIN_PWD if it's being set \
-			if [[ "$$var" == "ADMIN_PWD" ]]; then \
-				while true; do \
-					if [[ $${#val} -lt 8 ]]; then \
-						echo "$(YELLOW)Password must be at least 8 characters long. Please try again.$(NC)"; \
-					elif ! [[ "$$val" =~ [^a-zA-Z0-9] ]]; then \
-						echo "$(YELLOW)Password must contain at least one special character. Please try again.$(NC)"; \
-					elif ! [[ "$$val" =~ [0-9] ]]; then \
-						echo "$(YELLOW)Password must contain at least one digit. Please try again.$(NC)"; \
-					else \
-						break; \
+			while true; do \
+				printf "$${CYAN}$$prompt$${NC} (default: $$default): "; \
+				read val; \
+				val=$${val:-$$default}; \
+				if [ "$$var" = "ADMIN_PWD" ]; then \
+					if [ $${#val} -lt 8 ]; then \
+						echo "$${YELLOW}Password must be at least 8 characters long. Please try again.$${NC}"; \
+						continue; \
+					elif ! echo "$$val" | grep -q '[^a-zA-Z0-9]'; then \
+						echo "$${YELLOW}Password must contain at least one special character. Please try again.$${NC}"; \
+						continue; \
+					elif ! echo "$$val" | grep -q '[0-9]'; then \
+						echo "$${YELLOW}Password must contain at least one digit. Please try again.$${NC}"; \
+						continue; \
 					fi; \
-					echo -e "$(CYAN)$$prompt$(NC) (default: $$default): \c"; \
-					read val; \
-					val=$${val:-$$default}; \
-				done; \
-			fi; \
+				fi; \
+				break; \
+			done; \
 		else \
 			val=$$default; \
-			if [[ "$$var" == "ADMIN_PWD" ]]; then \
-				if [[ $${#val} -lt 8 ]] || ! [[ "$$val" =~ [^a-zA-Z0-9] ]] || ! [[ "$$val" =~ [0-9] ]]; then \
-					echo "$(YELLOW)Using default password for $$var. It's recommended to change it later with 'make passwords' in interactive mode.$(NC)"; \
+			if [ "$$var" = "ADMIN_PWD" ]; then \
+				warn=""; \
+				if [ $${#val} -lt 8 ] || ! echo "$$val" | grep -q '[^a-zA-Z0-9]' || ! echo "$$val" | grep -q '[0-9]'; then \
+					warn=1; \
+				fi; \
+				if [ "$$warn" = "1" ]; then \
+					echo "$${YELLOW}Using default password for $$var. It's recommended to change it later with 'make passwords' in interactive mode.$${NC}"; \
 				fi; \
 			fi; \
 		fi; \
-		\
-		# Update or add the variable to .env \
 		if grep -q "^$$var=" .env; then \
-			# Use cross-platform sed \
 			if [ "$$(uname)" = "Darwin" ]; then \
 				sed -i '' "s/^$$var=.*/$$var='$$val'/" .env || { \
-					echo "$(RED)Failed to update $$var in .env file.$(NC)"; \
-					exit 1; \
-				}; \
+					echo "$${RED}Failed to update $$var in .env file.$${NC}"; exit 1; }; \
 			else \
 				sed -i "s/^$$var=.*/$$var='$$val'/" .env || { \
-					echo "$(RED)Failed to update $$var in .env file.$(NC)"; \
-					exit 1; \
-				}; \
+					echo "$${RED}Failed to update $$var in .env file.$${NC}"; exit 1; }; \
 			fi; \
-			echo "$(GREEN)$$var updated.$(NC)"; \
+			echo "$${GREEN}$$var updated.$${NC}"; \
 		else \
 			if ! echo "$$var='$$val'" >> .env; then \
-				echo "$(RED)Failed to add $$var to .env file.$(NC)"; \
+				echo "$${RED}Failed to add $$var to .env file.$${NC}"; \
 				exit 1; \
 			fi; \
-			echo "$(GREEN)$$var added.$(NC)"; \
+			echo "$${GREEN}$$var added.$${NC}"; \
 		fi; \
 	done; \
-	\
-	# Set proper permissions for .env file \
 	if ! chmod 600 .env; then \
-		echo "$(YELLOW)Warning: Failed to set secure permissions on .env file.$(NC)"; \
+		echo "$${YELLOW}Warning: Failed to set secure permissions on .env file.$${NC}"; \
 	fi; \
-	\
-	echo "$(GREEN)Done updating passwords.$(NC)"
+	echo "$${GREEN}Done updating passwords.$${NC}"
 
 .PHONY: help up down test test-coverage logs status restart dbclean reload clean re redetach env re-env passwords
