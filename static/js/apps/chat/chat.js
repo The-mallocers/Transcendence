@@ -109,6 +109,9 @@ if(messageInput){
         chatSocket.send(JSON.stringify(message));
     });
     messageInput?.addEventListener("keydown", function (event) {
+        let remaining = MAX_MESSAGE_LENGTH;
+        const counterElement = document.getElementById("char-counter")
+
         if (event.key === "Enter") {
             event.preventDefault(); // Prevents the default action (like form submission)
             let messageText = this.value.trim(); // Get the entered text and trim whitespace
@@ -123,9 +126,8 @@ if(messageInput){
                 return; // Don't send empty messages
             }
             
-            this.value = ""; // Clear the input field after handling
+            this.value = "";
             
-            // Sending this to the websocket
             const message = {
                 "event": "chat",
                 "data": {
@@ -136,31 +138,24 @@ if(messageInput){
                     }
                 }
             }
-
+            remaining = MAX_MESSAGE_LENGTH;
+            counterElement.textContent = `${remaining} characters remaining`;
+            counterElement.style.color = '#FFFFFF';
+            
             chatSocket.send(JSON.stringify(message));
         }
-    });
-
-    const counterElement = document.createElement('div');
-    counterElement.className = 'char-counter';
-    counterElement.style.position = 'absolute';
-    counterElement.style.right = '10px';
-    counterElement.style.bottom = '40px';
-    counterElement.style.fontSize = '0.8rem';
-    counterElement.style.color = '#FFFFFF';
-    
-    messageInput.parentNode.insertBefore(counterElement, messageInput.nextSibling);
-    
-    messageInput?.addEventListener('input', function() {
-        const remaining = MAX_MESSAGE_LENGTH - this.value.length;
-        counterElement.textContent = `${remaining} characters remaining`;
-        
-        if (remaining < 20) {
-            counterElement.style.color = '#dc3545';
-        } else {
-            counterElement.style.color = '#FFFFFF';
+        else{
+            remaining = MAX_MESSAGE_LENGTH - this.value.length;
+            counterElement.textContent = `${remaining} characters remaining`;
+            
+            if (remaining < 20) {
+                counterElement.style.color = '#dc3545';
+            } else {
+                counterElement.style.color = '#FFFFFF';
+            }
         }
     });
+
 }
 
 window.clickRoom = function (room) {

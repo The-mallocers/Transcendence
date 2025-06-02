@@ -129,15 +129,7 @@
     color: white;
     margin-top: 10px;
     cursor: pointer;
-}
-
-
-.roomroom:nth-child(odd){
-    background-color: #00babc
-}
-
-.roomroom:nth-child(even){
-    background-color: #0b9799
+    background-color: #00babc;
 }
 
 .roomroom img{
