@@ -45,7 +45,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ CORE SETTINGS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 PRINT = 'true'
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
 S_42_API = open(os.environ.get('S_42_AUTH_PATH')).read()
@@ -238,7 +238,7 @@ SESSION_CACHE_ALIAS = 'default'
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ INTERNATIONALIZATION ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
 
-LANGUAGE_CODE = 'fr-fr'
+LANGUAGE_CODE = 'en'
 TIME_ZONE = 'Europe/Paris'
 USE_TZ = True
 USE_I18N = True
