@@ -40,6 +40,11 @@ chatSocket.onmessage = (event) => {
         {
             messageId.placeholder = `Send message to ${message.data.content.username}`
         }
+        const chatElement = document.querySelector(`.chat-${message.data.content.username}`);
+        const badge = chatElement.querySelector('.notification-badge');
+        if (badge) {
+            badge.innerText = '0';
+        }
     }
     else if(message.data.action == "NO_HISTORY")
         {

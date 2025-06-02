@@ -72,13 +72,13 @@ export function create_front_chat_room(room, username, usernameId, status, profi
             document.querySelectorAll('.active-room').forEach(div => {
                 if (div !== this) {
                     div.classList.remove('active-room');
-                    const badge = div.querySelector('.notification-badge');
-                    if (badge) {
-                        console.log("Hiding badge for room:", div);
-                        badge.style.display = 'none'; // Hide the badge when viewing profile
-                    }
                 }
             });
+
+            const badge = chatElement.querySelector('.notification-badge');
+            if (badge) {
+                badge.style.display = 'none'; // Hide the badge when viewing profile
+            }
             clickRoom(room)
         })
         chatProfile?.addEventListener('click', function(event){
@@ -110,13 +110,20 @@ export function create_front_chat_room(room, username, usernameId, status, profi
 
 export function addNotificationBadge(username) {
     const chatRoom = document.querySelector(`.chat-${username}`);
-    console.log("Chat room found:", chatRoom);
     if (chatRoom) {
-        const badge = document.querySelector('.notification-badge');
-        const profileContainer = document.querySelector('.profile-picture-container');
+        const roomroom = chatRoom.parentElement
+        const badge = chatRoom.querySelector('.notification-badge');
+        const profileContainer = chatRoom.querySelector('.profile-picture-container');
         let unreadCount = parseInt(badge.innerText) || 0;
         unreadCount += 1; // Increment unread count
-        
+        console.log(roomroom);
+
+        if (roomroom.classList.contains('active-room')) {
+            console.log("Room is active, resetting unread count.");
+            unreadCount = 0; // Reset unread count if the room is active
+            badge.style.display = 'none'; // Hide badge if the room is active
+        }
+
         if (unreadCount > 0) {
             if (badge) {
                 // Update existing badge

@@ -227,3 +227,13 @@ class Messages(models.Model):
                 return len(msg)
         except Exception as e:
             return []
+        
+    @staticmethod
+    @sync_to_async
+    def aset_message(client, room, message):
+        try:
+            with transaction.atomic():
+                Messages.objects.create(sender=client, content=message, room=room)
+        except Exception as e:
+            print(f"Error setting message: {e}")
+            return None
