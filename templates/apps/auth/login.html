@@ -1,100 +1,10 @@
 {% load static %}
 
-<head>
-</head>
-
-
-<style>
-    .loginPage {
-        color: white;
-        position: fixed;
-        top: 0;
-        left: 0;
-        /* background-image: ; */
-        width: 100vw;
-        height: 100vh;
-    }
-
-
-    .loginPage .container {
-        max-width: 42rem;
-        height: 100%;
-
-    }
-
-    .loginPage form {
-        position: relative;
-        flex-direction: column;
-        display: flex;
-        top: 40%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-    }
-
-
-    .loginPage form .myBtn {
-        border: none;
-        background-color: transparent;
-    }
-
-    .loginPage form .gbtn {
-        background-color: #DB4437;
-        border: 2px solid #d03f32;
-
-    }
-
-    .loginPage form .ibtn {
-        border: 2px solid #06a1a1;
-
-        background-color: #00BABB;
-    }
-
-    .loginPage img {
-        position: relative;
-
-
-        top: 20%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-
-        width: 142px;
-        height: 142px;
-
-    }
-
-    .loginPage form button {
-        background-color: #00BABB;
-        border: none;
-        color: white;
-    }
-
-    .loginPage form input {
-        border: #00BABB solid 2px;
-        border-radius: 2px;
-        background-color: rgba(44, 44, 44, 0.383);
-        color: white;
-
-    }
-
-
-    .loginPage .registerBtn {
-        text-decoration: underline;
-    }
-
-    .registerBtn:hover {
-        cursor: pointer
-    }
-
-    .loginPage .myBtn {
-        width: 100%;
-    }
-
-</style>
-
 <div class="loginPage" style="background-image: url('{% static 'assets/imgs/loginBackground.jpg' %}');">
-    <div class="container">
-        <img class="bgrImg" src="{% static 'assets/imgs/42_logo.svg' %}" alt="">
-        <form id="register-form" enctype="multipart/form-data" action="{% url 'login' %}">
+    <div class="container d-flex flex-column align-items-center justify-content-center">
+        {% comment %} <img class="bgrImg" src="{% static 'assets/imgs/42_logo.svg' %}" alt=""> {% endcomment %}
+        <img class="logo-tran d-flex alig" src="{% static 'assets/imgs/42_logo_tran.svg' %}" alt="">
+        <form class="d-flex flex-column" id="register-form" enctype="multipart/form-data" action="{% url 'login' %}">
             <div id="error-message" style="color: red;"></div>
             {% csrf_token %}
             <input class="p-3" type="email" id="email" name="email" placeholder="Enter your email" required>
@@ -115,7 +25,7 @@
             </div>
         </form>
     </div>
-
 </div>
 
 <script type="module" src="{% static '/js/apps/auth/login.js' %}"></script>
+<link rel="stylesheet" href="{% static 'css/auth/login.css' %}">
