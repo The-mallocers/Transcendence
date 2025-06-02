@@ -80,7 +80,17 @@ class NotificationService(BaseServices):
             await room.asave()
             await room.add_client(client)
             await room.add_client(target)
-
+            clientFriendTable = await client.get_friend_table()
+            targetFriendTable = await target.get_friend_table()
+            
+            clientBlock = "Block"
+            targetBlock = "Block"
+            
+            if clientFriendTable and await clientFriendTable.user_is_block(target) is True:
+                clientBlock = "Unblock"
+            if targetFriendTable and await targetFriendTable.user_is_block(client) is True:
+                targetBlock = "Unblock"
+                
             profile_picture_source = await client.aget_profile_by_user()
             profile_picture_target = await target.aget_profile_by_user()
 
@@ -90,6 +100,7 @@ class NotificationService(BaseServices):
                                 "sender": str(target.id),
                                 "username": await target.aget_profile_username(),
                                 "room": str(room.id),
+                                "textBlock": clientBlock,
                                 "profile_picture": profile_picture_target
                               })
 
@@ -99,6 +110,7 @@ class NotificationService(BaseServices):
                                 "sender": str(client.id),
                                 "username": await client.aget_profile_username(),
                                 "room": str(room.id),
+                                "textBlock": targetBlock,
                                 "profile_picture": profile_picture_source
                               })
 
