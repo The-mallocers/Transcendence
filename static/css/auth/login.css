@@ -1,91 +1,68 @@
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f0f0f0;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+.loginPage {
+    color: white;
+    position: fixed;
+    top: 0;
+    left: 0;
+    /* background-image: ; */
+    width: 100vw;
     height: 100vh;
 }
 
-header {
-    background-color: #4CAF50;
-    color: white;
-    width: 100%;
-    padding: 20px;
-    text-align: center;
-    position: fixed; /* Fixe le header en haut de la page */
-    top: 0; /* Positionne le header tout en haut */
-    left: 0; /* S'assure que le header couvre toute la largeur */
-    z-index: 1000; /* Assure que le header reste au-dessus des autres éléments */
+.loginPage .container {
+    max-width: 42rem;
+    height: 100%;
 }
 
-h1 {
-    font-size: 3em;
-    margin: 0;
+.logo-tran{
+    width: 250px;
+    object-fit: fill;
+    margin-bottom: 20px;
 }
 
-.container form {
-    background-color: white;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+.loginPage form {
     width: 80%;
-    max-width: 800px;
-    margin-top: 100px; /* pour éviter que le formulaire soit caché sous le header */
 }
 
-.login-container {
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    width: 100%;
-    max-width: 400px;
-}
 
-h1 {
-    text-align: center;
-    color: #333;
-}
-
-form {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-label {
-    font-size: 14px;
-    color: #555;
-}
-
-input {
-    padding: 10px;
-    font-size: 14px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-}
-
-button {
-    padding: 10px;
-    font-size: 16px;
-    background-color: #007BFF;
-    color: #fff;
+.loginPage form .myBtn {
     border: none;
-    border-radius: 4px;
-    cursor: pointer;
+    background-color: transparent;
 }
 
-button:hover {
-    background-color: #0056b3;
+.loginPage form .gbtn {
+    background-color: #DB4437;
+    border: 2px solid #d03f32;
+
 }
 
-.footer {
-    margin-top: 10px;
-    text-align: center;
-    font-size: 12px;
-    color: #777;
+.loginPage form .ibtn {
+    border: 2px solid #06a1a1;
+    background-color: #00BABB;
+}
+
+.loginPage form button {
+    background-color: #00BABB;
+    border: none;
+    color: white;
+}
+
+.loginPage form input {
+    border: #00BABB solid 2px;
+    border-radius: 2px;
+    background-color: rgba(44, 44, 44, 0.383);
+    color: white;
+
+}
+
+
+.loginPage .registerBtn {
+    text-decoration: underline;
+}
+
+.registerBtn:hover {
+    cursor: pointer
+}
+
+.loginPage .myBtn {
+    width: 100%;
 }

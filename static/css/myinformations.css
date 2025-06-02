@@ -173,6 +173,10 @@ ul.friends_group .list-group-item{
     height: 100%;
 }
 
+.box.lastPlayerContainer{
+    max-height: 368px;
+}
+
 .title-personal-info{
     color: #2c2c34;
     font-family: "futura-pt", "Helvetica", "Sans serif";
