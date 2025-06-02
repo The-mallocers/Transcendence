@@ -54,7 +54,8 @@ def get(req):
     if client is not None:
         winrate = get_winrate(client, games_played)
     pending_tournament_invitations = get_pending_tournament_invitations(client)
-    tournaments = Tournaments.objects.filter(clients__id=client.id)
+    tournaments = Tournaments.objects.filter(clients__id=client.id).order_by('-created_at')[:4]
+
     context = {
         "is_client_profile": False,
         "client": client,

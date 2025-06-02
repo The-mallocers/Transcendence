@@ -3,8 +3,11 @@ import { populateTree } from "./populateHelpers.js";
 if (window.treeInfos){
     populateTree(window.treeInfos)
     setTimeout(()=>{
-        const btn = document.querySelector("#leave-btn-tree")
-        if (btn)
-            btn.innerText = "Back to gamemodes"
+        const leaveBtn = document.querySelector("#leave-btn-tree")
+        const readyBtn = document.querySelector("#ready-btn")
+        if (leaveBtn)
+            leaveBtn.innerText = "Back to gamemodes"
+        if (readyBtn)
+            readyBtn.remove()
     }, 0)
 }
