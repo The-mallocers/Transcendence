@@ -50,7 +50,7 @@
 <div class="container-fluid main mt-4">
     <div class="row g-4 align-items-start justify-content-start flex-wrap">
         <div class="col-12 col-lg-6">
-            <div class="box">
+            <div class="box lastPlayerContainer">
                 <h4>Biggest rivals</h4>
                 <div class="lastPlayerContainer mt-4">
                     {% for rival_id, rival in rivals.items %}
@@ -100,10 +100,12 @@
             <div class="box tournamentBox">
                 <h4>Tournaments</h4>
                 {% for tournament in tournaments %}
-                    <div class="tournament" data-route="/pong/tournament/treequery/?code={{tournament.code}}">
-                        <img class="tournamentDiamond" src="{% static '/assets/imgs/diamond.png' %}" />
-                        <span>{{tournament.scoreboards.title|safe}}</span>
-                    </div>
+                    {% if tournament.winner is not None %}
+                        <div class="tournament" data-route="/pong/tournament/treequery/?code={{tournament.code}}">
+                            <img class="tournamentDiamond" src="{% static '/assets/imgs/diamond.png' %}" />
+                            <span>{{tournament.scoreboards.title|safe}}</span>
+                        </div>
+                    {% endif %}
                 {%endfor%}
             </div>
         </div>

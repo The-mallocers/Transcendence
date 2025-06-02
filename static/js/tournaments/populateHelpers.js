@@ -160,9 +160,10 @@ export function populateTournament(tournament_data){
     const btnsRoom = document.querySelector("#btnsRoom")
     const h1 = document.querySelector("h1")
     if (h1) {
-        // const parser = new DOMParser();
-        // const html = parser.parseFromString(tournament_data.title, "text/html");
-        h1.innerHTML = tournament_data.title;
+        const parser = new DOMParser();
+        const html = parser.parseFromString(tournament_data.title, "text/html");
+        // h1.innerText = tournament_data.title;
+        h1.innerText = html.firstChild.innerText;
     }
 
     if (btnsRoom) {
@@ -184,13 +185,13 @@ export function populateTournament(tournament_data){
     for (let i = 0 ; i < max_clients ; i++){
         clientsDiv.push(`
             <div class="col p-2">
-            <div class="content border p-3 d-flex justify-content-between align-items-center">
-            <div class="d-flex align-items-center justify-content-center gap-3">
-            <div class="nickname ml-3"> waiting <span class="dot-animation"></span></div>
+                <div class="content border p-3 d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center justify-content-center gap-3">
+                        <div class="nickname ml-3"> waiting <span class="dot-animation"></span></div>
 
-            </div>
-            </div>
-            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
             `)
         }

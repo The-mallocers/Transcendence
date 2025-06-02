@@ -366,6 +366,14 @@ class DeleteApiView(APIView):
                     return Response({
                         "error": "You are currently in a tournament, please end it before deleting your account"
                     }, status=status.HTTP_401_UNAUTHORIZED)
+            if (redis.hexists(RTables.HASH_G_QUEUE, str(client.id))):
+                return Response({
+                    "error": "You are currently in queue, please leave it before deleting your account"
+                }, status=status.HTTP_401_UNAUTHORIZED)
+            if (redis.hexists(RTables.HASH_DUEL_QUEUE, str(client.id))):
+                return Response({
+                    "error": "You are currently in a duel queue, please leave it before deleting your account"
+                }, status=status.HTTP_401_UNAUTHORIZED)
             client.delete()
             RedisConnectionPool.close_sync_connection('api')
             return response

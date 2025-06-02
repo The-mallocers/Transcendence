@@ -19,16 +19,19 @@ class MatchmakingService(BaseServices):
     # ════════════════════════════════════ Online ════════════════════════════════════ #
 
     async def _handle_join_queue(self, data, client: Clients):
-        if queue := await Clients.acheck_in_queue(client, self.redis):
-            if await self.redis.hget(RTables.HASH_TOURNAMENT_QUEUE(queue.decode('utf-8')), str(client.id)) == 'False':
-                await self.redis.hset(RTables.HASH_TOURNAMENT_QUEUE(queue.decode('utf-8')), str(client.id), 'True')
+        try:
+            if queue := await Clients.acheck_in_queue(client, self.redis):
+                if await self.redis.hget(RTables.HASH_TOURNAMENT_QUEUE(queue.decode('utf-8')), str(client.id)) == 'False':
+                    await self.redis.hset(RTables.HASH_TOURNAMENT_QUEUE(queue.decode('utf-8')), str(client.id), 'True')
+                    await asend_group(self.service_group, EventType.MATCHMAKING, ResponseAction.JOIN_QUEUE)
+                return await asend_group_error(self.service_group, ResponseError.ALREADY_IN_QUEUE)
+            if await self.redis.hget(name=RTables.HASH_MATCHES, key=str(client.id)) is not None:
+                return await asend_group_error(self.service_group, ResponseError.ALREAY_IN_GAME)
+            else:
+                await self.redis.hset(name=RTables.HASH_G_QUEUE, key=str(client.id), value=await client.aget_mmr())
                 await asend_group(self.service_group, EventType.MATCHMAKING, ResponseAction.JOIN_QUEUE)
-            return await asend_group_error(self.service_group, ResponseError.ALREADY_IN_QUEUE)
-        if await self.redis.hget(name=RTables.HASH_MATCHES, key=str(client.id)) is not None:
-            return await asend_group_error(self.service_group, ResponseError.ALREAY_IN_GAME)
-        else:
-            await self.redis.hset(name=RTables.HASH_G_QUEUE, key=str(client.id), value=await client.aget_mmr())
-            await asend_group(self.service_group, EventType.MATCHMAKING, ResponseAction.JOIN_QUEUE)
+        except:
+            return await asend_group_error(self.service_group, ResponseError.JOINING_ERROR)
 
     async def _handle_leave_queue(self, data, client: Clients):
         if await Clients.acheck_in_queue(client, self.redis) is RTables.HASH_G_QUEUE:
