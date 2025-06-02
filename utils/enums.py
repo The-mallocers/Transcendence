@@ -162,6 +162,7 @@ class ResponseAction(str, Enum):
     ALL_ROOM_RECEIVED: str = "all_room_received"
     NEW_FRIEND: str = "new_friend"
     ERROR_MESSAGE_USER_BLOCK: str = "error_message_user_block"
+    UNREAD_MESSAGES: str = "unread_messages"
     
     # ── NOTIFICATION ACTION ───────────────────────────────────────────────────────────
     ACK_SEND_FRIEND_REQUEST: str = "acknowledge_send_friend_request"

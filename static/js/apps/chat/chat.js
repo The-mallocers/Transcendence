@@ -4,7 +4,7 @@ import { create_message_duel } from "../game/gamemode.js";
 import { create_message_notif_block } from "../profile/profile.js";
 import { toast_message } from "../profile/toast.js";
 import { remove_toast } from "../profile/toast.js";
-import { getClientId } from "../../utils/utils.js";
+import { getClientId, addNotificationBadge } from "../../utils/utils.js";
 import { create_front_chat_room } from "../../utils/utils.js";
 
 let client_id = null;
@@ -40,6 +40,11 @@ chatSocket.onmessage = (event) => {
         {
             messageId.placeholder = `Send message to ${message.data.content.username}`
         }
+        const chatElement = document.querySelector(`.chat-${message.data.content.username}`);
+        const badge = chatElement.querySelector('.notification-badge');
+        if (badge) {
+            badge.innerText = '0';
+        }
     }
     else if(message.data.action == "NO_HISTORY")
         {
@@ -55,6 +60,7 @@ chatSocket.onmessage = (event) => {
         displayRooms(message.data.content.rooms);
     }
     else if(message.data.action == "MESSAGE_RECEIVED") {
+        addNotificationBadge(message.data.content.username)
         if (message.data.content.room_id === room_id) {
             let chatHistory = document.querySelector('.chatHistory');
             
@@ -212,11 +218,13 @@ async function displayRooms(rooms) {
     let chatRooms = document.querySelector('.chatRooms');
     
     for (let i = 0; i < rooms.length; i++) {
+        console.log("Unread message: ", rooms[i].unread_messages);
         create_front_chat_room(rooms[i].room, 
                             rooms[i].player[0].username, 
                             rooms[i].player[0].id, 
                             rooms[i].player[0].status,
-                            rooms[i].player[0].profile_picture)
+                            rooms[i].player[0].profile_picture,
+                            rooms[i].unread_messages);
     }
     scrollToBottom(chatRooms);
 }
