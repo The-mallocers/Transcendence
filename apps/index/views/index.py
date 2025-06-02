@@ -22,7 +22,8 @@ def get(req):
     ghistory = get_last_matches(client, games_played)
 
     tournaments = Tournaments.objects.filter(clients__id=client.id).order_by('-created_at')[:4]
-
+    for tournament in tournaments :
+        print(tournament.winner)
     friends_list = client.get_all_friends()
     friends_pending = client.get_all_pending_request()
     rivals = get_rivals(client, games_played)

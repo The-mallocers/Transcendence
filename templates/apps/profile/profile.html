@@ -100,10 +100,12 @@
             <div class="box tournamentBox">
                 <h4>Tournaments</h4>
                 {% for tournament in tournaments %}
-                    <div class="tournament" data-route="/pong/tournament/treequery/?code={{tournament.code}}">
-                        <img class="tournamentDiamond" src="{% static '/assets/imgs/diamond.png' %}" />
-                        <span>{{tournament.scoreboards.title|safe}}</span>
-                    </div>
+                    {% if tournament.winner is not None %}
+                        <div class="tournament" data-route="/pong/tournament/treequery/?code={{tournament.code}}">
+                            <img class="tournamentDiamond" src="{% static '/assets/imgs/diamond.png' %}" />
+                            <span>{{tournament.scoreboards.title|safe}}</span>
+                        </div>
+                    {% endif %}
                 {%endfor%}
             </div>
         </div>
