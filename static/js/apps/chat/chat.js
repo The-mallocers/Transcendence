@@ -31,7 +31,7 @@ function showActiveChat(show) {
 
 chatSocket.onmessage = (event) => {
     const message = JSON.parse(event.data);
-    
+    // console.log(message);
     if (message.data.action == "HISTORY_RECEIVED") {
         showActiveChat(true);
         displayHistory(message.data.content.messages);
@@ -76,7 +76,7 @@ chatSocket.onmessage = (event) => {
         create_front_chat_room(message.data.content.room,
                                 message.data.content.username, 
                                 message.data.content.sender, 
-                                "Block",
+                                message.data.content.textBlock,
                                 message.data.content.profile_picture);
     }
     else if (message.data.action == "DUEL_CREATED") {
