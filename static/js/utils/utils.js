@@ -114,10 +114,8 @@ export function addNotificationBadge(username) {
         const profileContainer = chatRoom.querySelector('.profile-picture-container');
         let unreadCount = parseInt(badge.innerText) || 0;
         unreadCount += 1; // Increment unread count
-        console.log(roomroom);
 
         if (roomroom.classList.contains('active-room')) {
-            console.log("Room is active, resetting unread count.");
             unreadCount = 0; // Reset unread count if the room is active
             badge.style.display = 'none'; // Hide badge if the room is active
         }

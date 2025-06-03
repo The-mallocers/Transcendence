@@ -262,7 +262,6 @@ class PongLogic:
     def compute_mmr_change(self, winner, loser):
             K = 50
 
-            print(winner, loser)
             winner_mmr = winner.client.stats.mmr
             loser_mmr = loser.client.stats.mmr
 

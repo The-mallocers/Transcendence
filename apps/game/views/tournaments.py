@@ -70,7 +70,6 @@ def tournamentTreeQuery(request):
         return JsonResponse({
             'html': html_content,
         }, status=404)
-    print("SALUT:", tournamentCode, tournament.scoreboards)
     html_content = render_to_string("apps/pong/treeHistory.html", {"csrf_token": get_token(request), "roomInfos": json.dumps(tournament.scoreboards)})
     return JsonResponse({
         'html': html_content,

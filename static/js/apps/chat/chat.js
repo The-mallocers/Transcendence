@@ -213,7 +213,6 @@ async function displayRooms(rooms) {
     let chatRooms = document.querySelector('.chatRooms');
     
     for (let i = 0; i < rooms.length; i++) {
-        console.log("Unread message: ", rooms[i].unread_messages);
         create_front_chat_room(rooms[i].room, 
                             rooms[i].player[0].username, 
                             rooms[i].player[0].id, 

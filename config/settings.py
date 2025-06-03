@@ -46,7 +46,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
-PRINT = 'true'
+PRINT = 'false'
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
 S_42_API = open(os.environ.get('S_42_AUTH_PATH')).read()
 U_42_API = open(os.environ.get('U_42_AUTH_PATH')).read()

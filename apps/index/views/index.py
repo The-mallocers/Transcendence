@@ -26,7 +26,6 @@ def get(req):
         clients__id=client.id,
         winner__isnull=False
     ).order_by('-created_at')[:4]
-    print("My tournaments:", tournaments)
 
     friends_list = client.get_all_friends()
     friends_pending = client.get_all_pending_request()

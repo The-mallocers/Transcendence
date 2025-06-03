@@ -235,5 +235,4 @@ class Messages(models.Model):
             with transaction.atomic():
                 Messages.objects.create(sender=client, content=message, room=room)
         except Exception as e:
-            print(f"Error setting message: {e}")
             return None
