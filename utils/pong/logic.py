@@ -215,7 +215,7 @@ class PongLogic:
             winner.score = self.score_pL.get_score()
             loser.client = Clients.get_client_by_id(self.game.pR.client.id)
             loser.score = self.score_pR.get_score()
-        elif self.score_pL.get_score() < self.score_pR.get_score():
+        else:
             winner.client = Clients.get_client_by_id(self.game.pR.client.id)
             winner.score = self.score_pR.get_score()
             loser.client = Clients.get_client_by_id(self.game.pL.client.id)
