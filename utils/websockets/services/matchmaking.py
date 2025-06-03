@@ -72,7 +72,7 @@ class MatchmakingService(BaseServices):
             except ValueError as e:
                 await asend_group_error(self.service_group, ResponseError.KEY_ERROR, str(e))
             except Exception as e:
-                self._logger.error(traceback.format_exc())
+                # self._logger.error(traceback.format_exc())
                 await asend_group_error(self.service_group, ResponseError.TOURNAMENT_NOT_CREATE, str(e))
 
     async def _handle_ping(self, data, client):

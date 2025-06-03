@@ -30,6 +30,10 @@ class GameConsumer(WsConsumer):
         except JSONDecodeError as e:
             self._logger.error(f'Json error: {e}')
             await asend_group_error(RTables.GROUP_CLIENT(self.client.id), ResponseError.JSON_ERROR)
+        except KeyError as e:
+            await asend_group_error(RTables.GROUP_CLIENT(self.client.id), ResponseError.JSON_ERROR)
+        except Exception:
+            await asend_group_error(RTables.GROUP_CLIENT(self.client.id), ResponseError.JSON_ERROR)
 
     async def connect(self):
         await super().connect()
