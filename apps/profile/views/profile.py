@@ -59,7 +59,7 @@ def get(req):
         clients__id=client.id,
         winner__isnull=False
     ).order_by('-created_at')[:4]
-    print("My tournaments:", tournaments)
+    # print(tournaments)
 
     context = {
         "is_client_profile": False,

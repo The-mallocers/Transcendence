@@ -13,7 +13,9 @@ function joinTournament(code) {
             }
         }
     }
-    tournamentSocket.send(JSON.stringify(message));
+    if (WebSocketManager.isSocketOpen(tournamentSocket)) {
+        tournamentSocket.send(JSON.stringify(message));
+    }
 }
 
 //Need to do this so that the event listerner also listens to the dynamic html
