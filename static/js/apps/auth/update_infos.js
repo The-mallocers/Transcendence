@@ -5,7 +5,7 @@ async function update() {
     const error = document.getElementById("error-message");
     const username = document.getElementById('username')?.value;
     const email = document.getElementById('email')?.value;
-    const password = document.getElementById('password').value;
+    const password = document.getElementById('password')?.value;
     const passwordcheck = document.getElementById('password_check')?.value;
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
 
@@ -38,6 +38,18 @@ async function update() {
             error.textContent = "Informations updated succesfully";
             updateFrontInformation();
             error.style.color = "green";
+            const todel1 = document.getElementById('username')
+            const todel2 = document.getElementById('email')
+            const todel3 = document.getElementById('password')
+            const todel4 = document.getElementById('password_check')
+            if (todel1)
+                todel1.value = ""
+            if (todel2)
+                todel2.value = ""
+            if (todel3)
+                todel3.value = ""
+            if (todel4)
+                todel4.value = ""
         } else {
             error.textContent = "Error updating";
             error.style.color = "red";

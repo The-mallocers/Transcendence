@@ -78,6 +78,8 @@ class RegisterApiView(APIView):
 
 class UpdateApiView(APIView):
     def put(self, request, *args, **kwargs):
+        if validate_structure(request.data) == False:
+            return Response({"message": "Form format is wrong"}, status=status.HTTP_400_BAD_REQUEST)
         try:
             data = request.data
             # We get rid of the empty fields
@@ -88,6 +90,8 @@ class UpdateApiView(APIView):
                             del data[section][key]
                     if not data[section]:
                         del data[section]
+            if data == {}:
+                return Response({"message": "Updates can't be empty"}, status=status.HTTP_400_BAD_REQUEST)
 
             client = Clients.get_client_by_request(request)
             serializer = ClientSerializer(instance=client, data=request.data, partial=True)
@@ -107,8 +111,18 @@ class UpdateApiView(APIView):
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except (ValidationError) as e:
             return Response(e.detail, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e: 
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR) 
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST) 
+
+def validate_structure(data):
+    try:
+        _ = data['profile']['username']
+        _ = data['profile']['email']
+        _ = data['password']['password']
+        _ = data['password']['passwordcheck']
+        return True
+    except KeyError:
+        return False
 
 
 class LoginApiView(APIView):
