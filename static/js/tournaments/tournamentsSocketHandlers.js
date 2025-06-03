@@ -30,6 +30,7 @@ export function setUpTournamentSocket (tournamentSocket) {
             case "EXCEPTION":
             case "ERROR":
             case "KEY_ERROR":
+            case "SERVICE_ERROR":
                 const path = window.location.pathname;
                 if (path == "/pong/tournament/tree/" || path == "/pong/tournament/") {
                     remove_toast();
