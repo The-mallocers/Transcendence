@@ -299,6 +299,8 @@ class TournamentThread(Threads):
 
         for key in self.redis.scan_iter(match=f'{RTables.JSON_TOURNAMENT("*")}'):
             key = key.decode('utf-8')
+            if RTables.HASH_TOURNAMENT_INVITATION('') in key:
+                continue
             if key == RTables.JSON_TOURNAMENT(self.tournament.code):
                 continue
 

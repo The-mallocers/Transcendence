@@ -71,7 +71,6 @@ class RequestAction(str, Enum):
     PADDLE_MOVE: str = 'paddle_move'
 
     # ── Chat Actions ──────────────────────────────────────────────────────────────────
-    CREATE_ROOM: str = "create_room"
     SEND_MESSAGE: str = "send_message"
     GET_HISTORY: str = "get_history"
     GET_ALL_ROOM_BY_CLIENT: str = "get_all_room_by_client"
