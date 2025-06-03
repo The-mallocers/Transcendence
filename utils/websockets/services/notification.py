@@ -179,7 +179,7 @@ class NotificationService(BaseServices):
 
     async def _handle_create_duel(self, data, client: Clients):
         # ── Target Check ──────────────────────────────────────────────────────────── #
-        target = await Clients.aget_client_by_id(data.get('data').get('args').get('target_id'))
+        target = await Clients.aget_client_by_id(data.get('data').get('args').get('target'))
         if target is None:
             return await asend_group_error(self.service_group, ResponseError.TARGET_NOT_FOUND)
         target_online = await self.redis.hget(RTables.HASH_CLIENT(target.id), str(EventType.NOTIFICATION.value))

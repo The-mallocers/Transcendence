@@ -188,7 +188,6 @@ window.handleChatUnblock = function (username) {
 }
 
 window.handleChatDuel = function (usernameId) {
-
     const message = create_message_duel("create_duel", usernameId);
     notifSocket.send(JSON.stringify(message));
     // navigateTo('/pong/duel/');
