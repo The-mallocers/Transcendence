@@ -11,7 +11,7 @@ export const WebSocketManager = {
     //   client_id = await getClientId(); // Ensure client_id is available
     // }
       if (this.isSocketClosed(this.gameSocket)) {
-      this.gameSocket = new WebSocket(`wss://${window.location.host}/ws/game/?id=${client_id}`);
+      this.gameSocket = new WebSocket(`wss://${window.location.host}/ws/game/`);
           this.gameSocket.onopen = () => {
               const message = {
                   "event": "matchmaking",
@@ -30,7 +30,7 @@ export const WebSocketManager = {
     //   client_id = await getClientId();
     // }
       if (this.isSocketClosed(this.chatSocket)) {
-      this.chatSocket = new WebSocket(`wss://${window.location.host}/ws/chat/?id=${client_id}`);
+      this.chatSocket = new WebSocket(`wss://${window.location.host}/ws/chat/`);
           this.chatSocket.onopen = () => {
               const message = {
                   "event": "chat",
@@ -49,7 +49,7 @@ export const WebSocketManager = {
     //   client_id = await getClientId();
     // }
       if (this.isSocketClosed(this.notifSocket)) {
-      this.notifSocket = new WebSocket(`wss://${window.location.host}/ws/notification/?id=${client_id}`);
+      this.notifSocket = new WebSocket(`wss://${window.location.host}/ws/notification/`);
           this.notifSocket.onopen = () => {
               const message = {
                   "event": "notification",
@@ -82,24 +82,6 @@ export const WebSocketManager = {
 
         }
     return this.tournamentSocket;
-  },
-  async initNotifSocket(client_id) {
-    // if (!client_id) {
-    //   client_id = await getClientId();
-    // }
-      if (this.isSocketClosed(this.notifSocket)) {
-      this.notifSocket = new WebSocket(`wss://${window.location.host}/ws/notification/?id=${client_id}`);
-          this.notifSocket.onopen = () => {
-              const message = {
-                  "event": "notification",
-                  "data": {
-                      "action": "ping"
-                  }
-              }
-              this.notifSocket.send(JSON.stringify(message))
-          }
-    }
-    return this.notifSocket;
   },
 
   closeAllSockets() {
