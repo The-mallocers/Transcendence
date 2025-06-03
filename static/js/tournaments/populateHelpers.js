@@ -100,7 +100,7 @@ const buildControlsCard = (tournamentInfos) => {
     return `
     <div id="controls-card-fixed" class="controls-card mt-3">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <h3 class="mb-0">Tournament Controls</h3>
+            <h3 class="mb-0" id="tournament-history-title">Tournament Controls</h3>
         </div>
         <div class="card-body">
             <div class="btns d-flex flex-row justify-content-between gap-3 align-items-center">
@@ -156,9 +156,9 @@ export function populateTree(tournamentInfos) {
 
 //TOURNAMENT ROOM
 export function populateTournament(tournament_data){
-    const max_clients = tournament_data.max_clients
-    const btnsRoom = document.querySelector("#btnsRoom")
-    const h1 = document.querySelector("h1")
+    const max_clients = tournament_data.max_clients;
+    const btnsRoom = document.querySelector("#btnsRoom");
+    const h1 = document.querySelector("#tournament-room-title");
     if (h1) {
         const parser = new DOMParser();
         const html = parser.parseFromString(tournament_data.title, "text/html");

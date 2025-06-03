@@ -5,7 +5,7 @@ if (window.treeInfos){
     setTimeout(()=>{
         const leaveBtn = document.querySelector("#leave-btn-tree");
         const readyBtn = document.querySelector("#ready-btn");
-        const titleTree = document.querySelector("h3");
+        const titleTree = document.querySelector("#tournament-history-title");
         if (titleTree) {
             titleTree.innerText = "Tournament Result";
             // titleTree.parentElement.classList.add('text-center');
