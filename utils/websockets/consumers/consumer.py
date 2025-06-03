@@ -27,12 +27,10 @@ class WsConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         logging.getLogger('websocket.client').info(f'New WebSocket connection from {self.scope["client"]}')
         self._redis = await RedisConnectionPool.get_async_connection(self.service.__class__.__name__)
-        query_string = self.scope['query_string'].decode()
-        query_params = parse_qs(query_string)
         path = self.scope['path']
 
         try:
-            self.client: Clients = await Clients.aget_client_by_id(query_params.get('id', ['default'])[0])
+            self.client = await Clients.get_client_by_websocket(self.scope)
             self.event_type = EventType(path.split('/')[2]) if len(path.split('/')) > 2 else None
             await self.accept()
             if await self._redis.hget(name=RTables.HASH_CLIENT(self.client.id), key=str(self.event_type.value)) is not None:
