@@ -180,31 +180,45 @@ import json
 
 # the 2FA does not use the restful api stuff like above, too bad !
 def change_two_fa(req):
-    if req.method == "POST":
-        data = json.loads(req.body.decode('utf-8'))
-        client = Clients.get_client_by_request(req)
-        if client is not None:
-            if(data['status']):
-                if get_qrcode(client, True) == True:
-                    response = JsonResponse({
-                        "success": True,
-                        "state": True,
-                        "image": client.twoFa.qrcode.url,
-                        "message": "State 2fa change to true",
-                    }, status=200)
-            else:
-                client.twoFa.update("enable", False)
+    if req.method != "POST":
+        return formulate_json_response(False, 405, "Method not allowed for this request", "/profile/settings")
+    if not req.body:
+        return formulate_json_response(False, 400, "Error from json 2fa", "/profile/settings")
+    try:
+        decoded_body = req.body.decode('utf-8')
+    except UnicodeDecodeError as e:
+        return formulate_json_response(False, 400, f"Cannot decode request body as UTF-8: {str(e)}", "/profile/settings")
+    try:
+        data = json.loads(decoded_body)
+    except json.JSONDecodeError as e:
+        return formulate_json_response(False, 400, f"Invalid JSON format: {str(e)}", "/profile/settings")
+    
+    client = Clients.get_client_by_request(req)
+    if client is not None:
+        if 'status' not in data:
+            return formulate_json_response(False, 400, "Error from json 2fa", "/profile/settings")
+        if(data['status']):
+            if get_qrcode(client, True) == True:
                 response = JsonResponse({
                     "success": True,
-                    "state": False,
-                    "message": "State 2fa change to false"
+                    "state": True,
+                    "image": client.twoFa.qrcode.url,
+                    "message": "State 2fa change to true",
                 }, status=200)
         else:
+            client.twoFa.update("enable", False)
             response = JsonResponse({
-                "success": False,
-                "message": "No user match this request"
-            }, status=404)
-        return response
+                "success": True,
+                "state": False,
+                "message": "State 2fa change to false"
+            }, status=200)
+    else:
+        response = JsonResponse({
+            "success": False,
+            "message": "No user match this request"
+        }, status=404)
+    return response
+        
 
 import pyotp
 import qrcode
@@ -244,51 +258,70 @@ def get_qrcode(user, binary):
         if old_twofa and Clients.objects.filter(twoFa=old_twofa).count() <= 1:
             if old_twofa.qrcode:
                 old_twofa.qrcode.delete(save=False)
-            old_twofa.delete()
-            
+            old_twofa.delete()        
         return True
     return False
 
 def post_check_qrcode(req):
     client = Clients.get_client_by_request(req)
-    if client: 
-        if req.method == "POST":
-            data = json.loads(req.body.decode('utf-8'))
-            totp = pyotp.TOTP(client.twoFa.key)
-            is_valid = totp.verify(data['code'])
-            if is_valid:
-                client.twoFa.update("enable", True)
-                if not client.twoFa.scanned:
-                    client.twoFa.update("scanned", True)
-                response = formulate_json_response(True, 200, "2Fa successfully activate", "/profile/settings") 
-                return response
-            else:
-                return formulate_json_response(False, 200, "Invalid code", "/profile/settings")
+    if req.method != "POST":
+        return formulate_json_response(False, 405, "Method not allowed for this request", "/profile/settings")
+    if not req.body:
+        return formulate_json_response(False, 400, "Error from json 2fa", "/profile/settings")
+    try:
+        decoded_body = req.body.decode('utf-8')
+    except UnicodeDecodeError as e:
+        return formulate_json_response(False, 400, f"Cannot decode request body as UTF-8: {str(e)}", "/profile/settings")
+    try:
+        data = json.loads(decoded_body)
+    except json.JSONDecodeError as e:
+        return formulate_json_response(False, 400, f"Invalid JSON format: {str(e)}", "/profile/settings")
+    if client:
+        totp = pyotp.TOTP(client.twoFa.key)
+        if 'code' not in data:
+            return formulate_json_response(False, 400, "Error from json 2fa", "/profile/settings")
+        is_valid = totp.verify(data['code'])
+        if is_valid:
+            client.twoFa.update("enable", True)
+            if not client.twoFa.scanned:
+                client.twoFa.update("scanned", True)
+            response = formulate_json_response(True, 200, "2Fa successfully activate", "/profile/settings") 
+            return response
         else:
-            return formulate_json_response(False, 405, "Method not allowed for this request", "/profile/settings")    
+            return formulate_json_response(False, 200, "Invalid code", "/profile/settings")
     else:
         return formulate_json_response(False, 404, "No user match this request", "/profile/settings")
 
 def post_twofa_code(req):
     email = req.COOKIES.get('email')
     client = Clients.get_client_by_email(email)
+    if req.method != "POST":
+        return formulate_json_response(False, 405, "Method not allowed for this request", "/profile/settings")
+    if not req.body:
+        return formulate_json_response(False, 400, "Error from json 2fa", "/profile/settings")
+    try:
+        decoded_body = req.body.decode('utf-8')
+    except UnicodeDecodeError as e:
+        return formulate_json_response(False, 400, f"Cannot decode request body as UTF-8: {str(e)}", "/profile/settings")
+    try:
+        data = json.loads(decoded_body)
+    except json.JSONDecodeError as e:
+        return formulate_json_response(False, 400, f"Invalid JSON format: {str(e)}", "/profile/settings")
     if client is None:
         return formulate_json_response(False, 404, "No user match this request", "/auth/login")
-    if req.method == "POST":
-        data = json.loads(req.body.decode('utf-8'))
-        totp = pyotp.TOTP(client.twoFa.key)
-        is_valid = totp.verify(data['code'])
-        if is_valid:
-            if not client.twoFa.scanned:
-                client.twoFa.update("scanned", True)
-            response = formulate_json_response(True, 200, "Login Successful", "/")
-            JWT(client, JWTType.ACCESS, req).set_cookie(response)
-            JWT(client, JWTType.REFRESH, req).set_cookie(response)
-            return response
-        else:
-            response = formulate_json_response(False, 200, "Invalid Code", "/auth/login")
+    totp = pyotp.TOTP(client.twoFa.key)
+    if 'code' not in data:
+        return formulate_json_response(False, 400, "No code in the two fa code", "/profile/settings")
+    is_valid = totp.verify(data['code'])
+    if is_valid:
+        if not client.twoFa.scanned:
+            client.twoFa.update("scanned", True)
+        response = formulate_json_response(True, 200, "Login Successful", "/")
+        JWT(client, JWTType.ACCESS, req).set_cookie(response)
+        JWT(client, JWTType.REFRESH, req).set_cookie(response)
+        return response
     else:
-        response = formulate_json_response(False, 401, "Method not allowed for this request", "/auth/login")
+        response = formulate_json_response(False, 200, "Invalid Code", "/auth/login")
     return response
 
 def formulate_json_response(state, status, message, redirect):
@@ -321,7 +354,6 @@ class GetClientIDApiView(APIView):
 class UploadPictureApiView(APIView):
     def post(self, request: HttpRequest, *args, **kwargs):
         try:
-
             client = Clients.get_client_by_request(request)
             profile = client.profile
             if not profile:
