@@ -405,9 +405,11 @@ notifSocket.onmessage = (event) => {
         navigateTo(`/pong/tournament/?code=${message.data.content.tournament_code}`);
     }
     else if(message.data.action == "NEW_MESSAGE") {
-        // console.log("New message received", message.data.content.sender_id);
-        remove_toast();
-        toast_message(`New message from ${message.data.content.sender_id}`);
+        if (window.location.pathname != '/chat/')
+        {
+            remove_toast();
+            toast_message(`New message from ${message.data.content.sender_id}`);
+        }
     }
     else if(message.data.action == "TOURNAMENT_FULL"){
         remove_toast();

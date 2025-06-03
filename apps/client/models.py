@@ -44,7 +44,7 @@ class Clients(models.Model):
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ SURCHARGE ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ #
 
     def __str__(self):
-        return f"Client data => Email:{self.profile.email}, Username:{self.profile.username}"
+        return f"Client uuid: {self.id}"
 
     # J'overide delete pour que ca supprime tout les trucs associer quand on supprime un client
     # Hopefully it doesnt break anything else
@@ -93,6 +93,19 @@ class Clients(models.Model):
         if token is not None:
             return Clients.get_client_by_id(token.SUB)
         return None
+
+    @staticmethod
+    async def get_client_by_websocket(scope):
+        from utils.jwt.JWT import JWT
+
+        cookies = scope.get('cookies', {})
+        access_token = cookies.get('access_token')
+        try:
+            token = JWT.decode_token(access_token)
+            client = await Clients.aget_client_by_id(token['sub'])
+            return client
+        except Exception as e:
+            return None
 
     @staticmethod
     @sync_to_async
