@@ -415,6 +415,10 @@ notifSocket.onmessage = (event) => {
         remove_toast();
         toast_message('Tournament full');        
     }
+    else if (message.data.action == "ALREADY_IN_QUEUE") {
+        remove_toast();
+        toast_message('You are already in the queue');
+    }
 };
 
 window.handleAskFriend = function(username) {

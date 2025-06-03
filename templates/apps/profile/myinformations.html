@@ -57,20 +57,20 @@
                 <form id="register-form" method="PUT" action="{% url 'update' %}" enctype="multipart/form-data">
                     <div id="error-message" style="color: red;"></div>
                     <div>
-                        <label for="username" class="control-label username optional">Username</label>
-                        <input class="form-control string optional" id="username" name="username" type="text" required>
+                        <label for="username" class="control-label username optional" >Username</label>
+                        <input class="form-control string optional" id="username" name="username" type="text" maxlength="50" required>
                     </div>
                     <div>
                         <label for="email" class="control-label email optional">Email</label>
-                        <input class="form-control string optional" id="email" type="email" name="email" required>
+                        <input class="form-control string optional" id="email" type="email" name="email" maxlength="50" required>
                     </div>
                     <div>
                         <label for="password" class="control-label password optional">Password</label>
-                        <input class="form-control string optional" id="password" type="password" name="password" required>
+                        <input class="form-control string optional" id="password" type="password" name="password" maxlength="512" required>
                     </div>
                     <div>
                         <label for="password_check" class="control-label email optional">Verify password</label>
-                        <input class="form-control string optional" id="password_check" type="password" name="password_check" required>
+                        <input class="form-control string optional" id="password_check" type="password" name="password_check" maxlength="512" required>
                     </div>
                     <div class="type-intra-green mt-4" id="update-btn">Update informations</div>
                 </form>
