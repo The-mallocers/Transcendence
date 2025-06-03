@@ -48,8 +48,8 @@ class PasswordApiView(APIView):
 
 
 class RegisterApiView(APIView):
-    permission_classes = []
-    authentication_classes = []
+    # permission_classes = []
+    # authentication_classes = []
 
     def post(self, request, *args, **kwargs):
         if validate_register(request.data) == False:
@@ -136,8 +136,8 @@ def validate_structure(data):
 
 
 class LoginApiView(APIView):
-    permission_classes = []
-    authentication_classes = []
+    # permission_classes = []
+    # authentication_classes = []
 
     def post(self, request: HttpRequest, *args, **kwargs):
         email = request.POST.get('email')
@@ -180,8 +180,8 @@ class LoginApiView(APIView):
 
 # TODO, add the fact that we disconnect the notif socket/Get rid of the client in redis
 class LogoutApiView(APIView):
-    permission_classes = []
-    authentication_classes = []
+    # permission_classes = []
+    # authentication_classes = []
 
     def post(self, request: HttpRequest, *args, **kwargs):
         if request.COOKIES.get('access_token') is not None:
