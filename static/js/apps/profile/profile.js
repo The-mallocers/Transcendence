@@ -160,7 +160,7 @@ if (!searchParams.has('username') && pathname == '/') {
 
 notifSocket.onmessage = (event) => {
     const message = JSON.parse(event.data);
-
+    console.log(message);
     if (message.data.action == "SESSION_EXPIRED") {
         remove_toast();
         toast_message("Session expired");
@@ -409,6 +409,10 @@ notifSocket.onmessage = (event) => {
         // console.log("New message received", message.data.content.sender_id);
         remove_toast();
         toast_message(`New message from ${message.data.content.sender_id}`);
+    }
+    else if(message.data.action == "TOURNAMENT_FULL"){
+        remove_toast();
+        toast_message('Tournament full');        
     }
 };
 

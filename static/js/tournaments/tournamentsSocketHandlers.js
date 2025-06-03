@@ -19,7 +19,8 @@ export function setUpTournamentSocket (tournamentSocket) {
     tournamentSocket.onmessage = (message) => {
         const jsonData = JSON.parse(message.data);
         if (jsonData.event != "TOURNAMENT" && jsonData.event != "ERROR") return;
-        const action = jsonData.data.action;   
+        const action = jsonData.data.action;
+        console.log(action);
         switch (action) {
 
             case "HOST_LEAVE":
@@ -115,6 +116,10 @@ export function setUpTournamentSocket (tournamentSocket) {
             case "BLOCKED_USER":
                 remove_toast();
                 toast_message("Cant send invitation to user block")
+                break;
+            case "TOURNAMENT_FULL":
+                remove_toast();
+                toast_message("Tournament is Full !");
                 break;
             default:
                 break;
