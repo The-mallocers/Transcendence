@@ -52,6 +52,8 @@ class RegisterApiView(APIView):
     authentication_classes = []
 
     def post(self, request, *args, **kwargs):
+        if validate_register(request.data) == False:
+            return Response({"error": "Form format is wrong"}, status=status.HTTP_400_BAD_REQUEST)
         options = ["Fire", "Earth", "Water", "Air"]
         coa = random.choice(options)
         request.data['profile']['coalition'] = coa
@@ -59,22 +61,30 @@ class RegisterApiView(APIView):
         if serializer.is_valid():
             try:
                 client = serializer.save()  # this can fail so we added a catch
-                
-
                 logger.info(f'Client create successfully: {client}')
                 response = Response(ClientSerializer(client).data, status=status.HTTP_201_CREATED)
                 JWT(client, JWTType.ACCESS, request).set_cookie(response)  # vous aviez raison la team c'est mieux
                 JWT(client, JWTType.REFRESH, request).set_cookie(response)
                 return response
             except Exception as e:
-                import traceback
-                logging.getLogger('MainThread').error(traceback.format_exc())
+                # import traceback
+                # logging.getLogger('MainThread').error(traceback.format_exc())
                 return Response({"error": str(e)},
-                                status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                                status=status.HTTP_400_BAD_REQUEST)
         else:
             logging.getLogger('MainThread').error(serializer.errors)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+def validate_register(data):
+    try:
+        # Try to access all required keys
+        _ = data['profile']['username']
+        _ = data['profile']['email']
+        _ = data['password']['password']
+        _ = data['password']['passwordcheck']
+        return True
+    except KeyError:
+        return False
 
 class UpdateApiView(APIView):
     def put(self, request, *args, **kwargs):
@@ -132,6 +142,9 @@ class LoginApiView(APIView):
     def post(self, request: HttpRequest, *args, **kwargs):
         email = request.POST.get('email')
         pwd = request.POST.get('password')
+        if email is None or pwd is None:
+            return Response({"error": "Form format is wrong"}, status=status.HTTP_400_BAD_REQUEST)
+
         client = Clients.get_client_by_email(email)
         if client is None or client.password.check_pwd(password=pwd) is False:
             return Response({
