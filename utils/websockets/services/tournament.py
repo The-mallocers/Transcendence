@@ -61,13 +61,18 @@ class TournamentService(BaseServices):
         if not await self.redis.exists(RTables.HASH_TOURNAMENT_QUEUE(code)):
             return await asend_group_error(self.service_group, ResponseError.TOURNAMENT_NOT_EXIST)
         else:
+            max_client = await self.redis.json().get(RTables.JSON_TOURNAMENT(code), Path('max_clients'))
             if await self.redis.json().get(RTables.JSON_TOURNAMENT(code), Path('is_public')) == 'True':
                 return await asend_group_error(self.service_group, ResponseError.NOT_INVITED)
             if await self.redis.hget(RTables.HASH_TOURNAMENT_QUEUE(code), str(client.id)) == 'True':
                 return await asend_group_error(self.service_group, ResponseError.ALREADY_JOIN_TOURNAMENT)
             client_list = [await self.redis.json().get(RTables.JSON_TOURNAMENT(code), Path('clients'))]
-            if await self.redis.json().get(RTables.JSON_TOURNAMENT(code), Path('max_clients')) < len(client_list):
+            if max_client <= len(client_list):
                 return await asend_group_error(self.service_group, ResponseError.TOURNAMENT_FULL)
+            queue = await self.redis.hgetall(RTables.HASH_TOURNAMENT_QUEUE(code))
+            client_list = list(queue.items())
+            if len(queue) >= max_client:
+                return await asend_group_error(self.service_group, ResponseError.TOURNAMENT_FULL) 
             else:
                 await self.redis.hset(RTables.HASH_TOURNAMENT_QUEUE(code), str(client.id), 'True')
                 await self.channel_layer.group_add(RTables.GROUP_TOURNAMENT(code), self.channel_name)

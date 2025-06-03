@@ -14,6 +14,7 @@ from utils.threads.game import GameThread
 from utils.threads.threads import Threads
 from utils.util import get_all_online_clients
 from utils.websockets.channel_send import send_group, send_group_error
+from utils.util import aget_all_online_clients
 
 
 class TournamentThread(Threads):
@@ -95,8 +96,11 @@ class TournamentThread(Threads):
                 send_group(RTables.HASH_CLIENT(game.pR.client.id), EventType.TOURNAMENT, ResponseAction.TOURNAMENT_GAME_READY)
                 GameThread(game=game).start()
             self.set_status(TournamentStatus.RUNNING)
+            self._helper_list_tournament() #sending update that tournament started   
             return True
         return False
+
+
 
     #Very importante !!
     def _running(self):
@@ -290,7 +294,7 @@ class TournamentThread(Threads):
         }
         return roomInfos
 
-    def _helper_list_tournament(self, client):
+    def _helper_list_tournament(self):
         tournaments_in_waitting = []
 
         for key in self.redis.scan_iter(match=f'{RTables.JSON_TOURNAMENT("*")}'):
