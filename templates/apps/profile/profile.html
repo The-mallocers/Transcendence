@@ -6,7 +6,15 @@
     <div class="avatar">
         <img src="{{ client.profile.profile_picture.url }}">
         {% if is_client_profile %}
-        <img class="star" src="/static/img/star.png" alt="" style="width: 5rem; height: 5rem;">
+        <span class="badge" style="
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            padding: 0.5rem 1rem;
+            border-radius: 30px;
+        ">
+            <img class="img-badge" src="/static/img/star.png" alt="Badge">
+        </span>
         {% endif %}
     </div>
     <div class="container infos">

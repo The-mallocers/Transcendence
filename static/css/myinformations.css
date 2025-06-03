@@ -232,3 +232,8 @@ label{
 .verify-code{
     margin-bottom: 20px;
 }
+.avatar .img-badge{
+    width: 40px; 
+    height: 40px; 
+    object-fit: cover;
+}
