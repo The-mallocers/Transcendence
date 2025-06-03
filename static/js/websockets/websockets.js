@@ -68,7 +68,7 @@ export const WebSocketManager = {
     //   client_id = await getClientId();
     // }
       if (this.isSocketClosed(this.tournamentSocket)) {
-      this.tournamentSocket = new WebSocket(`wss://${window.location.host}/ws/tournament/?id=${client_id}`);
+      this.tournamentSocket = new WebSocket(`wss://${window.location.host}/ws/tournament/`);
           this.tournamentSocket.onopen = () => {
               const message = {
                   "event": "tournament",
