@@ -20,7 +20,6 @@ export function setUpTournamentSocket (tournamentSocket) {
         const jsonData = JSON.parse(message.data);
         if (jsonData.event != "TOURNAMENT" && jsonData.event != "ERROR") return;
         const action = jsonData.data.action;
-        console.log(action);
         switch (action) {
 
             case "HOST_LEAVE":
