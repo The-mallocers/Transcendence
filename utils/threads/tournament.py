@@ -208,7 +208,7 @@ class TournamentThread(Threads):
             host = self.redis.hexists(RTables.HASH_TOURNAMENT_QUEUE(self.tournament.code), str(self.tournament.host.id))
             if not host:
                 send_group_error(RTables.GROUP_TOURNAMENT(self.tournament.code), ResponseError.HOST_LEAVE)
-                self._helper_list_tournament(self.tournament.host)
+                self._helper_list_tournament()
                 return False
             return True
         else:

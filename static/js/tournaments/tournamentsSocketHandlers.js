@@ -20,19 +20,27 @@ export function setUpTournamentSocket (tournamentSocket) {
         const jsonData = JSON.parse(message.data);
         if (jsonData.event != "TOURNAMENT" && jsonData.event != "ERROR") return;
         const action = jsonData.data.action;
+        console.log(action);
         switch (action) {
 
             case "HOST_LEAVE":
             case "NOT_IN_TOURNAMENT":
+            case "TOURNAMENT_NOT_CREATE":
             case "TOURNAMENT_NOT_EXIST":
+            case "EXCEPTION":
             case "ERROR":
+            case "KEY_ERROR":
                 const path = window.location.pathname;
                 if (path == "/pong/tournament/tree/" || path == "/pong/tournament/") {
                     remove_toast();
                     toast_message(jsonData.data.error || jsonData.data.content )
                     navigateTo("/pong/gamemodes/");
                 }
-                // errDiv.innerHTML = jsonData.data.error
+                const errDiv = document.getElementById('errDiv');
+                console.log(jsonData.data.error);
+                if (errDiv) {
+                    errDiv.innerText = "There was an error";
+                }
                 break;
             case "TOURNAMENT_PLAYER_LEFT" :
                 tournamentSocket.send(JSON.stringify(get_tournament_info));
