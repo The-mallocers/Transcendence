@@ -389,13 +389,10 @@ class NotificationService(BaseServices):
 
     async def _handle_tournament_invitation_response(self, data, client):
         code = data.get('data').get('args').get('tournament_code')
-        print("data: ", data)
-        print("code: ",code)
         if code is None:
             return await asend_group_error(self.service_group, ResponseError.JSON_ERROR)
         action = data.get('data').get('args').get('action')
         inviter_username = data.get('data').get('args').get('inviter_username')
-        print("action: ",action)
 
         inviter = await Clients.aget_client_by_username(inviter_username)
         if inviter is None:
@@ -410,10 +407,8 @@ class NotificationService(BaseServices):
             return await asend_group_error(self.service_group, ResponseError.TOURNAMENT_NOT_EXIST)
 
         if action == "accept":
-            print("client accepted invitation")
             if await Clients.acheck_in_queue(client, self.redis):
                 await self.redis.delete(invitation_key)
-                print("client already in queue")
                 return await asend_group_error(self.service_group, ResponseError.ALREADY_IN_QUEUE)
 
             await self.redis.hset(RTables.HASH_TOURNAMENT_QUEUE(code), str(client.id), 'True')

@@ -20,7 +20,7 @@ export function setUpTournamentSocket (tournamentSocket) {
         const jsonData = JSON.parse(message.data);
         if (jsonData.event != "TOURNAMENT" && jsonData.event != "ERROR") return;
         const action = jsonData.data.action;
-        console.log(action);
+        // console.log(action);
         switch (action) {
 
             case "HOST_LEAVE":
@@ -38,7 +38,7 @@ export function setUpTournamentSocket (tournamentSocket) {
                     navigateTo("/pong/gamemodes/");
                 }
                 const errDiv = document.getElementById('errDiv');
-                console.log(jsonData.data.error);
+                // console.log(jsonData.data.error);
                 if (errDiv) {
                     errDiv.innerText = "There was an error";
                 }
