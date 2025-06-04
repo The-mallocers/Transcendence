@@ -196,7 +196,7 @@ class Messages(models.Model):
     def aget_message_by_room(room, target):
         try:
             with transaction.atomic():
-                return list(Messages.objects.filter(room__id=room.id))
+                return list(Messages.objects.filter(room__id=room.id).order_by('send_at'))
         except Exception as e:
             return None
 
