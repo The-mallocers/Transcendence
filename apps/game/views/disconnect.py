@@ -13,6 +13,11 @@ from apps.game.models import Game
 def get(request):
     game_id = request.GET.get("game", "game_not_found")
     found_game = Game.objects.filter(code=game_id).first()
+    if found_game == None:
+        html_content = render_to_string("apps/error/404.html", {"error_code": "404"})
+        return JsonResponse({
+            'html': html_content,
+        }, status=404)
     message = "Opponent Left"
     # Lets add something cute here to get a random message everytime.
     disconnect_messages = [
