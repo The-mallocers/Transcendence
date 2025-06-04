@@ -4,6 +4,7 @@ from django.middleware.csrf import get_token
 from django.template.loader import render_to_string
 
 from apps.client.models import Clients
+from apps.notifications.models import Friend
 from apps.index.views.index import get_last_matches, get_rivals, get_winrate
 from apps.profile.models import Profile
 from config import settings
@@ -24,6 +25,7 @@ def get(req):
             'html': html_content,
         }, status=404)
     
+    
     #test if I have a friend
     #If I have it i dont display the friend request button
     client = Clients.get_client_by_request(req)
@@ -39,6 +41,7 @@ def get(req):
         show_friend_request = False
     # End of specific profile content
 
+    showAskFriend = Friend.is_pending_friend(client, target)
     client = target  # The client is not us its the target we are looking at !
     winrate = ghistory = rivals = None
     games_played = client.stats.games.all().order_by('-created_at')
@@ -60,12 +63,12 @@ def get(req):
         winner__isnull=False
     ).order_by('-created_at')[:4]
     # print(tournaments)
-
     context = {
         "is_client_profile": False,
         "client": client,
         "clients": Clients.objects.all(),
         "gamesHistory": ghistory,
+        "showAskFriend": showAskFriend,
         "winrate": winrate,
         "winrate_angle": int((winrate / 100) * 360),
         "rivals": rivals,

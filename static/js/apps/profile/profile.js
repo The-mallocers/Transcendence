@@ -194,7 +194,10 @@ notifSocket.onmessage = (event) => {
         if (pending_group) {
             pending_group.appendChild(pendingElement);
         }
-        
+        const existingButton = document.querySelector('.friendrequest');
+        if(existingButton)
+            existingButton.remove();
+
         remove_toast();
         toast_friend(`New friend request from ${message.data.content.username}`, message.data, pendingElement);
     }

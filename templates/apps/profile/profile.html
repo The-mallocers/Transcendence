@@ -38,7 +38,7 @@
             <div class="col-md-4 currentActivity box">
                 <div class="p-3 text-center minibox">
                     <h2 id="online-status">{{ online_status }}</h2>
-                    {% if show_friend_request %}
+                    {% if show_friend_request and showAskFriend%}
                     <button type="button" class="type-intra-green friendrequest" onclick="handleAskFriend(new URLSearchParams(window.location.search).get('username'))">Friend Request</button>
                     {%endif%}
                 </div>

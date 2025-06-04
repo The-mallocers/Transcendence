@@ -20,14 +20,24 @@ class Friend(models.Model):
         # unique_together = ['friends', 'pending_friends']
         verbose_name_plural = 'Friend Requests'
 
-    # def __str__(self):
-    #     return f"Friend Request with {self.id}"
+    def __str__(self):
+        return f"Friend Request with {self.id}"
 
     def delete(self, *args, **kwargs):
         self.friends.clear()
         self.pending_friends.clear()
         self.blocked_users.clear()
         super().delete(*args, **kwargs)
+
+    @staticmethod
+    def is_pending_friend(client, target):
+        try:
+            friend_obj = Friend.objects.get(id=client.friend.id)
+            if not friend_obj.pending_friends.filter(id=target.id).exists() :
+                return True
+            return False
+        except:
+            return False
 
     @sync_to_async
     def add_pending_friend(self, client):

@@ -35,6 +35,7 @@ def get(req):
     online_status = "Online"
     pending_tournament_invitations = get_pending_tournament_invitations(client)
     
+    
     if client is not None:
         winrate = get_winrate(client, games_played)
     context = {
