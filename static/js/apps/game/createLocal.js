@@ -92,7 +92,7 @@ btn?.addEventListener('click', () => {
                 gameSocket.send(JSON.stringify(startGameMessage))
                 navigateTo('/pong/arena/');
             }
-            else if (message.event == "ERROR") {
+            else if (message.event == "ERROR" && message.data.action != "NO_GAME") {
                 const errDiv = document.getElementById('localErrDiv');
                 if (errDiv) {
                     errDiv.innerText = "There was an error creating the game";
