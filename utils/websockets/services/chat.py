@@ -9,6 +9,7 @@ from utils.enums import EventType, ResponseAction, ResponseError, RTables
 from utils.websockets.channel_send import asend_group, asend_group_error
 from utils.websockets.services.services import BaseServices, ServiceError
 from django.db import transaction
+from django.utils import timezone
 
 uuid_global_room = uuid.UUID('00000000-0000-0000-0000-000000000000')
 MAX_MESSAGE_LENGTH = 200
@@ -75,7 +76,11 @@ class ChatService(BaseServices):
                                                  'sender': str(client.id),
                                                  'room_id': str(room.id)
                                              })
-            await Messages.aset_message(client, room, message)
+            # await Messages.aset_message(client, room, message)
+            
+            timestamp = timezone.now()
+            await Messages.objects.acreate(sender=client, content=message, room=room, send_at=timestamp)
+
             # Send the message to the group  
             room_group = str(await Rooms.get_id(room))
             await asend_group(RTables.GROUP_CHAT(room_group), EventType.CHAT, ResponseAction.MESSAGE_RECEIVED, {
